@@ -1,4 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
+import { contactRequestBody } from '@sureground/shared';
 
 export type AgencyMemberRole =
   | 'OWNER'
@@ -50,22 +51,31 @@ export interface AgencyMember {
 
 export interface AgencyStaffInvite {
   id: string;
+  /** Empty when the invite went by phone number to an account with no email. */
   email: string;
+  /** Their number, masked ("+234 803 *** 4567"), when the invite has no email. */
+  phoneMasked?: string | null;
   role: AgencyMemberRole;
   roleLabel: string;
   membershipExpiresAt: string | null;
   expiresAt: string;
   createdAt: string;
   status: 'PENDING' | 'EXPIRED';
+  /** Only on a new invite: how it reached them (IN_APP is a notification in their app). */
+  deliveredBy?: ('EMAIL' | 'IN_APP')[];
 }
 
 export interface AgencyInvitePreview {
   firmName: string;
   role: AgencyMemberRole;
   roleLabel: string;
+  /** Empty for an invite sent by phone number. */
   email: string;
+  /** The invitee's own number, masked; only shown to them. */
+  phoneMasked?: string | null;
   status: 'PENDING' | 'EXPIRED' | 'ACCEPTED' | 'REVOKED';
   membershipExpiresAt: string | null;
+  /** True when the signed-in account is the one invited (by email or by phone). */
   emailMatches: boolean;
 }
 
@@ -82,11 +92,19 @@ export const agencyTeamService = {
     safeCall(() => authFetch<AgencyMember[]>('/agency/team/members')),
   invitations: (): Promise<ApiResponse<AgencyStaffInvite[]>> =>
     safeCall(() => authFetch<AgencyStaffInvite[]>('/agency/team/invitations')),
-  invite: (input: {
-    email: string;
+  /** `contact` is their phone number or email; an email goes as `email`, which older servers accept. */
+  invite: ({
+    contact,
+    ...input
+  }: {
+    contact: string;
     role: AssignableAgencyRole;
     membershipExpiresAt?: string | null;
-  }) => post<AgencyStaffInvite>('/agency/team/invitations', input),
+  }) =>
+    post<AgencyStaffInvite>('/agency/team/invitations', {
+      ...(contactRequestBody(contact) ?? { contact }),
+      ...input,
+    }),
   revoke: (id: string) => post<{ id: string }>(`/agency/team/invitations/${id}/revoke`),
   update: (userId: string, input: { role?: AssignableAgencyRole; expiresAt?: string | null }) =>
     safeCall(() =>

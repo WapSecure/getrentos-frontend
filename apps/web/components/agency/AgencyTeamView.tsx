@@ -11,7 +11,6 @@ import {
   DatePicker,
   EmptyState,
   Field,
-  Input,
   PageErrorState,
   PageHeader,
   Select,
@@ -19,12 +18,16 @@ import {
   type Column,
   useToast,
 } from '@sureground/ui';
+import { isNoAccountMessage, personContactLabel } from '@sureground/shared';
 import { formatDate } from '@/lib/format';
+import { ContactField, contactIsReady } from '@/components/shared/contact/ContactField';
+import { InviteToSignUp } from '@/components/shared/representatives/InviteToSignUp';
 import { getStoredUser } from '@/lib/authStorage';
 import {
   ASSIGNABLE_ROLE_OPTIONS,
   agencyTeamService,
   type AgencyMember,
+  type AgencyStaffInvite,
   type AssignableAgencyRole,
 } from '@/services/agencyTeamService';
 
@@ -37,7 +40,8 @@ export function AgencyTeamView() {
   const queryClient = useQueryClient();
   const myId = getStoredUser<{ id?: string }>()?.id;
   const toast = useToast();
-  const [email, setEmail] = useState('');
+  const [contact, setContact] = useState('');
+  const [noAccount, setNoAccount] = useState(false);
   const [role, setRole] = useState<AssignableAgencyRole>('PORTFOLIO_MANAGER');
   const [endDay, setEndDay] = useState('');
 
@@ -78,14 +82,27 @@ export function AgencyTeamView() {
 
   const invite = useMutation({
     mutationFn: run(() =>
-      agencyTeamService.invite({ email: email.trim(), role, membershipExpiresAt: endOfDay(endDay) })
+      agencyTeamService.invite({
+        contact: contact.trim(),
+        role,
+        membershipExpiresAt: endOfDay(endDay),
+      })
     ),
-    onSuccess: () => {
-      setEmail('');
+    onSuccess: (sent) => {
+      const who = contact.trim();
+      setContact('');
       setEndDay('');
-      done(`Invitation sent to ${email.trim()}.`);
+      setNoAccount(false);
+      done(
+        (sent as AgencyStaffInvite | undefined)?.deliveredBy?.includes('EMAIL')
+          ? `Invitation sent to ${who}.`
+          : `Invitation sent to ${who} in their Sureground app.`
+      );
     },
-    onError: fail,
+    onError: (e: Error) => {
+      if (isNoAccountMessage(e.message)) setNoAccount(true);
+      else fail(e);
+    },
   });
   const revoke = useMutation({
     mutationFn: (id: string) => run(() => agencyTeamService.revoke(id))(),
@@ -119,7 +136,7 @@ export function AgencyTeamView() {
       render: (m) => (
         <>
           <p className="text-foreground">{m.name}</p>
-          <p className="text-xs text-muted-foreground">{m.email}</p>
+          {m.email && <p className="text-xs text-muted-foreground">{m.email}</p>}
         </>
       ),
     },
@@ -242,14 +259,16 @@ export function AgencyTeamView() {
             <UserPlus className="h-4 w-4 text-muted-foreground" /> Invite someone
           </h2>
           <div className="mt-3 grid gap-3 md:grid-cols-[1fr_220px_180px_auto] md:items-end">
-            <Field label="Email">
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@yourfirm.ng"
-              />
-            </Field>
+            <ContactField
+              id="team-invite-contact"
+              label="Phone number or email"
+              hint=""
+              value={contact}
+              onChange={(next) => {
+                setContact(next);
+                setNoAccount(false);
+              }}
+            />
             <Field label="Role">
               <Select
                 value={role}
@@ -262,7 +281,7 @@ export function AgencyTeamView() {
             </Field>
             <Button
               onClick={() => invite.mutate()}
-              disabled={!email.includes('@')}
+              disabled={!contactIsReady(contact)}
               isLoading={invite.isPending}
               loadingText="Sending…"
             >
@@ -270,9 +289,18 @@ export function AgencyTeamView() {
             </Button>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            {ASSIGNABLE_ROLE_OPTIONS.find((o) => o.value === role)?.hint}. They join by signing in
-            with this email.
+            {ASSIGNABLE_ROLE_OPTIONS.find((o) => o.value === role)?.hint}. Someone already on
+            Sureground gets the invitation in their app; an email address also gets it by email.
           </p>
+          {noAccount && (
+            <div className="mt-3">
+              <InviteToSignUp
+                message="Nobody on Sureground uses that phone number yet, and we cannot text an invite. Send them the signup link, or invite them by email instead."
+                reason="add you to our team"
+                footnote="Once they have signed up, invite them here with the same phone number."
+              />
+            </div>
+          )}
 
           {(invites.data ?? []).length > 0 && (
             <div className="mt-4 border-t border-border pt-4">
@@ -285,7 +313,7 @@ export function AgencyTeamView() {
                   >
                     <span className="flex items-center gap-2">
                       <Mail className="h-4 w-4 text-muted-foreground" />
-                      {i.email} · {i.roleLabel}
+                      {personContactLabel(i) ?? 'Invited by phone'} · {i.roleLabel}
                       {i.membershipExpiresAt ? ` · until ${formatDate(i.membershipExpiresAt)}` : ''}
                     </span>
                     <span className="flex items-center gap-2">

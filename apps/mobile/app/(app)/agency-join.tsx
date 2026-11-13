@@ -33,7 +33,7 @@ export default function AgencyJoin() {
       <DetailScreenHeader
         eyebrow="Agency"
         title="Join a firm"
-        subtitle="From your invitation email"
+        subtitle="From your invitation"
         onBack={() => goBack()}
       />
       <ScrollView
@@ -49,7 +49,7 @@ export default function AgencyJoin() {
         ) : (
           <Card style={{ gap: spacing.md }}>
             <Text variant="callout" color="mutedForeground">
-              Open the link from your invitation email, or paste it here.
+              Open the link from your invitation email or notification, or paste it here.
             </Text>
             <TextField
               label="Invitation link"
@@ -142,7 +142,11 @@ function Invitation({ token, onReset }: { token: string; onReset: () => void }) 
         <>
           <FormAlert
             tone="warning"
-            message={`It was sent to ${p.email}. Sign in with that account to accept it.`}
+            message={
+              p.email
+                ? `It was sent to ${p.email}. Sign in with that account to accept it.`
+                : 'It was sent to another account. Sign in with the phone number it was sent to.'
+            }
           />
           <Button
             label="Sign out and switch account"

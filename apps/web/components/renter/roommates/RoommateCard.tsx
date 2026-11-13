@@ -107,20 +107,22 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
             </div>
 
             <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Mail className="w-3 h-3" />
-                <span>{roommate.email}</span>
-              </div>
+              {roommate.email && (
+                <div className="flex items-center gap-1">
+                  <Mail className="w-3 h-3" />
+                  <span>{roommate.email}</span>
+                </div>
+              )}
               {roommate.phone && (
                 <>
-                  <span>•</span>
+                  {roommate.email && <span>•</span>}
                   <div className="flex items-center gap-1">
                     <Phone className="w-3 h-3" />
                     <span>{roommate.phone}</span>
                   </div>
                 </>
               )}
-              <span>•</span>
+              {(roommate.email || roommate.phone) && <span>•</span>}
               <div className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 <span>Joined {formatDate(roommate.joinedDate)}</span>

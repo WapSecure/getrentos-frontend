@@ -1,4 +1,5 @@
 import { ApiError, apiFetch } from './client';
+import { contactBody } from '@/lib/contact';
 import type { ManagedEstate } from './estateManager';
 import type { Paginated } from './properties';
 
@@ -7,7 +8,10 @@ import type { Paginated } from './properties';
 export interface StaffMember {
   userId: string;
   name: string;
+  /** Empty when the account is phone-only. */
   email: string;
+  /** "+234 803 *** 4567" for a phone-only account; never the full number. */
+  phoneMasked?: string | null;
   addedAt: string;
 }
 
@@ -51,11 +55,11 @@ export const estateStaffSetupApi = {
     apiFetch<Paginated<StaffMember>>(
       `/estate/${estateId}/staff?page=${page}&pageSize=${STAFF_PAGE_SIZE}`
     ),
-  /** The person must already have a Sureground account under this email. */
-  addGateman: (estateId: string, email: string) =>
+  /** By the phone number or email on their Sureground account (gatemen are often phone-only). */
+  addGateman: (estateId: string, contact: string) =>
     apiFetch<StaffMember>(`/estate/${estateId}/staff/gateman`, {
       method: 'POST',
-      body: { email },
+      body: contactBody(contact),
     }),
   removeGateman: (estateId: string, userId: string) =>
     apiFetch<void>(`/estate/${estateId}/staff/${userId}`, { method: 'DELETE' }),

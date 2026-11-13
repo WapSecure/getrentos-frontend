@@ -1,6 +1,7 @@
 import type { AnnouncementDraft, PollDraft, ReportDigest } from '@/types/estateOps';
 import type { ReplyLanguage } from '@/lib/replyLanguage';
 import { authDownload, authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
+import { contactRequestBody } from '@sureground/shared';
 import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
 import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 import type {
@@ -325,15 +326,16 @@ export const estateService = {
     );
   },
 
+  /** By the resident's phone number or email (an email goes as `email`, which older servers accept). */
   async linkResident(
     estateId: string,
     householdId: string,
-    email: string
+    contact: string
   ): Promise<ApiResponse<Household>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/households/${householdId}/resident`, {
         method: 'POST',
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(contactRequestBody(contact) ?? { contact }),
       })
     );
   },
@@ -596,11 +598,12 @@ export const estateService = {
     );
   },
 
-  async inviteGateman(estateId: string, email: string): Promise<ApiResponse<StaffMember>> {
+  /** By the gateman's phone number or email (an email goes as `email`, which older servers accept). */
+  async inviteGateman(estateId: string, contact: string): Promise<ApiResponse<StaffMember>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/staff/gateman`, {
         method: 'POST',
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(contactRequestBody(contact) ?? { contact }),
       })
     );
   },

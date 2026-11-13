@@ -67,7 +67,7 @@ export default function RealtorClientsPage() {
   const total = data?.total ?? 0;
   const hasActiveFilters = Boolean(searchQuery.trim() || filter !== 'all');
   const inviteClient = useMutation({
-    mutationFn: (email: string) => unwrap(realtorService.inviteClient(email)),
+    mutationFn: (contact: string) => unwrap(realtorService.inviteClient(contact)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.clients });
       setPage(1);
@@ -84,8 +84,8 @@ export default function RealtorClientsPage() {
     },
   });
 
-  const handleAddClient = (email: string) => {
-    inviteClient.mutate(email);
+  const handleAddClient = (contact: string) => {
+    inviteClient.mutate(contact);
   };
 
   const filterOptions: { value: RoleFilter; label: string }[] = [

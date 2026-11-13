@@ -57,10 +57,13 @@ export default function RoommatesPage() {
   });
 
   const inviteMutation = useMutation({
-    mutationFn: (data: { email: string; message: string }) =>
-      unwrap(renterService.inviteRoommate(data.email, data.message)),
-    onSuccess: invalidateRoommates,
-    onError: () => toast.error('The roommate invitation could not be sent.'),
+    mutationFn: (data: { contact: string; message: string }) =>
+      unwrap(renterService.inviteRoommate(data.contact, data.message)),
+    onSuccess: () => {
+      invalidateRoommates();
+      toast.success('Invitation sent.');
+    },
+    // The invite dialog shows the reason (and a signup link when they are not on Sureground).
   });
 
   const removeMutation = useMutation({
@@ -105,7 +108,7 @@ export default function RoommatesPage() {
     onError: () => toast.error('The task could not be added.'),
   });
 
-  const handleInvite = (data: { email: string; message: string }) =>
+  const handleInvite = (data: { contact: string; message: string }) =>
     inviteMutation.mutateAsync(data).then(() => undefined);
   const handleRemoveRoommate = (id: string) => removeMutation.mutate(id);
   const handleUpdateShare = (id: string, percentage: number) =>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { UserPlus, Mail, CheckCircle2 } from '@sureground/icons';
+import { isNoAccountMessage, readContactInput } from '@sureground/shared';
 import {
   Alert,
   Button,
@@ -20,15 +21,15 @@ import {
   isVerificationGateError,
 } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { InviteToSignUp } from '@/components/shared/representatives/InviteToSignUp';
 
 type CheckState = 'idle' | 'checking' | 'eligible' | 'ineligible' | 'notfound' | 'error';
 
 interface AddClientModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (email: string) => void;
+  /** The client's phone number or email, as typed. */
+  onSubmit: (contact: string) => void;
   isSubmitting?: boolean;
   error?: string | null;
   submitError?: unknown;
@@ -51,7 +52,7 @@ export const AddClientModal = ({
   const check = useMutation({
     mutationFn: (value: string) => unwrap(realtorService.checkClientEmail(value)),
     onSuccess: (result) => {
-      setCheckedEmail(email);
+      setCheckedEmail(email.trim());
       if (!result.exists) setCheckState('notfound');
       else if (result.isEligible) {
         setCheckState('eligible');
@@ -73,11 +74,9 @@ export const AddClientModal = ({
   };
 
   const validateFormat = (value: string): string | null => {
-    if (!value) return 'Enter the client’s email address.';
-    if (!EMAIL_PATTERN.test(value)) {
-      return 'Enter a valid email address, e.g. client@example.com.';
-    }
-    return null;
+    const input = readContactInput(value);
+    if (input.kind === 'empty') return 'Enter the client’s phone number or email.';
+    return input.kind === 'invalid' ? input.message : null;
   };
 
   const runCheck = () => {
@@ -98,13 +97,12 @@ export const AddClientModal = ({
   const checkError =
     checkState === 'ineligible'
       ? 'This account exists but is not registered as an owner or landlord.'
-      : checkState === 'notfound'
-        ? 'No Sureground account was found for that email. Ask the client to create an account first.'
-        : checkState === 'error'
-          ? 'We couldn’t verify that email. Please try again.'
-          : null;
+      : checkState === 'error'
+        ? 'We couldn’t check that phone number or email. Please try again.'
+        : null;
+  const noAccount = (checkState === 'notfound' && !emailChanged) || isNoAccountMessage(error);
 
-  const shownError = localError ?? checkError ?? error;
+  const shownError = localError ?? checkError ?? (isNoAccountMessage(error) ? null : error);
 
   const handlePrimary = () => {
     if (!verifiedEligible) {
@@ -116,28 +114,30 @@ export const AddClientModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="p-0 sm:max-w-sm sm:p-0">
+      <DialogContent size={noAccount ? 'lg' : 'md'} className="p-0 sm:p-0">
         <div className="p-4 pr-12 border-b border-border">
           <DialogTitle className="font-semibold text-foreground">Add client</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-            Add an owner or landlord by their Sureground account email
+            Add an owner or landlord by the phone number or email on their Sureground account
           </DialogDescription>
         </div>
 
         <div className="p-4 space-y-4">
           <VerificationRequiredNotice error={submitError} href={ROUTES.REALTOR_VERIFICATION} />
           <Field
-            label="Email"
+            label="Phone number or email"
             htmlFor="realtor-client-email"
             required
             error={shownError ?? undefined}
           >
             <Input
               id="realtor-client-email"
-              type="email"
+              type="text"
               inputMode="email"
-              autoComplete="email"
-              placeholder="client@example.com"
+              autoComplete="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              placeholder="0803 123 4567 or client@example.com"
               leadingIcon={<Mail className="h-4 w-4" />}
               value={email}
               onChange={(e) => {
@@ -161,10 +161,17 @@ export const AddClientModal = ({
             <Alert variant="success" title="Verified as an owner or landlord">
               {checkedName || email} is ready to receive an invitation.
             </Alert>
+          ) : noAccount ? (
+            <InviteToSignUp
+              message="Nobody on Sureground uses that phone number or email yet. Send them the signup link; they should sign up as an owner or landlord."
+              reason="represent your properties"
+              footnote="Once they have signed up, add them here with the same phone number or email."
+            />
           ) : (
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Enter the client’s email and we’ll verify their account before sending an invitation.
-              They must be registered as an owner or landlord on Sureground.
+              Enter the client’s phone number or email and we’ll check their account before sending
+              an invitation. They must be registered as an owner or landlord on Sureground, and they
+              get the invitation in their app.
             </p>
           )}
         </div>

@@ -5,6 +5,7 @@ import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/li
 import { trackOnSuccess } from '@/lib/analytics';
 import type { ApiResponse } from '@/lib/apiHelpers';
 import type { VideoCallJoin } from '@sureground/shared';
+import { contactRequestBody } from '@sureground/shared';
 import type {
   Application,
   ApplicationStatus,
@@ -822,11 +823,12 @@ export const renterService = {
     );
   },
 
-  async inviteRoommate(email: string, message?: string): Promise<ApiResponse<Roommate>> {
+  /** By their phone number or email (an email goes as `email`, which older servers accept). */
+  async inviteRoommate(contact: string, message?: string): Promise<ApiResponse<Roommate>> {
     return safeCall(() =>
       authFetch('/renter/roommates/invite', {
         method: 'POST',
-        body: JSON.stringify({ email, message }),
+        body: JSON.stringify({ ...(contactRequestBody(contact) ?? { contact }), message }),
       })
     );
   },

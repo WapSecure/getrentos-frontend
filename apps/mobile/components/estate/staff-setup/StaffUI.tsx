@@ -12,13 +12,10 @@ import {
   useToast,
 } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
-import {
-  estateStaffSetupApi,
-  isEmail,
-  normaliseEmail,
-  staffSetupKeys,
-  type StaffMember,
-} from '@/lib/api/estateStaffSetup';
+import { isNoAccountMessage, personContactLabel } from '@sureground/shared';
+import { estateStaffSetupApi, staffSetupKeys, type StaffMember } from '@/lib/api/estateStaffSetup';
+import { contactProblem, contactReady } from '@/lib/contact';
+import { InviteToSignUp } from '@/components/contact/InviteToSignUp';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { errorMessage } from '@/lib/api/client';
@@ -34,20 +31,23 @@ export function StaffRow({
 }) {
   const { spacing } = useTheme();
   const since = formatDate(member.addedAt, 'medium');
+  const contact = personContactLabel(member);
   return (
     <Card elevated style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
       <Avatar name={member.name} />
       <View
         style={{ flex: 1, gap: 2 }}
         accessible
-        accessibilityLabel={`${member.name}, ${member.email}, gateman since ${since}`}
+        accessibilityLabel={`${member.name}${contact ? `, ${contact}` : ''}, gateman since ${since}`}
       >
         <Text variant="bodyStrong" numberOfLines={1}>
           {member.name}
         </Text>
-        <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-          {member.email}
-        </Text>
+        {contact ? (
+          <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+            {contact}
+          </Text>
+        ) : null}
         <Text variant="caption" color="mutedForeground">
           Gateman since {since}
         </Text>
@@ -96,12 +96,12 @@ function AddGatemanForm({
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
-  const [email, setEmail] = useState('');
-  const typed = email.trim().length > 0;
-  const valid = isEmail(email);
+  const [contact, setContact] = useState('');
+  const [touched, setTouched] = useState(false);
+  const valid = contactReady(contact);
 
   const add = useMutation({
-    mutationFn: () => estateStaffSetupApi.addGateman(estateId, normaliseEmail(email)),
+    mutationFn: () => estateStaffSetupApi.addGateman(estateId, contact),
     onSuccess: (member) => {
       void haptics.success();
       qc.invalidateQueries({ queryKey: staffSetupKeys.staff(estateId) });
@@ -110,20 +110,27 @@ function AddGatemanForm({
     },
     onError: () => void haptics.error(),
   });
+  const failure = add.error
+    ? errorMessage(add.error, 'Could not add this gateman. Try again.')
+    : null;
+  const noAccount = isNoAccountMessage(failure);
 
   return (
     <View style={{ gap: spacing.md }}>
       <Text variant="callout" color="mutedForeground">
-        Enter the email they use on Sureground. Once added, they can verify visitor passes and log
-        arrivals{estateName ? ` at ${estateName}` : ''} from their own phone.
+        Enter the phone number or email they use on Sureground. Once added, they can verify visitor
+        passes and log arrivals{estateName ? ` at ${estateName}` : ''} from their own phone.
       </Text>
       <TextField
-        label="Their Sureground email"
+        label="Their phone number or email"
         required
-        value={email}
-        onChangeText={setEmail}
-        placeholder="gateman@example.com"
-        keyboardType="email-address"
+        value={contact}
+        onChangeText={(v) => {
+          setContact(v);
+          if (add.error) add.reset();
+        }}
+        onBlur={() => setTouched(true)}
+        placeholder="0803 123 4567"
         autoCapitalize="none"
         autoCorrect={false}
         autoComplete="off"
@@ -132,11 +139,17 @@ function AddGatemanForm({
         onSubmitEditing={() => {
           if (valid && !add.isPending) add.mutate();
         }}
-        error={typed && !valid ? 'That email doesn’t look right.' : undefined}
-        hint="They need a Sureground account first. If they don’t have one, ask them to sign up."
+        error={touched ? contactProblem(contact) : undefined}
+        hint="Most gatemen sign up with a phone number. They need a Sureground account first."
       />
-      {add.error ? (
-        <FormAlert message={errorMessage(add.error, 'Could not add this gateman. Try again.')} />
+      {noAccount ? (
+        <InviteToSignUp
+          message="Nobody on Sureground uses that phone number or email yet. Send them the signup link."
+          reason="add you to my estate staff"
+          footnote="Once they have signed up, add them here with the same phone number or email."
+        />
+      ) : failure ? (
+        <FormAlert message={failure} />
       ) : null}
       <Button
         label="Add gateman"

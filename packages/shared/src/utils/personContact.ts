@@ -78,9 +78,15 @@ export function isNoAccountMessage(message: string | null | undefined): boolean 
   return /^No Sureground account uses that/i.test(message?.trim() ?? '');
 }
 
-/** A plain invitation to sign up. No tracking parameters and nothing about either person. */
-export function signupInviteMessage(signupUrl: string): string {
-  return `Join me on Sureground so I can add you as my representative. Sign up here: ${signupUrl}`;
+/**
+ * A plain invitation to sign up. No tracking parameters and nothing about either person. `reason`
+ * finishes "Join me on Sureground so I can …", for example "add you to my estate staff".
+ */
+export function signupInviteMessage(
+  signupUrl: string,
+  reason = 'add you as my representative'
+): string {
+  return `Join me on Sureground so I can ${reason}. Sign up here: ${signupUrl}`;
 }
 
 export function whatsappShareUrl(text: string): string {

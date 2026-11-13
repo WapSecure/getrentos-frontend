@@ -19,6 +19,7 @@ import {
   PageHeader,
 } from '@sureground/ui';
 import { useCustody } from './CustodyProvider';
+import { personContactLabel } from '@sureground/shared';
 import { InviteOwnerModal } from './InviteOwnerModal';
 import { unwrap } from '@/lib/apiHelpers';
 import {
@@ -71,14 +72,18 @@ export function AgencyOwnersView() {
   });
 
   const inviteMutation = useMutation({
-    mutationFn: (input: { email: string; name?: string; note?: string }) =>
+    mutationFn: (input: { contact: string; name?: string; note?: string }) =>
       unwrap(agencyOwnerInviteService.invite(input)),
-    onSuccess: () => {
+    onSuccess: (sent) => {
       queryClient.invalidateQueries({ queryKey: ['agency', 'ownerInvites'] });
       setInviteOpen(false);
-      toast.success('Invitation sent.');
+      toast.success(
+        sent?.deliveredBy?.includes('EMAIL')
+          ? 'Invitation sent.'
+          : 'Invitation sent to their Sureground app.'
+      );
     },
-    onError: (e: Error) => toast.error(e.message || 'Could not send the invite.'),
+    // The invite dialog shows the reason (and a signup link when they are not on Sureground).
   });
 
   const revokeMutation = useMutation({
@@ -124,9 +129,13 @@ export function AgencyOwnersView() {
         <span className="flex items-center gap-2">
           <Mail className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
           <span className="min-w-0">
-            <span className="block truncate text-foreground">{invite.name ?? invite.email}</span>
-            {invite.name && (
-              <span className="block truncate text-xs text-muted-foreground">{invite.email}</span>
+            <span className="block truncate text-foreground">
+              {invite.name ?? personContactLabel(invite) ?? 'Invited by phone'}
+            </span>
+            {invite.name && personContactLabel(invite) && (
+              <span className="block truncate text-xs text-muted-foreground">
+                {personContactLabel(invite)}
+              </span>
             )}
           </span>
         </span>
@@ -192,7 +201,13 @@ export function AgencyOwnersView() {
             : `${groups.length} owner${groups.length === 1 ? '' : 's'} across ${mandates.length} propert${mandates.length === 1 ? 'y' : 'ies'}.`
         }
         actions={
-          <Button onClick={() => setInviteOpen(true)} icon={<UserPlus className="h-4 w-4" />}>
+          <Button
+            onClick={() => {
+              inviteMutation.reset();
+              setInviteOpen(true);
+            }}
+            icon={<UserPlus className="h-4 w-4" />}
+          >
             Invite owner
           </Button>
         }
@@ -267,6 +282,7 @@ export function AgencyOwnersView() {
         isOpen={inviteOpen}
         onClose={() => setInviteOpen(false)}
         onSubmit={(input) => inviteMutation.mutate(input)}
+        onEdit={() => inviteMutation.reset()}
         isSubmitting={inviteMutation.isPending}
         error={inviteMutation.isError ? (inviteMutation.error as Error).message : null}
       />

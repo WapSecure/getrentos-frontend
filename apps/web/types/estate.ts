@@ -279,7 +279,10 @@ export interface IssuedVisitorPass extends VisitorPass {
 export interface StaffMember {
   userId: string;
   name: string;
+  /** Empty when the account is phone-only. */
   email: string;
+  /** "+234 803 *** 4567" for a phone-only account; never the full number. */
+  phoneMasked?: string | null;
   addedAt: string;
 }
 

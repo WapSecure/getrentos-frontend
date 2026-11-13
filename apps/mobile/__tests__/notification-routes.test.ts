@@ -241,4 +241,14 @@ describe('realtor and client updates', () => {
       '/(app)/representatives'
     );
   });
+
+  it('opens an agency invitation with its token, so a phone-only invitee can accept in the app', () => {
+    expect(routeForActionUrl('/agency/join?token=abc%2B1')).toBe(
+      '/(app)/agency-join?token=abc%2B1'
+    );
+    expect(routeForActionUrl('/agency-invite/claim?token=xyz')).toBe(
+      '/(app)/agency-invite-claim?token=xyz'
+    );
+    expect(routeForActionUrl('/agency-invite/claim')).toBeNull();
+  });
 });

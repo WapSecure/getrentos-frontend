@@ -1,4 +1,5 @@
 import type { ReplyLanguage } from '../replyLanguage';
+import { contactBody } from '@/lib/contact';
 import { apiFetch, apiFetchOrNull, apiUpload } from './client';
 import { toQuery } from './query';
 import { appendFile, type PickedFile } from './documents';
@@ -371,10 +372,11 @@ export const estateManagerApi = {
     apiFetch<Household>(`/estate/${estateId}/households/${householdId}`, { method: 'PATCH', body }),
   removeHousehold: (estateId: string, householdId: string) =>
     apiFetch<void>(`/estate/${estateId}/households/${householdId}`, { method: 'DELETE' }),
-  linkResident: (estateId: string, householdId: string, email: string) =>
+  /** By the resident's phone number or email on Sureground. */
+  linkResident: (estateId: string, householdId: string, contact: string) =>
     apiFetch<Household>(`/estate/${estateId}/households/${householdId}/resident`, {
       method: 'POST',
-      body: { email },
+      body: contactBody(contact),
     }),
   unlinkResident: (estateId: string, householdId: string) =>
     apiFetch<Household>(`/estate/${estateId}/households/${householdId}/resident`, {

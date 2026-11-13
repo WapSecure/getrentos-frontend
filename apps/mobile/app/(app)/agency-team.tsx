@@ -32,6 +32,9 @@ import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { isNoAccountMessage, personContactLabel } from '@sureground/shared';
+import { contactProblem, contactReady } from '@/lib/contact';
+import { InviteToSignUp } from '@/components/contact/InviteToSignUp';
 
 export default function AgencyTeam() {
   const { colors, spacing } = useTheme();
@@ -124,7 +127,8 @@ function MemberRow({
             {m.name}
           </Text>
           <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-            {m.roleLabel} · {m.email}
+            {m.roleLabel}
+            {m.email ? ` · ${m.email}` : ''}
           </Text>
         </View>
         <Badge label={state.label} tone={state.tone} />
@@ -240,34 +244,60 @@ function InviteForm() {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
-  const [email, setEmail] = useState('');
+  const [contact, setContact] = useState('');
+  const [touched, setTouched] = useState(false);
+  const [noAccount, setNoAccount] = useState(false);
   const [role, setRole] = useState<string>('PORTFOLIO_MANAGER');
   const [until, setUntil] = useState('');
   const invite = useMutation({
     mutationFn: () =>
       agencyFirmApi.invite({
-        email: email.trim(),
+        contact,
         role,
         membershipExpiresAt: endOfDayLagos(until),
       }),
-    onSuccess: () => {
+    onSuccess: (sent) => {
       qc.invalidateQueries({ queryKey: qk.agency.invitations });
-      toast.show(`Invitation sent to ${email.trim()}.`, 'success');
-      setEmail('');
+      const who = contact.trim();
+      toast.show(
+        sent?.deliveredBy?.includes('EMAIL')
+          ? `Invitation sent to ${who}.`
+          : `Invitation sent to ${who} in their Sureground app.`,
+        'success'
+      );
+      setContact('');
+      setTouched(false);
       setUntil('');
     },
-    onError: (e) => toast.show(errorMessage(e, 'Could not send the invitation.'), 'error'),
+    onError: (e) => {
+      const text = errorMessage(e, 'Could not send the invitation.');
+      if (isNoAccountMessage(text)) setNoAccount(true);
+      else toast.show(text, 'error');
+    },
   });
   return (
     <Card style={{ gap: spacing.md }}>
       <Text variant="heading">Invite someone</Text>
       <TextField
-        label="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
+        label="Phone number or email"
+        value={contact}
+        onChangeText={(v) => {
+          setContact(v);
+          setNoAccount(false);
+        }}
+        onBlur={() => setTouched(true)}
+        error={touched ? contactProblem(contact) : undefined}
+        hint="Someone on Sureground gets the invitation in their app; an email address also gets it by email."
         autoCapitalize="none"
+        autoCorrect={false}
       />
+      {noAccount ? (
+        <InviteToSignUp
+          message="Nobody on Sureground uses that phone number yet, and we cannot text an invite. Send them the signup link, or invite them by email instead."
+          reason="add you to our team"
+          footnote="Once they have signed up, invite them here with the same phone number."
+        />
+      ) : null}
       <ChipSelect
         label="Role"
         options={ASSIGNABLE_ROLES.map((r) => ({ value: r.value, label: r.label }))}
@@ -286,7 +316,7 @@ function InviteForm() {
       <Button
         label="Send invitation"
         loading={invite.isPending}
-        disabled={!email.includes('@') || invite.isPending}
+        disabled={!contactReady(contact) || invite.isPending}
         onPress={() => invite.mutate()}
       />
     </Card>
@@ -309,7 +339,7 @@ function InvitationRow({ invitation: i }: { invitation: TeamInvitation }) {
     <Card padding={spacing.md} style={{ gap: 4 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <Text variant="callout" style={{ flex: 1, fontWeight: '600' }} numberOfLines={1}>
-          {i.email}
+          {personContactLabel(i) ?? 'Invited by phone'}
         </Text>
         <Badge
           label={i.status === 'PENDING' ? 'Invited' : 'Expired'}
@@ -326,7 +356,7 @@ function InvitationRow({ invitation: i }: { invitation: TeamInvitation }) {
         variant="ghost"
         loading={revoke.isPending}
         onPress={() =>
-          Alert.alert('Withdraw this invitation?', i.email, [
+          Alert.alert('Withdraw this invitation?', personContactLabel(i) ?? i.roleLabel, [
             { text: 'Keep it', style: 'cancel' },
             { text: 'Withdraw', style: 'destructive', onPress: () => revoke.mutate() },
           ])

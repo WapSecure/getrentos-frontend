@@ -1,4 +1,5 @@
 import { apiFetch } from './client';
+import { contactBody } from '@/lib/contact';
 import { toQuery } from './query';
 import type { Paginated } from './properties';
 
@@ -24,6 +25,10 @@ export const agentClientsApi = {
       `/agent/clients${toQuery({ page, pageSize, status })}`
     ),
 
-  invite: (email: string) =>
-    apiFetch<AgentClientRelationship>('/agent/clients', { method: 'POST', body: { email } }),
+  /** By the landlord's or owner's phone number or email; they see it in their app. */
+  invite: (contact: string) =>
+    apiFetch<AgentClientRelationship>('/agent/clients', {
+      method: 'POST',
+      body: contactBody(contact),
+    }),
 };

@@ -28,6 +28,7 @@ function ClaimContent() {
   const [phase, setPhase] = useState<Phase>('loading');
   const [firm, setFirm] = useState<string>('');
   const [email, setEmail] = useState<string>('');
+  const [phoneMasked, setPhoneMasked] = useState<string>('');
   const [message, setMessage] = useState<string>('');
   const [token, setToken] = useState<string>('');
   const [claimError, setClaimError] = useState<string>('');
@@ -51,6 +52,7 @@ function ClaimContent() {
       setToken(token);
       setFirm(info.data.organizationName);
       setEmail(info.data.email);
+      setPhoneMasked(info.data.phoneMasked ?? '');
 
       if (info.data.status === 'CLAIMED') {
         setPhase('done');
@@ -130,8 +132,8 @@ function ClaimContent() {
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {firm} is a property management firm on Sureground. If you accept, your account (
-              <strong>{email}</strong>) is connected to {firm}, and they can set up management of
-              your property with you.
+              <strong>{email || phoneMasked}</strong>) is connected to {firm}, and they can set up
+              management of your property with you.
             </p>
             {claimError && (
               <p role="alert" className="mt-3 text-sm text-destructive">
@@ -157,11 +159,21 @@ function ClaimContent() {
               {firm} invited you to Sureground
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Create an account or sign in with <strong>{email}</strong>. You will come back here to
-              review and accept the invitation.
+              {email || phoneMasked ? (
+                <>
+                  Create an account or sign in with <strong>{email || phoneMasked}</strong>.
+                </>
+              ) : (
+                'Create an account or sign in.'
+              )}{' '}
+              You will come back here to review and accept the invitation.
             </p>
             <div className="mt-5 flex flex-col gap-2">
-              <Button href={withNext(ROUTES.SIGNUP, returnTo, { email })} rounded="full" fullWidth>
+              <Button
+                href={withNext(ROUTES.SIGNUP, returnTo, email ? { email } : {})}
+                rounded="full"
+                fullWidth
+              >
                 Create an account
               </Button>
               <a

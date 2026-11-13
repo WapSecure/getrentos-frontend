@@ -50,6 +50,8 @@ import { ProUpsell } from '@/components/estate/governance/ProUpsell';
 import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 import { readGate } from '@/lib/verificationGate';
 import { kycApi } from '@/lib/api/kyc';
+import { InviteToSignUp } from '@/components/contact/InviteToSignUp';
+import { CONTACT_HINT, contactProblem, contactReady } from '@/lib/contact';
 
 export function LeadCard({ lead }: { lead: RealtorLead }) {
   const { colors, spacing } = useTheme();
@@ -568,13 +570,14 @@ function InviteClientForm({
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
-  const [email, setEmail] = useState('');
-  const valid = /^\S+@\S+\.\S+$/.test(email.trim());
+  const [contact, setContact] = useState('');
+  const [touched, setTouched] = useState(false);
+  const valid = contactReady(contact);
   const check = useMutation({
-    mutationFn: () => realtorApi.checkClient(email.trim().toLowerCase()),
+    mutationFn: () => realtorApi.checkClient(contact),
   });
   const invite = useMutation({
-    mutationFn: () => realtorApi.inviteClient(email.trim().toLowerCase()),
+    mutationFn: () => realtorApi.inviteClient(contact),
     onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       void haptics.success();
@@ -625,23 +628,28 @@ function InviteClientForm({
         invite, then choose which properties you handle.
       </Text>
       <TextField
-        label="Client’s email"
+        label="Client’s phone number or email"
         required
-        value={email}
+        value={contact}
         onChangeText={(v) => {
-          setEmail(v);
+          setContact(v);
           check.reset();
+          invite.reset();
         }}
-        keyboardType="email-address"
+        onBlur={() => setTouched(true)}
+        error={touched ? contactProblem(contact) : undefined}
+        hint={CONTACT_HINT}
         autoCapitalize="none"
+        autoCorrect={false}
         editable={!invite.isPending}
         autoFocus
       />
       {c ? (
         !c.exists ? (
-          <FormAlert
-            tone="info"
-            message="No Sureground account uses that email. Ask them to sign up as an owner or landlord first."
+          <InviteToSignUp
+            message="Nobody on Sureground uses that phone number or email yet. Send them the signup link; they should sign up as an owner or landlord."
+            reason="represent your properties"
+            footnote="Once they have signed up, invite them here with the same phone number or email."
           />
         ) : !c.isEligible ? (
           <FormAlert

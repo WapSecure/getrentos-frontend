@@ -1,4 +1,4 @@
-import { formatLocation } from '@sureground/shared';
+import { formatLocation, isNoAccountMessage } from '@sureground/shared';
 import { useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
@@ -32,6 +32,8 @@ import {
 import { errorMessage } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { Sheet } from '@/components/Sheet';
+import { InviteToSignUp } from '@/components/contact/InviteToSignUp';
+import { CONTACT_HINT, contactProblem, contactReady } from '@/lib/contact';
 import { WriteItForMe } from './WriteItForMe';
 import { REPLY_LANGUAGES, type ReplyLanguage } from '@/lib/replyLanguage';
 import { StatusPill, isUpgradeError } from '@/components/host/HostUI';
@@ -414,11 +416,11 @@ function LinkResidentForm({
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
-  const [email, setEmail] = useState(household.contactEmail ?? '');
-  const valid = /^\S+@\S+\.\S+$/.test(email.trim());
+  const [contact, setContact] = useState(household.contactEmail || household.contactPhone || '');
+  const [touched, setTouched] = useState(false);
+  const valid = contactReady(contact);
   const link = useMutation({
-    mutationFn: () =>
-      estateManagerApi.linkResident(estateId, household.id, email.trim().toLowerCase()),
+    mutationFn: () => estateManagerApi.linkResident(estateId, household.id, contact),
     onSuccess: () => {
       void haptics.success();
       qc.invalidateQueries({ queryKey: qk.estateManager.estate(estateId) });
@@ -426,23 +428,36 @@ function LinkResidentForm({
       onDone();
     },
   });
+  const failure = link.error ? errorMessage(link.error, 'Could not link that account.') : null;
   return (
     <View style={{ gap: spacing.md }}>
       <Text variant="callout" color="mutedForeground">
-        Enter the email {household.residentName} uses on Sureground. Once linked, they see this
-        home’s dues, announcements and visitor passes in their own app.
+        Enter the phone number or email {household.residentName} uses on Sureground. Once linked,
+        they see this home’s dues, announcements and visitor passes in their own app.
       </Text>
       <TextField
-        label="Resident’s Sureground email"
+        label="Resident’s phone number or email"
         required
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
+        value={contact}
+        onChangeText={(v) => {
+          setContact(v);
+          if (link.error) link.reset();
+        }}
+        onBlur={() => setTouched(true)}
+        error={touched ? contactProblem(contact) : undefined}
+        hint={CONTACT_HINT}
         autoCapitalize="none"
+        autoCorrect={false}
         autoFocus
       />
-      {link.error ? (
-        <FormAlert message={errorMessage(link.error, 'Could not link that account.')} />
+      {isNoAccountMessage(failure) ? (
+        <InviteToSignUp
+          message="Nobody on Sureground uses that phone number or email yet. Send them the signup link."
+          reason="link you to your home in our estate"
+          footnote="Once they have signed up, link them here with the same phone number or email."
+        />
+      ) : failure ? (
+        <FormAlert message={failure} />
       ) : null}
       <Button
         label="Link account"
