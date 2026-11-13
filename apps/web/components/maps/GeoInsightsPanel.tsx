@@ -19,6 +19,12 @@ import {
   UtensilsCrossed,
   Wallet,
 } from '@sureground/icons';
+import {
+  commuteSourceNote,
+  NEARBY_PLACES_UNAVAILABLE,
+  shownTravelMode,
+  walkabilityView,
+} from '@sureground/shared';
 import { PropertyMap, type MapMarker } from '@/components/maps/PropertyMap';
 import { Badge } from '@sureground/ui/Badge';
 import { Button } from '@sureground/ui/Button';
@@ -99,6 +105,8 @@ export const GeoInsightsPanel = ({
     (insights.latitude != null ||
       (insights.neighborhood && Object.keys(insights.neighborhood).length > 0));
 
+  const walking = walkabilityView(insights?.walkability);
+
   const marker: MapMarker[] =
     insights && insights.latitude != null && insights.longitude != null
       ? [
@@ -137,7 +145,7 @@ export const GeoInsightsPanel = ({
           <p className="max-w-sm text-xs text-muted-foreground">
             {isError
               ? 'We could not load insights for this listing right now.'
-              : 'Location data for this property is being prepared. Real neighborhood data and commute times will appear here once it is ready.'}
+              : 'Location data for this property is being prepared. Nearby places and commute times will appear here once it is ready.'}
           </p>
         </div>
       ) : (
@@ -186,21 +194,15 @@ export const GeoInsightsPanel = ({
               )}
             </div>
 
-            {insights.walkability && (
-              <div className="rounded-2xl border border-border bg-card p-4">
-                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                  <Footprints className="h-4 w-4" />
-                  Walkability
-                </div>
-                <div className="mt-2 flex items-center gap-3">
-                  <span className="text-2xl font-bold text-primary">
-                    {insights.walkability.score}
-                  </span>
-                  <Badge variant="success">{insights.walkability.label}</Badge>
-                </div>
-                <p className="mt-2 text-xs text-muted-foreground">{insights.walkability.summary}</p>
+            <div className="rounded-2xl border border-border bg-card p-4">
+              <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <Footprints className="h-4 w-4" />
+                {walking?.heading ?? 'Within walking distance'}
               </div>
-            )}
+              <p className="mt-2 text-sm text-foreground">
+                {walking?.summary ?? NEARBY_PLACES_UNAVAILABLE}
+              </p>
+            </div>
           </div>
 
           {insights.aiSummary && (
@@ -241,8 +243,10 @@ export const GeoInsightsPanel = ({
             {insights.travelTimes ? (
               <div className="mt-3 grid gap-2 sm:grid-cols-3">
                 {(Object.keys(MODE_META) as (keyof typeof MODE_META)[]).map((mode) => {
-                  const result: TravelModeResult | null | undefined =
-                    insights.travelTimes?.modes?.[mode];
+                  const result: TravelModeResult | null = shownTravelMode(
+                    mode,
+                    insights.travelTimes?.modes?.[mode]
+                  );
                   const Icon = MODE_META[mode].icon;
                   return (
                     <div key={mode} className="rounded-xl border border-border bg-secondary/40 p-3">
@@ -263,10 +267,13 @@ export const GeoInsightsPanel = ({
                     </div>
                   );
                 })}
+                <p className="text-xs text-muted-foreground sm:col-span-3">
+                  {commuteSourceNote(insights.travelTimes.source)}
+                </p>
               </div>
             ) : (
               <p className="mt-3 text-xs text-muted-foreground">
-                Enter a destination to see real drive / transit / walk times.
+                Enter a destination to see estimated driving, transit and walking times.
               </p>
             )}
           </div>
@@ -290,8 +297,11 @@ export const GeoInsightsPanel = ({
                           {meta.label}
                         </div>
                         <ul className="mt-2 space-y-1.5">
-                          {(places as NearbyPlace[]).slice(0, 3).map((place) => (
-                            <li key={place.name} className="text-xs text-muted-foreground">
+                          {(places as NearbyPlace[]).slice(0, 3).map((place, index) => (
+                            <li
+                              key={`${place.name}-${index}`}
+                              className="text-xs text-muted-foreground"
+                            >
                               <span className="font-medium text-foreground">{place.name}</span>
                               {place.rating != null && (
                                 <span className="ml-1 text-warning">

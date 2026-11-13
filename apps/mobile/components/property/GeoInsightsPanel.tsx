@@ -2,7 +2,13 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Car, Footprints, MapPinned, TrainFront } from '@sureground/icons/native';
-import type { AddressValue } from '@sureground/shared';
+import {
+  commuteSourceNote,
+  NEARBY_PLACES_UNAVAILABLE,
+  shownTravelMode,
+  walkabilityView,
+  type AddressValue,
+} from '@sureground/shared';
 import { Button, Card, Chip, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { AddressInput } from '@/components/forms/AddressInput';
 import { qk } from '@/lib/query/keys';
@@ -11,13 +17,6 @@ import {
   NEIGHBORHOOD_CATEGORY_LABEL,
   type NeighborhoodCategory,
 } from '@/lib/api/geoInsights';
-
-const WALKABILITY_TEXT_COLOR: Record<string, 'success' | 'warning' | 'destructive'> = {
-  'Very walkable': 'success',
-  Walkable: 'success',
-  'Somewhat walkable': 'warning',
-  'Car-dependent': 'destructive',
-};
 
 interface Props {
   listingId: string;
@@ -47,7 +46,11 @@ export function GeoInsightsPanel({ listingId }: Props) {
   }
 
   const data = query.data;
-  if (!data || (!data.walkability && !data.neighborhood)) return null;
+  if (!data) return null;
+  const walking = walkabilityView(data.walkability);
+  const driving = shownTravelMode('driving', data.travelTimes?.modes.driving);
+  const transit = shownTravelMode('transit', data.travelTimes?.modes.transit);
+  const walk = shownTravelMode('walking', data.travelTimes?.modes.walking);
 
   const categories = (Object.keys(data.neighborhood ?? {}) as NeighborhoodCategory[]).filter(
     (c) => (data.neighborhood?.[c]?.length ?? 0) > 0
@@ -60,41 +63,34 @@ export function GeoInsightsPanel({ listingId }: Props) {
     <View style={{ gap: spacing.sm }}>
       <Text variant="bodyStrong">Neighbourhood</Text>
 
-      {data.walkability ? (
-        <Card elevated>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-            <View
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 24,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor:
-                  data.walkability.label === 'Car-dependent'
-                    ? colors.secondary
-                    : colors[
-                        `${WALKABILITY_TEXT_COLOR[data.walkability.label]}Subtle` as
-                          | 'successSubtle'
-                          | 'warningSubtle'
-                      ],
-              }}
-            >
-              <Text variant="bodyStrong" color={WALKABILITY_TEXT_COLOR[data.walkability.label]}>
-                {data.walkability.score}
-              </Text>
-            </View>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text variant="callout" style={{ fontWeight: '700' }}>
-                {data.walkability.label}
-              </Text>
-              <Text variant="caption" color="mutedForeground">
-                {data.walkability.summary}
-              </Text>
-            </View>
+      <Card elevated>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+          <View
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: colors.secondary,
+            }}
+          >
+            {walking?.count != null ? (
+              <Text variant="bodyStrong">{walking.count}</Text>
+            ) : (
+              <Footprints size={18} color={colors.mutedForeground} />
+            )}
           </View>
-        </Card>
-      ) : null}
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text variant="callout" style={{ fontWeight: '700' }}>
+              {walking?.heading ?? 'Within walking distance'}
+            </Text>
+            <Text variant="caption" color="mutedForeground">
+              {walking?.summary ?? NEARBY_PLACES_UNAVAILABLE}
+            </Text>
+          </View>
+        </View>
+      </Card>
 
       {categories.length > 0 ? (
         <Card elevated padding="none">
@@ -111,9 +107,9 @@ export function GeoInsightsPanel({ listingId }: Props) {
               ))}
             </View>
             <View style={{ gap: spacing.sm }}>
-              {places.map((place) => (
+              {places.map((place, index) => (
                 <View
-                  key={place.name}
+                  key={`${place.name}-${index}`}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'flex-start',
@@ -134,7 +130,7 @@ export function GeoInsightsPanel({ listingId }: Props) {
                   </View>
                   <Text variant="caption" color="mutedForeground">
                     {place.distanceMeters < 1000
-                      ? `${place.distanceMeters} m`
+                      ? `${Math.round(place.distanceMeters)} m`
                       : `${(place.distanceMeters / 1000).toFixed(1)} km`}
                   </Text>
                 </View>
@@ -170,26 +166,31 @@ export function GeoInsightsPanel({ listingId }: Props) {
           />
         </View>
 
-        {data.travelTimes ? (
-          <View style={{ flexDirection: 'row', gap: spacing.lg, marginTop: spacing.md }}>
-            {data.travelTimes.modes.driving ? (
-              <CommuteMode
-                icon={<Car size={15} color={colors.foreground} />}
-                text={data.travelTimes.modes.driving.durationText}
-              />
-            ) : null}
-            {data.travelTimes.modes.transit ? (
-              <CommuteMode
-                icon={<TrainFront size={15} color={colors.foreground} />}
-                text={data.travelTimes.modes.transit.durationText}
-              />
-            ) : null}
-            {data.travelTimes.modes.walking ? (
-              <CommuteMode
-                icon={<Footprints size={15} color={colors.foreground} />}
-                text={data.travelTimes.modes.walking.durationText}
-              />
-            ) : null}
+        {data.travelTimes && (driving || transit || walk) ? (
+          <View style={{ gap: spacing.xs, marginTop: spacing.md }}>
+            <View style={{ flexDirection: 'row', gap: spacing.lg }}>
+              {driving ? (
+                <CommuteMode
+                  icon={<Car size={15} color={colors.foreground} />}
+                  text={driving.durationText}
+                />
+              ) : null}
+              {transit ? (
+                <CommuteMode
+                  icon={<TrainFront size={15} color={colors.foreground} />}
+                  text={transit.durationText}
+                />
+              ) : null}
+              {walk ? (
+                <CommuteMode
+                  icon={<Footprints size={15} color={colors.foreground} />}
+                  text={walk.durationText}
+                />
+              ) : null}
+            </View>
+            <Text variant="caption" color="mutedForeground">
+              {commuteSourceNote(data.travelTimes.source)}
+            </Text>
           </View>
         ) : destination ? (
           <View

@@ -21,8 +21,9 @@ export const Journeys = () => (
           action={<ArrowLink href="/rent">Find a home to rent</ArrowLink>}
         >
           <p>
-            Book viewings, apply and pay rent from one account. Rent is released to the landlord on
-            schedule, and a dispute keeps the money held.
+            Book viewings, apply and pay rent from one account. Rent is released to the landlord
+            when you confirm move-in or on its scheduled date, whichever comes first, and a dispute
+            keeps the money held.
           </p>
         </FeatureRow>
         <FeatureRow

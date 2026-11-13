@@ -15,6 +15,7 @@ import {
 } from '../src/showroom/map.ts';
 import type { MediaItem } from '../src/showroom/types.ts';
 import { trustChainLabel } from '../src/utils/trustLabel.ts';
+import { RENT_PROTECTION_RULE } from '../src/constants/payment-protection.ts';
 
 const rental = {
   id: 'r1',
@@ -394,7 +395,7 @@ const fullChain = {
       id: 'payment',
       label: 'Payment protected',
       met: true,
-      detail: 'Your rent is held by Sureground and only released once you confirm move-in.',
+      detail: RENT_PROTECTION_RULE,
     },
   ],
 };

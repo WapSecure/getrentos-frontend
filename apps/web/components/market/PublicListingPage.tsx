@@ -1,4 +1,4 @@
-import { formatLocation } from '@sureground/shared';
+import { formatLocation, RENT_PROTECTION_RULE } from '@sureground/shared';
 import { Badge } from '@sureground/ui/Badge';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
@@ -42,7 +42,7 @@ const MARKET_NOUN: Record<PublicDetailMarket, string> = {
 };
 
 const PROTECTION_LINE: Record<PublicDetailMarket, string> = {
-  rent: 'Pay through Sureground: we hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
+  rent: RENT_PROTECTION_RULE,
   sale: 'Pay through Sureground: we hold your deposit until the seller hands over the keys and you confirm.',
   land: 'Pay through Sureground: we hold your money and only release it to the seller once the conveyance steps are confirmed.',
 };
