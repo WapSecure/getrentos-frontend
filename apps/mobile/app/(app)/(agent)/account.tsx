@@ -23,6 +23,7 @@ import { useTrustItems } from '@/components/account/useTrustItems';
 import { useProSettings } from '@/hooks/useProSettings';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { RepresentingGroup } from '@/components/account/RepresentingGroup';
 import { AccountFooter, AppearanceFooter, ProfileCard } from '@/components/account/AccountParts';
 
 const go = (href: Href) => () => router.push(href);
@@ -164,6 +165,7 @@ export default function AgentAccount() {
         }
       />
       <WorkspaceSwitcher />
+      <RepresentingGroup />
       <SettingsGroup title="Field work" items={work} />
       <SettingsGroup title="Trust & reputation" items={trust} />
       <SettingsGroup title="Settings" items={settings} footer={<AppearanceFooter />} />

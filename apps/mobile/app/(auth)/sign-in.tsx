@@ -271,7 +271,7 @@ export default function SignIn() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextField
                   label="Email or phone"
-                  placeholder="you@example.com"
+                  placeholder="0803 123 4567 or you@example.com"
                   leftIcon={<AtSign size={18} color={colors.mutedForeground} />}
                   autoCapitalize="none"
                   autoCorrect={false}

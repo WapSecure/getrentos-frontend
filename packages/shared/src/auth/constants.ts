@@ -75,7 +75,7 @@ export const ROLES = {
   REALTOR: {
     id: 'realtor',
     name: 'Realtor',
-    description: 'Bring listings, schedule tours, negotiate on behalf.',
+    description: 'Bring listings, arrange viewings and negotiate for your clients.',
     icon: 'Users',
     requiresVerification: ['identity', 'license'],
     canAddLater: true,
@@ -85,7 +85,7 @@ export const ROLES = {
   AGENT: {
     id: 'agent',
     name: 'Agent',
-    description: 'Operate on behalf with scoped, delegated permissions.',
+    description: 'Act for landlords and owners, with only the permissions they give you.',
     icon: 'UserCheck',
     requiresVerification: ['identity'],
     canAddLater: true,
@@ -481,7 +481,9 @@ export const getDashboardRoute = (roleId: string): string => {
   return roleMap[roleId] || ROUTES.DASHBOARD;
 };
 
-const INVITED_ROLE_PRECEDENCE: readonly string[] = ['GATEMAN'];
+// The estate manager's dashboard wins over the gate console: someone who runs an estate and also
+// mans its gate starts where they manage it, as on mobile. Either beats the sign-up role.
+const INVITED_ROLE_PRECEDENCE: readonly string[] = ['ESTATE_MANAGER', 'GATEMAN'];
 
 // Takes the first role the web app has a portal for: an unmapped roles[0] fell back to renter and
 // a non-renter then looped between the renter guard and that fallback.

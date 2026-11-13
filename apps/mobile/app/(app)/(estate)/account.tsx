@@ -1,3 +1,4 @@
+import { formatPhoneForDisplay } from '@sureground/shared';
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { router, type Href } from 'expo-router';
@@ -32,6 +33,7 @@ import {
 } from '@sureground/ui-native';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { RepresentingGroup } from '@/components/account/RepresentingGroup';
 import { EstateSwitcherSheet } from '@/components/estate/EstateUI';
 import { useEstate } from '@/hooks/useEstate';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -193,7 +195,7 @@ export default function EstateAccount() {
           {profile?.legalName ?? 'Estate manager'}
         </Text>
         <Text variant="callout" color="mutedForeground">
-          {profile?.email ?? profile?.phone ?? ''}
+          {profile?.email ?? formatPhoneForDisplay(profile?.phone)}
         </Text>
         <Text
           variant="caption"
@@ -205,6 +207,7 @@ export default function EstateAccount() {
       </View>
 
       <WorkspaceSwitcher />
+      <RepresentingGroup />
 
       <SettingsGroup title="The office" items={office} />
       <SettingsGroup title="Trust & reputation" items={trust} />

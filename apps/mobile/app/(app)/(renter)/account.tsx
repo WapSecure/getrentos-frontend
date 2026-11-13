@@ -47,6 +47,7 @@ import { useTrustItems } from '@/components/account/useTrustItems';
 import { ProfileCard } from '@/components/account/AccountParts';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { RepresentingGroup } from '@/components/account/RepresentingGroup';
 import { financingApi } from '@/lib/api/financing';
 import { qk } from '@/lib/query/keys';
 
@@ -289,6 +290,7 @@ export default function Account() {
       ) : null}
 
       <WorkspaceSwitcher />
+      <RepresentingGroup />
 
       <SettingsGroup title="Your home" items={home} />
       <SettingsGroup title="Money" items={money} />
