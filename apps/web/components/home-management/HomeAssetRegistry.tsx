@@ -27,7 +27,13 @@ import { EmptyState } from '@sureground/ui';
 import { Skeleton } from '@sureground/ui';
 import { Field } from '@sureground/ui';
 import { Input, ToggleChip } from '@sureground/ui';
-import { HOME_ASSET_CATEGORY_SUGGESTIONS } from '@sureground/shared';
+import {
+  HOME_ASSET_CATEGORY_SUGGESTIONS,
+  UTILITY_KINDS,
+  UTILITY_KIND_LABELS,
+  utilityKindForCategory,
+  type UtilityKind,
+} from '@sureground/shared';
 import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
 import { useToast } from '@sureground/ui';
@@ -56,6 +62,7 @@ type AssetForm = {
   serialNumber: string;
   installedAt: string;
   warrantyExpiresAt: string;
+  utilityKind: UtilityKind | '';
 };
 
 const initialAssetForm: AssetForm = {
@@ -68,6 +75,7 @@ const initialAssetForm: AssetForm = {
   serialNumber: '',
   installedAt: '',
   warrantyExpiresAt: '',
+  utilityKind: '',
 };
 
 const assetStatus: Record<HomeAsset['status'], { label: string; variant: BadgeVariant }> = {
@@ -204,6 +212,7 @@ export function HomeAssetRegistry({
       serialNumber: trimOptional(form.serialNumber),
       installedAt: form.installedAt || undefined,
       warrantyExpiresAt: form.warrantyExpiresAt || undefined,
+      utilityKind: form.utilityKind || undefined,
     });
   };
 
@@ -495,6 +504,7 @@ export function HomeAssetRegistry({
                           ...current,
                           category: suggestion,
                           name: current.name.trim() ? current.name : suggestion,
+                          utilityKind: utilityKindForCategory(suggestion) ?? current.utilityKind,
                         }))
                       }
                     >
@@ -502,6 +512,28 @@ export function HomeAssetRegistry({
                     </ToggleChip>
                   ))}
                 </div>
+              </Field>
+              <Field
+                label="Utility type"
+                hint="Tag generators, inverters, solar, boreholes, pumps and tanks so they appear under Utilities."
+              >
+                <Select
+                  ariaLabel="Utility type"
+                  value={form.utilityKind}
+                  onValueChange={(utilityKind) =>
+                    setForm((current) => ({
+                      ...current,
+                      utilityKind: utilityKind as UtilityKind | '',
+                    }))
+                  }
+                  options={[
+                    { value: '', label: 'Not a utility' },
+                    ...UTILITY_KINDS.map((kind) => ({
+                      value: kind,
+                      label: UTILITY_KIND_LABELS[kind],
+                    })),
+                  ]}
+                />
               </Field>
               <Field label="Manufacturer" htmlFor="asset-manufacturer">
                 <Input

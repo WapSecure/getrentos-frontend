@@ -3,6 +3,7 @@ export const HOME_MANAGEMENT_TABS = [
   'work-orders',
   'preventive-care',
   'assets',
+  'utilities',
   'service-standards',
   'history',
 ] as const;
@@ -32,3 +33,35 @@ export function homeManagementTabHref(
   const query = params.toString();
   return query ? `${pathname}?${query}` : pathname;
 }
+
+/** The Utilities tab's own sub-view, kept in `view`. Power is the default. */
+export const UTILITIES_VIEWS = ['power', 'water'] as const;
+
+export type UtilitiesView = (typeof UTILITIES_VIEWS)[number];
+
+export const DEFAULT_UTILITIES_VIEW: UtilitiesView = 'power';
+
+export const UTILITIES_VIEW_PARAM = 'view';
+
+/** An unknown value falls back to power, so an old link still opens the tab. */
+export function parseUtilitiesView(value: string | null | undefined): UtilitiesView {
+  return UTILITIES_VIEWS.find((view) => view === value) ?? DEFAULT_UTILITIES_VIEW;
+}
+
+/** The URL for a utilities sub-view, keeping every other parameter; power drops the parameter. */
+export function utilitiesViewHref(pathname: string, search: string, view: UtilitiesView): string {
+  const params = new URLSearchParams(search);
+  if (view === DEFAULT_UTILITIES_VIEW) params.delete(UTILITIES_VIEW_PARAM);
+  else params.set(UTILITIES_VIEW_PARAM, view);
+  const query = params.toString();
+  return query ? `${pathname}?${query}` : pathname;
+}
+
+/** The workspace's "Add" actions that open a utilities form, and the sub-view each one needs. */
+export type UtilitiesCreateKind = 'fuel' | 'meter' | 'water-test';
+
+export const UTILITIES_VIEW_FOR: Record<UtilitiesCreateKind, UtilitiesView> = {
+  fuel: 'power',
+  meter: 'power',
+  'water-test': 'water',
+};

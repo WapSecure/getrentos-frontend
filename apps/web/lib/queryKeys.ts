@@ -248,6 +248,23 @@ export const homeManagementKeys = {
   properties: (role: 'owner' | 'landlord' | 'manager') =>
     ['home-management', role, 'properties'] as const,
   vendors: ['home-management', 'landlord', 'vendors'] as const,
+  /** Power and water records; every key starts with `utilities` so one invalidation refreshes the tab. */
+  utilities: {
+    all: ['home-management', 'utilities'] as const,
+    generators: (propertyId?: string) =>
+      ['home-management', 'utilities', 'generators', propertyId ?? 'all'] as const,
+    readings: (assetId: string) => ['home-management', 'utilities', 'readings', assetId] as const,
+    healthNotes: (assetId: string) =>
+      ['home-management', 'utilities', 'health-notes', assetId] as const,
+    purchases: (params: Record<string, unknown>) =>
+      ['home-management', 'utilities', 'purchases', params] as const,
+    meters: (propertyId?: string) =>
+      ['home-management', 'utilities', 'meters', propertyId ?? 'all'] as const,
+    supplyHours: (meterId: string) =>
+      ['home-management', 'utilities', 'supply-hours', meterId] as const,
+    waterTests: (propertyId?: string, page = 1) =>
+      ['home-management', 'utilities', 'water-tests', propertyId ?? 'all', page] as const,
+  },
   vendorPayoutAccount: (vendorId: string) =>
     ['home-management', 'vendors', vendorId, 'payout-account'] as const,
 };

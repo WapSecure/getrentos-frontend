@@ -10,6 +10,7 @@ import {
   Plus,
   Timer,
   Wrench,
+  Zap,
   type SgIcon,
 } from '@sureground/icons/native';
 import {
@@ -163,6 +164,12 @@ export default function HomeCare() {
                   label="Assets"
                   hint={`${d.totalAssets} tracked${d.assetsNeedingService ? ` · ${d.assetsNeedingService} need service` : ''}`}
                   onPress={() => router.push('/(app)/home-care/assets')}
+                />
+                <Tile
+                  Icon={Zap}
+                  label="Power and water"
+                  hint="Fuel, generator hours, tokens and water tests"
+                  onPress={() => router.push('/(app)/home-care/utilities')}
                 />
                 <Tile
                   Icon={CalendarClock}

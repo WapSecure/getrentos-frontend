@@ -1,4 +1,4 @@
-import type { MaintenanceCategoryCode } from '@sureground/shared';
+import type { MaintenanceCategoryCode, UtilityKind } from '@sureground/shared';
 import type { InvoiceCheck } from '@/types/invoiceCheck';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import { providerQuery } from '@/services/paymentStatusService';
@@ -35,6 +35,7 @@ export type HomeManagementPageParams = {
 export type HomeManagementAssetsParams = HomeManagementPageParams & {
   propertyId?: string;
   status?: HomeAssetStatus;
+  utilityKind?: UtilityKind;
 };
 
 export type HomeManagementPlansParams = HomeManagementPageParams & {
@@ -102,6 +103,8 @@ export type HomeAsset = {
   installedAt?: string | null;
   warrantyExpiresAt?: string | null;
   status: HomeAssetStatus;
+  /** Set for generators, inverters, solar, boreholes, pumps, tanks and treatment. */
+  utilityKind?: UtilityKind | null;
   createdAt: string;
   updatedAt: string;
   property?: { title?: string | null; name?: string | null };
@@ -142,6 +145,7 @@ export type CreateHomeAssetInput = {
   serialNumber?: string;
   installedAt?: string;
   warrantyExpiresAt?: string;
+  utilityKind?: UtilityKind;
 };
 
 export type CreatePreventivePlanInput = {

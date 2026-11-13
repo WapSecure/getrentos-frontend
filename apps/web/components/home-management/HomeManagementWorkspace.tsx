@@ -7,6 +7,7 @@ import {
   CalendarClock,
   ChevronDown,
   CircleAlert,
+  ClipboardCheck,
   ClipboardList,
   ClipboardPlus,
   PackagePlus,
@@ -14,6 +15,7 @@ import {
   ShieldCheck,
   TriangleAlert,
   Wrench,
+  Zap,
 } from '@sureground/icons';
 import { HomeAssetRegistry } from '@/components/home-management/HomeAssetRegistry';
 import { HomeManagementInspectionFeed } from '@/components/home-management/HomeManagementInspectionFeed';
@@ -42,9 +44,12 @@ import {
 import dynamic from 'next/dynamic';
 import { unwrap } from '@/lib/apiHelpers';
 import {
+  UTILITIES_VIEW_FOR,
   homeManagementTabHref,
   parseHomeManagementTab,
+  utilitiesViewHref,
   type HomeManagementTab,
+  type UtilitiesCreateKind,
 } from '@/lib/homeManagementTabs';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
@@ -78,6 +83,13 @@ const HomeManagementWorkOrderQueue = dynamic(
     ),
   { loading: sectionFallback }
 );
+const HomeManagementUtilities = dynamic(
+  () =>
+    import('@/components/home-management/utilities/HomeManagementUtilities').then(
+      (m) => m.HomeManagementUtilities
+    ),
+  { loading: sectionFallback }
+);
 const HomeManagementEscalationQueue = dynamic(
   () =>
     import('@/components/home-management/HomeManagementEscalationQueue').then(
@@ -100,16 +112,24 @@ interface HomeManagementWorkspaceProps {
    * Requests / Home Management switch, so it passes another name.
    */
   tabParam?: string;
+  /** A field agent records readings and purchases; set-up actions such as adding a meter are hidden. */
+  recordOnly?: boolean;
 }
 
-type CreateKind = 'work-order' | 'asset' | 'plan' | 'policy';
+type CreateKind = 'work-order' | 'asset' | 'plan' | 'policy' | UtilitiesCreateKind;
 
 const CREATE_TAB: Record<CreateKind, HomeManagementTab> = {
   'work-order': 'work-orders',
   asset: 'assets',
   plan: 'preventive-care',
   policy: 'service-standards',
+  fuel: 'utilities',
+  meter: 'utilities',
+  'water-test': 'utilities',
 };
+
+const isUtilitiesKind = (kind: CreateKind): kind is UtilitiesCreateKind =>
+  kind === 'fuel' || kind === 'meter' || kind === 'water-test';
 
 const DEFAULT_DESCRIPTION: Record<HomeManagementWorkspaceRole, string> = {
   owner: 'Work orders, care plans, assets and records for the homes you own.',
@@ -136,6 +156,7 @@ export function HomeManagementWorkspace({
   eyebrow = 'Property care',
   description,
   tabParam = 'tab',
+  recordOnly = false,
 }: HomeManagementWorkspaceProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -153,12 +174,23 @@ export function HomeManagementWorkspace({
   // Never reused, so a section that stays mounted still sees the next click as a new request.
   const requestSequence = useRef(0);
   const requestCreate = (kind: CreateKind) => {
-    if (activeTab !== CREATE_TAB[kind]) setTab(CREATE_TAB[kind]);
+    if (isUtilitiesKind(kind)) {
+      // One navigation for the tab and its sub-view, so the right form's panel is mounted.
+      const tabUrl = new URL(tabHref('utilities'), 'http://local');
+      router.push(
+        utilitiesViewHref(tabUrl.pathname, tabUrl.search.slice(1), UTILITIES_VIEW_FOR[kind]),
+        { scroll: false }
+      );
+    } else if (activeTab !== CREATE_TAB[kind]) setTab(CREATE_TAB[kind]);
     requestSequence.current += 1;
     setCreateRequest({ kind, id: requestSequence.current });
   };
   const requestFor = (kind: CreateKind) =>
     createRequest?.kind === kind ? createRequest.id : undefined;
+  const utilitiesRequest =
+    createRequest && isUtilitiesKind(createRequest.kind)
+      ? { kind: createRequest.kind, id: createRequest.id }
+      : undefined;
 
   const [assetPage, setAssetPage] = useState(1);
   const [chosenAssetPropertyId, setAssetPropertyId] = useState('');
@@ -324,6 +356,7 @@ export function HomeManagementWorkspace({
     { id: 'work-orders', label: 'Work orders', countLabel: 'open' },
     { id: 'preventive-care', label: 'Preventive care', countLabel: 'due' },
     { id: 'assets', label: 'Assets' },
+    { id: 'utilities', label: 'Utilities' },
     { id: 'service-standards', label: 'Service standards' },
     { id: 'history', label: 'History & records' },
   ];
@@ -388,6 +421,32 @@ export function HomeManagementWorkspace({
                 >
                   <Settings2 className="h-4 w-4 text-primary" aria-hidden="true" />
                   Add service policy
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={!hasProperties}
+                  title={noPropertyTitle}
+                  onSelect={() => requestCreate('fuel')}
+                >
+                  <Zap className="h-4 w-4 text-primary" aria-hidden="true" />
+                  Log fuel
+                </DropdownMenuItem>
+                {!recordOnly && (
+                  <DropdownMenuItem
+                    disabled={!hasProperties}
+                    title={noPropertyTitle}
+                    onSelect={() => requestCreate('meter')}
+                  >
+                    <Zap className="h-4 w-4 text-primary" aria-hidden="true" />
+                    Add meter
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  disabled={!hasProperties}
+                  title={noPropertyTitle}
+                  onSelect={() => requestCreate('water-test')}
+                >
+                  <ClipboardCheck className="h-4 w-4 text-primary" aria-hidden="true" />
+                  Record water test
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -519,6 +578,17 @@ export function HomeManagementWorkspace({
             }}
             createRequest={requestFor('asset')}
             onCreateRequestHandled={clearCreateRequest}
+          />
+        </TabsContent>
+
+        <TabsContent value="utilities" className={panelClass}>
+          <HomeManagementUtilities
+            properties={properties}
+            scopePropertyId={scopePropertyId}
+            recordOnly={recordOnly}
+            createRequest={utilitiesRequest}
+            onCreateRequestHandled={clearCreateRequest}
+            onRaiseWorkOrder={() => requestCreate('work-order')}
           />
         </TabsContent>
 
