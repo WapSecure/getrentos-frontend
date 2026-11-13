@@ -1,5 +1,6 @@
 import { Container } from '@/components/marketing/Container';
 import { CtaLink } from '@/components/marketing/CtaLink';
+import { Eyebrow } from '@/components/marketing/Eyebrow';
 import { PhotoFrame } from '@/components/marketing/PhotoFrame';
 import { photos } from '@/components/marketing/photos';
 import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
@@ -11,7 +12,7 @@ export const DiasporaFeature = () => (
   <section aria-labelledby="diaspora-title" className="py-20 md:py-28">
     <Container className="grid items-center gap-14 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:gap-20">
       <div>
-        <p className="label-caps mb-4 text-muted-foreground">Diaspora Invest</p>
+        <Eyebrow className="mb-4">Diaspora Invest</Eyebrow>
         <h2
           id="diaspora-title"
           className="font-display text-[2.125rem] leading-[1.08] font-light tracking-[-0.01em] text-balance md:text-[3rem]"

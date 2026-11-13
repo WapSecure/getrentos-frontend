@@ -63,6 +63,7 @@ import { AssuranceTierBadge } from '@/components/land/market/AssuranceTierBadge'
 import { TrustLabelsList } from '@/components/shared/trust/TrustLabelsList';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import type { LandAssuranceTier } from '@/types/land';
+import { Eyebrow } from '@/components/marketing/Eyebrow';
 import { CollectionsStrip } from '@/components/collections/CollectionsStrip';
 
 type MarketplaceMode = 'public' | 'buyer';
@@ -374,8 +375,8 @@ export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBro
     <>
       <div className={mode === 'public' ? 'mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8' : ''}>
         <div className="mb-8 max-w-3xl">
-          <p className="label-caps text-muted-foreground">Reviewed land marketplace</p>
-          <h1 className="mt-4 text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-4xl">
+          <Eyebrow>Reviewed land marketplace</Eyebrow>
+          <h1 className="font-display mt-5 text-[2.25rem] leading-[1.06] font-light tracking-[-0.02em] text-balance text-foreground sm:text-[3rem] lg:text-[3.5rem]">
             Buy land with the parcel record in view.
           </h1>
           <p className="mt-3 text-base text-muted-foreground">

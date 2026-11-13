@@ -34,6 +34,7 @@ import {
   RISKS,
   TRANSPARENCY,
 } from './content';
+import { Eyebrow } from '@/components/marketing/Eyebrow';
 
 // Server-rendered, like the landing page: plain markup that reads without JavaScript.
 
@@ -295,7 +296,7 @@ export const DiasporaInvestLanding = () => (
     <Band id="risks" labelledBy="diaspora-risks">
       <div className="grid gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] md:gap-16">
         <div id="fees" className="scroll-mt-20">
-          <p className="label-caps mb-4 text-muted-foreground">Fees</p>
+          <Eyebrow className="mb-4">Fees</Eyebrow>
           <h2 className="font-display mb-5 text-[2rem] leading-[1.1] font-normal md:text-[2.5rem]">
             Shown in full before you commit
           </h2>
@@ -306,7 +307,7 @@ export const DiasporaInvestLanding = () => (
           </p>
         </div>
         <div>
-          <p className="label-caps mb-4 text-muted-foreground">Risks</p>
+          <Eyebrow className="mb-4">Risks</Eyebrow>
           <h2
             id="diaspora-risks"
             className="font-display mb-5 text-[2rem] leading-[1.1] font-normal md:text-[2.5rem]"

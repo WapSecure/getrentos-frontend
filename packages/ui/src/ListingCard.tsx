@@ -3,7 +3,7 @@
 import { forwardRef, useEffect, useRef, useState, type ReactNode } from 'react';
 import { CARD_IMPRESSION_RULE } from '@sureground/shared';
 import Link from 'next/link';
-import { BadgeCheck, ImageOff } from '@sureground/icons';
+import { BadgeCheck, ImageOff, MapPin } from '@sureground/icons';
 import { cn, formatCurrency, tidyPlace } from '@sureground/shared';
 import { Badge, type BadgeVariant } from './Badge';
 import { ProgressiveImg } from './ProgressiveImg';
@@ -240,7 +240,7 @@ export const ListingCard = ({
     <p
       className={cn(
         'data-value shrink-0 whitespace-nowrap font-semibold text-foreground',
-        isMap ? 'text-sm' : 'text-base'
+        isMap ? 'text-sm' : isGrid ? 'text-lg tracking-[-0.02em]' : 'text-base'
       )}
     >
       {formatCurrency(price, { compact: priceCompact })}
@@ -288,9 +288,15 @@ export const ListingCard = ({
 
   const details = (
     <>
-      {location && (
-        <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{tidyPlace(location)}</p>
-      )}
+      {location &&
+        (isGrid ? (
+          <p className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+            <span className="line-clamp-1">{tidyPlace(location)}</span>
+          </p>
+        ) : (
+          <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{tidyPlace(location)}</p>
+        ))}
       {factsLine.length > 0 && (
         <p
           className={cn(

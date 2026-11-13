@@ -15,6 +15,7 @@ import { ROUTES, getUserRole } from '@/lib/constants/auth';
 import { signedInPricingLinks } from '@/lib/pricingCta';
 import { useAuthStore } from '@/lib/store/authStore';
 import type { PlanPersona, PlanPricing } from '@/services/subscriptionService';
+import { Eyebrow } from '@/components/marketing/Eyebrow';
 
 const PERSONAS: Segment<PlanPersona>[] = [
   { value: 'landlord', label: 'Landlords' },
@@ -61,7 +62,7 @@ export function PricingView({ initialPricing }: { initialPricing?: PlanPricing }
       <section aria-labelledby="page-title" className="pt-24 pb-16 md:pt-32 md:pb-24">
         <Container className="grid items-start gap-12 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:gap-16">
           <div className="hero-rise">
-            <p className="label-caps mb-5 text-muted-foreground">Pricing</p>
+            <Eyebrow className="mb-5">Pricing</Eyebrow>
             <h1
               id="page-title"
               className="text-[2.5rem] leading-[1.04] font-light tracking-[-0.02em] text-balance sm:text-[3.25rem] lg:text-[4rem]"

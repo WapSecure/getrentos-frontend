@@ -28,6 +28,7 @@ import { ShowroomShareButton } from './ShowroomShareButton';
 import { ShowroomTrust } from './ShowroomTrust';
 import { VerificationSummaryBadge } from '@/components/shared/trust/VerificationSummaryCard';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
+import { IconTile } from '@/components/marketing/IconTile';
 import { ListingInvestmentAnalysis } from '@/components/diaspora/analysis/ListingInvestmentAnalysis';
 import {
   FloorPlansShortcut,
@@ -56,9 +57,13 @@ export async function ShowroomPage({
   const back = MARKET_PATH[market];
   const path = publicListingPath(listing);
   const keyFacts = [
-    listing.bedrooms ? { icon: BedDouble, label: `${listing.bedrooms} bed` } : null,
-    listing.bathrooms ? { icon: Bath, label: `${listing.bathrooms} bath` } : null,
-    listing.size ? { icon: Ruler, label: `${listing.size} m²` } : null,
+    listing.bedrooms
+      ? { icon: BedDouble, label: `${listing.bedrooms} bed`, name: 'Bedrooms' }
+      : null,
+    listing.bathrooms
+      ? { icon: Bath, label: `${listing.bathrooms} bath`, name: 'Bathrooms' }
+      : null,
+    listing.size ? { icon: Ruler, label: `${listing.size} m²`, name: 'Size' } : null,
   ].filter((f): f is NonNullable<typeof f> => !!f);
   const floorPlans = floorPlanLevels(listing.media);
   const crumbs = [
@@ -115,13 +120,16 @@ export async function ShowroomPage({
                   )
                 ) : (
                   listing.verified && (
-                    <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
+                    <Badge
+                      className="border-primary bg-primary text-primary-foreground"
+                      icon={<BadgeCheck className="h-3.5 w-3.5" />}
+                    >
                       {market === 'land' ? 'Ownership verified' : 'Verified'}
                     </Badge>
                   )
                 )}
                 <div className="flex items-start justify-between gap-4">
-                  <h1 className="text-3xl font-semibold tracking-[-0.035em] text-foreground text-balance sm:text-4xl">
+                  <h1 className="font-display text-[2.125rem] leading-[1.08] font-light tracking-[-0.015em] text-balance text-foreground sm:text-[2.75rem] lg:text-[3.25rem]">
                     {listing.title}
                   </h1>
                   <div className="flex shrink-0 gap-2">
@@ -134,31 +142,39 @@ export async function ShowroomPage({
                   </div>
                 </div>
                 <p className="flex items-start gap-1.5 text-muted-foreground">
-                  <MapPin className="mt-1 h-4 w-4 shrink-0" aria-hidden="true" />
+                  <MapPin className="mt-1 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                   <span>
                     {listing.address ? `${listing.address}, ${listing.location}` : listing.location}
                   </span>
                 </p>
                 {/* Phones see the price here; the full breakdown sits further down. */}
-                <p className="data-value text-2xl font-semibold tracking-[-0.025em] text-foreground lg:hidden">
+                <p className="font-display data-value text-[2rem] leading-tight font-normal tracking-[-0.015em] text-foreground lg:hidden">
                   {formatCurrency(listing.price)}
                   {listing.priceUnit && (
-                    <span className="text-base font-normal text-muted-foreground">
+                    <span className="font-sans text-base font-normal text-muted-foreground">
                       /{listing.priceUnit}
                     </span>
                   )}
                 </p>
                 {(keyFacts.length > 0 || floorPlans.length > 0) && (
-                  <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-1">
+                  <div className="flex flex-col gap-4 pt-3">
                     {keyFacts.length > 0 && (
                       <ul
                         aria-label="Key facts"
-                        className="flex flex-wrap items-center gap-y-2 divide-x divide-border text-sm font-medium text-foreground"
+                        className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4"
                       >
-                        {keyFacts.map(({ icon: Icon, label }) => (
-                          <li key={label} className="flex items-center gap-2 px-4 first:pl-0">
-                            <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />{' '}
-                            {label}
+                        {keyFacts.map(({ icon, label, name }) => (
+                          <li
+                            key={label}
+                            className="flex items-center gap-3 rounded-md border border-border bg-card p-3 sm:p-4"
+                          >
+                            <IconTile icon={icon} size="sm" />
+                            <span className="flex min-w-0 flex-col">
+                              <span className="label-caps text-muted-foreground">{name}</span>
+                              <span className="text-[0.9375rem] font-semibold text-foreground tabular-nums">
+                                {label}
+                              </span>
+                            </span>
                           </li>
                         ))}
                       </ul>
@@ -190,7 +206,7 @@ export async function ShowroomPage({
 
               {listing.facts.length > 0 && (
                 <Section id="details" title="Details">
-                  <div className="rounded-xl border border-border bg-card px-5 shadow-xs">
+                  <div className="rounded-md border border-border bg-card px-5">
                     <DescriptionList layout="rows" items={listing.facts} />
                   </div>
                 </Section>
@@ -202,9 +218,14 @@ export async function ShowroomPage({
                     {listing.amenities.map((a) => (
                       <li
                         key={a}
-                        className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm text-foreground"
+                        className="flex items-center gap-3 rounded-md border border-border bg-card px-4 py-3 text-sm text-foreground"
                       >
-                        <Check className="h-4 w-4 text-success" aria-hidden="true" />
+                        <span
+                          aria-hidden="true"
+                          className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                        </span>
                         {a}
                       </li>
                     ))}

@@ -73,7 +73,10 @@ export function HeroSearch({ className }: { className?: string }) {
       role="search"
       aria-label="Search property"
       onSubmit={onSubmit}
-      className={cn('border border-border bg-card p-4 shadow-lg sm:p-6', className)}
+      className={cn(
+        'rounded-md border border-border bg-card p-4 shadow-xl shadow-foreground/5 ring-1 ring-primary/10 transition-shadow focus-within:ring-2 focus-within:ring-primary/40 sm:p-6',
+        className
+      )}
     >
       <SegmentedControl
         aria-label="What are you looking for?"
@@ -84,7 +87,7 @@ export function HeroSearch({ className }: { className?: string }) {
       />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="relative min-w-0 flex-1">
-          <label htmlFor={inputId} className="label-caps mb-2 block text-muted-foreground">
+          <label htmlFor={inputId} className="label-caps mb-2 block text-primary">
             Location
           </label>
           <Input
@@ -126,7 +129,7 @@ export function HeroSearch({ className }: { className?: string }) {
                   onClick={() => choose(area)}
                   className={cn(
                     'flex cursor-pointer items-center justify-between gap-4 px-4 py-3 text-sm',
-                    index === active ? 'bg-secondary' : 'hover:bg-secondary/70'
+                    index === active ? 'bg-primary/10 text-primary' : 'hover:bg-primary/5'
                   )}
                 >
                   <span className="font-medium">{area.name}</span>
@@ -141,7 +144,7 @@ export function HeroSearch({ className }: { className?: string }) {
           size="lg"
           icon={<Search className="h-4 w-4" aria-hidden="true" />}
           iconPosition="right"
-          className="h-12 px-8 text-[0.6875rem] tracking-[0.22em] uppercase"
+          className="h-12 px-8 text-[0.6875rem] tracking-[0.22em] uppercase shadow-sm shadow-primary/20"
         >
           Search
         </Button>

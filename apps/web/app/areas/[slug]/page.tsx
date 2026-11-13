@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { Building2, Home, MapPin } from '@sureground/icons';
 import { Breadcrumbs } from '@sureground/ui/Breadcrumbs';
 import { AREAS, type Area } from '@/components/home/areas';
 import { searchHref } from '@/components/home/searchRoutes';
@@ -9,6 +10,8 @@ import { ArrowLink } from '@/components/marketing/ArrowLink';
 import { ClosingBand } from '@/components/marketing/ClosingBand';
 import { Container } from '@/components/marketing/Container';
 import { CtaLink } from '@/components/marketing/CtaLink';
+import { Eyebrow } from '@/components/marketing/Eyebrow';
+import { IconTile } from '@/components/marketing/IconTile';
 import { ListingTile } from '@/components/marketing/ListingTile';
 import { SectionIntro } from '@/components/marketing/SectionIntro';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -145,7 +148,12 @@ export default async function AreaPage({ params }: AreaPageProps) {
               ]}
               className="mb-8"
             />
-            <p className="label-caps mb-5 text-muted-foreground">{area.city}</p>
+            <Eyebrow className="mb-5">
+              <span className="inline-flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+                {area.city}
+              </span>
+            </Eyebrow>
             <h1
               id="page-title"
               className="text-[2.5rem] leading-[1.04] font-light tracking-[-0.02em] text-balance sm:text-[3.25rem] lg:text-[4rem]"
@@ -173,6 +181,31 @@ export default async function AreaPage({ params }: AreaPageProps) {
                 </CtaLink>
               ) : null}
             </div>
+            {/* Live counts from the same search the page is built from; nothing estimated. */}
+            <ul className="mt-12 grid max-w-2xl grid-cols-1 gap-4 border-t border-border pt-8 sm:grid-cols-2">
+              {inventory.rentTotal > 0 ? (
+                <li className="flex items-center gap-4">
+                  <IconTile icon={Home} />
+                  <div>
+                    <p className="label-caps text-muted-foreground">Homes to rent</p>
+                    <p className="font-display text-[2rem] leading-none font-normal tabular-nums text-foreground">
+                      {inventory.rentTotal}
+                    </p>
+                  </div>
+                </li>
+              ) : null}
+              {inventory.saleTotal > 0 ? (
+                <li className="flex items-center gap-4">
+                  <IconTile icon={Building2} />
+                  <div>
+                    <p className="label-caps text-muted-foreground">Property for sale</p>
+                    <p className="font-display text-[2rem] leading-none font-normal tabular-nums text-foreground">
+                      {inventory.saleTotal}
+                    </p>
+                  </div>
+                </li>
+              ) : null}
+            </ul>
           </Container>
         </section>
 
@@ -205,6 +238,7 @@ export default async function AreaPage({ params }: AreaPageProps) {
         ) : null}
 
         <ClosingBand
+          eyebrow={`List in ${area.name}`}
           title={`Own property in ${area.name}?`}
           lead="List it on Sureground. Verified owners and properties are marked as verified, so people can see what has been checked."
           actions={

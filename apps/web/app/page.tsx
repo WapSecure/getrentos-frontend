@@ -77,6 +77,7 @@ export default function Home() {
         <DiasporaSection />
         <HomeFaq />
         <ClosingBand
+          eyebrow="Free to join"
           title="List, rent or buy with fewer surprises"
           lead="Create a free account to book viewings, make offers and pay through Sureground Payment Protection."
           actions={
