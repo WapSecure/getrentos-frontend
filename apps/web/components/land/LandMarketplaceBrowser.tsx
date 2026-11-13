@@ -609,118 +609,183 @@ export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBro
           setLinkedListingId(null);
         }}
       >
-        <DialogContent className="p-0">
+        <DialogContent size="xl" padded={false} className="lg:max-w-6xl lg:overflow-hidden">
           {activeListing && (
-            <div className="max-h-[85vh] overflow-y-auto">
-              <div className="relative flex h-48 items-center justify-center bg-muted">
-                <Trees className="h-16 w-16 text-primary/60" />
-                <div className="absolute bottom-4 left-5 rounded-xl bg-primary px-3 py-1.5 font-semibold text-primary-foreground">
-                  {formatCurrency(activeListing.askingPrice)}
-                </div>
-              </div>
-              <div className="space-y-5 p-5">
-                <div>
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <DialogTitle className="text-xl font-semibold text-foreground">
-                        {activeListing.title}
-                      </DialogTitle>
-                      <DialogDescription className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        {formatLocation(
-                          activeListing.address,
-                          activeListing.city,
-                          activeListing.state
-                        )}
-                      </DialogDescription>
-                      {activeListing.addressHidden && (
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          The exact address is shared once the property is verified.
-                        </p>
-                      )}
+            <div className="grid lg:max-h-[88dvh] lg:grid-cols-[minmax(0,1fr)_380px]">
+              {/* Parcel record */}
+              <div className="min-w-0 lg:overflow-y-auto">
+                <div className="relative h-56 bg-muted sm:h-72 lg:h-80">
+                  {activeListing.coverImageUrl ? (
+                    <img
+                      src={activeListing.coverImageUrl}
+                      srcSet={srcSetOf(activeListing.imageVariants)}
+                      sizes="(min-width: 1024px) 760px, 100vw"
+                      alt={activeListing.title}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/10 via-muted to-secondary">
+                      <Trees className="h-16 w-16 text-primary/60" aria-hidden />
                     </div>
-                    <div className="flex flex-col items-end gap-1.5">
-                      <AssuranceTierBadge tier={activeListing.diligence?.assuranceTier} />
-                    </div>
-                  </div>
-                  {activeListing.description && (
-                    <p className="mt-4 text-sm leading-6 text-muted-foreground">
-                      {activeListing.description}
-                    </p>
                   )}
+                  <div className="absolute bottom-4 left-5 flex flex-wrap gap-2">
+                    <Badge variant="success" icon={<ShieldCheck className="h-3.5 w-3.5" />}>
+                      Diligence verified
+                    </Badge>
+                  </div>
                 </div>
 
-                {Boolean(
-                  activeListing.diligence?.labels?.length ||
-                  activeListing.diligence?.notVerified?.length
-                ) && (
-                  <section className="rounded-xl border border-border bg-card p-4">
-                    <h3 className="mb-3 font-medium text-foreground">What was checked</h3>
-                    <TrustLabelsList
-                      labels={activeListing.diligence?.labels}
-                      notVerified={activeListing.diligence?.notVerified}
-                    />
-                  </section>
-                )}
+                <div className="space-y-8 p-6 sm:p-8">
+                  <header>
+                    <DialogTitle className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                      {activeListing.title}
+                    </DialogTitle>
+                    <DialogDescription className="mt-2 flex items-center gap-1.5 text-base text-muted-foreground">
+                      <MapPin className="h-4 w-4 shrink-0" />
+                      {formatLocation(
+                        activeListing.address,
+                        activeListing.city,
+                        activeListing.state
+                      )}
+                    </DialogDescription>
+                    {activeListing.addressHidden && (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        The exact address is shared once the property is verified.
+                      </p>
+                    )}
+                    {activeListing.description && (
+                      <p className="mt-5 max-w-prose text-base leading-7 text-foreground/80">
+                        {activeListing.description}
+                      </p>
+                    )}
+                  </header>
 
-                <section className="rounded-xl border border-border bg-secondary/30 p-4">
-                  <h3 className="font-medium text-foreground">Public parcel facts</h3>
-                  <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-                    <Fact label="Area" value={areaLabel(activeListing)} />
-                    <Fact
-                      label="Title type"
-                      value={
-                        activeListing.parcel.titleType
-                          ? LAND_TITLE_TYPE_LABELS[activeListing.parcel.titleType]
-                          : undefined
-                      }
-                    />
-                    <Fact label="Zoning" value={activeListing.parcel.zoning} />
-                    <Fact label="Permitted use" value={activeListing.parcel.permittedUse} />
-                    <Fact label="Terrain" value={activeListing.parcel.terrain} />
-                    <Fact
-                      label="Road access"
-                      value={activeListing.parcel.roadAccess ? 'Available' : 'Not stated'}
-                    />
-                    <Fact
-                      label="Subdivision"
-                      value={activeListing.parcel.subdivisionAllowed ? 'Allowed' : 'Not stated'}
-                    />
-                    <Fact
-                      label="Diligence reviewed"
-                      value={
-                        activeListing.diligence?.reviewedAt
-                          ? formatDate(activeListing.diligence.reviewedAt)
-                          : undefined
-                      }
-                    />
-                  </div>
+                  <section aria-labelledby="land-facts-heading">
+                    <h3 id="land-facts-heading" className="text-lg font-semibold text-foreground">
+                      Parcel facts
+                    </h3>
+                    <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+                      <Fact label="Area" value={areaLabel(activeListing)} />
+                      <Fact
+                        label="Title type"
+                        value={
+                          activeListing.parcel.titleType
+                            ? LAND_TITLE_TYPE_LABELS[activeListing.parcel.titleType]
+                            : undefined
+                        }
+                      />
+                      <Fact label="Zoning" value={activeListing.parcel.zoning} />
+                      <Fact label="Permitted use" value={activeListing.parcel.permittedUse} />
+                      <Fact label="Terrain" value={activeListing.parcel.terrain} />
+                      <Fact
+                        label="Road access"
+                        value={activeListing.parcel.roadAccess ? 'Available' : 'Not stated'}
+                      />
+                      <Fact
+                        label="Subdivision"
+                        value={activeListing.parcel.subdivisionAllowed ? 'Allowed' : 'Not stated'}
+                      />
+                      <Fact
+                        label="Diligence reviewed"
+                        value={
+                          activeListing.diligence?.reviewedAt
+                            ? formatDate(activeListing.diligence.reviewedAt)
+                            : undefined
+                        }
+                      />
+                    </dl>
+                    {activeListing.parcel.utilities?.length ? (
+                      <div className="mt-4 flex flex-wrap items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Utilities:</span>
+                        {activeListing.parcel.utilities.map((utility) => (
+                          <Badge key={utility} variant="neutral">
+                            {utility}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : null}
+                  </section>
+
                   {(() => {
                     const outline = boundaryCorners(activeListing.parcel.boundaryGeometry);
-                    return outline ? (
-                      <div className="mt-4 border-t border-border pt-3">
-                        <p className="mb-2 text-xs font-medium text-muted-foreground">
-                          Plot outline, as drawn by the owner
-                        </p>
-                        <ParcelBoundaryMap key={activeListing.id} corners={outline} height={240} />
-                      </div>
+                    return outline || activeListing.parcel.boundaryNotes ? (
+                      <section aria-labelledby="land-outline-heading">
+                        <h3
+                          id="land-outline-heading"
+                          className="text-lg font-semibold text-foreground"
+                        >
+                          Plot outline
+                        </h3>
+                        <p className="mt-1 text-sm text-muted-foreground">As drawn by the owner.</p>
+                        {outline && (
+                          <div className="mt-4 overflow-hidden rounded-xl border border-border">
+                            <ParcelBoundaryMap
+                              key={activeListing.id}
+                              corners={outline}
+                              height={340}
+                            />
+                          </div>
+                        )}
+                        {activeListing.parcel.boundaryNotes && (
+                          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                            {activeListing.parcel.boundaryNotes}
+                          </p>
+                        )}
+                      </section>
                     ) : null;
                   })()}
-                  {activeListing.parcel.boundaryNotes && (
-                    <p className="mt-4 border-t border-border pt-3 text-sm text-muted-foreground">
-                      {activeListing.parcel.boundaryNotes}
+
+                  {Boolean(
+                    activeListing.diligence?.labels?.length ||
+                    activeListing.diligence?.notVerified?.length
+                  ) && (
+                    <section aria-labelledby="land-checked-heading">
+                      <h3
+                        id="land-checked-heading"
+                        className="text-lg font-semibold text-foreground"
+                      >
+                        What was checked
+                      </h3>
+                      <div className="mt-4 rounded-xl border border-border bg-card p-5">
+                        <TrustLabelsList
+                          labels={activeListing.diligence?.labels}
+                          notVerified={activeListing.diligence?.notVerified}
+                        />
+                      </div>
+                    </section>
+                  )}
+                </div>
+              </div>
+
+              {/* Price, trust and actions */}
+              <aside className="flex flex-col gap-5 border-t border-border bg-secondary/40 p-6 sm:p-8 lg:overflow-y-auto lg:border-l lg:border-t-0">
+                <div>
+                  <p className="text-sm text-muted-foreground">Asking price</p>
+                  <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
+                    {formatCurrency(activeListing.askingPrice)}
+                  </p>
+                  {activeListing.listedDate && (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Published {formatDate(activeListing.listedDate)}
                     </p>
                   )}
-                  {activeListing.parcel.utilities?.length ? (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {activeListing.parcel.utilities.map((utility) => (
-                        <Badge key={utility} variant="neutral">
-                          {utility}
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : null}
-                </section>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <AssuranceTierBadge tier={activeListing.diligence?.assuranceTier} />
+                </div>
+
+                <dl className="grid grid-cols-2 gap-3 rounded-xl border border-border bg-card p-4">
+                  <Fact label="Plot size" value={areaLabel(activeListing)} />
+                  <Fact
+                    label="Title"
+                    value={
+                      activeListing.parcel.titleType
+                        ? LAND_TITLE_TYPE_LABELS[activeListing.parcel.titleType]
+                        : undefined
+                    }
+                  />
+                </dl>
 
                 <Alert variant="success" icon={ShieldCheck} title="Protected sale process">
                   <p>
@@ -729,11 +794,52 @@ export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBro
                   </p>
                 </Alert>
 
-                {activeListing.listedDate && (
-                  <p className="text-xs text-muted-foreground">
-                    Published {formatDate(activeListing.listedDate)}
-                  </p>
+                {canOffer || needsSignIn ? (
+                  <div className="grid gap-3">
+                    <Button
+                      href={buyerRoute(`${ROUTES.BUYER_OFFERS}?property=${activeListing.id}`)}
+                      variant="primary"
+                      rounded="lg"
+                      size="lg"
+                      icon={<ShieldCheck className="h-4 w-4" />}
+                    >
+                      {canOffer ? 'Make an offer' : 'Sign in to offer'}
+                    </Button>
+                    <Button
+                      href={buyerRoute(`${ROUTES.BUYER_MESSAGES}?property=${activeListing.id}`)}
+                      variant="outline"
+                      rounded="lg"
+                      size="lg"
+                      icon={<MessageSquare className="h-4 w-4" />}
+                    >
+                      {canOffer ? 'Ask a question' : 'Sign in to ask'}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid gap-3">
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      Questions and offers on land come from a buyer account. Add one to this
+                      account to make an offer.
+                    </p>
+                    <Button
+                      variant="primary"
+                      rounded="lg"
+                      size="lg"
+                      icon={<ShieldCheck className="h-4 w-4" />}
+                      disabled={addRole.isPending}
+                      isLoading={addRole.isPending}
+                      onClick={() =>
+                        addRole.mutate({
+                          role: 'buyer',
+                          to: `${ROUTES.BUYER_LAND}?property=${activeListing.id}`,
+                        })
+                      }
+                    >
+                      Add a buyer account
+                    </Button>
+                  </div>
                 )}
+
                 <Link
                   href={LAND_BUYER_ROUTES.listing(activeListing.id, activeListing.title)}
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
@@ -741,49 +847,7 @@ export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBro
                   Full listing and price comparison
                   <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                 </Link>
-              </div>
-              {canOffer || needsSignIn ? (
-                <div className="grid grid-cols-2 gap-3 border-t border-border p-5">
-                  <Button
-                    href={buyerRoute(`${ROUTES.BUYER_MESSAGES}?property=${activeListing.id}`)}
-                    variant="outline"
-                    rounded="lg"
-                    icon={<MessageSquare className="h-4 w-4" />}
-                  >
-                    {canOffer ? 'Ask a question' : 'Sign in to ask'}
-                  </Button>
-                  <Button
-                    href={buyerRoute(`${ROUTES.BUYER_OFFERS}?property=${activeListing.id}`)}
-                    variant="primary"
-                    rounded="lg"
-                    icon={<ShieldCheck className="h-4 w-4" />}
-                  >
-                    {canOffer ? 'Make an offer' : 'Sign in to offer'}
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-3 border-t border-border p-5 sm:flex-row sm:items-center">
-                  <p className="flex-1 text-sm text-muted-foreground">
-                    Questions and offers on land come from a buyer account. Add one to this account
-                    to make an offer.
-                  </p>
-                  <Button
-                    variant="primary"
-                    rounded="lg"
-                    icon={<ShieldCheck className="h-4 w-4" />}
-                    disabled={addRole.isPending}
-                    isLoading={addRole.isPending}
-                    onClick={() =>
-                      addRole.mutate({
-                        role: 'buyer',
-                        to: `${ROUTES.BUYER_LAND}?property=${activeListing.id}`,
-                      })
-                    }
-                  >
-                    Add a buyer account
-                  </Button>
-                </div>
-              )}
+              </aside>
             </div>
           )}
         </DialogContent>
@@ -793,8 +857,10 @@ export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBro
 };
 
 const Fact = ({ label, value }: { label: string; value?: string }) => (
-  <div>
-    <p className="text-xs text-muted-foreground">{label}</p>
-    <p className="mt-0.5 font-medium text-foreground">{value || 'Not stated'}</p>
+  <div className="rounded-lg bg-card px-3 py-2.5 ring-1 ring-border/60">
+    <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
+    <dd className="mt-1 text-sm font-semibold text-foreground sm:text-base">
+      {value || 'Not stated'}
+    </dd>
   </div>
 );
