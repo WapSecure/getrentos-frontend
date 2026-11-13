@@ -1,12 +1,15 @@
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ArrowRight } from '@sureground/icons/native';
+import { moneyVariant, salePlanLabel } from '@sureground/shared';
 import {
   Badge,
   Button,
   Card,
   DetailSkeleton,
+  Divider,
   QueryState,
   Text,
   useTheme,
@@ -14,12 +17,18 @@ import {
 } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landBuyerExtrasApi, type Deal } from '@/lib/api/landBuyerExtras';
+import { purchaseWorkspaceApi } from '@/lib/api/purchaseWorkspace';
 import { BUYER_MILESTONE_STATUS } from '@/lib/api/landBuyer';
 import type { Milestone } from '@/lib/api/landSales';
 import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { AcquisitionStatusBadges } from '@/components/purchases/AcquisitionStatusBadges';
+
+// Shown when an older server sends no note of its own.
+const DEPOSIT_NOTE =
+  'This covers the deposit held under Payment Protection only. It does not show that the property is legally yours.';
 
 export default function LandRepresented() {
   const { kind, id } = useLocalSearchParams<{ kind: 'purchase' | 'transaction'; id: string }>();
@@ -42,6 +51,15 @@ export default function LandRepresented() {
     },
     enabled: !!id,
   });
+  // The sale's workspace names the property, its deposit and what happens next. Same key as the
+  // full purchase screen, so opening that afterwards is instant.
+  const workspace = useQuery({
+    queryKey: qk.purchaseWorkspace.detail('REPRESENTATIVE', id),
+    queryFn: () => purchaseWorkspaceApi.get('REPRESENTATIVE', id),
+    retry: false,
+    enabled: !!id && deal.kind === 'transaction',
+  });
+  const ws = workspace.data;
   const rule = useQuery({
     queryKey: [...qk.buyerLand.represented(deal.kind, id), 'co-approval'],
     queryFn: () => landBuyerExtrasApi.representedCoApproval(deal),
@@ -63,8 +81,8 @@ export default function LandRepresented() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <DetailScreenHeader
-        eyebrow="You represent the buyer"
-        title={detail.data?.title ?? 'Land deal'}
+        eyebrow={ws ? `${salePlanLabel(ws)} · You represent the buyer` : 'You represent the buyer'}
+        title={ws?.propertyTitle ?? detail.data?.title ?? 'Land deal'}
         subtitle={iApprove ? 'You give the second approval on each step' : 'You follow this deal'}
         onBack={() => goBack()}
       />
@@ -87,11 +105,55 @@ export default function LandRepresented() {
               onRefresh={() => {
                 detail.refetch();
                 rule.refetch();
+                if (deal.kind === 'transaction') workspace.refetch();
               }}
               tintColor={colors.mutedForeground}
             />
           }
         >
+          {ws ? (
+            <Card style={{ gap: spacing.md }}>
+              <AcquisitionStatusBadges statuses={ws.statuses} />
+              {ws.nextAction ? (
+                <Text
+                  variant="callout"
+                  color={ws.nextAction.waitingForYou ? 'foreground' : 'mutedForeground'}
+                >
+                  <Text variant="callout" color="mutedForeground">
+                    {ws.nextAction.waitingForYou ? 'Waiting for you: ' : 'Next: '}
+                  </Text>
+                  {ws.nextAction.label}
+                </Text>
+              ) : null}
+              <Divider />
+              <View style={{ gap: spacing.xs }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Text variant="bodyStrong" style={{ flex: 1 }}>
+                    Deposit
+                  </Text>
+                  <Badge
+                    label={ws.statuses.moneyStatus.label}
+                    tone={moneyVariant(ws.statuses.moneyStatus.code)}
+                  />
+                </View>
+                <Text variant="caption" color="mutedForeground">
+                  {ws.statuses.moneyStatus.note || DEPOSIT_NOTE}
+                </Text>
+              </View>
+              <Button
+                label="See the whole purchase"
+                variant="secondary"
+                size="sm"
+                iconRight={<ArrowRight size={16} color={colors.secondaryForeground} />}
+                onPress={() =>
+                  router.push(
+                    `/(app)/purchase-workspace/${encodeURIComponent(id)}?role=representative`
+                  )
+                }
+                style={{ alignSelf: 'flex-start' }}
+              />
+            </Card>
+          ) : null}
           {[...(detail.data?.milestones ?? [])]
             .sort((a, b) => a.sequence - b.sequence)
             .map((m) => {
