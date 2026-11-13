@@ -55,12 +55,14 @@ export const RenterRoommates = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.65, duration: 0.4 }}
-        className="bg-card rounded-xl border border-border overflow-hidden"
+        className="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
       >
-        <div className="p-4 border-b border-border">
+        <div className="border-b border-border px-5 py-4">
           <div className="flex flex-wrap justify-between items-center gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Roommates</h2>
+              <h2 className="text-base font-semibold tracking-[-0.015em] text-foreground">
+                Roommates
+              </h2>
               <p className="text-sm text-muted-foreground">Manage shared living arrangements</p>
             </div>
             <Button size="sm" className="gap-1" onClick={() => setShowInvite(!showInvite)}>

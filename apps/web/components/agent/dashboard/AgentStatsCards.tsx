@@ -1,5 +1,6 @@
 'use client';
 
+import { AlertTriangle, CheckCircle2, ClipboardList, Timer } from '@sureground/icons';
 import { SegmentedBar, StatGroup } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
@@ -25,18 +26,21 @@ export const AgentStatsCards = ({
       items={[
         {
           label: 'Assigned',
+          icon: ClipboardList,
           value: todaysTasks,
           subtitle: 'Not started, not yet due',
           href: ROUTES.AGENT_TASKS,
         },
         {
           label: 'In progress',
+          icon: Timer,
           value: inProgress,
           subtitle: 'Currently underway',
           href: ROUTES.AGENT_TASKS,
         },
         {
           label: 'Overdue',
+          icon: AlertTriangle,
           value: overdueTasks,
           subtitle: 'Needs attention',
           attention: overdueTasks > 0,
@@ -44,6 +48,7 @@ export const AgentStatsCards = ({
         },
         {
           label: 'Completed',
+          icon: CheckCircle2,
           value: completedThisWeek,
           subtitle: 'Last 7 days',
           href: ROUTES.AGENT_TASKS,

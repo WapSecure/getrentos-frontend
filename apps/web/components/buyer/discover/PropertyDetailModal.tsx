@@ -13,6 +13,7 @@ import {
   Handshake,
   MessageSquare,
   PlayCircle,
+  ImageOff,
 } from '@sureground/icons';
 import { Badge, Button, Dialog, DialogContent, DialogTitle, IconButton } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -52,7 +53,7 @@ export const PropertyDetailModal = ({
         showClose={false}
         className="flex flex-col overflow-hidden sm:max-w-lg"
       >
-        <div className="relative h-48 bg-muted shrink-0">
+        <div className="relative aspect-[16/9] max-h-64 w-full shrink-0 bg-muted">
           {listing.image ? (
             // eslint-disable-next-line @next/next/no-img-element -- signed, short-lived storage URL
             <img
@@ -61,8 +62,9 @@ export const PropertyDetailModal = ({
               className="absolute inset-0 h-full w-full object-cover"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-5xl">🏠</span>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-muted-foreground">
+              <ImageOff className="h-6 w-6" aria-hidden="true" />
+              <span className="text-xs">No photo yet</span>
             </div>
           )}
           <IconButton
@@ -84,18 +86,28 @@ export const PropertyDetailModal = ({
             onClick={onToggleSave}
             className="absolute top-3 right-14 bg-card/90 backdrop-blur-sm hover:bg-card"
           />
-          <div className="absolute bottom-3 left-4 bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-lg font-bold">
+          <div className="data-value absolute bottom-3 left-4 rounded-lg bg-primary px-3 py-1.5 text-lg font-semibold text-primary-foreground shadow-sm">
             {formatCurrency(listing.askingPrice)}
           </div>
         </div>
 
         <div className="p-4 space-y-4 overflow-y-auto flex-1 min-h-0">
           <div>
-            <DialogTitle className="text-lg font-semibold text-foreground">
+            <div className="mb-2 flex flex-wrap items-center gap-1.5">
+              <Badge variant={listing.acceptingOffers === false ? 'neutral' : 'primary'}>
+                {listing.acceptingOffers === false ? 'Under offer' : 'For sale'}
+              </Badge>
+              {listing.ownerVerified && (
+                <Badge variant="success" icon={<ShieldCheck className="h-3 w-3" />}>
+                  Verified owner
+                </Badge>
+              )}
+            </div>
+            <DialogTitle className="font-display text-2xl font-normal leading-tight tracking-[-0.01em] text-foreground">
               {listing.title}
             </DialogTitle>
             <p className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-              <MapPin className="w-3.5 h-3.5" />
+              <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               {[listing.address, listing.city, listing.state].filter(Boolean).join(', ')}
             </p>
             {listing.addressHidden && (
@@ -105,26 +117,30 @@ export const PropertyDetailModal = ({
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
-            {listing.bedrooms !== undefined && (
-              <span className="flex items-center gap-1.5">
-                <BedDouble className="w-4 h-4 text-muted-foreground" />
-                {listing.bedrooms} beds
-              </span>
-            )}
-            {listing.bathrooms !== undefined && (
-              <span className="flex items-center gap-1.5">
-                <Bath className="w-4 h-4 text-muted-foreground" />
-                {listing.bathrooms} baths
-              </span>
-            )}
-            {listing.propertySize !== undefined && (
-              <span className="flex items-center gap-1.5">
-                <Ruler className="w-4 h-4 text-muted-foreground" />
-                {listing.propertySize} sqm
-              </span>
-            )}
-          </div>
+          {(listing.bedrooms !== undefined ||
+            listing.bathrooms !== undefined ||
+            listing.propertySize !== undefined) && (
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-border px-3 py-2.5 text-sm text-foreground">
+              {listing.bedrooms !== undefined && (
+                <span className="flex items-center gap-1.5">
+                  <BedDouble className="h-4 w-4 text-primary" aria-hidden="true" />
+                  {listing.bedrooms} beds
+                </span>
+              )}
+              {listing.bathrooms !== undefined && (
+                <span className="flex items-center gap-1.5">
+                  <Bath className="h-4 w-4 text-primary" aria-hidden="true" />
+                  {listing.bathrooms} baths
+                </span>
+              )}
+              {listing.propertySize !== undefined && (
+                <span className="flex items-center gap-1.5">
+                  <Ruler className="h-4 w-4 text-primary" aria-hidden="true" />
+                  {listing.propertySize} sqm
+                </span>
+              )}
+            </div>
+          )}
 
           <p className="text-sm text-muted-foreground">{listing.description}</p>
 
@@ -175,8 +191,8 @@ export const PropertyDetailModal = ({
 
           <DiligenceChecklist listingId={listing.id} />
 
-          <div className="rounded-lg border border-border p-3 flex items-center justify-between">
-            <div>
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
+            <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Listed by</p>
               <p className="text-sm font-medium text-foreground">{listing.ownerName}</p>
             </div>

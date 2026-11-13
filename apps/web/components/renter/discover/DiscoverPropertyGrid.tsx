@@ -102,17 +102,14 @@ export const DiscoverPropertyGrid = ({
       <div
         role="status"
         aria-label="Loading properties"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
+        className="grid grid-cols-1 gap-x-6 gap-y-10 md:grid-cols-2"
       >
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="overflow-hidden rounded-xl border border-border bg-card">
-            <Skeleton className="h-48 w-full rounded-none" />
-            <div className="space-y-3 p-4">
-              <Skeleton className="h-4 w-2/3" />
-              <Skeleton className="h-3 w-1/2" />
-              <Skeleton className="h-3 w-3/5" />
-              <Skeleton className="h-8 w-full" />
-            </div>
+          <div key={index} className="space-y-3">
+            <Skeleton className="aspect-[4/3] w-full rounded-xl" />
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-3 w-1/2" />
+            <Skeleton className="h-10 w-full" />
           </div>
         ))}
       </div>
@@ -124,7 +121,7 @@ export const DiscoverPropertyGrid = ({
       <EmptyState
         icon={Home}
         title="No properties found"
-        description="Try adjusting your filters to find more properties"
+        description="Try widening your price range or location, or clear a filter."
       />
     );
   }

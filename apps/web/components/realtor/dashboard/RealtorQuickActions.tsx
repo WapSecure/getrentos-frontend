@@ -1,36 +1,34 @@
 'use client';
 
 import { Megaphone, CalendarClock, UserPlus, Users } from '@sureground/icons';
-import { Button, Card, CardHeader, CardTitle } from '@sureground/ui';
+import { QuickActionsCard } from '@/components/shared/dashboard/QuickActionsCard';
 import { ROUTES } from '@/lib/constants/auth';
 
 const actions = [
-  { label: 'Add listing', href: ROUTES.REALTOR_LISTINGS, icon: Megaphone },
-  { label: 'Schedule viewing', href: ROUTES.REALTOR_VIEWINGS, icon: CalendarClock },
-  { label: 'View leads', href: ROUTES.REALTOR_LEADS, icon: UserPlus },
-  { label: 'Add client', href: ROUTES.REALTOR_CLIENTS, icon: Users },
+  {
+    label: 'Add listing',
+    description: 'List a property for a client',
+    href: ROUTES.REALTOR_LISTINGS,
+    icon: Megaphone,
+  },
+  {
+    label: 'Schedule viewing',
+    description: 'Arrange a tour with a lead',
+    href: ROUTES.REALTOR_VIEWINGS,
+    icon: CalendarClock,
+  },
+  {
+    label: 'View leads',
+    description: 'Follow up on enquiries',
+    href: ROUTES.REALTOR_LEADS,
+    icon: UserPlus,
+  },
+  {
+    label: 'Add client',
+    description: 'Represent another owner or landlord',
+    href: ROUTES.REALTOR_CLIENTS,
+    icon: Users,
+  },
 ];
 
-export const RealtorQuickActions = () => {
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle>Quick actions</CardTitle>
-      </CardHeader>
-      <div className="grid grid-cols-2 gap-3 p-5 pt-0">
-        {actions.map((action) => (
-          <Button
-            key={action.label}
-            href={action.href}
-            variant="outline"
-            rounded="md"
-            className="flex-col h-auto py-4 gap-2"
-          >
-            <action.icon className="w-5 h-5 text-muted-foreground" />
-            <span className="text-xs font-medium text-center">{action.label}</span>
-          </Button>
-        ))}
-      </div>
-    </Card>
-  );
-};
+export const RealtorQuickActions = () => <QuickActionsCard actions={actions} />;

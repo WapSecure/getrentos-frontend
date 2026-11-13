@@ -1,7 +1,8 @@
 'use client';
 
 import { Plus } from '@sureground/icons';
-import { Button, PageHeader } from '@sureground/ui';
+import { Button } from '@sureground/ui';
+import { DashboardHeader } from '@/components/shared/dashboard/DashboardHeader';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface LandlordDashboardHeaderProps {
@@ -9,22 +10,14 @@ interface LandlordDashboardHeaderProps {
   firstName: string;
 }
 
-export const LandlordDashboardHeader = ({ greeting, firstName }: LandlordDashboardHeaderProps) => {
-  return (
-    <PageHeader
-      title={`${greeting}, ${firstName}`}
-      description="Track your portfolio, rent collection, and the work that needs your attention."
-      actions={
-        <Button
-          href={ROUTES.LANDLORD_PROPERTIES}
-          variant="primary"
-          size="lg"
-          className="shrink-0 gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add property
-        </Button>
-      }
-    />
-  );
-};
+export const LandlordDashboardHeader = ({ greeting, firstName }: LandlordDashboardHeaderProps) => (
+  <DashboardHeader
+    title={`${greeting}, ${firstName}`}
+    description="Track your portfolio, rent collection, and the work that needs your attention."
+    action={
+      <Button href={ROUTES.LANDLORD_PROPERTIES} variant="primary" size="lg" icon={<Plus />}>
+        Add property
+      </Button>
+    }
+  />
+);

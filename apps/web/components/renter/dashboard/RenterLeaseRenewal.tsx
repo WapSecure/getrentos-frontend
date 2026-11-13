@@ -45,19 +45,19 @@ export const RenterLeaseRenewal = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6, duration: 0.4 }}
-      className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm"
+      className="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
     >
-      <div className="flex items-start justify-between gap-4 border-b border-border/70 p-5">
+      <div className="flex items-start justify-between gap-4 border-b border-border p-5">
         <div>
-          <p className="mb-1 text-xs font-bold uppercase tracking-[0.14em] text-primary">
-            Your tenancy
-          </p>
-          <h2 className="text-lg font-semibold text-foreground">Lease renewal</h2>
+          <p className="mb-1 text-sm font-semibold text-primary">Your tenancy</p>
+          <h2 className="text-base font-semibold tracking-[-0.015em] text-foreground">
+            Lease renewal
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Plan your next lease term with clarity.
           </p>
         </div>
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
           <CalendarDays className="h-5 w-5" aria-hidden="true" />
         </div>
       </div>
@@ -74,7 +74,7 @@ export const RenterLeaseRenewal = () => {
             : `${Math.max(daysUntilEnd, 0)} days remain. Your property owner has not sent an offer yet.`}
         </Alert>
 
-        <div className="mb-5 rounded-xl border border-border/70 px-4">
+        <div className="mb-5 rounded-xl border border-border px-4">
           <DescriptionList
             layout="rows"
             items={[

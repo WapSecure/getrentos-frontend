@@ -1,5 +1,6 @@
 'use client';
 
+import { Banknote, Building2, Clock, DoorOpen, KeyRound, Wallet, Wrench } from '@sureground/icons';
 import { SegmentedBar, StatGroup } from '@sureground/ui';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 import { formatCurrency } from '@/lib/format';
@@ -38,6 +39,7 @@ export const LandlordStatsCards = ({
         items={[
           {
             label: 'Annual rent roll',
+            icon: Banknote,
             // Rent is contracted and paid yearly, so this is an annual figure, not monthly revenue.
             value: moneyVisible ? formatCurrency(annualRentRoll, { compact: true }) : HIDDEN,
             subtitle: 'Contracted across let units, per year',
@@ -45,6 +47,7 @@ export const LandlordStatsCards = ({
           },
           {
             label: 'Outstanding rent',
+            icon: Wallet,
             value: moneyVisible ? formatCurrency(outstandingAmount, { compact: true }) : HIDDEN,
             subtitle:
               outstandingPayments === 1
@@ -55,6 +58,7 @@ export const LandlordStatsCards = ({
           },
           {
             label: 'Active maintenance',
+            icon: Wrench,
             value: activeMaintenanceRequests,
             subtitle: activeMaintenanceRequests === 1 ? 'Open ticket' : 'Open tickets',
             attention: activeMaintenanceRequests > 0,
@@ -67,19 +71,22 @@ export const LandlordStatsCards = ({
         items={[
           {
             label: 'Properties',
+            icon: Building2,
             value: totalProperties,
             subtitle: `${totalUnits} ${totalUnits === 1 ? 'unit' : 'units'} in total`,
             href: ROUTES.LANDLORD_PROPERTIES,
           },
-          { label: 'Occupied', value: occupiedUnits, subtitle: 'Signed and let' },
+          { label: 'Occupied', icon: KeyRound, value: occupiedUnits, subtitle: 'Signed and let' },
           {
             label: 'Reserved',
+            icon: Clock,
             value: reservedUnits,
             // Off the market but not let (awaiting signature or first payment), so not counted as rented.
             subtitle: 'Awaiting signature or payment',
           },
           {
             label: 'Vacant',
+            icon: DoorOpen,
             value: vacantUnits,
             subtitle: 'Available now',
             href: ROUTES.LANDLORD_UNITS,
