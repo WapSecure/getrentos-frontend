@@ -274,6 +274,25 @@ export const humaniseCode = (code: string): string => {
   return words.charAt(0).toUpperCase() + words.slice(1);
 };
 
+export type SalePlan = 'LAND_RESALE' | 'BUILT_HOME';
+
+/** What kind of sale a transaction is, as the purchase workspace names it. */
+export const SALE_PLAN_LABEL: Record<SalePlan, string> = {
+  LAND_RESALE: 'Land sale',
+  BUILT_HOME: 'Built home',
+};
+
+/**
+ * The kind of sale from a workspace `plan`, or from a property type where a list only has that.
+ * No type at all means a land resale: the representative's deal list once held only those.
+ */
+export const salePlanLabel = (input: { plan?: string | null; propertyType?: string | null }) => {
+  if (input.plan) return SALE_PLAN_LABEL[input.plan as SalePlan] ?? humaniseCode(input.plan);
+  const plan: SalePlan =
+    !input.propertyType || input.propertyType === 'LAND' ? 'LAND_RESALE' : 'BUILT_HOME';
+  return SALE_PLAN_LABEL[plan];
+};
+
 /** The step, condition or legal step a document belongs to, by its label where the workspace has it. */
 export const documentLinkLabel = (
   document: Pick<WorkspaceDocument, 'linkedTo' | 'key'>,

@@ -18,6 +18,7 @@ import {
   releaseBlockedNote,
   landReleaseOutstanding,
   releaseDialogDescription,
+  salePlanLabel,
   releaseOutcome,
   releaseStageNote,
   stageVariant,
@@ -355,4 +356,13 @@ test('a land sale cannot be released until every required step and condition is 
     releaseBlockedNote({ plan: 'BUILT_HOME', milestones: [], conditions: [] }),
     RELEASE_BLOCKED_NOTE
   );
+});
+
+test('salePlanLabel names a land sale the same in the list and the detail', () => {
+  assert.equal(salePlanLabel({ plan: 'LAND_RESALE' }), 'Land sale');
+  assert.equal(salePlanLabel({ plan: 'BUILT_HOME' }), 'Built home');
+  assert.equal(salePlanLabel({ propertyType: 'LAND' }), 'Land sale');
+  assert.equal(salePlanLabel({ propertyType: 'APARTMENT' }), 'Built home');
+  assert.equal(salePlanLabel({}), 'Land sale');
+  assert.equal(salePlanLabel({ plan: 'NEW_KIND' }), 'New kind');
 });

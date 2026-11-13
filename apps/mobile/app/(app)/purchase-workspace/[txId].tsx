@@ -36,6 +36,7 @@ import {
   nextActionTarget,
   releaseDialogDescription,
   releaseOutcome,
+  salePlanLabel,
   workspaceProgress,
   type WorkspaceSection,
 } from '@sureground/shared';
@@ -61,11 +62,6 @@ import { TitlePerfection } from '@/components/land/TitlePerfection';
 import { AcquisitionStatusBadges } from '@/components/purchases/AcquisitionStatusBadges';
 import { DepositPaySheet } from '@/components/purchases/DepositPaySheet';
 import { StepProgress } from '@/components/purchases/StepProgress';
-
-const PLAN_LABEL: Record<TransactionWorkspace['plan'], string> = {
-  BUILT_HOME: 'Built home',
-  LAND_RESALE: 'Land sale',
-};
 
 const PROFESSIONAL_LABEL: Record<WorkspaceProfessional['role'], string> = {
   SURVEYOR: 'Surveyor',
@@ -259,7 +255,7 @@ export default function PurchaseWorkspace() {
       <DetailScreenHeader
         eyebrow={
           data
-            ? `${PLAN_LABEL[data.plan] ?? humaniseCode(data.plan)}${isRepresentative ? ' · You represent the buyer' : ''}`
+            ? `${salePlanLabel(data)}${isRepresentative ? ' · You represent the buyer' : ''}`
             : 'Purchase'
         }
         title={data?.propertyTitle ?? 'Purchase'}
