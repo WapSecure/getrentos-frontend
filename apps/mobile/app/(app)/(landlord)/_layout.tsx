@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Building2, Home, MessageCircle, User, Users } from '@sureground/icons/native';
 import { useTheme } from '@sureground/ui-native';
+import { tabIcon } from '@/components/navigation/TabIcon';
 import { premiumTabBarOptions } from '@/lib/navigationStyles';
 
 export default function LandlordTabsLayout() {
@@ -14,35 +15,35 @@ export default function LandlordTabsLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+          tabBarIcon: tabIcon(Home),
         }}
       />
       <Tabs.Screen
         name="properties"
         options={{
           title: 'Properties',
-          tabBarIcon: ({ color, size }) => <Building2 color={color} size={size} />,
+          tabBarIcon: tabIcon(Building2),
         }}
       />
       <Tabs.Screen
         name="tenants"
         options={{
           title: 'Tenants',
-          tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
+          tabBarIcon: tabIcon(Users),
         }}
       />
       <Tabs.Screen
         name="messages"
         options={{
           title: 'Messages',
-          tabBarIcon: ({ color, size }) => <MessageCircle color={color} size={size} />,
+          tabBarIcon: tabIcon(MessageCircle),
         }}
       />
       <Tabs.Screen
         name="account"
         options={{
           title: 'Account',
-          tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
+          tabBarIcon: tabIcon(User),
         }}
       />
     </Tabs>

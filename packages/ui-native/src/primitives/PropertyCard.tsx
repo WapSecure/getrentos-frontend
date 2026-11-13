@@ -11,7 +11,7 @@ import {
   Columns3,
   Clock,
 } from '@sureground/icons/native';
-import { useTheme } from '../theme';
+import { useTheme, withAlpha } from '../theme';
 import { Text } from './Text';
 import { Price } from './Price';
 import { ListingPlaceholder } from './ListingPlaceholder';
@@ -320,7 +320,7 @@ function PropertyCardBase({
             gap: 7,
             borderTopWidth: StyleSheet.hairlineWidth,
             borderTopColor: colors.border,
-            backgroundColor: compared ? colors.accent : colors.card,
+            backgroundColor: compared ? withAlpha(colors.primary, 0.1) : colors.card,
             opacity: compareDisabled ? 0.45 : pressed ? 0.75 : 1,
           })}
         >

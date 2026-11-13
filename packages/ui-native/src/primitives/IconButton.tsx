@@ -1,5 +1,5 @@
 import { ActivityIndicator, View, type StyleProp, type ViewStyle } from 'react-native';
-import { useTheme } from '../theme';
+import { useTheme, withAlpha } from '../theme';
 import { PressableScale, type PressableScaleProps } from './PressableScale';
 import { Text } from './Text';
 
@@ -26,7 +26,7 @@ export function IconButton({
   ...rest
 }: IconButtonProps) {
   const ghost = variant === 'ghost';
-  const { colors, radius } = useTheme();
+  const { colors, radius, scheme } = useTheme();
   const spokenLabel = badge > 0 ? `${accessibilityLabel}, ${badge} unread` : accessibilityLabel;
 
   return (
@@ -49,7 +49,11 @@ export function IconButton({
           borderRadius: radius.full,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: selected ? colors.accent : ghost ? 'transparent' : colors.card,
+          backgroundColor: selected
+            ? withAlpha(colors.primary, scheme === 'dark' ? 0.2 : 0.1)
+            : ghost
+              ? 'transparent'
+              : colors.card,
           borderWidth: ghost && !selected ? 0 : 1,
           borderColor: selected ? colors.primary : colors.border,
           opacity: disabled ? 0.45 : 1,
@@ -72,7 +76,8 @@ export function IconButton({
             paddingHorizontal: 4,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: colors.destructive,
+            // Unread is a brand moment, not an error: the count sits on Sureground blue.
+            backgroundColor: colors.primary,
             borderWidth: 2,
             borderColor: colors.background,
           }}
@@ -81,7 +86,7 @@ export function IconButton({
             variant="caption"
             maxFontSizeMultiplier={1.4}
             style={{
-              color: colors.destructiveForeground,
+              color: colors.primaryForeground,
               fontSize: 12,
               lineHeight: 12,
               fontWeight: '800',

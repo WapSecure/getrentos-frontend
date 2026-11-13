@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, Megaphone, Users2, User } from '@sureground/icons/native';
 import { useTheme } from '@sureground/ui-native';
+import { tabIcon } from '@/components/navigation/TabIcon';
 import { premiumTabBarOptions } from '@/lib/navigationStyles';
 
 export default function ResidentTabsLayout() {
@@ -14,28 +15,28 @@ export default function ResidentTabsLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+          tabBarIcon: tabIcon(Home),
         }}
       />
       <Tabs.Screen
         name="announcements"
         options={{
           title: 'Announcements',
-          tabBarIcon: ({ color, size }) => <Megaphone color={color} size={size} />,
+          tabBarIcon: tabIcon(Megaphone),
         }}
       />
       <Tabs.Screen
         name="community"
         options={{
           title: 'Community',
-          tabBarIcon: ({ color, size }) => <Users2 color={color} size={size} />,
+          tabBarIcon: tabIcon(Users2),
         }}
       />
       <Tabs.Screen
         name="account"
         options={{
           title: 'Account',
-          tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
+          tabBarIcon: tabIcon(User),
         }}
       />
     </Tabs>

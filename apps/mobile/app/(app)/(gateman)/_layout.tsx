@@ -4,6 +4,7 @@ import { Car, KeyRound, Menu, Package, UserCheck } from '@sureground/icons/nativ
 import { useTheme } from '@sureground/ui-native';
 import { GateQueueSync } from '@/components/gateman/GateQueueSync';
 import { GatemanPostProvider } from '@/lib/gateman/GatemanPostProvider';
+import { tabIcon } from '@/components/navigation/TabIcon';
 import { premiumTabBarOptions } from '@/lib/navigationStyles';
 
 // Tab files that share a name with a top-level screen take a `gate-` prefix: a group screen also answers on its bare path, and Expo Router's typed-route union hides the clash from tsc until a deep link mis-resolves at runtime.
@@ -21,7 +22,7 @@ export default function GatemanTabsLayout() {
           name="index"
           options={{
             title: 'Check-In',
-            tabBarIcon: ({ color, size }) => <KeyRound color={color} size={size} />,
+            tabBarIcon: tabIcon(KeyRound),
           }}
         />
         {/* Read-only: nothing on it opens the barrier. */}
@@ -29,21 +30,21 @@ export default function GatemanTabsLayout() {
           name="gate-expected"
           options={{
             title: 'Expected',
-            tabBarIcon: ({ color, size }) => <UserCheck color={color} size={size} />,
+            tabBarIcon: tabIcon(UserCheck),
           }}
         />
         <Tabs.Screen
           name="vehicles"
           options={{
             title: 'Vehicles',
-            tabBarIcon: ({ color, size }) => <Car color={color} size={size} />,
+            tabBarIcon: tabIcon(Car),
           }}
         />
         <Tabs.Screen
           name="gate-deliveries"
           options={{
             title: 'Deliveries',
-            tabBarIcon: ({ color, size }) => <Package color={color} size={size} />,
+            tabBarIcon: tabIcon(Package),
           }}
         />
         <Tabs.Screen
@@ -62,7 +63,7 @@ export default function GatemanTabsLayout() {
           name="account"
           options={{
             title: 'More',
-            tabBarIcon: ({ color, size }) => <Menu color={color} size={size} />,
+            tabBarIcon: tabIcon(Menu),
           }}
         />
       </Tabs>

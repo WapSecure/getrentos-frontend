@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, Search, FileText, MessageCircle, User } from '@sureground/icons/native';
 import { useTheme } from '@sureground/ui-native';
+import { tabIcon } from '@/components/navigation/TabIcon';
 import { premiumTabBarOptions } from '@/lib/navigationStyles';
 
 export default function RenterTabsLayout() {
@@ -14,35 +15,35 @@ export default function RenterTabsLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+          tabBarIcon: tabIcon(Home),
         }}
       />
       <Tabs.Screen
         name="discover"
         options={{
           title: 'Discover',
-          tabBarIcon: ({ color, size }) => <Search color={color} size={size} />,
+          tabBarIcon: tabIcon(Search),
         }}
       />
       <Tabs.Screen
         name="applications"
         options={{
           title: 'Applications',
-          tabBarIcon: ({ color, size }) => <FileText color={color} size={size} />,
+          tabBarIcon: tabIcon(FileText),
         }}
       />
       <Tabs.Screen
         name="messages"
         options={{
           title: 'Messages',
-          tabBarIcon: ({ color, size }) => <MessageCircle color={color} size={size} />,
+          tabBarIcon: tabIcon(MessageCircle),
         }}
       />
       <Tabs.Screen
         name="account"
         options={{
           title: 'Account',
-          tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
+          tabBarIcon: tabIcon(User),
         }}
       />
     </Tabs>

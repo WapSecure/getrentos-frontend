@@ -1,5 +1,5 @@
 import { Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
-import { Badge, Text, useTheme } from '@sureground/ui-native';
+import { Text, useTheme, withAlpha } from '@sureground/ui-native';
 
 type DashboardHeaderProps = {
   eyebrow: string;
@@ -47,7 +47,7 @@ export function DashboardHeader({
           style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.sm }}
         >
           <Text variant="title">{title}</Text>
-          {roleBadge ? <Badge label={roleBadge} tone="info" /> : null}
+          {roleBadge ? <RoleChip label={roleBadge} /> : null}
         </View>
         {subtitle ? (
           <Text variant="callout" color="mutedForeground">
@@ -56,6 +56,31 @@ export function DashboardHeader({
         ) : null}
       </TitleBlock>
       {accessory}
+    </View>
+  );
+}
+
+/** The workspace's role initials ("LL", "RT") as a small Sureground blue chip beside the name. */
+function RoleChip({ label }: { label: string }) {
+  const { colors, radius, scheme } = useTheme();
+  return (
+    <View
+      style={{
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: radius.full,
+        borderWidth: 1,
+        borderColor: withAlpha(colors.primary, 0.32),
+        backgroundColor: withAlpha(colors.primary, scheme === 'dark' ? 0.2 : 0.1),
+      }}
+    >
+      <Text
+        variant="caption"
+        maxFontSizeMultiplier={1.4}
+        style={{ color: colors.primary, fontWeight: '800', letterSpacing: 0.8 }}
+      >
+        {label}
+      </Text>
     </View>
   );
 }

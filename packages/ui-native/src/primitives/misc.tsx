@@ -20,7 +20,7 @@ export function Badge({ label, tone = 'neutral' }: { label: string; tone?: Badge
   if (!label) return null;
   const map: Record<BadgeTone, { bg: string; fg: string }> = {
     neutral: { bg: colors.secondary, fg: colors.secondaryForeground },
-    info: { bg: colors.infoSubtle, fg: colors.accentForeground },
+    info: { bg: colors.infoSubtle, fg: colors.primary },
     success: { bg: colors.successSubtle, fg: colors.success },
     warning: { bg: colors.warningSubtle, fg: colors.warning },
     danger: { bg: colors.destructiveSubtle, fg: colors.destructive },
