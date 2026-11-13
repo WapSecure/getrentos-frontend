@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -134,7 +135,7 @@ export default function RealtorClientDetail() {
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                           <MapPin size={12} color={colors.mutedForeground} />
                           <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                            {[p.city, p.state].filter(Boolean).join(', ')}
+                            {formatLocation(p.city, p.state)}
                           </Text>
                         </View>
                       </View>

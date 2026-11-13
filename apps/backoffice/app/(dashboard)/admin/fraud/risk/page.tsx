@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Activity } from '@sureground/icons';
+import { Activity, ShieldAlert } from '@sureground/icons';
 import {
   Alert,
   Badge,
@@ -13,6 +13,7 @@ import {
   PageErrorState,
   PageHeader,
   Pagination,
+  Skeleton,
   Tabs,
   TabsList,
   TabsTrigger,
@@ -23,6 +24,7 @@ import { adminKeys } from '@/lib/queryKeys';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { adminRiskService, type RiskDecision, type RiskEvent } from '@/services/adminRiskService';
 import { useAdminUser } from '../../layout';
+import { IconTile } from '@/components/admin/ops/OpsParts';
 
 const PAGE_SIZE = 20;
 
@@ -132,14 +134,30 @@ const lagos = (iso: string) =>
   });
 
 const DecisionRow = ({ decision, canAct }: { decision: RiskDecision; canAct: boolean }) => (
-  <Card className="space-y-2 p-5">
+  <Card
+    className={`space-y-3 p-5 ${decision.review?.status === 'OPEN' ? 'border-destructive/30' : ''}`}
+  >
     <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0">
-        <h3 className="font-semibold text-foreground">{decision.user.name}</h3>
-        <p className="text-sm text-muted-foreground">
-          {EVENT[decision.event] ?? decision.event}
-          {decision.deviceLabel && <> · {decision.deviceLabel}</>} · {lagos(decision.createdAt)}
-        </p>
+      <div className="flex min-w-0 items-start gap-3">
+        <IconTile
+          size="sm"
+          tone={
+            decision.review?.status === 'OPEN'
+              ? 'danger'
+              : decision.outcome === 'ALLOW'
+                ? 'neutral'
+                : 'warning'
+          }
+        >
+          <ShieldAlert />
+        </IconTile>
+        <div className="min-w-0">
+          <h3 className="font-semibold text-foreground">{decision.user.name}</h3>
+          <p className="text-sm text-muted-foreground">
+            {EVENT[decision.event] ?? decision.event}
+            {decision.deviceLabel && <> · {decision.deviceLabel}</>} · {lagos(decision.createdAt)}
+          </p>
+        </div>
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
         <Badge variant={decision.outcome === 'ALLOW' ? 'neutral' : 'warning'}>
@@ -147,14 +165,14 @@ const DecisionRow = ({ decision, canAct }: { decision: RiskDecision; canAct: boo
         </Badge>
         {!decision.enforced && <Badge variant="neutral">Shadow: not acted on</Badge>}
         {decision.review && (
-          <Badge variant={decision.review.status === 'OPEN' ? 'danger' : 'neutral'}>
+          <Badge variant={decision.review.status === 'OPEN' ? 'danger' : 'neutral'} dot>
             {REVIEW[decision.review.status]}
           </Badge>
         )}
       </div>
     </div>
     {decision.signals.length > 0 ? (
-      <ul className="space-y-1 text-sm text-foreground">
+      <ul className="space-y-1 rounded-lg bg-secondary/40 px-3 py-2.5 text-sm text-foreground">
         {decision.signals.map((signal) => (
           <li key={signal.rule}>
             <span className="font-medium">{RULE[signal.rule] ?? signal.rule}:</span> {signal.reason}
@@ -199,13 +217,31 @@ export default function RiskDecisionsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Risk"
+        breadcrumbs={[
+          { label: 'Fraud and risk review', href: '/admin/fraud' },
+          { label: 'Risk decisions' },
+        ]}
         title="Risk decisions"
         description="What the risk rules flagged and why. Payout rules run in shadow mode: they are recorded here and never hold money until their thresholds are approved."
       />
 
       <Card className="p-5">
-        <h2 className="font-semibold text-foreground">Last {summary.data?.days ?? 30} days</h2>
-        {summary.isError ? (
+        <div className="flex items-center gap-3">
+          <IconTile size="sm">
+            <Activity />
+          </IconTile>
+          <h2 className="font-semibold tracking-[-0.01em] text-foreground">
+            Last {summary.data?.days ?? 30} days
+          </h2>
+        </div>
+        {summary.isLoading ? (
+          <div className="mt-3 space-y-2.5" role="status" aria-label="Loading the rule summary">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+        ) : summary.isError ? (
           <p className="mt-2 text-sm text-muted-foreground">This summary could not load.</p>
         ) : summary.data && summary.data.rules.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">No rule has fired.</p>
@@ -225,7 +261,9 @@ export default function RiskDecisionsPage() {
                 </span>
                 <span className="flex items-center gap-2">
                   {!rule.enforced && <Badge variant="neutral">Shadow</Badge>}
-                  <span className="font-medium tabular-nums text-foreground">{rule.count}</span>
+                  <span className="min-w-8 text-right font-semibold tabular-nums text-primary">
+                    {rule.count}
+                  </span>
                 </span>
               </li>
             ))}

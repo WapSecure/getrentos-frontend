@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -87,7 +88,7 @@ export const LayoutDetailView = ({ layoutId }: { layoutId: string }) => {
         </h1>
         <p className="mt-2 flex items-center gap-1.5 text-muted-foreground">
           <MapPin className="h-4 w-4" aria-hidden />
-          {layout.city}, {layout.state} · on {layout.propertyTitle}
+          {formatLocation(layout.city, layout.state)} · on {layout.propertyTitle}
         </p>
         {layout.description && (
           <p className="mt-4 max-w-3xl whitespace-pre-line text-muted-foreground">

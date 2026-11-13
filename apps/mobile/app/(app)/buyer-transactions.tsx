@@ -28,6 +28,7 @@ import {
   type BuyerEscrowStatus,
   type BuyerTransaction,
 } from '@/lib/api/buyerTransactions';
+import { releaseOutcome } from '@sureground/shared';
 import { formatDate } from '@/lib/format';
 import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -39,13 +40,14 @@ const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] =
   {
     key: 'deposit_pending',
     label: 'Deposit',
-    description: 'Pay your deposit to Sureground, which holds it safely until you confirm receipt.',
+    description:
+      'Pay your deposit to Sureground, which holds it until the handover is done and you confirm.',
   },
   {
     key: 'funds_held',
     label: 'Funds held',
     description:
-      'Your payment is held safely by Sureground. Once you have received the property and its documents, confirm receipt to release the funds to the seller.',
+      'Your payment is held by Sureground. Once the seller has handed over and you have the property and its documents, confirm receipt to release the funds.',
   },
   {
     key: 'released',
@@ -104,14 +106,8 @@ export default function BuyerTransactions() {
     mutationFn: (id: string) => buyerTransactionsApi.release(id),
     onSuccess: (tx) => {
       invalidate();
-      // Under two-person approval the buyer's approval is recorded but nothing moves until the representative approves.
-      toast.show(
-        tx.release?.state === 'WAITING_FOR_CO_APPROVAL'
-          ? (tx.release.message ??
-              'Your approval is recorded. The deposit is released once your representative approves too.')
-          : 'Deposit released to the seller.',
-        'success'
-      );
+      // Under two-person approval this only records the buyer's approval; they release again once both are in.
+      toast.show(releaseOutcome(tx.release).message, 'success');
     },
     onError: fail('Could not release these funds.'),
   });

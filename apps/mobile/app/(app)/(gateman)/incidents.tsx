@@ -63,6 +63,9 @@ const PRIORITY_TONE: Record<IncidentPriority, BadgeTone> = {
   critical: 'danger',
 };
 
+/** How long the guard holds the panic button before it fires. */
+const PANIC_HOLD_MS = 1000;
+
 export default function GatemanIncidents() {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();
@@ -73,6 +76,7 @@ export default function GatemanIncidents() {
   const [description, setDescription] = useState('');
   const [photo, setPhoto] = useState<PickedFile | null>(null);
   const [panicSent, setPanicSent] = useState(false);
+  const [panicHolding, setPanicHolding] = useState(false);
 
   const { estate, isLoading: isPostLoading } = useGatemanPost();
 
@@ -159,15 +163,27 @@ export default function GatemanIncidents() {
         subtitle={`${estate.name} · Report, escalate and track safety events`}
       />
 
+      {/* Fires only after a one-second press and hold, so a stray tap never sends a critical alert. */}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Panic alert"
+        accessibilityHint="Press and hold for one second to notify the estate manager"
         accessibilityState={{ disabled: panic.isPending, busy: panic.isPending }}
+        accessibilityActions={[{ name: 'longpress', label: 'Send panic alert' }]}
+        onAccessibilityAction={(e) => {
+          if (e.nativeEvent.actionName === 'longpress' && !panic.isPending) panic.mutate();
+        }}
         disabled={panic.isPending}
-        onPress={() => panic.mutate()}
+        delayLongPress={PANIC_HOLD_MS}
+        onPressIn={() => setPanicHolding(true)}
+        onPressOut={() => setPanicHolding(false)}
+        onLongPress={() => {
+          setPanicHolding(false);
+          panic.mutate();
+        }}
         style={{
           borderRadius: 20,
-          backgroundColor: colors.destructive,
+          backgroundColor: panicHolding ? colors.destructive + 'D9' : colors.destructive,
           paddingVertical: spacing['2xl'],
           alignItems: 'center',
           gap: spacing.xs,
@@ -183,7 +199,9 @@ export default function GatemanIncidents() {
           style={{ color: colors.destructiveForeground, opacity: 0.85 }}
           center
         >
-          Tap to immediately notify the estate manager
+          {panicHolding
+            ? 'Keep holding…'
+            : 'Press and hold for 1 second to notify the estate manager'}
         </Text>
       </Pressable>
 

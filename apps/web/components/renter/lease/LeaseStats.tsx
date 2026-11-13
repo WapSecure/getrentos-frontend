@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Home, Calendar, FileText } from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
-import { leaseRentLabel } from '@/lib/leaseTerm';
+import { countRentCharges, leaseRentLabel } from '@/lib/leaseTerm';
 import type { Lease } from '@/services/renterService';
 
 interface LeaseStatsProps {
@@ -41,7 +41,12 @@ export const LeaseStats = ({ lease }: LeaseStatsProps) => {
     },
     {
       icon: NairaSign,
-      label: leaseRentLabel(lease.rentPeriod, lease.startDate, lease.endDate),
+      label: leaseRentLabel(
+        lease.rentPeriod,
+        lease.startDate,
+        lease.endDate,
+        countRentCharges(lease.rentAmount, lease.paymentHistory ?? [])
+      ),
       value: formatCurrency(lease.rentAmount),
     },
     {

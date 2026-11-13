@@ -84,6 +84,60 @@ export interface AdminDevelopment {
   updatedAt: string;
 }
 
+export interface UnansweredDevelopmentQuestion {
+  id: string;
+  unitTypeName?: string;
+  excerpt: string;
+  askedAt: string;
+  ageDays: number;
+  reminderCount: number;
+  lastRemindedAt?: string;
+}
+
+export interface UnansweredDevelopmentGroup {
+  developmentId: string;
+  name: string;
+  city: string;
+  state: string;
+  status: AdminDevelopmentStatus;
+  firm: { organizationId: string; name: string };
+  waiting: number;
+  oldestAskedAt: string;
+  lastRemindedAt?: string;
+  questions: UnansweredDevelopmentQuestion[];
+}
+
+export interface UnansweredDevelopmentQuestions {
+  total: number;
+  shown: number;
+  developments: UnansweredDevelopmentGroup[];
+}
+
+export interface DevelopmentReminderResult {
+  developmentId: string;
+  questions: number;
+  recipients: number;
+  remindedAt: string;
+}
+
+/** Buyers' questions to developers that have waited more than three days. The buyer is never contacted. */
+export const adminDevelopmentQuestionsService = {
+  unanswered(): Promise<ApiResponse<UnansweredDevelopmentQuestions>> {
+    return safeCall(() =>
+      authFetch<UnansweredDevelopmentQuestions>('/admin/development-enquiries/unanswered')
+    );
+  },
+  /** Reminds the firm's editing seats now; audit-logged. */
+  remind(developmentId: string): Promise<ApiResponse<DevelopmentReminderResult>> {
+    return safeCall(() =>
+      authFetch<DevelopmentReminderResult>(
+        `/admin/development-enquiries/developments/${encodeURIComponent(developmentId)}/remind`,
+        { method: 'POST' }
+      )
+    );
+  },
+};
+
 const at = (id: string, rest = '') => `/admin/developments/${encodeURIComponent(id)}${rest}`;
 
 export const adminDevelopmentsService = {

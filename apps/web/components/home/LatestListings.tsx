@@ -19,7 +19,7 @@ const Row = ({
 }: (typeof ROWS)[number] & { items: PublicListingCard[] }) => (
   <div className="border-t border-border pt-8">
     <div className="mb-8 flex flex-wrap items-baseline justify-between gap-4">
-      <h3 className="label-caps">{title}</h3>
+      <h3 className="label-caps text-primary">{title}</h3>
       <ArrowLink href={href}>{cta}</ArrowLink>
     </div>
     <div className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">

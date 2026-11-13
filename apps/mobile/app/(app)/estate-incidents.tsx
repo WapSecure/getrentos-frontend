@@ -56,6 +56,20 @@ export default function EstateIncidents() {
     [query.data]
   );
 
+  const start = useMutation({
+    mutationFn: (item: Incident) => estateManagerApi.startIncident(estateId, item.id),
+    onSuccess: () => {
+      void haptics.success();
+      qc.invalidateQueries({ queryKey: qk.estateManager.incidents(estateId) });
+      qc.invalidateQueries({ queryKey: qk.estateManager.reportDigest(estateId) });
+      toast.show('Incident marked in progress.', 'success');
+    },
+    onError: (e) => {
+      qc.invalidateQueries({ queryKey: qk.estateManager.incidents(estateId) });
+      toast.show(errorMessage(e, 'Could not start this incident.'), 'error');
+    },
+  });
+
   const close = useMutation({
     mutationFn: (v: { item: Incident; how: 'resolve' | 'dismiss'; notes: string }) =>
       estateManagerApi.closeIncident(estateId, v.item.id, v.how, v.notes || undefined),
@@ -114,21 +128,37 @@ export default function EstateIncidents() {
                 label: `${categoryLabel(i.priority)} priority`,
                 tone: INCIDENT_PRIORITY_TONE[i.priority] ?? 'neutral',
               },
-              ...(isOpenItem(i.status)
+              ...(i.status === 'open'
                 ? []
                 : [
                     {
                       label: categoryLabel(i.status),
-                      tone: i.status === 'resolved' ? ('success' as const) : ('neutral' as const),
+                      tone:
+                        i.status === 'in_progress'
+                          ? ('info' as const)
+                          : i.status === 'resolved'
+                            ? ('success' as const)
+                            : ('neutral' as const),
                     },
                   ]),
             ]}
             actions={
               isOpenItem(i.status) ? (
                 <>
+                  {i.status === 'open' ? (
+                    <Button
+                      label="Start"
+                      accessibilityLabel="Mark this incident in progress"
+                      size="sm"
+                      style={{ flex: 1 }}
+                      loading={start.isPending && start.variables?.id === i.id}
+                      onPress={() => start.mutate(i)}
+                    />
+                  ) : null}
                   <Button
                     label="Resolve"
                     size="sm"
+                    variant={i.status === 'open' ? 'secondary' : 'primary'}
                     style={{ flex: 1 }}
                     onPress={() => setClosing({ item: i, how: 'resolve' })}
                   />

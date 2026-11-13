@@ -19,8 +19,9 @@ import { estateKeys } from '@/lib/queryKeys';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { LogDeliveryModal } from '@/components/estate/deliveries/LogDeliveryModal';
 import { DeliveryLogRow } from '@/components/estate/deliveries/DeliveryLogRow';
+import { CollectDeliveryDialog } from '@/components/estate/deliveries/CollectDeliveryDialog';
 import { ManageGatesModal } from '@/components/estate/gates/ManageGatesModal';
-import type { DeliveryLogStatus } from '@/types/estate';
+import type { DeliveryLog, DeliveryLogStatus } from '@/types/estate';
 
 const statusFilters: { value: DeliveryLogStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -105,9 +106,16 @@ export default function EstateDeliveriesPage() {
     },
   });
 
+  const [collectTarget, setCollectTarget] = useState<DeliveryLog | null>(null);
+
   const markCollected = useMutation({
-    mutationFn: (logId: string) => unwrap(estateService.markDeliveryCollected(estate!.id, logId)),
-    onSuccess: () => invalidateLogs(),
+    meta: { showGlobalError: true },
+    mutationFn: ({ logId, collectedBy }: { logId: string; collectedBy?: string }) =>
+      unwrap(estateService.markDeliveryCollected(estate!.id, logId, collectedBy)),
+    onSuccess: () => {
+      invalidateLogs();
+      setCollectTarget(null);
+    },
   });
 
   if (isEstateLoading) {
@@ -188,7 +196,7 @@ export default function EstateDeliveriesPage() {
             <DeliveryLogRow
               key={log.id}
               log={log}
-              onMarkCollected={() => markCollected.mutate(log.id)}
+              onMarkCollected={() => setCollectTarget(log)}
               isMarkingCollected={markCollected.isPending}
             />
           ))}
@@ -224,6 +232,15 @@ export default function EstateDeliveriesPage() {
         isOpen={isGatesModalOpen}
         estateId={estate.id}
         onClose={() => setIsGatesModalOpen(false)}
+      />
+
+      <CollectDeliveryDialog
+        log={collectTarget}
+        onClose={() => setCollectTarget(null)}
+        onConfirm={(collectedBy) =>
+          collectTarget && markCollected.mutate({ logId: collectTarget.id, collectedBy })
+        }
+        isSubmitting={markCollected.isPending}
       />
     </>
   );

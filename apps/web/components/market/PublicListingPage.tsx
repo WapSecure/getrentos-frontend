@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { Badge } from '@sureground/ui/Badge';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
@@ -42,7 +43,7 @@ const MARKET_NOUN: Record<PublicDetailMarket, string> = {
 
 const PROTECTION_LINE: Record<PublicDetailMarket, string> = {
   rent: 'Pay through Sureground: we hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
-  sale: 'Pay through Sureground: we hold your deposit and only release it to the seller once you confirm receipt.',
+  sale: 'Pay through Sureground: we hold your deposit until the seller hands over the keys and you confirm.',
   land: 'Pay through Sureground: we hold your money and only release it to the seller once the conveyance steps are confirmed.',
 };
 
@@ -55,13 +56,13 @@ export async function publicListingMetadata(
   const path = publicListingPath(listing);
   const description =
     listing.description?.slice(0, 160) ||
-    `${listing.title} in ${listing.location}: verified listing on Sureground with payment protection.`;
+    `${listing.title} in ${formatLocation(listing.location)}: verified listing on Sureground with payment protection.`;
   return {
-    title: `${listing.title}: ${listing.location}`,
+    title: `${listing.title}: ${formatLocation(listing.location)}`,
     description,
     alternates: { canonical: path },
     openGraph: {
-      title: `${listing.title}: ${listing.location}`,
+      title: `${listing.title}: ${formatLocation(listing.location)}`,
       description,
       url: `${SITE_URL}${path}`,
       type: 'website',
@@ -126,9 +127,7 @@ export async function PublicListingPage({
               </div>
               <p className="flex items-start gap-1.5 text-muted-foreground">
                 <MapPin className="mt-1 h-4 w-4 shrink-0" />
-                <span>
-                  {listing.address ? `${listing.address}, ${listing.location}` : listing.location}
-                </span>
+                <span>{formatLocation(listing.address, listing.location)}</span>
               </p>
               {(listing.bedrooms || listing.bathrooms || listing.size) && (
                 <ul className="flex flex-wrap gap-3 pt-2 text-sm text-foreground">
@@ -221,6 +220,7 @@ export async function PublicListingPage({
                   id={listing.id}
                   returnPath={path}
                   underOffer={listing.underOffer}
+                  notAcceptingApplications={listing.notAcceptingApplications}
                   title={listing.title}
                 />
               </div>
@@ -284,7 +284,7 @@ export async function PublicListingPage({
         </div>
         <SimilarListings listingId={listing.id} market={market} />
         {extra}
-        {!listing.underOffer && (
+        {!listing.underOffer && !listing.notAcceptingApplications && (
           <>
             {/* Room for the pinned bar, so it never covers the end of the page. */}
             <div className="h-20" aria-hidden="true" />

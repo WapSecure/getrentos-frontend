@@ -135,6 +135,8 @@ export interface ShowroomListing {
   costs: ShowroomCosts;
   host?: ShowroomHost;
   underOffer?: boolean;
+  /** Rent only: the home is let or has an approved applicant, so it takes no new applications or enquiries. */
+  notAcceptingApplications?: boolean;
   availableFrom?: string;
   /** Sale and land detail routes only; undefined from an older API. */
   verificationSummary?: VerificationSummary;
@@ -183,6 +185,8 @@ export interface PublicRentalDto {
   petsAllowed?: boolean;
   propertyType?: string;
   videoTourFilmedOnSite?: boolean;
+  /** False once the home is let; browse leaves such homes out, but a direct link can still reach one. */
+  acceptingApplications?: boolean;
   /** Detail route only. Read through `floorPlansOf`, never trusted as is. */
   floorPlans?: unknown;
   /** Commercial properties only. Read through `commercialDetailsOf`, never trusted as is. */

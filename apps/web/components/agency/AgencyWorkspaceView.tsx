@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import {
@@ -160,7 +161,7 @@ export function AgencyWorkspaceView() {
                     </div>
                     <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                       <MapPin className="h-3.5 w-3.5" aria-hidden />
-                      {[property.address, property.city].filter(Boolean).join(', ')}
+                      {formatLocation(property.address, property.city)}
                     </p>
                   </div>
                   <Link

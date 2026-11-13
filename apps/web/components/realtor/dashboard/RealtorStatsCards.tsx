@@ -1,6 +1,14 @@
 'use client';
 
-import { Lock } from '@sureground/icons';
+import {
+  CalendarClock,
+  Coins,
+  Handshake,
+  Lock,
+  Megaphone,
+  UserPlus,
+  Users,
+} from '@sureground/icons';
 import { StatGroup } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
@@ -29,6 +37,7 @@ export const RealtorStatsCards = ({
       items={[
         {
           label: 'Commission YTD',
+          icon: Coins,
           value:
             commissionYtd === null ? (
               <span className="inline-flex items-center text-muted-foreground">
@@ -43,12 +52,14 @@ export const RealtorStatsCards = ({
         },
         {
           label: 'Active clients',
+          icon: Users,
           value: activeClients,
           subtitle: 'Owners & landlords',
           href: ROUTES.REALTOR_CLIENTS,
         },
         {
           label: 'Active listings',
+          icon: Megaphone,
           value: activeListings,
           subtitle: 'Published on your behalf',
           href: ROUTES.REALTOR_LISTINGS,
@@ -60,18 +71,21 @@ export const RealtorStatsCards = ({
       items={[
         {
           label: 'Active leads',
+          icon: UserPlus,
           value: activeLeads,
           subtitle: 'In your pipeline',
           href: ROUTES.REALTOR_LEADS,
         },
         {
           label: 'Upcoming viewings',
+          icon: CalendarClock,
           value: upcomingViewings,
           subtitle: 'Scheduled tours',
           href: ROUTES.REALTOR_VIEWINGS,
         },
         {
           label: 'Pending offers',
+          icon: Handshake,
           value: pendingOffers,
           subtitle: 'Awaiting response',
           href: ROUTES.REALTOR_OFFERS,

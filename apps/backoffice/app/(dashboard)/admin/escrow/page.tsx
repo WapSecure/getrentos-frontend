@@ -2,17 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Landmark, Flag, Send, Undo2 } from '@sureground/icons';
+import { Landmark, Flag, Lock, Send, Undo2 } from '@sureground/icons';
 import {
   DataTable,
   IconButton,
   PageHeader,
   SearchInput,
-  Tabs,
-  TabsList,
-  TabsTrigger,
+  StatGroup,
   type Column,
 } from '@sureground/ui';
+import { FilterChips, OpsToolbar } from '@/components/admin/ops/OpsParts';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { EmptyState, PageErrorState } from '@sureground/ui';
 import { Pagination } from '@sureground/ui';
@@ -38,6 +37,17 @@ const statusConfig: Record<PlatformEscrowStatus, { label: string; variant: Badge
 
 // Only these statuses hold money (mirrors HOLDABLE_ESCROW_STATUSES on the API); offering release or refund on others only earns a rejection.
 const SETTLEABLE_STATUSES: PlatformEscrowStatus[] = ['funds_held', 'verification', 'final_payment'];
+
+// Money sits with us only from the deposit until it is released or refunded; the price is never held.
+const HOLDING_STATUSES: PlatformEscrowStatus[] = [...SETTLEABLE_STATUSES, 'frozen', 'disputed'];
+
+function heldCell(t: PlatformEscrowTransaction): { text: string; muted: boolean } {
+  const held = formatCurrency(t.heldAmount, { compact: true });
+  if (HOLDING_STATUSES.includes(t.status)) return { text: held, muted: false };
+  if (t.status === 'released') return { text: `None (${held} released)`, muted: true };
+  if (t.status === 'refunded') return { text: `None (${held} refunded)`, muted: true };
+  return { text: 'None yet', muted: true };
+}
 
 type StatusFilter = 'all' | PlatformEscrowStatus;
 
@@ -103,9 +113,17 @@ export default function AdminEscrowPage() {
       header: 'Property',
       render: (t) => (
         <div>
-          <div>{t.propertyTitle}</div>
+          <div className="flex items-center gap-1.5">
+            {t.flagged && (
+              <>
+                <Flag className="h-3.5 w-3.5 shrink-0 text-destructive" aria-hidden="true" />
+                <span className="sr-only">Flagged: </span>
+              </>
+            )}
+            {t.propertyTitle}
+          </div>
           {t.flagged && t.flaggedReason && (
-            <div className="text-xs font-normal text-destructive whitespace-normal max-w-xs">
+            <div className="mt-0.5 max-w-xs whitespace-normal text-xs font-normal text-destructive">
               {t.flaggedReason}
             </div>
           )}
@@ -126,16 +144,29 @@ export default function AdminEscrowPage() {
       className: 'text-muted-foreground whitespace-nowrap',
     },
     {
-      key: 'amount',
-      header: 'Amount',
-      render: (t) => formatCurrency(t.amount, { compact: true }),
+      key: 'held',
+      header: 'Held',
+      numeric: true,
+      render: (t) => {
+        const held = heldCell(t);
+        return (
+          <div>
+            <div className={held.muted ? 'text-muted-foreground' : undefined}>{held.text}</div>
+            <div className="text-xs text-muted-foreground">
+              Sale price {formatCurrency(t.amount, { compact: true })}
+            </div>
+          </div>
+        );
+      },
       className: 'text-foreground whitespace-nowrap',
     },
     {
       key: 'status',
       header: 'Status',
       render: (t) => (
-        <Badge variant={statusConfig[t.status].variant}>{statusConfig[t.status].label}</Badge>
+        <Badge variant={statusConfig[t.status].variant} dot>
+          {statusConfig[t.status].label}
+        </Badge>
       ),
       className: 'whitespace-nowrap',
     },
@@ -148,6 +179,7 @@ export default function AdminEscrowPage() {
     {
       key: 'actions',
       header: '',
+      srHeader: 'Actions',
       render: (t) => {
         const settling = SETTLEABLE_STATUSES.includes(t.status);
         const busy = actions.processingKey !== null;
@@ -167,7 +199,8 @@ export default function AdminEscrowPage() {
                     actions.request({
                       key: `release:${t.id}`,
                       title: 'Release these funds to the seller?',
-                      description: `${held} held for ${t.propertyTitle} (sale price ${amount}) will be released to ${t.sellerName}. This settles the escrow and cannot be reversed from here.`,
+                      // A buyer's confirmation of receipt releases the deposit itself, so anything still held here has not been confirmed.
+                      description: `${t.buyerName} has not confirmed receipt. Release only if you have checked the handover yourself. ${held} held for ${t.propertyTitle} (sale price ${amount}) will be released to ${t.sellerName}. This settles the escrow and cannot be reversed from here.`,
                       confirmLabel: 'Release funds',
                       successMessage: `${held} released to ${t.sellerName}.`,
                       run: () => adminService.releaseEscrow(t.id),
@@ -238,6 +271,7 @@ export default function AdminEscrowPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Money"
         title="Escrow oversight"
         description={
           <>
@@ -247,7 +281,30 @@ export default function AdminEscrowPage() {
         }
       />
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+      <StatGroup
+        title="Escrow at a glance"
+        className="mb-6"
+        items={[
+          {
+            label: 'Flagged for review',
+            value: flaggedCountError ? '–' : (flaggedData?.total ?? '–'),
+            subtitle: flaggedCountError ? 'Count unavailable' : 'In the manual review queue',
+            icon: Flag,
+            attention: flaggedCount > 0,
+          },
+          {
+            label:
+              statusFilter === 'all'
+                ? 'Transactions'
+                : `${statusOptions.find((option) => option.value === statusFilter)?.label ?? 'Matching'} transactions`,
+            value: data ? total : '–',
+            subtitle: debouncedSearch ? 'Matching your search' : 'In the current view',
+            icon: Lock,
+          },
+        ]}
+      />
+
+      <OpsToolbar className="mb-3">
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -258,24 +315,18 @@ export default function AdminEscrowPage() {
           placeholder="Search by property, buyer, or seller..."
           className="flex-1 max-w-sm"
         />
-      </div>
+      </OpsToolbar>
 
-      <Tabs
+      <FilterChips
+        label="Filter escrow transactions by status"
         value={statusFilter}
-        onValueChange={(value) => {
-          setStatusFilter(value as StatusFilter);
+        onChange={(value) => {
+          setStatusFilter(value);
           setPage(1);
         }}
-        className="mb-6"
-      >
-        <TabsList className="max-w-full">
-          {statusOptions.map((option) => (
-            <TabsTrigger key={option.value} value={option.value}>
-              {option.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+        options={statusOptions}
+        className="mb-5"
+      />
 
       {isError && !data ? (
         <PageErrorState
@@ -292,7 +343,14 @@ export default function AdminEscrowPage() {
           isLoading={isLoading}
           getRowKey={(t) => t.id}
           getRowClassName={(t) => (t.flagged ? 'bg-destructive-subtle/50' : undefined)}
-          emptyState={<EmptyState icon={Landmark} title="No transactions match your filters" />}
+          caption="Escrow transactions"
+          emptyState={
+            <EmptyState
+              icon={Landmark}
+              title="No transactions match your filters"
+              description="Try another property, buyer or seller, or clear the status filter."
+            />
+          }
           footer={
             total > 0 && (
               <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />

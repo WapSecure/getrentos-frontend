@@ -8,7 +8,6 @@ import {
   Button,
   CardSkeleton,
   EmptyState,
-  ListSkeleton,
   Pagination,
   ToggleChip,
   PageHeader,
@@ -20,6 +19,12 @@ import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { LogVehicleModal } from '@/components/estate/vehicles/LogVehicleModal';
 import { VehicleLogRow } from '@/components/estate/vehicles/VehicleLogRow';
 import { ManageGatesModal } from '@/components/estate/gates/ManageGatesModal';
+import {
+  EstateFilterChips,
+  EstateListSection,
+  EstateListSkeleton,
+  EstateRowList,
+} from '@/components/estate/shared/EstateListSection';
 
 type StatusFilter = 'all' | 'inside' | 'exited';
 
@@ -94,87 +99,103 @@ export default function EstateVehiclesPage() {
 
   if (!estate) return <RedirectToEstateSetup />;
 
+  const activeFilter = statusFilters.find((filter) => filter.value === statusFilter)!;
+
   return (
     <>
       <PageHeader
         title="Vehicles"
-        description={
-          <>
-            {isLogsLoading ? (
-              'Loading…'
-            ) : (
-              <>
-                {total} log{total === 1 ? '' : 's'}
-              </>
-            )}{' '}
-            in {estate.name}
-          </>
-        }
+        description={`Vehicles logged in and out at the gates of ${estate.name}.`}
         actions={
           <>
-            <Button variant="outline" className="gap-2" onClick={() => setIsGatesModalOpen(true)}>
-              <Settings2 className="w-4 h-4" />
+            <Button
+              variant="outline"
+              icon={<Settings2 className="h-4 w-4" />}
+              onClick={() => setIsGatesModalOpen(true)}
+            >
               Manage gates
             </Button>
-            <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
-              <Plus className="w-4 h-4" />
+            <Button
+              variant="primary"
+              icon={<Plus className="h-4 w-4" />}
+              onClick={() => setIsModalOpen(true)}
+            >
               Log vehicle
             </Button>
           </>
         }
       />
 
-      <div
-        className="flex flex-wrap gap-2 mb-6"
-        role="group"
-        aria-label="Filter vehicles by status"
+      <EstateListSection
+        id="vehicle-logs"
+        title={statusFilter === 'all' ? 'Vehicle log' : activeFilter.label}
+        count={isLogsLoading ? undefined : total}
+        countLabel={`${total} log${total === 1 ? '' : 's'}`}
+        description="Plate, driver and gate for each entry. Mark a vehicle exited when it leaves."
+        toolbar={
+          <EstateFilterChips label="Filter vehicles by status">
+            {statusFilters.map((filter) => (
+              <ToggleChip
+                key={filter.value}
+                size="sm"
+                pressed={statusFilter === filter.value}
+                onPressedChange={() => {
+                  setStatusFilter(filter.value);
+                  setPage(1);
+                }}
+              >
+                {filter.label}
+              </ToggleChip>
+            ))}
+          </EstateFilterChips>
+        }
+        footer={
+          statusFilter !== 'exited' && total > PAGE_SIZE ? (
+            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+          ) : undefined
+        }
       >
-        {statusFilters.map((filter) => (
-          <ToggleChip
-            key={filter.value}
-            pressed={statusFilter === filter.value}
-            onPressedChange={() => {
-              setStatusFilter(filter.value);
-              setPage(1);
-            }}
-          >
-            {filter.label}
-          </ToggleChip>
-        ))}
-      </div>
-
-      {isLogsLoading ? (
-        <ListSkeleton rows={3} />
-      ) : logs.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
-          <EmptyState
-            icon={Car}
-            title="No vehicle logs yet"
-            description="Log a vehicle entering the estate at the gate."
-          />
-        </div>
-      ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {logs.map((log) => (
-            <VehicleLogRow
-              key={log.id}
-              log={log}
-              onMarkExited={() => markExited.mutate(log.id)}
-              isMarkingExited={markExited.isPending}
+        {isLogsLoading ? (
+          <EstateListSkeleton />
+        ) : logs.length === 0 ? (
+          statusFilter === 'inside' ? (
+            <EmptyState
+              bare
+              size="compact"
+              icon={Car}
+              title="No vehicles inside"
+              description="Every logged vehicle has been marked as exited."
             />
-          ))}
-        </div>
-      )}
-
-      {statusFilter !== 'exited' && total > 0 && (
-        <Pagination
-          page={page}
-          pageSize={PAGE_SIZE}
-          total={total}
-          onPageChange={setPage}
-          className="mt-6"
-        />
-      )}
+          ) : statusFilter === 'exited' ? (
+            <EmptyState
+              bare
+              size="compact"
+              icon={Car}
+              title="No vehicles have exited"
+              description="Vehicles show here once they are marked as exited."
+            />
+          ) : (
+            <EmptyState
+              bare
+              icon={Car}
+              title="No vehicle logs yet"
+              description="Log a vehicle as it comes through the gate. Gate officers can log vehicles too."
+            />
+          )
+        ) : (
+          <EstateRowList>
+            {logs.map((log) => (
+              <li key={log.id}>
+                <VehicleLogRow
+                  log={log}
+                  onMarkExited={() => markExited.mutate(log.id)}
+                  isMarkingExited={markExited.isPending}
+                />
+              </li>
+            ))}
+          </EstateRowList>
+        )}
+      </EstateListSection>
 
       <LogVehicleModal
         isOpen={isModalOpen}

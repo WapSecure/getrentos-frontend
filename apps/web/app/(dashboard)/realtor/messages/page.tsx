@@ -133,7 +133,11 @@ function RealtorMessagesPageContent() {
 
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col">
-      <PageHeader title="Messages" description="Communicate securely with active clients" />
+      <PageHeader
+        eyebrow="Inbox"
+        title="Messages"
+        description="Communicate securely with active clients"
+      />
       <div className="flex min-h-0 flex-1 gap-4">
         <div
           className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto flex-col gap-2')}

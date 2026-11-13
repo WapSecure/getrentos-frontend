@@ -130,6 +130,7 @@ export default function OwnerListingsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Selling"
         title="Sale listings"
         description={
           isLoading ? (

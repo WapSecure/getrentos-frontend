@@ -11,7 +11,8 @@ import {
   Columns3,
   Clock,
 } from '@sureground/icons/native';
-import { useTheme } from '../theme';
+import { formatLocation } from '@sureground/shared/address';
+import { useTheme, withAlpha } from '../theme';
 import { Text } from './Text';
 import { Price } from './Price';
 import { ListingPlaceholder } from './ListingPlaceholder';
@@ -52,7 +53,7 @@ export function describeProperty(p: PropertyCardData): string {
   const price = `${Math.round(p.price).toLocaleString('en-NG')} naira${p.period ? ` ${SPOKEN_PERIOD[p.period]}` : ''}`;
   return [
     p.title,
-    p.location,
+    formatLocation(p.location),
     price,
     p.bedrooms ? `${p.bedrooms} bedroom${p.bedrooms === 1 ? '' : 's'}` : null,
     p.bathrooms ? `${p.bathrooms} bathroom${p.bathrooms === 1 ? '' : 's'}` : null,
@@ -153,7 +154,8 @@ function PropertyCardBase({
     <View
       style={{
         width: row ? 116 : '100%',
-        height: row ? 116 : property.image ? 196 : 96,
+        // A photo keeps a 3:2 frame at any card width; without one, a short branded band.
+        ...(row ? { height: 116 } : property.image ? { aspectRatio: 3 / 2 } : { height: 96 }),
         backgroundColor: colors.secondary,
       }}
     >
@@ -253,6 +255,8 @@ function PropertyCardBase({
                 amount={property.price}
                 period={property.period ?? undefined}
                 variant="subheading"
+                color="primary"
+                style={{ fontWeight: '700' }}
               />
               <Text variant="bodyStrong" numberOfLines={2}>
                 {property.title}
@@ -263,7 +267,7 @@ function PropertyCardBase({
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <MapPin size={12} color={colors.mutedForeground} />
             <Text variant="caption" color="mutedForeground" numberOfLines={1} style={{ flex: 1 }}>
-              {property.location}
+              {formatLocation(property.location)}
             </Text>
           </View>
           <Specs property={property} />
@@ -320,7 +324,7 @@ function PropertyCardBase({
             gap: 7,
             borderTopWidth: StyleSheet.hairlineWidth,
             borderTopColor: colors.border,
-            backgroundColor: compared ? colors.accent : colors.card,
+            backgroundColor: compared ? withAlpha(colors.primary, 0.1) : colors.card,
             opacity: compareDisabled ? 0.45 : pressed ? 0.75 : 1,
           })}
         >
@@ -340,7 +344,8 @@ const OVERLAY = {
   text: '#ffffff',
   glass: 'rgba(10,14,22,0.74)',
   glassEdge: 'rgba(255,255,255,0.16)',
-  verified: '#0b7a3e',
+  // The Sureground Verified blue, fixed: the theme's dark-mode blue is too light under white text.
+  verified: '#0057d9',
   partial: '#4ade80',
   pending: '#ffb454',
 } as const;

@@ -67,7 +67,7 @@ export const LAND_DILIGENCE_LABEL: Record<LandDiligenceStatus, string> = {
   VERIFIED: 'Diligence verified',
   REJECTED: 'Rejected',
   EXPIRED: 'Expired',
-  CONDITIONAL: 'Verified with conditions',
+  CONDITIONAL: 'Approved with conditions',
   SUSPENDED: 'Suspended',
 };
 
@@ -81,7 +81,7 @@ export const LAND_DILIGENCE_TONE: Record<
   VERIFIED: 'success',
   REJECTED: 'danger',
   EXPIRED: 'danger',
-  CONDITIONAL: 'info',
+  CONDITIONAL: 'warning',
   SUSPENDED: 'danger',
 };
 

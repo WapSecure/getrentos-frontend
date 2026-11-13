@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { Check, FileText, ShieldAlert, ShieldCheck, Clock, AlertTriangle } from '@sureground/icons';
 import {
@@ -382,7 +383,7 @@ export const AddOwnerPropertyModal = ({
                   value={
                     form.checked
                       ? form.checked.formatted
-                      : `${form.address}, ${form.city}, ${form.state}`
+                      : formatLocation(form.address, form.city, form.state)
                   }
                 />
                 <SummaryRow
@@ -413,8 +414,8 @@ export const AddOwnerPropertyModal = ({
               </div>
               <h4 className="text-lg font-semibold text-foreground">Pending review</h4>
               <p className="mx-auto mt-1 max-w-xs text-sm text-muted-foreground">
-                Your ownership documents for <strong>{form.name}</strong> have been submitted. Our
-                compliance team typically completes review within 24–48 hours.
+                Your ownership documents for <strong>{form.name}</strong> have been submitted.
+                We&apos;ll notify you when our team has reviewed your documents.
               </p>
               {uploadWarning && (
                 <Alert variant="warning" className="mt-3 text-left">

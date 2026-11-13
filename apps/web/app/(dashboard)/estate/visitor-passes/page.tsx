@@ -8,7 +8,6 @@ import {
   Button,
   CardSkeleton,
   EmptyState,
-  ListSkeleton,
   Pagination,
   ToggleChip,
   PageHeader,
@@ -20,6 +19,12 @@ import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { IssueVisitorPassModal } from '@/components/estate/visitor-passes/IssueVisitorPassModal';
 import { VisitorPassRow } from '@/components/estate/visitor-passes/VisitorPassRow';
 import { VisitorPinDialog } from '@/components/estate/visitor-passes/VisitorPinDialog';
+import {
+  EstateFilterChips,
+  EstateListSection,
+  EstateListSkeleton,
+  EstateRowList,
+} from '@/components/estate/shared/EstateListSection';
 import type { IssuedVisitorPass, VisitorPassStatus } from '@/types/estate';
 
 const statusFilters: { value: VisitorPassStatus | 'all'; label: string }[] = [
@@ -123,85 +128,104 @@ export default function EstateVisitorPassesPage() {
 
   if (!estate) return <RedirectToEstateSetup />;
 
+  const activeFilter = statusFilters.find((filter) => filter.value === statusFilter)!;
+  const openIssue = () => {
+    setHouseholdPage(1);
+    setIsModalOpen(true);
+  };
+
   return (
     <>
       <PageHeader
         title="Visitor passes"
-        description={
-          <>
-            {isPassesLoading ? (
-              'Loading…'
-            ) : (
-              <>
-                {total} pass{total === 1 ? '' : 'es'}
-              </>
-            )}{' '}
-            in {estate.name}
-          </>
-        }
+        description={`Passes issued for visitors to ${estate.name}. Each visitor shows their PIN at the gate.`}
         actions={
-          <Button
-            variant="primary"
-            className="gap-2"
-            onClick={() => {
-              setHouseholdPage(1);
-              setIsModalOpen(true);
-            }}
-          >
-            <Plus className="w-4 h-4" />
+          <Button variant="primary" icon={<Plus className="h-4 w-4" />} onClick={openIssue}>
             Issue pass
           </Button>
         }
       />
 
-      <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filter passes by status">
-        {statusFilters.map((filter) => (
-          <ToggleChip
-            key={filter.value}
-            pressed={statusFilter === filter.value}
-            onPressedChange={() => {
-              setStatusFilter(filter.value);
-              setPage(1);
-            }}
-          >
-            {filter.label}
-          </ToggleChip>
-        ))}
-      </div>
-
-      {isPassesLoading ? (
-        <ListSkeleton rows={3} />
-      ) : passes.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
-          <EmptyState
-            icon={KeyRound}
-            title="No visitor passes yet"
-            description="Issue a pass so a visitor can be verified at the gate."
-          />
-        </div>
-      ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {passes.map((pass) => (
-            <VisitorPassRow
-              key={pass.id}
-              pass={pass}
-              estateId={estate.id}
-              onRevoke={() => revokePass.mutate(pass.id)}
-              isRevoking={revokePass.isPending}
+      <EstateListSection
+        id="visitor-passes"
+        title={statusFilter === 'all' ? 'All passes' : activeFilter.label}
+        count={isPassesLoading ? undefined : total}
+        countLabel={`${total} pass${total === 1 ? '' : 'es'}`}
+        description="Who each pass is for, the home they are visiting and when it runs out. A pass can be revoked while it is pending."
+        toolbar={
+          <EstateFilterChips label="Filter passes by status">
+            {statusFilters.map((filter) => (
+              <ToggleChip
+                key={filter.value}
+                size="sm"
+                pressed={statusFilter === filter.value}
+                onPressedChange={() => {
+                  setStatusFilter(filter.value);
+                  setPage(1);
+                }}
+              >
+                {filter.label}
+              </ToggleChip>
+            ))}
+          </EstateFilterChips>
+        }
+        footer={
+          total > PAGE_SIZE ? (
+            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+          ) : undefined
+        }
+      >
+        {isPassesLoading ? (
+          <EstateListSkeleton />
+        ) : passes.length === 0 ? (
+          statusFilter === 'all' ? (
+            <EmptyState
+              bare
+              icon={KeyRound}
+              title="No visitor passes yet"
+              description="Issue a pass so a visitor can be verified at the gate. Passes residents issue show up here too."
+              action={
+                <Button variant="outline" size="sm" onClick={openIssue}>
+                  Issue the first pass
+                </Button>
+              }
             />
-          ))}
-        </div>
-      )}
-
-      {total > 0 && (
-        <Pagination
-          page={page}
-          pageSize={PAGE_SIZE}
-          total={total}
-          onPageChange={setPage}
-          className="mt-6"
-        />
-      )}
+          ) : (
+            <EmptyState
+              bare
+              size="compact"
+              icon={KeyRound}
+              title={`No passes are ${activeFilter.label.toLowerCase()}`}
+              description="Try another status, or show every pass."
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setPage(1);
+                  }}
+                >
+                  Show all passes
+                </Button>
+              }
+            />
+          )
+        ) : (
+          <EstateRowList>
+            {passes.map((pass) => (
+              <li key={pass.id}>
+                <VisitorPassRow
+                  pass={pass}
+                  estateId={estate.id}
+                  onRevoke={() => revokePass.mutate(pass.id)}
+                  isRevoking={revokePass.isPending}
+                />
+              </li>
+            ))}
+          </EstateRowList>
+        )}
+      </EstateListSection>
 
       <IssueVisitorPassModal
         isOpen={isModalOpen}

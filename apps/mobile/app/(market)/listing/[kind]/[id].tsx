@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ComponentRef } from 'react';
-import { tidyPlace } from '@sureground/shared';
+import { formatLocation } from '@sureground/shared';
 import { Dimensions, FlatList, ScrollView, Share, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -106,7 +106,7 @@ export default function PublicListing() {
     track('market_listing_shared', { kind });
     trackShowroom({ name: 'property_share', listingId: p.id, market: kind as MarketKind });
     await Share.share({
-      message: `${p.title} · ${p.location}\n${env.webUrl}${marketWebPath(kind as MarketKind, p.id)}`,
+      message: `${p.title} · ${formatLocation(p.location)}\n${env.webUrl}${marketWebPath(kind as MarketKind, p.id)}`,
     }).catch(() => undefined);
   };
 
@@ -248,7 +248,7 @@ function Body({
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6 }}>
           <MapPin size={15} color={colors.mutedForeground} style={{ marginTop: 2 }} />
           <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-            {tidyPlace(p.address ? `${p.address}, ${p.location}` : p.location)}
+            {formatLocation(p.address, p.location)}
           </Text>
         </View>
         <Card
@@ -565,7 +565,7 @@ function SimilarListings({
 
 const PROTECTION_LINE: Record<MarketKind, string> = {
   rent: 'We hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
-  sale: 'We hold your deposit and only release it to the seller once you confirm receipt.',
+  sale: 'We hold your deposit until the seller hands over the keys and you confirm.',
   land: 'We hold your money and only release it to the seller once the conveyance steps are confirmed.',
   shortlet: 'We hold your payment and pay the host no sooner than 24 hours after check-in.',
 };

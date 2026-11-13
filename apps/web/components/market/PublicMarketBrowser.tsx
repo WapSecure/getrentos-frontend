@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
-import { Columns3, Home, SlidersHorizontal } from '@sureground/icons';
+import { Columns3, Home, SearchX, SlidersHorizontal } from '@sureground/icons';
 import { Alert } from '@sureground/ui/Alert';
 import { Button } from '@sureground/ui/Button';
 import { Checkbox } from '@sureground/ui/Checkbox';
@@ -38,6 +38,7 @@ import { urlParam, useSyncUrlState } from '@/hooks/useUrlState';
 import { useTrackSearch } from '@/hooks/useTrackSearch';
 import { CollectionsStrip } from '@/components/collections/CollectionsStrip';
 import { listingPath } from '@/lib/listingSlug';
+import { Eyebrow } from '@/components/marketing/Eyebrow';
 
 // Shared with the server component that pre-renders the first page, so both ask for the same page size.
 const PAGE_SIZE = PUBLIC_MARKET_PAGE_SIZE;
@@ -352,7 +353,10 @@ export const PublicMarketBrowser = ({
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       {market === 'sale' && !estateFromUrl && <BuyMarketTabs current="homes" />}
       <header className="max-w-3xl py-6 sm:py-10">
-        <h1 className="text-4xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
+        <Eyebrow className="mb-5">
+          {market === 'rent' ? 'Rentals across Nigeria' : 'Property for sale across Nigeria'}
+        </Eyebrow>
+        <h1 className="font-display text-[2.5rem] leading-[1.04] font-light tracking-[-0.02em] text-balance text-foreground sm:text-[3.25rem] lg:text-[3.75rem]">
           {market === 'rent' ? 'Homes to rent' : 'Homes for sale'}
         </h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
@@ -408,6 +412,7 @@ export const PublicMarketBrowser = ({
           size="lg"
           rounded="md"
           onClick={() => setShowFilters((v) => !v)}
+          className={showFilters || activeCount > 0 ? 'border-primary text-primary' : undefined}
           aria-expanded={showFilters}
           aria-controls="public-market-filters"
           icon={<SlidersHorizontal className="h-4 w-4" />}
@@ -597,12 +602,30 @@ export const PublicMarketBrowser = ({
       ) : listings.length === 0 ? (
         <div className="mt-10">
           <EmptyState
-            icon={Home}
+            icon={estateFromUrl ? Home : SearchX}
             title={estateFromUrl ? 'Nothing here yet' : 'No listings match that'}
             description={
               estateFromUrl
                 ? `${humaniseSlug(estateFromUrl)} has no ${noun.many} listed in this market right now.`
                 : 'Try a different area, widen the price range, or clear a filter.'
+            }
+            action={
+              estateFromUrl ? (
+                <Button href={market === 'rent' ? '/rent' : '/buy'} rounded="md">
+                  {`See all ${noun.many}`}
+                </Button>
+              ) : search || activeCount > 0 ? (
+                <Button
+                  rounded="md"
+                  onClick={() => {
+                    setSearch('');
+                    setRefine(NO_REFINEMENTS);
+                    setPage(1);
+                  }}
+                >
+                  Clear search and filters
+                </Button>
+              ) : undefined
             }
           />
         </div>
@@ -610,7 +633,7 @@ export const PublicMarketBrowser = ({
         <>
           <div className="mt-9 flex flex-wrap items-end justify-between gap-3 border-b border-border pb-4">
             <div>
-              <h2 className="text-2xl font-semibold tracking-[-0.025em] text-foreground">
+              <h2 className="font-display text-[1.75rem] leading-tight font-normal tracking-[-0.01em] text-foreground">
                 {total} {total === 1 ? noun.one : noun.many} available
               </h2>
             </div>

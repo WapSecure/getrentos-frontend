@@ -309,6 +309,7 @@ export function PortfolioView() {
   return (
     <>
       <PageHeader
+        eyebrow="Money"
         title="Portfolio"
         description={
           <>

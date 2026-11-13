@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useCallback } from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
@@ -51,7 +52,7 @@ export default function BuyerSaved() {
                   {item.title}
                 </Text>
                 <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                  {[item.address, item.city].filter(Boolean).join(', ')}
+                  {formatLocation(item.address, item.city)}
                 </Text>
                 <Price amount={item.askingPrice} variant="bodyStrong" style={{ marginTop: 4 }} />
               </View>

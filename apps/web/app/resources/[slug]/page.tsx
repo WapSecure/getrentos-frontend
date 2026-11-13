@@ -10,6 +10,7 @@ import { availableGuides } from '@/components/resources/availableGuides';
 import { LegalNote } from '@/components/resources/LegalNote';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { breadcrumbJsonLd } from '@/lib/structuredData';
+import { Eyebrow } from '@/components/marketing/Eyebrow';
 
 interface GuidePageProps {
   params: Promise<{ slug: string }>;
@@ -59,7 +60,7 @@ export default async function GuidePage({ params }: GuidePageProps) {
                 ]}
                 className="mb-8"
               />
-              <p className="label-caps mb-5 text-muted-foreground">{guide.eyebrow}</p>
+              <Eyebrow className="mb-5">{guide.eyebrow}</Eyebrow>
               <h1
                 id="page-title"
                 className="max-w-[22ch] text-[2.5rem] leading-[1.06] font-light tracking-[-0.02em] text-balance sm:text-[3.25rem]"

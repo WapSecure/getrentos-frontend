@@ -27,6 +27,7 @@ export {
   type NextAction,
   type OperationalStage,
   type OperationalStageCode,
+  type PurchaseDispute,
   type PurchaseSummary,
   type WorkspaceDocument,
   type WorkspaceViewerRole,
@@ -74,7 +75,16 @@ export interface WorkspaceProfessional {
   completedAt?: string;
 }
 
-export type WorkspaceActorKind = 'MANAGER' | 'SUREGROUND' | 'TENANT' | 'SYSTEM' | 'OTHER' | 'YOU';
+export type WorkspaceActorKind =
+  | 'MANAGER'
+  | 'SUREGROUND'
+  | 'TENANT'
+  | 'SYSTEM'
+  | 'OTHER'
+  | 'YOU'
+  | 'BUYER'
+  | 'SELLER'
+  | 'REPRESENTATIVE';
 
 export interface WorkspaceHistoryItem {
   id: string;
@@ -113,6 +123,18 @@ export interface TransactionWorkspace {
   documents: WorkspaceDocument[];
   delays: WorkspaceDelays;
   history: WorkspaceHistoryItem[];
+  deposit?: WorkspaceDeposit;
+}
+
+/** The deposit held under Payment Protection; paying, releasing and refunding stay on buyer/transactions. */
+export interface WorkspaceDeposit {
+  amount: number;
+  currency: 'NGN';
+  escrowStatus: string;
+  payable: boolean;
+  releasable: boolean;
+  /** The buyer can take the deposit back now: held, and the handover has not started. */
+  refundable?: boolean;
 }
 
 /** Mirrors `MarketplaceDisputeDto`: a dispute on a sale's held deposit, from `GET /marketplace/disputes`. */
@@ -125,5 +147,24 @@ export interface SaleDispute {
   status: 'OPEN' | 'UNDER_REVIEW' | 'ESCALATED' | 'RESOLVED';
   raisedBy: { id: string; legalName: string };
   against: { id: string; legalName: string };
+  description?: string;
+  /** Older disputes only: links typed in by a party. Untrusted, never previewed. */
+  evidence?: string[];
+  /** Sureground's decision, once resolved. */
+  resolution?: string;
+  resolvedAt?: string;
   createdAt: string;
+  /** When Sureground will respond by (the staff response window); null once under review or decided. */
+  respondBy?: string | null;
+  respondByParty?: 'SUREGROUND' | null;
+}
+
+/** Mirrors `MarketplaceDisputeMessageDto`: one message in a deposit dispute's thread. */
+export interface SaleDisputeMessage {
+  id: string;
+  disputeId: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: string;
 }

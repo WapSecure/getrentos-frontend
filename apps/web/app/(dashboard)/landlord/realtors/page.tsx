@@ -7,6 +7,7 @@ export default function LandlordRealtorsPage() {
   return (
     <div className="space-y-12">
       <PageHeader
+        eyebrow="Team"
         title="Realtor access"
         description="Choose which realtors and agents can work on your properties, and hand tasks to an agent."
       />

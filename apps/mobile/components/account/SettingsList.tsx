@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 import type { SgIcon } from '@sureground/icons/native';
 import { ChevronRight } from '@sureground/icons/native';
-import { Card, Text, useTheme } from '@sureground/ui-native';
+import { Card, IconTile, Text, useTheme } from '@sureground/ui-native';
 
 export interface SettingsItem {
   key: string;
@@ -46,7 +46,7 @@ export function SettingsGroup({
 }
 
 function SettingsRow({ item, first }: { item: SettingsItem; first: boolean }) {
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   const { icon: Icon, tone = 'default' } = item;
   const toneColor =
     tone === 'success'
@@ -72,18 +72,7 @@ function SettingsRow({ item, first }: { item: SettingsItem; first: boolean }) {
         backgroundColor: pressed ? colors.secondary : 'transparent',
       })}
     >
-      <View
-        style={{
-          width: 34,
-          height: 34,
-          borderRadius: radius.md,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: colors.accent,
-        }}
-      >
-        <Icon size={17} color={colors.primary} />
-      </View>
+      <IconTile Icon={Icon} />
       <View style={{ flex: 1 }}>
         <Text variant="bodyStrong">{item.label}</Text>
         {item.description ? (

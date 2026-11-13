@@ -7,7 +7,8 @@ export type DiasporaQueueKind =
   | 'LEGAL_STEP_OVERDUE'
   | 'CO_APPROVAL_PENDING'
   | 'DISPUTE_RESPONSE_DUE'
-  | 'MANAGED_INTAKE_REVIEW';
+  | 'MANAGED_INTAKE_REVIEW'
+  | 'SOURCE_OF_FUNDS_REVIEW';
 
 export interface DiasporaQueueItem {
   /** `${kind}:${subjectId}` */

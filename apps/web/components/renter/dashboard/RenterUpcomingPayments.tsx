@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Calendar, Home, AlertCircle, ArrowRight } from '@sureground/icons';
+import { Calendar, Home, AlertCircle } from '@sureground/icons';
 import { Badge } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
@@ -51,62 +51,69 @@ export const RenterUpcomingPayments = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35, duration: 0.4 }}
-      className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm"
+      className="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
     >
-      <div className="p-4 border-b border-border">
-        <h2 className="text-lg font-semibold text-foreground">Upcoming payments</h2>
-        <p className="text-sm text-muted-foreground">Don&apos;t miss your rent deadlines</p>
+      <div className="border-b border-border px-5 py-4">
+        <h2 className="text-base font-semibold tracking-[-0.015em] text-foreground">
+          Upcoming payments
+        </h2>
+        <p className="mt-0.5 text-sm text-muted-foreground">Rent and charges that are due</p>
       </div>
 
-      <div className="p-4 space-y-3">
-        {upcomingPayments.map((payment, index) => (
-          <motion.div
-            key={payment.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 + index * 0.05, duration: 0.3 }}
-            className={`p-3 rounded-lg border ${
-              payment.status === 'overdue'
-                ? 'bg-destructive-subtle border-destructive/20'
-                : 'bg-secondary/60 border-border'
-            }`}
-          >
-            <div className="flex justify-between items-start gap-2 mb-2">
-              <div className="flex min-w-0 items-center gap-2">
-                <Home className="w-4 h-4 shrink-0 text-muted-foreground" />
-                <span className="font-medium text-foreground text-sm">{payment.property}</span>
-              </div>
-              {payment.status === 'overdue' && (
-                <Badge variant="danger" icon={<AlertCircle className="w-3 h-3" />}>
-                  Overdue
-                </Badge>
-              )}
-            </div>
-            <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="w-3 h-3" />
-                <span>Due {formatDate(payment.dueDate)}</span>
-              </div>
-              <span className="text-lg font-bold text-primary">{formatPrice(payment.amount)}</span>
-            </div>
-            <Button
-              href={ROUTES.RENTER_PAYMENTS}
-              variant={payment.status === 'overdue' ? 'danger' : 'primary'}
-              size="sm"
-              fullWidth
-              className="gap-2"
+      <ul className="divide-y divide-border">
+        {upcomingPayments.map((payment, index) => {
+          const overdue = payment.status === 'overdue';
+          return (
+            <motion.li
+              key={payment.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 + index * 0.05, duration: 0.3 }}
+              className="px-5 py-4"
             >
-              Pay now
-              <ArrowRight className="w-3 h-3" />
-            </Button>
-          </motion.div>
-        ))}
-      </div>
+              <div className="flex items-start gap-3.5">
+                <span
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${overdue ? 'bg-destructive-subtle text-destructive' : 'bg-primary/10 text-primary'}`}
+                >
+                  {overdue ? (
+                    <AlertCircle className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <Home className="h-4 w-4" aria-hidden="true" />
+                  )}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">{payment.property}</p>
+                  <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground tabular-nums">
+                    <Calendar className="h-3 w-3 shrink-0" aria-hidden="true" />
+                    Due {formatDate(payment.dueDate)}
+                  </p>
+                  {overdue && (
+                    <Badge variant="danger" className="mt-1.5">
+                      Overdue
+                    </Badge>
+                  )}
+                </div>
+                <span className="data-value shrink-0 whitespace-nowrap text-base font-semibold text-foreground">
+                  {formatPrice(payment.amount)}
+                </span>
+              </div>
+              <Button
+                href={ROUTES.RENTER_PAYMENTS}
+                variant={overdue ? 'danger' : 'primary'}
+                size="sm"
+                fullWidth
+                className="mt-3"
+              >
+                Pay now
+              </Button>
+            </motion.li>
+          );
+        })}
+      </ul>
 
-      <div className="p-4 border-t border-border">
-        <Button href={ROUTES.RENTER_PAYMENTS} variant="ghost" size="sm" fullWidth className="gap-1">
+      <div className="border-t border-border px-5 py-2.5">
+        <Button href={ROUTES.RENTER_PAYMENTS} variant="link" size="sm">
           View payment history
-          <ArrowRight className="w-3 h-3" />
         </Button>
       </div>
     </motion.div>

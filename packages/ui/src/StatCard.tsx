@@ -4,28 +4,15 @@ import { cn } from '@sureground/shared';
 
 export type StatCardAccent = 'blue' | 'primary' | 'orange' | 'red' | 'purple' | 'emerald' | 'green';
 
-const accentClasses: Record<StatCardAccent, { icon: string }> = {
-  blue: {
-    icon: 'text-muted-foreground',
-  },
-  primary: {
-    icon: 'text-primary',
-  },
-  orange: {
-    icon: 'text-warning',
-  },
-  red: {
-    icon: 'text-destructive',
-  },
-  purple: {
-    icon: 'text-muted-foreground',
-  },
-  emerald: {
-    icon: 'text-success',
-  },
-  green: {
-    icon: 'text-success',
-  },
+// Written out in full: Tailwind only generates classes it finds as literals.
+const accentClasses: Record<StatCardAccent, { tile: string; icon: string }> = {
+  blue: { tile: 'bg-primary/10', icon: 'text-primary' },
+  primary: { tile: 'bg-primary/10', icon: 'text-primary' },
+  orange: { tile: 'bg-warning-subtle', icon: 'text-warning' },
+  red: { tile: 'bg-destructive-subtle', icon: 'text-destructive' },
+  purple: { tile: 'bg-secondary', icon: 'text-muted-foreground' },
+  emerald: { tile: 'bg-success-subtle', icon: 'text-success' },
+  green: { tile: 'bg-success-subtle', icon: 'text-success' },
 };
 
 interface StatCardProps {
@@ -67,7 +54,12 @@ export const StatCard = ({
       <div className="relative p-5">
         <div className={cn('flex items-center justify-between gap-3', compact ? 'mb-3' : 'mb-5')}>
           <p className="text-sm font-medium tracking-[-0.01em] text-muted-foreground">{label}</p>
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-secondary">
+          <span
+            className={cn(
+              'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
+              colors.tile
+            )}
+          >
             <Icon className={cn('h-4 w-4', colors.icon)} aria-hidden="true" />
           </span>
         </div>

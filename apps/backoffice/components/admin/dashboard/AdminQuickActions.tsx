@@ -49,9 +49,11 @@ export const AdminQuickActions = () => {
             key={action.label}
             href={action.href}
             variant="outline"
-            className="h-auto flex-col gap-2 py-4"
+            className="h-auto flex-col gap-2.5 py-4 hover:border-primary/40"
           >
-            <action.icon className="h-5 w-5 text-muted-foreground" />
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+              <action.icon className="h-[18px] w-[18px] text-primary" aria-hidden="true" />
+            </span>
             <span className="text-center text-xs font-medium">{action.label}</span>
           </Button>
         ))}

@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
@@ -144,7 +145,7 @@ function ListingManager({ estateId, listing }: { estateId: string; listing: Esta
           {listing.availableFrom ? ` · from ${formatDate(listing.availableFrom, 'short')}` : ''}
         </Text>
         <Text variant="caption" color="mutedForeground">
-          {[listing.address, listing.city].filter(Boolean).join(', ')}
+          {formatLocation(listing.address, listing.city)}
           {listing.ownerName ? ` · owner ${listing.ownerName}` : ''}
         </Text>
         <Text variant="caption" color="mutedForeground">

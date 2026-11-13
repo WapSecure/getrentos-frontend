@@ -13,6 +13,7 @@ import {
   useToast,
   PageHeader,
 } from '@sureground/ui';
+import { RecordGridSkeleton, RecordToolbar } from '@/components/shared/records/RecordParts';
 import { ApplicationCard } from '@/components/landlord/applications/ApplicationCard';
 import { ApplicationDetailsModal } from '@/components/landlord/applications/ApplicationDetailsModal';
 import { RequestInfoDialog } from '@/components/landlord/applications/RequestInfoDialog';
@@ -115,6 +116,7 @@ export default function LandlordApplicationsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Lettings"
         title="Applications"
         description={
           <>
@@ -124,32 +126,40 @@ export default function LandlordApplicationsPage() {
       />
       <LandlordLettingsNav />
 
-      <div
-        className="mb-6 flex w-full max-w-full gap-2 overflow-x-auto pb-1"
-        role="group"
-        aria-label="Filter applications by status"
-      >
-        {statusFilters.map((option) => (
-          <ToggleChip
-            key={option.value}
-            size="sm"
-            pressed={filter === option.value}
-            onPressedChange={() => {
-              setFilter(option.value);
-              setPage(1);
-            }}
-          >
-            {option.label}
-          </ToggleChip>
-        ))}
-      </div>
+      <RecordToolbar>
+        <div
+          className="flex w-full max-w-full gap-2 overflow-x-auto"
+          role="group"
+          aria-label="Filter applications by status"
+        >
+          {statusFilters.map((option) => (
+            <ToggleChip
+              key={option.value}
+              size="sm"
+              pressed={filter === option.value}
+              onPressedChange={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
+            >
+              {option.label}
+            </ToggleChip>
+          ))}
+        </div>
+      </RecordToolbar>
 
       <ListState
         items={applications}
         query={{ isPending, isError, refetch }}
         errorTitle="We couldn't load your applications"
-        skeletonClassName="h-32"
-        empty={<EmptyState icon={FileText} title="No applications found" />}
+        skeleton={<RecordGridSkeleton />}
+        empty={
+          <EmptyState
+            icon={FileText}
+            title="No applications found"
+            description="Applications from renters appear here as they come in."
+          />
+        }
       >
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {applications.map((application, index) => (

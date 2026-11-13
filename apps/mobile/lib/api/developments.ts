@@ -1,7 +1,14 @@
-import { developmentOf, type ShowroomDevelopment } from '@sureground/shared/showroom';
+import {
+  buyerDevelopmentEnquiriesOf,
+  buyerDevelopmentEnquiryOf,
+  developmentOf,
+  type BuyerDevelopmentEnquiry,
+  type ShowroomDevelopment,
+} from '@sureground/shared/showroom';
 import { ApiError, apiFetch } from './client';
 import { toQuery } from './query';
 import { developmentsPageOf, isDevelopmentId, type DevelopmentsPage } from '../developments';
+import { enquiryBody } from '../askDeveloper';
 
 // Public routes: a token would only make a stale session 401 on a page that needs none.
 const anon = { anonymous: true } as const;
@@ -24,5 +31,27 @@ export const developmentsApi = {
       if (e instanceof ApiError && e.status === 404) return null;
       throw e;
     }
+  },
+
+  /** The signed-in user's own questions about one development, newest first. */
+  async myEnquiries(developmentId: string): Promise<BuyerDevelopmentEnquiry[]> {
+    if (!isDevelopmentId(developmentId)) return [];
+    const raw = await apiFetch<unknown>(`/development-enquiries${toQuery({ developmentId })}`);
+    return buyerDevelopmentEnquiriesOf(raw);
+  },
+
+  /** Signed in, live developments only; a 429 carries the API's own message. */
+  async ask(
+    developmentId: string,
+    message: string,
+    unitTypeId?: string
+  ): Promise<BuyerDevelopmentEnquiry> {
+    const raw = await apiFetch<unknown>(
+      `/developments/${encodeURIComponent(developmentId)}/enquiries`,
+      { method: 'POST', body: enquiryBody(message, unitTypeId) }
+    );
+    const sent = buyerDevelopmentEnquiryOf(raw);
+    if (!sent) throw new Error('Your question was not sent. Try again.');
+    return sent;
   },
 };

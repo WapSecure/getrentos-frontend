@@ -18,7 +18,7 @@ export const SavedPropertiesHeader = ({
   return (
     <div>
       <RenterPageHeader
-        eyebrow=""
+        eyebrow="Renting"
         icon={Heart}
         title="Saved properties"
         description="Organise favourite homes, compare your options, and return to promising listings quickly."

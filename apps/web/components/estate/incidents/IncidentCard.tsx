@@ -49,12 +49,19 @@ const formatDateTime = (value: string) =>
 
 interface IncidentCardProps {
   incident: Incident;
+  onStart?: () => void;
   onResolve?: () => void;
   onDismiss?: () => void;
   isUpdating?: boolean;
 }
 
-export const IncidentCard = ({ incident, onResolve, onDismiss, isUpdating }: IncidentCardProps) => {
+export const IncidentCard = ({
+  incident,
+  onStart,
+  onResolve,
+  onDismiss,
+  isUpdating,
+}: IncidentCardProps) => {
   const isOpen = incident.status === 'open' || incident.status === 'in_progress';
 
   return (
@@ -71,8 +78,13 @@ export const IncidentCard = ({ incident, onResolve, onDismiss, isUpdating }: Inc
             {categoryLabels[incident.category]} · Reported {formatDateTime(incident.createdAt)}
           </p>
         </div>
-        {isOpen && (onResolve || onDismiss) && (
+        {isOpen && (onStart || onResolve || onDismiss) && (
           <div className="flex items-center gap-2 shrink-0">
+            {onStart && incident.status === 'open' && (
+              <Button variant="outline" size="sm" disabled={isUpdating} onClick={onStart}>
+                Mark in progress
+              </Button>
+            )}
             {onResolve && (
               <Button variant="outline" size="sm" disabled={isUpdating} onClick={onResolve}>
                 Resolve

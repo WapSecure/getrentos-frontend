@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge, PageErrorState, PageHeader, Skeleton, Textarea, useToast } from '@sureground/ui';
 import { CalendarClock, MapPin } from '@sureground/icons';
-import { boundaryCorners } from '@sureground/shared';
+import { boundaryCorners, formatLocation } from '@sureground/shared';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
@@ -188,7 +188,8 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
           description={
             <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
               <span className="inline-flex items-center gap-1">
-                <MapPin className="h-4 w-4" aria-hidden /> {p.address}, {p.city}, {p.state}
+                <MapPin className="h-4 w-4" aria-hidden />{' '}
+                {formatLocation(p.address, p.city, p.state)}
               </span>
               {data.dueAt && (
                 <span

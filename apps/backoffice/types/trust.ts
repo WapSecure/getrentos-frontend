@@ -147,8 +147,15 @@ export interface TrustAppeal {
   targetLabel?: string | null;
 }
 
-/** Diaspora identity (decision D3): a passport, proof of address abroad and a bank statement from abroad. */
-export type ForeignPurpose = 'FOREIGN_IDENTITY' | 'FOREIGN_ADDRESS' | 'FOREIGN_BANK_STATEMENT';
+/**
+ * Staff-reviewed Diaspora Invest uploads on the same review endpoints: identity (decision D3) and
+ * source of funds (DIA-07, decision D4).
+ */
+export type ForeignPurpose =
+  | 'FOREIGN_IDENTITY'
+  | 'FOREIGN_ADDRESS'
+  | 'FOREIGN_BANK_STATEMENT'
+  | 'SOURCE_OF_FUNDS';
 
 /** GET /admin/trust/foreign-identity/review-cases, soonest due first. */
 export interface ForeignReviewCaseSummary {

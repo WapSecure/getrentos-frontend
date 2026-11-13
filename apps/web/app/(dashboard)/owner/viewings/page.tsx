@@ -108,6 +108,7 @@ export default function OwnerViewingsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Selling"
         title="Viewings"
         description={
           <>

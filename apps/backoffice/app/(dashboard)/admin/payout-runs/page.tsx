@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Landmark } from '@sureground/icons';
+import { AlertTriangle, ChevronDown, Clock, Landmark } from '@sureground/icons';
 import {
   Badge,
   Button,
@@ -15,15 +15,21 @@ import {
   PageErrorState,
   Select,
   Skeleton,
+  StatGroup,
   useToast,
   PageHeader,
   type Column,
 } from '@sureground/ui';
+import { cn } from '@sureground/shared';
 import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { payoutAccountLabel, payoutDestinationSentence } from '@/lib/payoutDestination';
-import { adminPayoutRunsService, type PayoutRun } from '@/services/adminPayoutRunsService';
+import {
+  adminPayoutRunsService,
+  type PayoutRun,
+  type PayoutRunSummary,
+} from '@/services/adminPayoutRunsService';
 import type { PayoutDestination } from '@/services/adminPayoutIssuesService';
 
 const MONTH_NAMES = [
@@ -160,21 +166,23 @@ export default function PayoutRunsPage() {
       header: 'Rent',
       numeric: true,
       className: 'align-top',
-      render: (i) => (i.grossIncome != null ? formatCurrency(i.grossIncome) : '—'),
+      render: (i) => (i.grossIncome != null ? formatCurrency(i.grossIncome) : '–'),
     },
     {
       key: 'toPay',
       header: 'To pay',
       numeric: true,
       className: 'align-top',
-      render: (i) => (i.netPayout != null ? formatCurrency(i.netPayout) : '—'),
+      render: (i) => (i.netPayout != null ? formatCurrency(i.netPayout) : '–'),
     },
     {
       key: 'status',
       header: 'Status',
       className: 'align-top',
       render: (i) => (
-        <Badge variant={ITEM_BADGE[i.status].variant}>{ITEM_BADGE[i.status].label}</Badge>
+        <Badge variant={ITEM_BADGE[i.status].variant} dot>
+          {ITEM_BADGE[i.status].label}
+        </Badge>
       ),
     },
     {
@@ -207,12 +215,119 @@ export default function PayoutRunsPage() {
     },
   ];
 
+  const runColumns: Column<PayoutRunSummary>[] = [
+    {
+      key: 'month',
+      header: 'Month',
+      render: (s) => <span className="font-medium text-foreground">{monthLabel(s.period)}</span>,
+      className: 'whitespace-nowrap',
+    },
+    {
+      key: 'owners',
+      header: 'Owners',
+      numeric: true,
+      render: (s) => s.owners,
+    },
+    {
+      key: 'total',
+      header: 'Total',
+      numeric: true,
+      render: (s) => <span className="font-medium text-foreground">{formatCurrency(s.total)}</span>,
+    },
+    {
+      key: 'dates',
+      header: 'Drafted',
+      render: (s) => (
+        <>
+          {formatDate(s.createdAt)}
+          {s.issuedAt && (
+            <span className="block text-xs text-muted-foreground">
+              Issued {formatDate(s.issuedAt)}
+            </span>
+          )}
+        </>
+      ),
+      className: 'whitespace-nowrap text-muted-foreground',
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (s) => (
+        <span className="flex flex-wrap items-center gap-1.5">
+          <Badge variant={s.status === 'ISSUED' ? 'success' : 'warning'} dot>
+            {s.status === 'ISSUED' ? 'Issued' : 'Waiting to be issued'}
+          </Badge>
+          {s.failed > 0 && <Badge variant="danger">{s.failed} failed</Badge>}
+        </span>
+      ),
+    },
+    {
+      key: 'open',
+      header: '',
+      srHeader: 'Actions',
+      align: 'right',
+      render: (s) => (
+        <Button
+          size="sm"
+          variant="outline"
+          aria-expanded={openRun === s.id}
+          iconPosition="right"
+          icon={
+            <ChevronDown
+              className={cn('transition-transform duration-150', openRun === s.id && 'rotate-180')}
+            />
+          }
+          onClick={() => setOpenRun(openRun === s.id ? null : s.id)}
+        >
+          {openRun === s.id ? 'Hide' : 'Open'}
+        </Button>
+      ),
+    },
+  ];
+
+  // The API returns the 24 most recent runs (payout-run.service), so these cover the list below only.
+  const waitingRuns = runs.data?.filter((s) => s.status === 'DRAFTED').length ?? 0;
+  const failedPayouts = runs.data?.reduce((sum, s) => sum + s.failed, 0) ?? 0;
+  const latestRun = runs.data?.[0];
+
   return (
     <>
       <PageHeader
+        eyebrow="Money"
         title="Payout runs"
         description="Pay every owner for a month at once. Drafting writes each owner's statement (fees and expenses as usual); someone other than the person who drafted it issues the run, and each statement then pays out, or waits for approval above the release threshold."
       />
+
+      {runs.data && runs.data.length > 0 && (
+        <StatGroup
+          title="Recent runs, as listed below"
+          className="mb-6"
+          items={[
+            {
+              label: 'Waiting to be issued',
+              value: waitingRuns,
+              subtitle: 'Drafted runs in the list, not yet paid',
+              icon: Clock,
+              attention: waitingRuns > 0,
+            },
+            {
+              label: 'Failed payouts',
+              value: failedPayouts,
+              subtitle: 'Across the issued runs listed below',
+              icon: AlertTriangle,
+              attention: failedPayouts > 0,
+            },
+            {
+              label: 'Latest run',
+              value: latestRun ? formatCurrency(latestRun.total) : '–',
+              subtitle: latestRun
+                ? `${monthLabel(latestRun.period)} · ${latestRun.owners} owner${latestRun.owners === 1 ? '' : 's'}`
+                : undefined,
+              icon: Landmark,
+            },
+          ]}
+        />
+      )}
 
       {canAct && (
         <Card className="mb-6 flex flex-wrap items-end gap-3 p-5">
@@ -251,76 +366,48 @@ export default function PayoutRunsPage() {
           description="Draft one for a month that has ended."
         />
       ) : (
-        <div className="space-y-3">
-          {runs.data.map((s) => (
-            <Card key={s.id} className="p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="font-medium text-foreground">
-                    {monthLabel(s.period)} · {s.owners} owner{s.owners === 1 ? '' : 's'} ·{' '}
-                    {formatCurrency(s.total)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Drafted {formatDate(s.createdAt)}
-                    {s.issuedAt ? ` · issued ${formatDate(s.issuedAt)}` : ''}
-                    {s.failed ? ` · ${s.failed} failed` : ''}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant={s.status === 'ISSUED' ? 'success' : 'warning'}>
-                    {s.status === 'ISSUED' ? 'Issued' : 'Waiting to be issued'}
-                  </Badge>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setOpenRun(openRun === s.id ? null : s.id)}
-                  >
-                    {openRun === s.id ? 'Hide' : 'Open'}
-                  </Button>
-                </div>
+        <DataTable
+          caption="Payout runs"
+          columns={runColumns}
+          data={runs.data}
+          getRowKey={(s) => s.id}
+          isRowSelected={(s) => openRun === s.id}
+          renderExpanded={(s) =>
+            openRun !== s.id ? null : !r && run.isLoading ? (
+              <div className="space-y-2" role="status" aria-label="Loading run">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-2/3" />
               </div>
-
-              {openRun === s.id && !r && run.isLoading && (
-                <div
-                  className="mt-4 space-y-2 border-t border-border pt-4"
-                  role="status"
-                  aria-label="Loading run"
-                >
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-5/6" />
-                  <Skeleton className="h-4 w-2/3" />
-                </div>
-              )}
-              {openRun === s.id && r && (
-                <div className="mt-4 border-t border-border pt-4">
-                  <DataTable
-                    variant="bare"
-                    caption={`Owner statements in the ${monthLabel(r.period)} payout run`}
-                    density="compact"
-                    columns={itemColumns}
-                    data={r.items}
-                    getRowKey={(i) => i.id}
-                  />
-                  {canAct && r.status === 'DRAFTED' && (
-                    <div className="mt-4 flex flex-wrap items-center gap-3">
-                      <Button
-                        variant="primary"
-                        isLoading={issue.isPending}
-                        loadingText="Issuing…"
-                        onClick={() => setConfirmingIssue(true)}
-                      >
-                        Issue run
-                      </Button>
-                      <p className="text-xs text-muted-foreground">
-                        Must be issued by someone other than the person who drafted it.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </Card>
-          ))}
-        </div>
+            ) : r ? (
+              <div className="rounded-lg border border-border bg-card">
+                <DataTable
+                  variant="bare"
+                  caption={`Owner statements in the ${monthLabel(r.period)} payout run`}
+                  density="compact"
+                  columns={itemColumns}
+                  data={r.items}
+                  getRowKey={(i) => i.id}
+                />
+                {canAct && r.status === 'DRAFTED' && (
+                  <div className="flex flex-wrap items-center gap-3 border-t border-border px-5 py-3">
+                    <Button
+                      variant="primary"
+                      isLoading={issue.isPending}
+                      loadingText="Issuing…"
+                      onClick={() => setConfirmingIssue(true)}
+                    >
+                      Issue run
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      Must be issued by someone other than the person who drafted it.
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : null
+          }
+        />
       )}
 
       <ConfirmDialog

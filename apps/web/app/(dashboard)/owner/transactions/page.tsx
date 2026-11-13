@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ShieldCheck } from '@sureground/icons';
+import { RecordToolbar } from '@/components/shared/records/RecordParts';
 import { EscrowTransactionCard } from '@/components/owner/transactions/EscrowTransactionCard';
 import { EscrowTransactionDetailModal } from '@/components/owner/transactions/EscrowTransactionDetailModal';
 import { ownerService } from '@/services/ownerService';
@@ -76,6 +77,7 @@ export default function OwnerTransactionsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Selling"
         title="Sales in progress"
         description={
           isLoading ? (
@@ -87,7 +89,7 @@ export default function OwnerTransactionsPage() {
       />
       <OwnerSellingNav />
 
-      <div className="mb-6 flex min-w-0 flex-col gap-3 sm:flex-row">
+      <RecordToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={setSearchQuery}
@@ -103,9 +105,9 @@ export default function OwnerTransactionsPage() {
             setPage(1);
           }}
           segments={filterOptions}
-          className="w-full min-w-0 max-w-full justify-start overflow-x-auto sm:w-auto"
+          className="w-full min-w-0 max-w-full justify-start overflow-x-auto sm:ml-auto sm:w-auto"
         />
-      </div>
+      </RecordToolbar>
 
       {isLoading ? (
         <ListSkeleton rows={6} variant="cards" label="Loading sales" />

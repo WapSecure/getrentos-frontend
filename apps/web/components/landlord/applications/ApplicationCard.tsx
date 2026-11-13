@@ -3,8 +3,15 @@
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert, Eye, Check, X, MessageSquareText } from '@sureground/icons';
 import { Badge, Button, IconButton } from '@sureground/ui';
+import { trustScoreDisplay } from '@sureground/shared';
 import { applicationStatusBadges } from '@/lib/statusBadge';
-import { formatCurrency, formatDate, getInitials } from '@/lib/format';
+import { formatCurrency, formatDate } from '@/lib/format';
+import {
+  RecordActions,
+  RecordAvatar,
+  RecordFacts,
+  recordCardClass,
+} from '@/components/shared/records/RecordParts';
 import type { RentalApplication } from '@/types/landlord';
 
 interface ApplicationCardProps {
@@ -33,53 +40,50 @@ export const ApplicationCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="min-w-0 rounded-2xl border border-border bg-card p-4"
+      className={recordCardClass()}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
-            {getInitials(application.applicantName)}
-          </div>
+          <RecordAvatar name={application.applicantName} />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <h3 className="font-semibold text-foreground truncate">
                 {application.applicantName}
               </h3>
               {isVerified ? (
-                <ShieldCheck className="w-3.5 h-3.5 text-success shrink-0" />
+                <ShieldCheck className="w-3.5 h-3.5 text-success shrink-0" aria-label="Verified" />
               ) : (
-                <ShieldAlert className="w-3.5 h-3.5 text-warning shrink-0" />
+                <ShieldAlert
+                  className="w-3.5 h-3.5 text-warning shrink-0"
+                  aria-label="Not verified"
+                />
               )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
-              {application.propertyName} • {application.unitName}
+              {application.propertyName} · {application.unitName}
             </p>
           </div>
         </div>
         <StatusBadge status={application.status} />
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mt-4">
-        <div>
-          <p className="text-xs text-foreground/70">Monthly income</p>
-          <p className="text-sm font-medium text-foreground">
-            {formatCurrency(application.monthlyIncome, { compact: true })}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs text-foreground/70">Applied</p>
-          <p className="text-sm font-medium text-foreground">
-            {formatDate(application.applicationDate)}
-          </p>
-        </div>
-      </div>
+      <RecordFacts
+        columns={3}
+        facts={[
+          {
+            label: 'Monthly income',
+            value: formatCurrency(application.monthlyIncome, { compact: true }),
+          },
+          { label: 'Applied', value: formatDate(application.applicationDate) },
+          {
+            label: 'Trust score',
+            value: trustScoreDisplay(application.trustScore),
+            tone: 'brand',
+          },
+        ]}
+      />
 
-      <div className="flex items-center gap-1.5 mt-3">
-        <span className="text-xs text-muted-foreground">Trust score</span>
-        <span className="text-xs font-bold text-primary">{application.trustScore}</span>
-      </div>
-
-      <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+      <RecordActions className="flex-nowrap">
         <Button variant="outline" size="sm" fullWidth className="gap-1.5" onClick={onViewDetails}>
           <Eye className="w-3.5 h-3.5" />
           Details
@@ -102,7 +106,7 @@ export const ApplicationCard = ({
             </Button>
           </>
         )}
-      </div>
+      </RecordActions>
     </motion.div>
   );
 };

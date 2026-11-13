@@ -191,6 +191,7 @@ export default function OwnerAnalyticsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Insights"
         title="Investment analytics"
         description="Figures from your records. A value is shown only from an accredited valuer's report under 12 months old."
         actions={

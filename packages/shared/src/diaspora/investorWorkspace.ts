@@ -5,6 +5,7 @@ import type {
   ForeignIdentityStatus,
   InvestorOverview,
   InvestorStatusCounts,
+  PurchaseDispute,
   PurchaseSummary,
 } from './types';
 
@@ -19,7 +20,8 @@ export type InvestorAttentionKind =
   | 'purchase'
   | 'tour'
   | 'spending'
-  | 'identity';
+  | 'identity'
+  | 'dispute';
 
 export interface InvestorAttentionItem extends AttentionItem {
   kind: InvestorAttentionKind;
@@ -60,6 +62,8 @@ export interface AttentionLinks {
   tours?: string;
   approvals?: string;
   identity: string;
+  /** Where a dispute opens; without it, the purchase's own workspace. */
+  dispute?: (dispute: Pick<PurchaseDispute, 'id' | 'kind'>) => string;
 }
 
 export interface AttentionInput {
@@ -128,6 +132,47 @@ const identityItems = (identity: ForeignIdentityStatus, href: string): InvestorA
   return items;
 };
 
+/** DIA-07: asked for once a purchase crosses the threshold; a row only while it is needed and not with our team. */
+const sourceOfFundsItems = (
+  identity: ForeignIdentityStatus,
+  href: string
+): InvestorAttentionItem[] => {
+  const status = identity.sourceOfFunds;
+  if (!status) return [];
+  if (status.state === 'REJECTED') {
+    return [
+      {
+        key: 'identity-source-of-funds',
+        kind: 'identity',
+        severity: 'urgent',
+        title: 'Send your source of funds documents again',
+        detail: 'Our team could not approve the last ones. The reason is on the check.',
+        link: { path: href, label: 'See why' },
+      },
+    ];
+  }
+  if (status.required && status.state === 'NOT_STARTED') {
+    return [
+      {
+        key: 'identity-source-of-funds',
+        kind: 'identity',
+        severity: 'urgent',
+        title: status.renewal
+          ? 'Confirm your source of funds again'
+          : 'Confirm your source of funds',
+        detail:
+          status.renewal === 'EXPIRED'
+            ? 'Your approval has expired. Needed before your next offer or deposit.'
+            : status.renewal === 'COVERAGE_EXCEEDED'
+              ? 'Your purchases now go beyond what your approval covered.'
+              : 'Needed before your next offer or deposit.',
+        link: { path: href, label: 'Start' },
+      },
+    ];
+  }
+  return [];
+};
+
 /**
  * "What needs me now": one row per thing waiting for the investor, most pressing first. A purchase
  * appears once, preferring the deposit row because it carries the amount.
@@ -192,6 +237,24 @@ export const buildAttentionQueue = (input: AttentionInput): InvestorAttentionIte
         link: { path, label: 'Open' },
       });
     }
+    const dispute = purchase.dispute;
+    if (dispute) {
+      // The model records no turn for the buyer, only Sureground's response deadline, so this is
+      // information with that deadline rather than a task.
+      items.push({
+        key: `dispute-${dispute.id}`,
+        kind: 'dispute',
+        severity: 'info',
+        title: `Open dispute on ${purchase.title}`,
+        detail:
+          dispute.kind === 'DEPOSIT'
+            ? 'The deposit stays held until Sureground decides.'
+            : 'A land case Sureground is looking into.',
+        dueAt: dispute.respondBy ?? undefined,
+        dueLabel: dispute.respondBy ? 'Sureground replies by' : undefined,
+        link: { path: links.dispute ? links.dispute(dispute) : path, label: 'View' },
+      });
+    }
   }
 
   if (links.tours) {
@@ -226,6 +289,7 @@ export const buildAttentionQueue = (input: AttentionInput): InvestorAttentionIte
   }
 
   if (input.identity?.eligible) items.push(...identityItems(input.identity, links.identity));
+  if (input.identity?.eligible) items.push(...sourceOfFundsItems(input.identity, links.identity));
 
   return items
     .map((item, index) => ({ item, index }))

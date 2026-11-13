@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cn } from '@sureground/shared';
+import { Eyebrow } from './Eyebrow';
 
 interface SectionIntroProps {
   eyebrow?: string;
@@ -32,7 +33,14 @@ export const SectionIntro = ({
     )}
   >
     <div className="min-w-0">
-      {eyebrow ? <p className="label-caps mb-4 text-muted-foreground">{eyebrow}</p> : null}
+      {eyebrow ? (
+        <Eyebrow
+          rule={layout !== 'centered'}
+          className={cn('mb-4', layout === 'centered' && 'justify-center')}
+        >
+          {eyebrow}
+        </Eyebrow>
+      ) : null}
       <h2
         id={id}
         className="font-display text-[2rem] leading-[1.1] font-normal tracking-[-0.01em] text-balance md:text-[2.75rem]"

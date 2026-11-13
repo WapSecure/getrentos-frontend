@@ -1,5 +1,13 @@
-import { useState } from 'react';
-import { Linking, Pressable, ScrollView, Share, View, useWindowDimensions } from 'react-native';
+import { formatLocation } from '@sureground/shared';
+import { useRef, useState } from 'react';
+import {
+  Pressable,
+  ScrollView,
+  Share,
+  View,
+  useWindowDimensions,
+  type ScrollViewInstance,
+} from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
@@ -12,9 +20,9 @@ import {
   CalendarDays,
   ChevronLeft,
   Info,
-  Mail,
+  LogIn,
   MapPin,
-  Phone,
+  MessageCircleQuestion,
   Ruler,
   Share2,
 } from '@sureground/icons/native';
@@ -32,6 +40,7 @@ import {
   useTheme,
 } from '@sureground/ui-native';
 import {
+  DEVELOPMENT_ENQUIRY_COPY,
   DEVELOPMENT_STAGE_LABEL,
   completionLabel,
   instalmentAmountLabel,
@@ -47,10 +56,9 @@ import {
   instalmentContext,
   isDevelopmentId,
   lowestUnitPrice,
-  mailLink,
   shortDay,
-  telLink,
 } from '@/lib/developments';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import { env } from '@/lib/env';
 import { formatNaira } from '@/lib/format';
 import { ShowroomPreview } from '@/components/showroom/ShowroomMedia';
@@ -59,6 +67,7 @@ import {
   DevelopmentChecks,
   DevelopmentPaymentNotice,
 } from '@/components/showroom/DevelopmentAssurance';
+import { AskTheDeveloper, SalesContact, signInToAsk } from '@/components/showroom/AskTheDeveloper';
 
 /**
  * A public off-plan development, as on the web's /developments/[id]: listed only. The developer
@@ -69,6 +78,11 @@ export default function PublicDevelopment() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const valid = isDevelopmentId(id);
+  const scrollRef = useRef<ScrollViewInstance>(null);
+  const bodyY = useRef(0);
+  const askY = useRef(0);
+  const scrollToAsk = () =>
+    scrollRef.current?.scrollTo({ y: Math.max(0, bodyY.current + askY.current - 80) });
 
   const query = useQuery({
     queryKey: qk.market.development(String(id)),
@@ -84,13 +98,14 @@ export default function PublicDevelopment() {
   const share = async () => {
     if (!d) return;
     await Share.share({
-      message: `${d.name} · ${d.city}, ${d.state}\n${env.webUrl}/developments/${encodeURIComponent(d.id)}`,
+      message: `${d.name} · ${formatLocation(d.city, d.state)}\n${env.webUrl}/developments/${encodeURIComponent(d.id)}`,
     }).catch(() => undefined);
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView
+        ref={scrollRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: insets.bottom + spacing['3xl'] }}
       >
@@ -106,7 +121,10 @@ export default function PublicDevelopment() {
           <View style={{ height: 320, backgroundColor: colors.muted }} />
         )}
 
-        <View style={{ padding: spacing.xl, gap: spacing['2xl'] }}>
+        <View
+          onLayout={(e) => (bodyY.current = e.nativeEvent.layout.y)}
+          style={{ padding: spacing.xl, gap: spacing['2xl'] }}
+        >
           {!valid || query.data === null ? (
             <EmptyState
               icon={<Building2 size={34} color={colors.mutedForeground} />}
@@ -127,7 +145,9 @@ export default function PublicDevelopment() {
                 </View>
               }
             >
-              {d ? <Body development={d} /> : null}
+              {d ? (
+                <Body development={d} onAsk={scrollToAsk} onAskLayout={(y) => (askY.current = y)} />
+              ) : null}
             </QueryState>
           )}
         </View>
@@ -162,8 +182,17 @@ export default function PublicDevelopment() {
   );
 }
 
-function Body({ development: d }: { development: ShowroomDevelopment }) {
+function Body({
+  development: d,
+  onAsk,
+  onAskLayout,
+}: {
+  development: ShowroomDevelopment;
+  onAsk: () => void;
+  onAskLayout: (y: number) => void;
+}) {
   const { colors, spacing } = useTheme();
+  const signedIn = useAuth().status === 'authenticated';
   const lowest = lowestUnitPrice(d);
   const completion = completionLabel(d.expectedCompletion);
   const location = [d.addressLine, d.lga, d.city, d.state].filter(Boolean).join(', ');
@@ -234,6 +263,19 @@ function Body({ development: d }: { development: ShowroomDevelopment }) {
             </Text>
           </View>
         ) : null}
+        {signedIn ? (
+          <Button
+            label={DEVELOPMENT_ENQUIRY_COPY.title}
+            icon={<MessageCircleQuestion size={16} color={colors.primaryForeground} />}
+            onPress={onAsk}
+          />
+        ) : (
+          <Button
+            label={DEVELOPMENT_ENQUIRY_COPY.signedOut}
+            icon={<LogIn size={16} color={colors.primaryForeground} />}
+            onPress={() => signInToAsk(d.id)}
+          />
+        )}
         <SalesContact development={d} />
         <DevelopmentPaymentNotice compact />
       </Card>
@@ -341,36 +383,11 @@ function Body({ development: d }: { development: ShowroomDevelopment }) {
       </View>
 
       <DevelopmentChecks development={d} />
-    </>
-  );
-}
 
-/** The developer's own sales line and email, as they stated them: Sureground is not a party to the sale. */
-function SalesContact({ development: d }: { development: ShowroomDevelopment }) {
-  const { colors, spacing } = useTheme();
-  if (!d.salesPhone && !d.salesEmail) return null;
-  return (
-    <View style={{ gap: spacing.sm }}>
-      <Text variant="bodyStrong">Contact the developer</Text>
-      {d.salesPhone ? (
-        <Button
-          label={d.salesPhone}
-          variant="secondary"
-          icon={<Phone size={16} color={colors.foreground} />}
-          accessibilityLabel={`Call the developer on ${d.salesPhone}`}
-          onPress={() => void Linking.openURL(telLink(d.salesPhone!)).catch(() => undefined)}
-        />
-      ) : null}
-      {d.salesEmail ? (
-        <Button
-          label={d.salesEmail}
-          variant="secondary"
-          icon={<Mail size={16} color={colors.foreground} />}
-          accessibilityLabel={`Email the developer at ${d.salesEmail}`}
-          onPress={() => void Linking.openURL(mailLink(d.salesEmail!)).catch(() => undefined)}
-        />
-      ) : null}
-    </View>
+      <View onLayout={(e) => onAskLayout(e.nativeEvent.layout.y)}>
+        <AskTheDeveloper development={d} />
+      </View>
+    </>
   );
 }
 

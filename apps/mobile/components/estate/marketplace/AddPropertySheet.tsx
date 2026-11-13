@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -124,7 +125,7 @@ function AddPropertyForm({ estateId, onDone }: { estateId: string; onDone: () =>
                     {c.title}
                   </Text>
                   <Text variant="caption" color="mutedForeground" numberOfLines={2}>
-                    {[c.address, c.city].filter(Boolean).join(', ')}
+                    {formatLocation(c.address, c.city)}
                     {c.ownerName ? ` · ${c.ownerName}` : ''}
                   </Text>
                 </View>

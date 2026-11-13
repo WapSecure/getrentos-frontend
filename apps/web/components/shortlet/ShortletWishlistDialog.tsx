@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -123,7 +124,7 @@ function WishlistRow({
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium">{listing.title}</p>
         <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
-          <MapPin className="h-3.5 w-3.5" /> {listing.city}, {listing.state}
+          <MapPin className="h-3.5 w-3.5" /> {formatLocation(listing.city, listing.state)}
         </p>
         <p className="mt-0.5 text-sm">
           {listing.nightlyRate != null ? formatCurrency(listing.nightlyRate) : '—'}

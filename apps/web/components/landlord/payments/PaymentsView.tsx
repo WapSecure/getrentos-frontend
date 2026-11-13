@@ -12,6 +12,7 @@ import {
   PageHeader,
 } from '@sureground/ui';
 import { RentCollectionStats } from '@/components/landlord/payments/RentCollectionStats';
+import { RecordToolbar } from '@/components/shared/records/RecordParts';
 import { PaymentsTable } from '@/components/landlord/payments/PaymentsTable';
 import { PaymentDetailsModal } from '@/components/landlord/payments/PaymentDetailsModal';
 import {
@@ -83,6 +84,7 @@ export function PaymentsView() {
   return (
     <>
       <PageHeader
+        eyebrow="Money"
         title="Payments"
         description="Track rent collection and when it is paid out to you"
       />
@@ -100,9 +102,9 @@ export function PaymentsView() {
         )
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <RecordToolbar>
         <SearchInput
-          className="flex-1 max-w-sm"
+          className="flex-1 sm:max-w-sm"
           value={searchQuery}
           onValueChange={(value) => {
             setSearchQuery(value);
@@ -112,7 +114,7 @@ export function PaymentsView() {
           label="Search payments by tenant, property or reference"
         />
         <div
-          className="flex max-w-full gap-1 overflow-x-auto pb-1"
+          className="flex max-w-full gap-2 overflow-x-auto sm:ml-auto"
           role="group"
           aria-label="Filter payments by status"
         >
@@ -130,10 +132,10 @@ export function PaymentsView() {
             </ToggleChip>
           ))}
         </div>
-      </div>
+      </RecordToolbar>
 
       {search && data && (
-        <p className="-mt-3 mb-4 text-xs text-muted-foreground" role="status">
+        <p className="-mt-2 mb-4 text-xs text-muted-foreground" role="status">
           {total === 1 ? '1 payment matches' : `${total} payments match`} &ldquo;{search}&rdquo;.
         </p>
       )}

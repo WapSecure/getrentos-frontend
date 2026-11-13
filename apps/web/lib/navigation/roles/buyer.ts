@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   MapPinned,
   MessageCircle,
+  MessageCircleQuestion,
   ScanSearch,
   Search,
   Settings,
@@ -63,6 +64,12 @@ export const buyerNavigation = defineRoleNavigation({
     },
     { id: 'offers', labelKey: 'sidebar.offers', href: ROUTES.BUYER_OFFERS, icon: Handshake },
     {
+      id: 'developerQuestions',
+      label: 'Questions to developers',
+      href: ROUTES.BUYER_DEVELOPER_QUESTIONS,
+      icon: MessageCircleQuestion,
+    },
+    {
       id: 'transactions',
       labelKey: 'sidebar.transactions',
       href: ROUTES.BUYER_TRANSACTIONS,
@@ -113,6 +120,7 @@ export const buyerNavigation = defineRoleNavigation({
         'tours',
         'inspections',
         'offers',
+        'developerQuestions',
         'transactions',
         'landPurchases',
         'invest',

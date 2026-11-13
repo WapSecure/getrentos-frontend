@@ -7,6 +7,7 @@ export const LegalResourcesView = () => {
   return (
     <>
       <PageHeader
+        eyebrow="Renting"
         title="Legal resources"
         description="General reference guidance on tenant rights, notice periods, deposits, and the eviction process."
       />

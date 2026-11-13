@@ -63,6 +63,11 @@ export interface Property {
   occupiedUnits: number;
   /** Contracted rent per year across let units, normalised to a year. */
   annualRentRoll: number;
+  /** Lowest asking rent among units with no current tenancy, in its own period. */
+  askingRent?: number;
+  askingRentPeriod?: 'month' | 'year';
+  /** The vacant units ask different rents, so `askingRent` is the lowest. */
+  askingRentVaries?: boolean;
   /** In naira. Optional; they drive cap rate and yield. */
   estimatedValue?: number;
   purchasePrice?: number;

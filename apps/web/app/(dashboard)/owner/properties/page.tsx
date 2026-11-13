@@ -177,6 +177,7 @@ export default function OwnerPropertiesPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Portfolio"
         title="Properties"
         description={
           <>

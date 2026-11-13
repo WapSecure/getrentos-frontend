@@ -20,9 +20,9 @@ export interface AttentionListItem extends AttentionItem {
 }
 
 const TONE = {
-  urgent: { icon: AlertCircle, cls: 'text-destructive' },
-  soon: { icon: Clock, cls: 'text-warning' },
-  info: { icon: Bell, cls: 'text-muted-foreground' },
+  urgent: { icon: AlertCircle, cls: 'text-destructive', tile: 'bg-destructive-subtle' },
+  soon: { icon: Clock, cls: 'text-warning', tile: 'bg-warning-subtle' },
+  info: { icon: Bell, cls: 'text-primary', tile: 'bg-primary/10' },
 } as const;
 
 const SEVERITY_LABEL = { urgent: 'Urgent', soon: 'Due soon', info: 'For information' } as const;
@@ -86,7 +86,12 @@ export function AttentionList({
                 className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:gap-4"
               >
                 <div className="flex min-w-0 flex-1 items-start gap-3">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                  <span
+                    className={cn(
+                      'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
+                      tone.tile
+                    )}
+                  >
                     <Icon className={cn('h-4 w-4', tone.cls)} aria-hidden="true" />
                   </span>
                   <div className="min-w-0 flex-1">

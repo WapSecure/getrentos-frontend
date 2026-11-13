@@ -1,6 +1,7 @@
 'use client';
 
-import { Check, CheckCheck } from '@sureground/icons';
+import { Check, CheckCheck, FileText, Image as ImageIcon, Link2 } from '@sureground/icons';
+import { RecordAvatar } from '@/components/shared/records/RecordParts';
 import { format } from 'date-fns';
 
 interface Attachment {
@@ -32,19 +33,13 @@ export const MessageBubble = ({ message, isCurrentUser }: MessageBubbleProps) =>
     return format(date, 'h:mm a');
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((word) => word[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
-  };
-
   const renderAttachmentIcon = (type: string) => {
-    if (type.startsWith('image/')) return '🖼️';
-    if (type === 'application/pdf') return '📄';
-    return '🔗';
+    const Icon = type.startsWith('image/')
+      ? ImageIcon
+      : type === 'application/pdf'
+        ? FileText
+        : Link2;
+    return <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />;
   };
 
   const formatFileSize = (size: string) => {
@@ -58,9 +53,7 @@ export const MessageBubble = ({ message, isCurrentUser }: MessageBubbleProps) =>
     <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4`}>
       {!isCurrentUser && (
         <div className="shrink-0 mr-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-            {getInitials(message.senderName)}
-          </div>
+          <RecordAvatar name={message.senderName} size="sm" className="h-8 w-8" />
         </div>
       )}
 
@@ -73,8 +66,10 @@ export const MessageBubble = ({ message, isCurrentUser }: MessageBubbleProps) =>
         )}
 
         <div
-          className={`rounded-2xl p-3 ${
-            isCurrentUser ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'
+          className={`rounded-2xl px-3.5 py-2.5 ${
+            isCurrentUser
+              ? 'rounded-br-md bg-primary text-primary-foreground'
+              : 'rounded-bl-md bg-secondary text-foreground'
           }`}
         >
           <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
@@ -88,10 +83,14 @@ export const MessageBubble = ({ message, isCurrentUser }: MessageBubbleProps) =>
                     isCurrentUser ? 'bg-primary-hover' : 'bg-background/60'
                   }`}
                 >
-                  <span className="text-sm">{renderAttachmentIcon(attachment.type)}</span>
+                  {renderAttachmentIcon(attachment.type)}
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate">{attachment.name}</p>
-                    <p className="text-xs opacity-75">{formatFileSize(attachment.size)}</p>
+                    <p
+                      className={`text-xs ${isCurrentUser ? 'text-primary-foreground/90' : 'text-muted-foreground'}`}
+                    >
+                      {formatFileSize(attachment.size)}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -106,7 +105,7 @@ export const MessageBubble = ({ message, isCurrentUser }: MessageBubbleProps) =>
           {isCurrentUser && (
             <span className="text-muted-foreground">
               {message.read ? (
-                <CheckCheck className="w-3 h-3 text-success" />
+                <CheckCheck className="w-3 h-3 text-primary" />
               ) : (
                 <Check className="w-3 h-3" />
               )}

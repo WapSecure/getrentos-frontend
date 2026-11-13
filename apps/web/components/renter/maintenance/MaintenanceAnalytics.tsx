@@ -58,12 +58,10 @@ export const MaintenanceAnalytics = ({ summary }: MaintenanceAnalyticsProps) => 
 
         {urgentRequests > 0 && (
           <Alert variant="danger">
-            {urgentRequests} urgent request{urgentRequests > 1 ? 's' : ''} need attention
+            {urgentRequests === 1
+              ? '1 urgent request needs attention'
+              : `${urgentRequests} urgent requests need attention`}
           </Alert>
-        )}
-
-        {resolutionRate > 80 && summary.total > 0 && (
-          <Alert variant="success">Great resolution rate! Keep up the good work.</Alert>
         )}
       </div>
     </motion.div>

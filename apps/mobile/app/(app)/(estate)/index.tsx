@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
@@ -98,7 +99,7 @@ export default function EstateHome() {
       roleBadge="EM"
       subtitle={
         estate
-          ? `${[estate.city, estate.state].filter(Boolean).join(', ')} · ${estate.householdCount} ${estate.householdCount === 1 ? 'household' : 'households'}`
+          ? `${formatLocation(estate.city, estate.state)} · ${estate.householdCount} ${estate.householdCount === 1 ? 'household' : 'households'}`
           : 'Community operations'
       }
       // Always openable once there is an estate: the sheet also adds another.

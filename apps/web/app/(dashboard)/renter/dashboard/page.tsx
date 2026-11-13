@@ -33,15 +33,15 @@ export default function RenterDashboardPage() {
           <RenterApplicationsList />
           <RenterRecentActivity />
         </div>
-        <div className="xl:col-span-4">
+        <aside className="space-y-6 xl:col-span-4" aria-label="Payments and profile">
+          <RenterUpcomingPayments />
           <RenterTrustScoreCard />
-        </div>
+        </aside>
       </div>
 
       <RenterRecommendedProperties />
 
       <div className="grid auto-rows-min items-start gap-6 lg:grid-cols-2">
-        <RenterUpcomingPayments />
         <RenterLeaseRenewal />
         <RenterRoommates />
         <RenterReviews />

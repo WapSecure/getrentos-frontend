@@ -47,7 +47,8 @@ const STATE_LABEL: Record<TimelineState, string> = {
 // Written out in full: Tailwind only generates classes it finds as literals.
 const MARKER: Record<TimelineState, string> = {
   done: 'bg-primary text-primary-foreground',
-  current: 'bg-primary/20 text-primary ring-2 ring-primary',
+  current:
+    'bg-card text-primary ring-2 ring-primary shadow-[0_0_0_5px_color-mix(in_srgb,var(--primary)_14%,transparent)]',
   pending: 'bg-secondary text-muted-foreground',
   blocked: 'bg-destructive-subtle text-destructive ring-1 ring-destructive/40',
   skipped: 'bg-secondary text-muted-foreground',

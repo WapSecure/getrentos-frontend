@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -68,7 +69,7 @@ export default function LandEstate() {
       <DetailScreenHeader
         eyebrow="Estate"
         title={e?.name ?? 'Estate'}
-        subtitle={e ? `${e.city}, ${e.state}` : undefined}
+        subtitle={e ? formatLocation(e.city, e.state) : undefined}
         onBack={() => goBack()}
       />
       <QueryState
@@ -97,7 +98,7 @@ export default function LandEstate() {
             {(e.openConditions ?? []).length ? (
               <FormAlert
                 tone="warning"
-                title="Verified with conditions"
+                title="Approved with conditions"
                 message={`Plot reservations open once they are met.\n${e
                   .openConditions!.map(
                     (c) => `• ${c.text}${c.dueAt ? ` (expected by ${formatDate(c.dueAt)})` : ''}`

@@ -134,7 +134,7 @@ export const DocumentUploadDialog = ({
               onDrop={handleDrop}
               className={cn(
                 'border-2 border-dashed rounded-xl p-8 text-center transition-colors',
-                dragActive ? 'border-primary bg-accent' : 'border-border hover:border-primary'
+                dragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary'
               )}
             >
               {file ? (

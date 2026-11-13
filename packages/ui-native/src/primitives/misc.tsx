@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, View, type ViewProps } from 'react-native';
-import { RotateCw } from '@sureground/icons/native';
-import { useTheme } from '../theme';
+import { RotateCw, type SgIcon } from '@sureground/icons/native';
+import { useTheme, withAlpha } from '../theme';
 import { Text } from './Text';
 import { useReducedMotion } from '../accessibility';
 
@@ -14,13 +14,64 @@ export function Divider({ style }: { style?: ViewProps['style'] }) {
 
 export type BadgeTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 
+export type IconTileTone = 'primary' | 'success' | 'warning' | 'danger' | 'neutral';
+
+const ICON_TILE_SIZE = { sm: 28, md: 36, lg: 44, xl: 56 } as const;
+
+/**
+ * A glyph on a soft tinted square: the brand blue by default, the status colours for figures and
+ * notices that need them. Decorative, so it is hidden from screen readers; the row it sits in
+ * carries the name.
+ */
+export function IconTile({
+  Icon,
+  tone = 'primary',
+  size = 'md',
+  style,
+}: {
+  Icon: SgIcon;
+  tone?: IconTileTone;
+  size?: keyof typeof ICON_TILE_SIZE;
+  style?: ViewProps['style'];
+}) {
+  const { colors, radius } = useTheme();
+  const fg = {
+    primary: colors.primary,
+    success: colors.success,
+    warning: colors.warning,
+    danger: colors.destructive,
+    neutral: colors.mutedForeground,
+  }[tone];
+  const box = ICON_TILE_SIZE[size];
+  return (
+    <View
+      accessible={false}
+      importantForAccessibility="no-hide-descendants"
+      accessibilityElementsHidden
+      style={[
+        {
+          width: box,
+          height: box,
+          borderRadius: radius.lg,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: tone === 'neutral' ? colors.secondary : withAlpha(fg, 0.12),
+        },
+        style,
+      ]}
+    >
+      <Icon size={Math.round(box * 0.46)} color={fg} />
+    </View>
+  );
+}
+
 export function Badge({ label, tone = 'neutral' }: { label: string; tone?: BadgeTone }) {
   const { colors, radius } = useTheme();
   // An unmapped status gives an empty label; render nothing rather than a blank pill.
   if (!label) return null;
   const map: Record<BadgeTone, { bg: string; fg: string }> = {
     neutral: { bg: colors.secondary, fg: colors.secondaryForeground },
-    info: { bg: colors.infoSubtle, fg: colors.accentForeground },
+    info: { bg: colors.infoSubtle, fg: colors.primary },
     success: { bg: colors.successSubtle, fg: colors.success },
     warning: { bg: colors.warningSubtle, fg: colors.warning },
     danger: { bg: colors.destructiveSubtle, fg: colors.destructive },

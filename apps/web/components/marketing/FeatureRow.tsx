@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cn } from '@sureground/shared';
+import { Eyebrow } from './Eyebrow';
 import { PhotoFrame } from './PhotoFrame';
 import type { MarketingPhoto } from './photos';
 
@@ -24,7 +25,7 @@ export const FeatureRow = ({
 }: FeatureRowProps) => (
   <div className="grid items-center gap-8 md:grid-cols-2 md:gap-16 lg:gap-24">
     <div className={cn('min-w-0', reverse && 'md:order-2')}>
-      <p className="label-caps mb-4 text-muted-foreground">{eyebrow}</p>
+      <Eyebrow className="mb-4">{eyebrow}</Eyebrow>
       <h3 className="font-display text-[1.875rem] leading-[1.12] font-normal tracking-[-0.01em] text-balance md:text-[2.375rem]">
         {title}
       </h3>

@@ -582,9 +582,17 @@ export const estateService = {
     return safeCall(() => authFetch(`/estate/${estateId}/deliveries${toQuery(query)}`));
   },
 
-  async markDeliveryCollected(estateId: string, logId: string): Promise<ApiResponse<DeliveryLog>> {
+  async markDeliveryCollected(
+    estateId: string,
+    logId: string,
+    collectedBy?: string
+  ): Promise<ApiResponse<DeliveryLog>> {
+    const name = collectedBy?.trim();
     return safeCall(() =>
-      authFetch(`/estate/${estateId}/deliveries/${logId}/collect`, { method: 'PATCH' })
+      authFetch(`/estate/${estateId}/deliveries/${logId}/collect`, {
+        method: 'PATCH',
+        body: JSON.stringify(name ? { collectedBy: name } : {}),
+      })
     );
   },
 
@@ -1066,6 +1074,12 @@ export const estateService = {
 
   async listIncidents(estateId: string, status?: string): Promise<ApiResponse<Incident[]>> {
     return safeCall(() => authFetch(`/estate/${estateId}/incidents${toQuery({ status })}`));
+  },
+
+  async startIncident(estateId: string, incidentId: string): Promise<ApiResponse<Incident>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/incidents/${incidentId}/start`, { method: 'PATCH' })
+    );
   },
 
   async resolveIncident(

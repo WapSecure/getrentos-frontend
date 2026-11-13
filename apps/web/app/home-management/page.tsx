@@ -19,6 +19,7 @@ import { LandingHero } from '@/components/marketing/LandingHero';
 import { SectionIntro } from '@/components/marketing/SectionIntro';
 import { photos } from '@/components/marketing/photos';
 import { ROUTES } from '@/lib/constants/auth';
+import { IconTile } from '@/components/marketing/IconTile';
 
 export const metadata: Metadata = {
   title: 'Property Management: assets, care, vendors',
@@ -148,9 +149,9 @@ export default function HomeManagementProductPage() {
               lead="Each decision is made with the right context, authority and history, because every part of the property's operations is connected."
             />
             <ul className="grid gap-x-10 gap-y-12 sm:grid-cols-2">
-              {WORKFLOWS.map(({ icon: Icon, title, body }) => (
+              {WORKFLOWS.map(({ icon, title, body }) => (
                 <li key={title} className="border-t border-border pt-6">
-                  <Icon className="mb-5 h-6 w-6 text-foreground" aria-hidden="true" />
+                  <IconTile icon={icon} className="mb-5" />
                   <h3 className="font-display mb-2 text-[1.5rem] font-normal">{title}</h3>
                   <p className="max-w-[52ch] leading-relaxed text-muted-foreground">{body}</p>
                 </li>
@@ -194,10 +195,10 @@ export default function HomeManagementProductPage() {
               lead="Property management is paid for by the operator, not the resident, and grows from everyday care into governed portfolio operations."
             />
             <ul className="grid gap-x-10 gap-y-12 lg:grid-cols-3">
-              {PLANS.map(({ icon: Icon, ...plan }) => (
-                <li key={plan.name} className="flex flex-col border-t border-foreground/80 pt-6">
-                  <Icon className="mb-5 h-6 w-6 text-foreground" aria-hidden="true" />
-                  <p className="label-caps mb-2 text-muted-foreground">{plan.audience}</p>
+              {PLANS.map(({ icon, ...plan }) => (
+                <li key={plan.name} className="flex flex-col border-t-2 border-primary pt-6">
+                  <IconTile icon={icon} className="mb-5" />
+                  <p className="label-caps mb-2 text-primary">{plan.audience}</p>
                   <h3 className="font-display mb-3 text-[1.75rem] font-normal">{plan.name}</h3>
                   <p className="mb-6 leading-relaxed text-muted-foreground">{plan.body}</p>
                   <ul className="mt-auto flex flex-col gap-2.5 border-t border-border pt-5 text-[0.9375rem]">

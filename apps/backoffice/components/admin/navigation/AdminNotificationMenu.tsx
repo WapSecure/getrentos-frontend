@@ -65,7 +65,7 @@ export function AdminNotificationMenu() {
               <Bell aria-hidden="true" />
               {unreadCount > 0 && (
                 <span
-                  className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive"
+                  className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary ring-2 ring-card"
                   aria-hidden="true"
                 />
               )}

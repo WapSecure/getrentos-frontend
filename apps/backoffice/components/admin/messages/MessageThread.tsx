@@ -144,18 +144,18 @@ export const MessageThread = ({
                     className={`flex items-center gap-1 mt-1 ${isAdmin ? 'justify-end' : 'justify-start'}`}
                   >
                     <span
-                      className={`text-2xs ${isAdmin ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}
+                      className={`text-2xs ${isAdmin ? 'text-primary-foreground/90' : 'text-muted-foreground'}`}
                     >
                       {format(new Date(message.timestamp), 'h:mm a')}
                     </span>
                     {isAdmin &&
                       (message.read ? (
                         <CheckCheck
-                          className="w-3 h-3 text-primary-foreground/80"
+                          className="w-3 h-3 text-primary-foreground/90"
                           aria-label="Read"
                         />
                       ) : (
-                        <Check className="w-3 h-3 text-primary-foreground/80" aria-label="Sent" />
+                        <Check className="w-3 h-3 text-primary-foreground/90" aria-label="Sent" />
                       ))}
                   </div>
                 </div>

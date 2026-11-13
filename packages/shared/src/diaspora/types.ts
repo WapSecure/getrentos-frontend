@@ -103,6 +103,11 @@ export interface CoApprovalPendingStep {
   milestoneKey: string;
   /** This approval also releases the held deposit (a built home's handover). */
   releasesDeposit?: boolean;
+  /**
+   * The seller has delivered the step. A handover cannot be approved before it is delivered; false
+   * means not yet. Missing on older responses.
+   */
+  stepDelivered?: boolean;
   buyerApproved: boolean;
   representativeApproved: boolean;
 }
@@ -112,6 +117,19 @@ export type DepositReleaseApprovalOutcome =
   | 'APPROVED'
   | 'WAITING_FOR_BUYER'
   | 'WAITING_FOR_REPRESENTATIVE';
+
+/**
+ * The active dispute on a purchase (`PurchaseDisputeSummaryDto`): the deposit dispute, else a live
+ * land case on the plot. `respondBy` is the deadline staff work to, null while staff are already
+ * on it; the only turn the model records is Sureground's.
+ */
+export interface PurchaseDispute {
+  id: string;
+  kind: 'DEPOSIT' | 'LAND';
+  status: string;
+  respondBy: string | null;
+  respondByParty: 'SUREGROUND' | null;
+}
 
 /** One purchase on the investor overview, from the same functions as the workspace. */
 export interface PurchaseSummary {
@@ -129,6 +147,8 @@ export interface PurchaseSummary {
   waitingForYou: boolean;
   /** Two-person approvals waiting for me on this purchase. */
   pendingApprovals: number;
+  /** The active dispute; not set for purchases seen as a representative. */
+  dispute?: PurchaseDispute | null;
 }
 
 // ── Investor profile and overview ────────────────────────────────────────────
@@ -321,6 +341,49 @@ export interface ForeignIdentityStatus {
   };
   address: ForeignDocumentStatus;
   bankStatement: ForeignDocumentStatus;
+  /** DIA-07; absent from older API versions. */
+  sourceOfFunds?: SourceOfFundsStatus;
+}
+
+// ── Source of funds (DIA-07, decision D4) ────────────────────────────────────
+
+export type SourceOfFundsSupportingKind =
+  | 'PAYSLIPS'
+  | 'TAX_RETURN'
+  | 'ASSET_SALE_CONTRACT'
+  | 'INHERITANCE_OR_GIFT_LETTER'
+  | 'BUSINESS_ACCOUNTS';
+
+export interface SourceOfFundsStatus extends ForeignDocumentStatus {
+  /** True once an existing commitment, or the running total, crosses a threshold. */
+  required: boolean;
+  reason: 'SINGLE_PURCHASE' | 'TOTAL_COMMITTED' | null;
+  /** Whole naira already committed to purchases. */
+  committedNaira: number;
+  /** Whole naira: asked at or above `singlePurchaseNaira` for one purchase, or past `totalCommittedNaira` in total. */
+  thresholds: { singlePurchaseNaira: number; totalCommittedNaira: number };
+  /** The one line that says why we ask. */
+  why: string;
+  bankStatementMonths: number;
+  supportingKinds: SourceOfFundsSupportingKind[];
+  /** Why an earlier approval no longer counts: it ran out (12 months) or purchases outgrew it. */
+  renewal?: SourceOfFundsRenewal | null;
+  /** While an approval counts. */
+  approvedAt?: string | null;
+  validUntil?: string | null;
+}
+
+export type SourceOfFundsRenewal = 'EXPIRED' | 'COVERAGE_EXCEEDED';
+
+/** `GET /trust/foreign-identity/source-of-funds/check?amount=`: asked before an offer or estate deposit. */
+export interface SourceOfFundsCheck {
+  applies: boolean;
+  required: boolean;
+  reason: SourceOfFundsStatus['reason'];
+  state: ForeignCheckState;
+  renewal: SourceOfFundsRenewal | null;
+  /** False when the offer or deposit would be refused until source of funds is approved. */
+  cleared: boolean;
 }
 
 export interface ForeignSubmission {

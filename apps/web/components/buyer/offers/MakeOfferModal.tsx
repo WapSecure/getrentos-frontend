@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Send } from '@sureground/icons';
+import { Send, ShieldAlert } from '@sureground/icons';
 import {
   Alert,
   Button,
@@ -27,6 +28,11 @@ import { landKeys } from '@/lib/queryKeys';
 import { landService } from '@/services/landService';
 import { TrustLabelsList } from '@/components/shared/trust/TrustLabelsList';
 import { formatCurrency } from '@/lib/format';
+import { foreignIdentityService } from '@/services/foreignIdentityService';
+import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
+import { ROUTES } from '@/lib/constants/auth';
+import { identityGate } from '@/lib/identityGate';
+import { kycService } from '@/services/kycService';
 
 interface MakeOfferModalProps {
   isOpen: boolean;
@@ -72,6 +78,8 @@ export const MakeOfferModal = ({
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // DIA-07: asked before sending, so a large offer is not refused with a 403.
+  const [fundsHold, setFundsHold] = useState<string | null>(null);
   const [acceptedRisks, setAcceptedRisks] = useState(false);
 
   const draftRestored = useSessionExpiryDraft<OfferDraft>(
@@ -111,6 +119,16 @@ export const MakeOfferModal = ({
     queryFn: () => unwrap(buyerService.getListing(defaultPropertyId as string)),
     enabled: isOpen && !!defaultPropertyId,
   });
+  // The server refuses offers from buyers whose identity is not verified: say so before they fill
+  // the form. An unloaded or failed status never blocks; the server still has the final say.
+  const { data: kycStatus } = useQuery({
+    queryKey: ['kyc-status'],
+    queryFn: () => unwrap(kycService.getStatus()),
+    enabled: isOpen,
+    staleTime: 60_000,
+  });
+  const identity = identityGate(kycStatus);
+  const identityBlocked = identity === 'unverified' || identity === 'in_review';
   const listings = listingsPage?.items ?? [];
   const selectedListing =
     (selectedListingState?.id === propertyId ? selectedListingState : null) ??
@@ -160,6 +178,7 @@ export const MakeOfferModal = ({
 
   const handleClose = () => {
     setAcceptedRisks(false);
+    setFundsHold(null);
     setPropertyId(defaultPropertyId || '');
     setListingSearch('');
     setListingPage(1);
@@ -175,6 +194,12 @@ export const MakeOfferModal = ({
     if (!selectedListing) return;
     setIsSubmitting(true);
     setSubmitError(null);
+    const hold = await foreignIdentityService.sourceOfFundsHold(Number(offerAmount) || 0);
+    setFundsHold(hold);
+    if (hold) {
+      setIsSubmitting(false);
+      return;
+    }
     const submitted = await onSubmit({
       propertyId: selectedListing.id,
       propertyTitle: selectedListing.title,
@@ -203,6 +228,23 @@ export const MakeOfferModal = ({
         </div>
 
         <div className="p-4 space-y-4 overflow-y-auto flex-1 min-h-0">
+          {identityBlocked && (
+            <Alert variant="warning" icon={ShieldAlert}>
+              <p>
+                {identity === 'in_review'
+                  ? 'Your identity check is being reviewed. You can send offers once it clears.'
+                  : 'Verify your identity before you make an offer. It takes a few minutes.'}
+              </p>
+              {identity === 'unverified' && (
+                <Link
+                  href={ROUTES.BUYER_VERIFICATION}
+                  className="inline-block mt-1 font-medium text-foreground underline hover:no-underline"
+                >
+                  Verify identity
+                </Link>
+              )}
+            </Alert>
+          )}
           <Field
             label="Property"
             required
@@ -315,6 +357,18 @@ export const MakeOfferModal = ({
           </Alert>
         )}
 
+        {fundsHold && (
+          <Alert variant="warning" title="Confirm your source of funds" className="mx-4 mb-3">
+            {fundsHold}{' '}
+            <Link
+              href={DIASPORA_ROUTES.BUYER_IDENTITY_ABROAD}
+              className="font-medium text-primary hover:underline"
+            >
+              Go to Identity abroad
+            </Link>
+          </Alert>
+        )}
+
         <div className="p-4 border-t border-border flex flex-wrap gap-3 shrink-0">
           {selectedListing?.acceptingOffers === false && (
             <p role="alert" className="w-full text-sm text-destructive">
@@ -349,6 +403,7 @@ export const MakeOfferModal = ({
               !!amountError ||
               !!depositError ||
               needsAcceptance ||
+              identityBlocked ||
               isSubmitting ||
               selectedListing?.acceptingOffers === false
             }

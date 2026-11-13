@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -54,7 +55,10 @@ import { seasonRange } from '@/lib/stays';
 import { useMarketSaved } from '@/hooks/useMarketSaved';
 import { useCardAnalytics } from '@/hooks/useCardAnalytics';
 import { MarketComparisonSheet } from '@/components/market/MarketComparisonSheet';
-import { DevelopmentsDirectory } from '@/components/market/DevelopmentsDirectory';
+import {
+  DEVELOPMENTS_INTRO,
+  DevelopmentsDirectory,
+} from '@/components/market/DevelopmentsDirectory';
 
 type Tab = MarketKind | 'estates' | 'developments';
 const OTHER_TABS: readonly string[] = ['estates', 'developments'];
@@ -76,7 +80,7 @@ const INTRO: Record<Tab, { title: string; body: string; search: string }> = {
   },
   sale: {
     title: 'Homes for sale',
-    body: 'Make an offer once you sign in: Sureground holds your deposit until you confirm receipt.',
+    body: 'Make an offer once you sign in: Sureground holds your deposit until the handover is done and you confirm.',
     search: 'Search area, estate or title',
   },
   shortlet: {
@@ -94,11 +98,7 @@ const INTRO: Record<Tab, { title: string; body: string; search: string }> = {
     body: 'Browse what is available inside an estate, and who is marketing it.',
     search: 'Search estate name or area',
   },
-  developments: {
-    title: 'Off-plan developments',
-    body: "Each one went live only after a Sureground staff member checked the developer's CAC registration, the directors' identities, the title to the site and the building plan approval.",
-    search: 'Search developments',
-  },
+  developments: { ...DEVELOPMENTS_INTRO, search: 'Search developments' },
 };
 
 const SORTS: MarketSort[] = ['newest', 'price_asc', 'price_desc'];
@@ -763,7 +763,7 @@ function EstatesDirectory({
                     {item.name}
                   </Text>
                   <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                    {[item.city, item.state].filter(Boolean).join(', ')}
+                    {formatLocation(item.city, item.state)}
                   </Text>
                 </View>
               </View>

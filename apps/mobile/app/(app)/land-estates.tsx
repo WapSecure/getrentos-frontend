@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
@@ -117,7 +118,7 @@ function EstateCard({ estate: e }: { estate: EstateSummary }) {
           <Badge label="Verified parcel" tone="success" />
         </View>
         <Text variant="caption" color="mutedForeground">
-          {e.city}, {e.state} · {e.availablePlots} of {e.totalPlots} available
+          {formatLocation(e.city, e.state)} · {e.availablePlots} of {e.totalPlots} available
         </Text>
         {e.description ? (
           <Text variant="callout" color="mutedForeground" numberOfLines={2}>

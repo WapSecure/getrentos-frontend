@@ -11,8 +11,6 @@ import {
   EmptyState,
   IconButton,
   Input,
-  ListSkeleton,
-  Skeleton,
   PageHeader,
   useToast,
 } from '@sureground/ui';
@@ -22,6 +20,13 @@ import { estateKeys } from '@/lib/queryKeys';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { AmenityBookingRow } from '@/components/estate/amenities/AmenityBookingRow';
 import type { AmenityBooking } from '@/types/estate';
+import {
+  EstateListSection,
+  EstateListSkeleton,
+  EstateRow,
+  EstateRowList,
+  RowAvatar,
+} from '@/components/estate/shared/EstateListSection';
 
 export default function EstateAmenitiesPage() {
   const queryClient = useQueryClient();
@@ -98,100 +103,120 @@ export default function EstateAmenitiesPage() {
     <>
       <PageHeader
         title="Amenities"
-        description={<>Shared facilities residents can book in {estate.name}</>}
+        description={`Shared facilities residents can book in ${estate.name}.`}
       />
 
-      <div className="bg-card rounded-2xl border border-border p-4 mb-8">
-        <h2 className="text-sm font-semibold text-foreground mb-3">Amenities</h2>
-        {isAmenitiesLoading ? (
-          <Skeleton className="h-12 w-full" />
-        ) : !amenities || amenities.length === 0 ? (
-          <EmptyState
-            icon={Dumbbell}
-            title="No amenities yet"
-            description="Add a facility below, such as a gym or hall, so residents can book it."
-            size="compact"
-            bare
-            className="mb-3"
-          />
-        ) : (
-          <div className="divide-y divide-border mb-3">
-            {amenities.map((amenity) => (
-              <div key={amenity.id} className="py-2 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{amenity.name}</p>
-                  {amenity.description && (
-                    <p className="text-xs text-muted-foreground truncate">{amenity.description}</p>
-                  )}
-                </div>
-                <IconButton
-                  label={`Delete ${amenity.name}`}
-                  icon={<Trash2 />}
-                  variant="danger"
-                  size="sm"
-                  onClick={() => setDeleting({ id: amenity.id, name: amenity.name })}
-                  disabled={deleteAmenity.isPending}
+      <div className="space-y-6">
+        <EstateListSection
+          id="amenities"
+          title="Amenities"
+          count={isAmenitiesLoading ? undefined : (amenities?.length ?? 0)}
+          countLabel={`${amenities?.length ?? 0} amenit${amenities?.length === 1 ? 'y' : 'ies'}`}
+          description="Facilities residents can see and book from their dashboard."
+          footer={
+            <div className="py-1">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_auto]">
+                <Input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Amenity name (e.g. Gym)"
+                  aria-label="Amenity name"
                 />
+                <Input
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Description (optional)"
+                  aria-label="Description"
+                />
+                <Button
+                  variant="primary"
+                  icon={<Plus className="h-4 w-4" />}
+                  disabled={!name.trim()}
+                  isLoading={createAmenity.isPending}
+                  loadingText="Adding…"
+                  onClick={() => createAmenity.mutate()}
+                >
+                  Add amenity
+                </Button>
               </div>
-            ))}
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Amenity name (e.g. Gym)"
-            aria-label="Amenity name"
-          />
-          <Input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Description (optional)"
-            aria-label="Description"
-          />
-        </div>
-        <Button
-          variant="primary"
-          className="mt-3"
-          icon={<Plus className="w-4 h-4" />}
-          disabled={!name.trim()}
-          isLoading={createAmenity.isPending}
-          loadingText="Adding…"
-          onClick={() => createAmenity.mutate()}
+            </div>
+          }
         >
-          Add amenity
-        </Button>
-      </div>
-
-      <h2 className="text-sm font-semibold text-foreground mb-3">
-        Bookings ({bookings?.length ?? 0})
-      </h2>
-      {isBookingsLoading ? (
-        <ListSkeleton rows={3} />
-      ) : !bookings || bookings.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
-          <EmptyState
-            icon={CalendarCheck}
-            title="No bookings yet"
-            description="Resident bookings for these amenities will show up here."
-          />
-        </div>
-      ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {bookings.map((booking) => (
-            <AmenityBookingRow
-              key={booking.id}
-              booking={booking}
-              showHousehold
-              onCancel={() => setCancelling(booking)}
-              isUpdating={cancelBooking.isPending}
+          {isAmenitiesLoading ? (
+            <EstateListSkeleton rows={2} />
+          ) : !amenities || amenities.length === 0 ? (
+            <EmptyState
+              bare
+              size="compact"
+              icon={Dumbbell}
+              title="No amenities yet"
+              description="Add a facility below, such as a gym or hall, so residents can book it."
             />
-          ))}
-        </div>
-      )}
+          ) : (
+            <EstateRowList>
+              {amenities.map((amenity) => (
+                <li key={amenity.id}>
+                  <EstateRow
+                    leading={<RowAvatar icon={Dumbbell} />}
+                    title={
+                      <p className="truncate text-sm font-medium text-foreground">{amenity.name}</p>
+                    }
+                    meta={
+                      amenity.description ? (
+                        <p className="truncate">{amenity.description}</p>
+                      ) : undefined
+                    }
+                    actions={
+                      <IconButton
+                        label={`Delete ${amenity.name}`}
+                        icon={<Trash2 />}
+                        variant="danger"
+                        size="sm"
+                        onClick={() => setDeleting({ id: amenity.id, name: amenity.name })}
+                        disabled={deleteAmenity.isPending}
+                      />
+                    }
+                  />
+                </li>
+              ))}
+            </EstateRowList>
+          )}
+        </EstateListSection>
+
+        <EstateListSection
+          id="amenity-bookings"
+          title="Bookings"
+          count={isBookingsLoading ? undefined : (bookings?.length ?? 0)}
+          countLabel={`${bookings?.length ?? 0} booking${bookings?.length === 1 ? '' : 's'}`}
+          description="Bookings residents have made. Cancelling frees the slot for others."
+        >
+          {isBookingsLoading ? (
+            <EstateListSkeleton />
+          ) : !bookings || bookings.length === 0 ? (
+            <EmptyState
+              bare
+              icon={CalendarCheck}
+              title="No bookings yet"
+              description="Resident bookings for these amenities will show up here."
+            />
+          ) : (
+            <EstateRowList>
+              {bookings.map((booking) => (
+                <li key={booking.id}>
+                  <AmenityBookingRow
+                    booking={booking}
+                    showHousehold
+                    onCancel={() => setCancelling(booking)}
+                    isUpdating={cancelBooking.isPending}
+                  />
+                </li>
+              ))}
+            </EstateRowList>
+          )}
+        </EstateListSection>
+      </div>
 
       <ConfirmDialog
         open={deleting !== null}

@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import {
   MapPin,
@@ -19,6 +20,7 @@ import {
   DropdownMenuItem,
   IconButton,
 } from '@sureground/ui';
+import { propertyRentSummary, type PropertyRentSummary } from '@sureground/shared';
 import { verificationBadges } from '@/lib/statusBadge';
 import { formatCurrency } from '@/lib/format';
 import { ReferenceCodeChip } from '@/components/shared/property/ReferenceCodeChip';
@@ -33,6 +35,15 @@ const propertyTypeLabels: Record<Property['type'], string> = {
 };
 
 const verificationConfig = verificationBadges;
+
+/** "₦3M/yr" once let; the asking rent while vacant; never "₦0/yr", which read as zero rent. */
+function rentText(rent: PropertyRentSummary): string {
+  if (rent.kind === 'none') return rent.label;
+  const figure = `${formatCurrency(rent.amount, { compact: true })}/${rent.period === 'month' ? 'mo' : 'yr'}`;
+  if (rent.kind === 'let') return figure;
+  return rent.from ? `From ${figure}` : `Asking ${figure}`;
+}
+
 interface PropertyCardProps {
   property: Property;
   onClick?: () => void;
@@ -52,6 +63,7 @@ export const PropertyCard = ({
   onVerify,
 }: PropertyCardProps) => {
   const verification = verificationConfig[property.verificationStatus];
+  const rent = propertyRentSummary(property);
   const vacantUnits = property.totalUnits - property.occupiedUnits;
   const occupancyPct =
     property.totalUnits > 0 ? Math.round((property.occupiedUnits / property.totalUnits) * 100) : 0;
@@ -60,7 +72,7 @@ export const PropertyCard = ({
   const showCover = Boolean(property.coverImage) && !coverFailed;
 
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-shadow hover:shadow-md">
+    <div className="group relative overflow-hidden rounded-2xl border border-border bg-card shadow-xs transition-[border-color,box-shadow] duration-150 hover:border-primary/30 hover:shadow-md">
       <div className={`relative bg-muted ${showCover ? 'aspect-[16/10]' : 'h-24'}`}>
         {showCover ? (
           // Signed storage URLs aren't in next.config's remotePatterns, so next/image can't optimise them.
@@ -139,7 +151,7 @@ export const PropertyCard = ({
               <button
                 type="button"
                 onClick={onClick}
-                className="text-left after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-primary focus-visible:after:ring-inset"
+                className="text-left transition-colors group-hover:text-primary after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-primary focus-visible:after:ring-inset"
               >
                 {property.name}
               </button>
@@ -152,8 +164,8 @@ export const PropertyCard = ({
           </Badge>
         </div>
         <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
-          <MapPin className="w-3 h-3" />
-          {property.city}, {property.state}
+          <MapPin className="w-3.5 h-3.5 shrink-0 text-primary/70" aria-hidden="true" />
+          {formatLocation(property.city, property.state)}
         </p>
         {property.referenceCode && (
           <div className="relative z-10 mt-3 w-fit">
@@ -163,15 +175,28 @@ export const PropertyCard = ({
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4">
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <DoorOpen className="w-4 h-4 text-muted-foreground/60" />
+            <DoorOpen className="w-4 h-4 text-primary/70" aria-hidden="true" />
             {property.occupiedUnits}/{property.totalUnits} occupied
           </div>
-          <p className="data-value text-base font-semibold text-foreground">
-            {formatCurrency(property.annualRentRoll, { compact: true })}/yr
+          <p
+            className={
+              rent.kind === 'none'
+                ? 'text-sm text-muted-foreground'
+                : 'data-value text-base font-semibold text-foreground'
+            }
+          >
+            {rentText(rent)}
           </p>
         </div>
 
-        <div className="mt-3 h-1.5 rounded-full bg-secondary overflow-hidden">
+        <div
+          className="mt-3 h-1.5 rounded-full bg-primary/10 overflow-hidden"
+          role="progressbar"
+          aria-label="Occupancy"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={occupancyPct}
+        >
           <div
             className="h-full rounded-full bg-primary transition-all duration-500"
             style={{ width: `${occupancyPct}%` }}

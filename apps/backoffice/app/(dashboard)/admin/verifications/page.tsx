@@ -20,6 +20,7 @@ import {
 import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
 import { adminService } from '@/services/adminService';
+import { OpsToolbar } from '@/components/admin/ops/OpsParts';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import type {
@@ -33,6 +34,14 @@ type TypeFilter = 'all' | VerificationRequestType;
 
 const PAGE_SIZE = 12;
 
+/** Approving over a failed cross-check must be a deliberate choice, so the issues are spelled out. */
+function approveDescription(request: VerificationRequest, crossCheckIssues: string[]): string {
+  const base = `${request.applicantName}'s ${request.subjectLabel} verification will be approved and may unlock trusted platform actions.`;
+  if (crossCheckIssues.length === 0) return base;
+  const count = crossCheckIssues.length;
+  return `The document cross-check raised ${count} issue${count === 1 ? '' : 's'}: ${crossCheckIssues.join(' ')} Approve only if you have reviewed ${count === 1 ? 'it' : 'them'}. ${base}`;
+}
+
 export default function AdminVerificationsPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,6 +51,7 @@ export default function AdminVerificationsPage() {
   const [page, setPage] = useState(1);
   const [activeRequest, setActiveRequest] = useState<VerificationRequest | null>(null);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [approveIssues, setApproveIssues] = useState<string[]>([]);
   const toast = useToast();
 
   useEffect(() => {
@@ -108,7 +118,10 @@ export default function AdminVerificationsPage() {
       reportActionError(error, 'Could not request clarification for this verification.'),
   });
 
-  const handleApprove = () => setShowApproveConfirm(true);
+  const handleApprove = (_id: string, crossCheckIssues: string[]) => {
+    setApproveIssues(crossCheckIssues);
+    setShowApproveConfirm(true);
+  };
   const handleReject = (id: string, reason: string) => rejectMutation.mutate({ id, reason });
   const handleRequestClarification = (id: string, reason: string) =>
     requestClarificationMutation.mutate({ id, reason });
@@ -138,6 +151,7 @@ export default function AdminVerificationsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Trust and safety"
         title="Verification queue"
         description={
           pendingCountError
@@ -146,7 +160,7 @@ export default function AdminVerificationsPage() {
         }
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <OpsToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -168,7 +182,7 @@ export default function AdminVerificationsPage() {
           searchable={false}
           className="w-full sm:w-44"
         />
-      </div>
+      </OpsToolbar>
 
       <Tabs
         value={statusFilter}
@@ -188,7 +202,7 @@ export default function AdminVerificationsPage() {
       </Tabs>
 
       {isLoading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
             <CardSkeleton key={index} />
           ))}
@@ -202,9 +216,17 @@ export default function AdminVerificationsPage() {
           isRetrying={isFetching}
         />
       ) : requests.length === 0 ? (
-        <EmptyState icon={ShieldCheck} title="No requests match your filters" />
+        <EmptyState
+          icon={ShieldCheck}
+          title="No requests match your filters"
+          description={
+            statusFilter === 'pending_review'
+              ? 'The queue is clear. New identity, property and licence checks appear here.'
+              : 'Try another applicant or subject, or clear the type and status filters.'
+          }
+        />
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {requests.map((request, index) => (
             <VerificationRequestCard
               key={request.id}
@@ -244,12 +266,9 @@ export default function AdminVerificationsPage() {
         open={showApproveConfirm && activeRequest !== null}
         onOpenChange={setShowApproveConfirm}
         title="Approve verification?"
-        description={
-          activeRequest
-            ? `${activeRequest.applicantName}'s ${activeRequest.subjectLabel} verification will be approved and may unlock trusted platform actions.`
-            : ''
-        }
-        confirmLabel="Approve verification"
+        description={activeRequest ? approveDescription(activeRequest, approveIssues) : ''}
+        tone={approveIssues.length > 0 ? 'danger' : 'primary'}
+        confirmLabel={approveIssues.length > 0 ? 'Approve anyway' : 'Approve verification'}
         isLoading={approveMutation.isPending}
         onConfirm={() => activeRequest && approveMutation.mutate(activeRequest.id)}
       />

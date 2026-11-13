@@ -360,6 +360,7 @@ export const ROUTES = {
   BUYER_SAVED: '/buyer/saved',
   BUYER_VIEWINGS: '/buyer/viewings',
   BUYER_OFFERS: '/buyer/offers',
+  BUYER_DEVELOPER_QUESTIONS: '/buyer/developer-questions',
   BUYER_TRANSACTIONS: '/buyer/transactions',
   BUYER_DOCUMENTS: '/buyer/documents',
   BUYER_MESSAGES: '/buyer/messages',

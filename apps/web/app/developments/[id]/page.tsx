@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { DevelopmentPage } from '@/components/showroom/DevelopmentPage';
@@ -13,7 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!d) return { title: 'Development not found', robots: { index: false } };
   return {
     title: `${d.name}, ${d.city}`,
-    description: `Off-plan development by ${d.developerName} in ${d.city}, ${d.state}. Checked by Sureground staff; you pay the developer directly.`,
+    description: `Off-plan development by ${d.developerName} in ${formatLocation(d.city, d.state)}. Checked by Sureground staff; you pay the developer directly.`,
     alternates: { canonical: developmentPath(d.id) },
   };
 }

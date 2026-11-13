@@ -145,7 +145,7 @@ export function SignaturePad({
     cn(
       'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors',
       active
-        ? 'bg-accent text-accent-foreground'
+        ? 'bg-primary/10 text-primary'
         : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
     );
 

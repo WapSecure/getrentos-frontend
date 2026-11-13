@@ -95,7 +95,7 @@ export const Toast = ({
             action.onClick();
             onClose();
           }}
-          className="shrink-0 rounded-md px-2 py-1 text-sm font-semibold leading-5 text-primary transition-colors hover:bg-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="shrink-0 rounded-md px-2 py-1 text-sm font-semibold leading-5 text-primary transition-colors duration-150 hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {action.label}
         </button>

@@ -90,6 +90,7 @@ export interface PushData {
   actionUrl?: string;
   bookingId?: string;
   conversationId?: string;
+  developmentId?: string;
 }
 
 export function readPushData(response: Notifications.NotificationResponse | null): PushData | null {

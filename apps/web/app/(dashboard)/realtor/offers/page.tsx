@@ -94,6 +94,7 @@ export default function RealtorOffersPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Clients"
         title="Offers"
         description={
           <>

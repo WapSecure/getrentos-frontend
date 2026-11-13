@@ -37,12 +37,14 @@ export function StickyListingCta({
   if (!show) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-4 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur sm:px-6">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-primary bg-card/95 px-4 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur sm:px-6">
       <div className="mx-auto flex max-w-7xl items-center gap-4">
-        <p className="min-w-0 flex-1 truncate text-lg font-bold text-foreground">
+        <p className="font-display data-value min-w-0 flex-1 truncate text-xl font-normal tracking-[-0.01em] text-foreground">
           {price}
           {priceUnit && (
-            <span className="text-sm font-normal text-muted-foreground">/{priceUnit}</span>
+            <span className="font-sans text-sm font-normal text-muted-foreground">
+              /{priceUnit}
+            </span>
           )}
         </p>
         <div className="w-auto shrink-0 sm:w-64 [&>a]:px-5">

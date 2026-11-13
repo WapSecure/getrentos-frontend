@@ -17,7 +17,7 @@ export function SidebarRailToggle({
       className="sidebar-item sidebar-rail-toggle w-full"
       onClick={() => onToggle(!rail)}
     >
-      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+      <Icon className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
       <span className="sidebar-item-label min-w-0 flex-1 truncate text-left">{label}</span>
     </button>
   );

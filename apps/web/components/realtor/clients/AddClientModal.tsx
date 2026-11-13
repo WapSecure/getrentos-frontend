@@ -125,10 +125,7 @@ export const AddClientModal = ({
         </div>
 
         <div className="p-4 space-y-4">
-          <VerificationRequiredNotice
-            error={submitError}
-            href={`${ROUTES.REALTOR_SETTINGS}?tab=verification`}
-          />
+          <VerificationRequiredNotice error={submitError} href={ROUTES.REALTOR_VERIFICATION} />
           <Field
             label="Email"
             htmlFor="realtor-client-email"

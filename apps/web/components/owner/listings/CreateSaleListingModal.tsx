@@ -308,7 +308,7 @@ export const CreateSaleListingModal = ({
             <EmptyState
               icon={FileCheck2}
               title="No verified properties yet"
-              description="You can list a property once our compliance team has verified its ownership documents, usually within 24–48 hours."
+              description="You can list a property once our compliance team has verified its ownership documents. We’ll notify you when that review is done."
               action={
                 <Button href={ROUTES.OWNER_PROPERTIES} variant="outline">
                   Go to your properties

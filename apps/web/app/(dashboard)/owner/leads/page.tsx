@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Users } from '@sureground/icons';
+import { RecordToolbar } from '@/components/shared/records/RecordParts';
 import { BuyerLeadCard } from '@/components/owner/leads/BuyerLeadCard';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -85,6 +86,7 @@ export default function OwnerLeadsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Selling"
         title="Buyer leads"
         description={
           <>
@@ -94,7 +96,7 @@ export default function OwnerLeadsPage() {
       />
       <OwnerSellingNav />
 
-      <div className="mb-6 flex min-w-0 flex-col gap-3 sm:flex-row">
+      <RecordToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={setSearchQuery}
@@ -110,9 +112,9 @@ export default function OwnerLeadsPage() {
             setPage(1);
           }}
           segments={filterOptions}
-          className="w-full min-w-0 max-w-full justify-start overflow-x-auto sm:w-auto"
+          className="w-full min-w-0 max-w-full justify-start overflow-x-auto sm:ml-auto sm:w-auto"
         />
-      </div>
+      </RecordToolbar>
 
       {leadsQuery.isLoading ? (
         <ListSkeleton rows={6} variant="cards" label="Loading leads" />

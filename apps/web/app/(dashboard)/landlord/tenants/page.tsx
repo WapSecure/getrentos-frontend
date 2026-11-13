@@ -16,6 +16,7 @@ import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { ListState } from '@/components/shared/ListState';
+import { RecordGridSkeleton, RecordToolbar } from '@/components/shared/records/RecordParts';
 import type { RentPaymentStatus } from '@/types/landlord';
 
 const rentStatusFilters: { value: 'all' | RentPaymentStatus; label: string }[] = [
@@ -56,6 +57,7 @@ export default function LandlordTenantsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Lettings"
         title="Tenants"
         description={
           <>
@@ -68,15 +70,15 @@ export default function LandlordTenantsPage() {
         }
       />
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <RecordToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={setSearchQuery}
           placeholder="Search tenants or properties..."
-          className="flex-1 max-w-sm"
+          className="flex-1 sm:max-w-sm"
         />
         <div
-          className="flex gap-2 overflow-x-auto"
+          className="flex gap-2 overflow-x-auto sm:ml-auto"
           role="group"
           aria-label="Filter tenants by rent status"
         >
@@ -94,12 +96,13 @@ export default function LandlordTenantsPage() {
             </ToggleChip>
           ))}
         </div>
-      </div>
+      </RecordToolbar>
 
       <ListState
         items={filteredTenants}
         query={{ isPending, isError, refetch }}
         errorTitle="We couldn't load your tenants"
+        skeleton={<RecordGridSkeleton />}
         empty={<EmptyState icon={Users} title="No tenants match your filters" />}
       >
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">

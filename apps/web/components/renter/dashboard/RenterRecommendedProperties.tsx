@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Heart, Eye, Star } from '@sureground/icons';
+import { Heart, Star } from '@sureground/icons';
+import { isListingVerified } from '@sureground/shared';
 import { Button, ListingCard, ListingCardAction } from '@sureground/ui';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
@@ -60,18 +61,19 @@ export const RenterRecommendedProperties = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3, duration: 0.4 }}
-      className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm"
+      className="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
     >
-      <div className="flex items-center justify-between border-b border-border/70 p-5">
+      <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Recommended for you</h2>
+          <h2 className="text-base font-semibold tracking-[-0.015em] text-foreground">
+            Recommended for you
+          </h2>
           <p className="text-sm text-muted-foreground">
             Based on your search history and preferences
           </p>
         </div>
-        <Button href={ROUTES.RENTER_DISCOVER} variant="ghost" size="sm" className="gap-1">
+        <Button href={ROUTES.RENTER_DISCOVER} variant="link" size="sm">
           View all
-          <Eye className="w-3 h-3" />
         </Button>
       </div>
 
@@ -87,7 +89,7 @@ export const RenterRecommendedProperties = () => {
               priceUnit={property.period}
               image={property.image}
               imageAlt={property.title}
-              verified={property.verified}
+              verified={isListingVerified(property)}
               facts={{ beds: property.bedrooms, baths: property.bathrooms, size: property.size }}
               meta={
                 property.rating > 0 ? (

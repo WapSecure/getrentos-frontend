@@ -47,7 +47,7 @@ const HOME_STEPS = [
   },
   {
     title: 'Pay a protected deposit',
-    body: 'Pay the deposit to Sureground. It is released to the seller once you confirm receipt.',
+    body: 'Pay the deposit to Sureground. It is released to the seller once the handover is done and you confirm.',
   },
 ];
 

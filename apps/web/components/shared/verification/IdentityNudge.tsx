@@ -6,10 +6,12 @@ import { ShieldAlert } from '@sureground/icons';
 import { Alert } from '@sureground/ui';
 import { kycService } from '@/services/kycService';
 import { unwrap } from '@/lib/apiHelpers';
-import { formatDate } from '@/lib/format';
 
-export const identityGraceMessage = (endsAt: string) =>
-  `Verify your identity by ${formatDate(endsAt)} to keep publishing listings and receiving payouts.`;
+/*
+ * No deadline here: the identity gate on inviting clients and publishing listings refuses an unverified
+ * account even during the identity grace period, so "verify by <date>" promised time that was not there.
+ * Say what is blocked now instead.
+ */
 
 export function IdentityNudge({
   verificationHref,
@@ -36,7 +38,6 @@ export function IdentityNudge({
   const row = licence ? data.license : data.identity;
   const inReview = row?.status === 'PENDING' || row?.status === 'PENDING_REVIEW';
   const what = licence ? 'licence' : 'identity';
-  const graceEndsAt = licence ? undefined : data.identityGraceEndsAt;
 
   return (
     <Alert variant="warning" icon={ShieldAlert} className={className}>
@@ -45,9 +46,7 @@ export function IdentityNudge({
           ? `Your ${what} check is being reviewed. Once it clears you can ${unlocks}.`
           : licence
             ? `Verify your licence to ${unlocks}.`
-            : graceEndsAt
-              ? `${identityGraceMessage(graceEndsAt)} It takes a few minutes.`
-              : `Verify your identity to ${unlocks}. It takes a few minutes.`}
+            : `Verify your identity to ${unlocks}. It takes a few minutes.`}
       </p>
       {!inReview && (
         <Link

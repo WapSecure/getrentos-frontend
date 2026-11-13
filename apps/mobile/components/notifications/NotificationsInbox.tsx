@@ -3,7 +3,15 @@ import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Bell, CheckCheck, type SgIcon } from '@sureground/icons/native';
-import { Card, EmptyState, ErrorState, Skeleton, Text, useTheme } from '@sureground/ui-native';
+import {
+  Card,
+  EmptyState,
+  ErrorState,
+  Skeleton,
+  Text,
+  useTheme,
+  withAlpha,
+} from '@sureground/ui-native';
 import { relativeTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -115,7 +123,9 @@ export function NotificationsInbox({
                         borderRadius: radius.md,
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backgroundColor: item.read ? colors.secondary : colors.accent,
+                        backgroundColor: item.read
+                          ? colors.secondary
+                          : withAlpha(colors.primary, 0.12),
                       }}
                     >
                       <Icon size={17} color={item.read ? colors.mutedForeground : colors.primary} />

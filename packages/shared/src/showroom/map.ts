@@ -19,8 +19,11 @@ import {
   LAND_DILIGENCE_LABELS,
   LAND_TITLE_TYPE_LABELS,
   verificationSummaryOf,
+  type VerificationSummary,
+  type VerificationSummaryStatus,
 } from '../utils/landTrust';
 import { tidyPlace } from '../utils/address';
+import { conditionsOutstanding, isListingVerified } from '../utils/trustLabel';
 import { tourSource } from '../utils/videoSource';
 import { floorPlansOf } from './floorPlans';
 import { valuationOf } from '../diaspora/valuation';
@@ -274,6 +277,40 @@ export function trustChainOf(raw: unknown): ShowroomTrustChain | undefined {
   };
 }
 
+/** Summary statuses in which the ownership and property evidence passed; the API's `verificationClearsTrust`. */
+const SUMMARY_CLEARS_TRUST: readonly VerificationSummaryStatus[] = [
+  'EVIDENCE_VERIFIED',
+  'INVESTMENT_ELIGIBLE',
+];
+
+const SALE_PAYMENT_DETAIL =
+  'Your deposit is held by Sureground until the seller hands over the keys and you confirm.';
+
+const HELD_BY_SUMMARY: Partial<Record<ShowroomTrustStepId, string>> = {
+  authority: "Ownership has not cleared Sureground's verification checks yet.",
+  property: "The property has not cleared Sureground's verification checks yet.",
+};
+
+/**
+ * A for-sale listing's trust chain, read against its verification summary. The summary is the stricter
+ * record, so the ownership and property links hold only once it says the evidence passed: the badge then
+ * never claims more than the verification panel on the same page. The API applies the same rule; this
+ * keeps an older API honest too. The payment link speaks of the deposit, not rent.
+ */
+export function saleTrustChain(
+  chain: ShowroomTrustChain | undefined,
+  summary: VerificationSummary | undefined
+): ShowroomTrustChain | undefined {
+  if (!chain) return undefined;
+  const cleared = !summary || SUMMARY_CLEARS_TRUST.includes(summary.status);
+  const steps = chain.steps.map((step) => {
+    if (step.id === 'payment') return { ...step, detail: SALE_PAYMENT_DETAIL };
+    const held = HELD_BY_SUMMARY[step.id];
+    return !cleared && held && step.met ? { ...step, met: false, detail: held } : step;
+  });
+  return { steps, metCount: steps.filter((s) => s.met).length, totalCount: steps.length };
+}
+
 export function fromRental(r: PublicRentalDto): ShowroomListing {
   const price = money(r.price);
   const media = showroomMedia(r.title, r.media, [r.image, ...(r.images ?? [])]);
@@ -308,6 +345,8 @@ export function fromRental(r: PublicRentalDto): ShowroomListing {
     size: positive(r.size),
     verified: !!r.verified,
     trustChain: trustChainOf(r.trustChain),
+    // Only an explicit false: an older API that sends nothing leaves the page as it was.
+    ...(r.acceptingApplications === false ? { notAcceptingApplications: true } : {}),
     media,
     images: imageUrls(media),
     ...withFloorPlans(r.floorPlans, media),
@@ -346,6 +385,7 @@ export function fromRental(r: PublicRentalDto): ShowroomListing {
 export function fromSale(s: PublicSaleDto): ShowroomListing {
   const price = money(s.price);
   const media = showroomMedia(s.title, s.media, [s.coverImageUrl, ...(s.images ?? [])]);
+  const summary = verificationSummaryOf(s.verificationSummary);
   return {
     id: s.id,
     market: 'sale',
@@ -355,10 +395,11 @@ export function fromSale(s: PublicSaleDto): ShowroomListing {
     price,
     bedrooms: positive(s.bedrooms),
     bathrooms: positive(s.bathrooms),
-    verified: !!s.isVerified,
-    trustChain: trustChainOf(s.trustChain),
+    // Approved with conditions is never verified, whatever the flag says.
+    verified: !!s.isVerified && !conditionsOutstanding({ verificationSummary: summary }),
+    trustChain: saleTrustChain(trustChainOf(s.trustChain), summary),
     underOffer: !!s.underOffer,
-    verificationSummary: verificationSummaryOf(s.verificationSummary),
+    verificationSummary: summary,
     valuation: valuationOf(s.valuation),
     media,
     images: imageUrls(media),
@@ -366,7 +407,10 @@ export function fromSale(s: PublicSaleDto): ShowroomListing {
     amenities: s.amenities ?? [],
     facts: [
       ...fact('Property type', humanise(s.propertyType)),
-      ...fact('Payment', 'Protected: Sureground holds your deposit until you confirm receipt'),
+      ...fact(
+        'Payment',
+        'Protected: Sureground holds your deposit until the seller hands over the keys and you confirm'
+      ),
     ],
     costs: {
       lines: [{ label: 'Asking price', amount: price }],
@@ -387,7 +431,8 @@ export function fromLand(l: PublicLandDto): ShowroomListing {
     location: place(l.city, l.state),
     address: l.address,
     price,
-    verified: !!l.isVerified,
+    // Land approved with conditions (CONDITIONAL) is public but never verified.
+    verified: isListingVerified(l),
     verificationSummary: verificationSummaryOf(l.verificationSummary),
     media,
     images: imageUrls(media),

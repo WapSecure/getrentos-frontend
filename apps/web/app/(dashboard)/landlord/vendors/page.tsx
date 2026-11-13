@@ -152,6 +152,7 @@ export default function LandlordVendorsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Property care"
         title="Vendors"
         description={
           <>

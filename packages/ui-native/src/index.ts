@@ -51,8 +51,16 @@ export { ThemeToggle } from './primitives/ThemeToggle';
 export type { ThemeToggleProps } from './primitives/ThemeToggle';
 export { BrandLogo, BrandMark } from './primitives/BrandLogo';
 export type { BrandLogoProps } from './primitives/BrandLogo';
-export { Divider, Badge, Avatar, Skeleton, EmptyState, ErrorState } from './primitives/misc';
-export type { BadgeTone } from './primitives/misc';
+export {
+  Divider,
+  Badge,
+  Avatar,
+  Skeleton,
+  EmptyState,
+  ErrorState,
+  IconTile,
+} from './primitives/misc';
+export type { BadgeTone, IconTileTone } from './primitives/misc';
 export { ToastProvider, useToast } from './feedback/Toast';
 export type { ToastTone } from './feedback/Toast';
 export { NumberField, CurrencyField, sanitizeNumber } from './primitives/NumberField';

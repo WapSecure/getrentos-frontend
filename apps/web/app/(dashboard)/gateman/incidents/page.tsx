@@ -1,26 +1,29 @@
 'use client';
 
 import { useState } from 'react';
+import { PanicHoldButton } from '@/components/gateman/PanicHoldButton';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, Siren, TriangleAlert } from '@sureground/icons';
 import { NotAssignedToEstate } from '@/components/gateman/NotAssignedToEstate';
 import {
   Alert,
   Button,
-  Card,
   CardSkeleton,
   DocumentUpload,
   EmptyState,
   Field,
   ListSkeleton,
+  PageHeader,
   Select,
   Textarea,
+  useToast,
 } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { IncidentCard } from '@/components/estate/incidents/IncidentCard';
+import { GateRowIcon, GateSection, gateRowEdge } from '@/components/gateman/GateSection';
 
 const categoryOptions = [
   { value: 'SECURITY', label: 'Security' },
@@ -40,6 +43,7 @@ const PANIC_DESCRIPTION = 'Panic button activated';
 
 export default function GatemanIncidentsPage() {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [category, setCategory] = useState('OTHER');
   const [priority, setPriority] = useState('MEDIUM');
   const [description, setDescription] = useState('');
@@ -69,7 +73,10 @@ export default function GatemanIncidentsPage() {
       setDescription('');
       setPhoto(null);
       invalidate();
+      toast.success('Incident reported. The estate manager can see it now.');
     },
+    onError: (error: Error) =>
+      toast.error(error.message || 'The incident was not reported. Try again.'),
   });
 
   const panicAlert = useMutation({
@@ -98,100 +105,129 @@ export default function GatemanIncidentsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="text-center">
-        <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3">
-          <Siren className="w-7 h-7" />
-        </div>
-        <h1 className="text-xl font-bold text-foreground">{estate.name}</h1>
-        <p className="text-muted-foreground text-sm mt-1">Report an incident or raise the alarm.</p>
-      </div>
+      <PageHeader title={estate.name} description="Report an incident or raise the alarm." />
 
-      <button
-        type="button"
-        onClick={() => panicAlert.mutate()}
-        disabled={panicAlert.isPending}
-        aria-busy={panicAlert.isPending || undefined}
-        className="w-full rounded-2xl bg-destructive hover:brightness-95 active:brightness-90 disabled:opacity-60 text-destructive-foreground py-6 flex flex-col items-center gap-2 shadow-lg shadow-destructive/20 transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring"
+      <section
+        aria-labelledby="panic-title"
+        className="overflow-hidden rounded-2xl border border-destructive/30 bg-card shadow-sm"
       >
-        <TriangleAlert className="w-8 h-8" />
-        <span className="text-lg font-bold tracking-wide">
-          {panicAlert.isPending ? 'Sending…' : 'PANIC ALERT'}
-        </span>
-        <span className="text-xs text-destructive-foreground/80">
-          Tap to immediately notify the estate manager
-        </span>
-      </button>
+        <header className="flex items-start gap-3 px-5 pt-5">
+          <GateRowIcon tone="danger">
+            <Siren />
+          </GateRowIcon>
+          <div className="min-w-0">
+            <h2 id="panic-title" className="text-base font-semibold text-foreground">
+              Emergency
+            </h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              For an emergency only. This sends a critical security incident to the estate manager.
+            </p>
+          </div>
+        </header>
+        <div className="p-5">
+          <PanicHoldButton onConfirm={() => panicAlert.mutate()} isPending={panicAlert.isPending} />
+          {panicSent && (
+            <Alert variant="success" className="mt-4">
+              Alert sent: the estate manager has been notified.
+            </Alert>
+          )}
+        </div>
+      </section>
 
-      {panicSent && (
-        <Alert variant="success">Alert sent: the estate manager has been notified.</Alert>
-      )}
+      <GateSection
+        id="report-incident"
+        title="Report an incident"
+        description="For anything that is not an emergency. Say what happened and where."
+      >
+        <div className="space-y-4 p-5 sm:p-6">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Field label="Category">
+              <Select value={category} onValueChange={setCategory} options={categoryOptions} />
+            </Field>
+            <Field label="Priority">
+              <Select value={priority} onValueChange={setPriority} options={priorityOptions} />
+            </Field>
+          </div>
 
-      <Card className="p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-foreground">Report an incident</h2>
-
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field label="Category">
-            <Select value={category} onValueChange={setCategory} options={categoryOptions} />
+          <Field label="Description">
+            <Textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              placeholder="What happened, where, and who's involved…"
+            />
           </Field>
-          <Field label="Priority">
-            <Select value={priority} onValueChange={setPriority} options={priorityOptions} />
+
+          <Field label="Photo" optionalLabel="(optional)">
+            <DocumentUpload
+              value={photo ? [{ id: 'photo', file: photo }] : []}
+              onChange={(items) => setPhoto(items[0]?.file ?? null)}
+              accept="image/*"
+              multiple={false}
+              label=""
+            />
           </Field>
         </div>
 
-        <Field label="Description">
-          <Textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            placeholder="What happened, where, and who's involved…"
-          />
-        </Field>
+        <div className="border-t border-border bg-secondary/40 px-5 py-4 sm:px-6">
+          <Button
+            variant="primary"
+            fullWidth
+            size="lg"
+            disabled={!description.trim()}
+            isLoading={reportIncident.isPending}
+            loadingText="Reporting…"
+            onClick={() =>
+              reportIncident.mutate({
+                description: description.trim(),
+                category: category as 'SECURITY' | 'MAINTENANCE' | 'SAFETY' | 'OTHER',
+                priority: priority as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
+                photo: photo ?? undefined,
+              })
+            }
+          >
+            Report incident
+          </Button>
+        </div>
+      </GateSection>
 
-        <Field label="Photo" optionalLabel="(optional)">
-          <DocumentUpload
-            value={photo ? [{ id: 'photo', file: photo }] : []}
-            onChange={(items) => setPhoto(items[0]?.file ?? null)}
-            accept="image/*"
-            multiple={false}
-            label=""
-          />
-        </Field>
-
-        <Button
-          variant="primary"
-          fullWidth
-          disabled={!description.trim()}
-          isLoading={reportIncident.isPending}
-          loadingText="Reporting…"
-          onClick={() =>
-            reportIncident.mutate({
-              description: description.trim(),
-              category: category as 'SECURITY' | 'MAINTENANCE' | 'SAFETY' | 'OTHER',
-              priority: priority as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
-              photo: photo ?? undefined,
-            })
-          }
-        >
-          Report incident
-        </Button>
-      </Card>
-
-      <div>
-        <h2 className="text-sm font-semibold text-foreground mb-3">
-          Open Incidents ({open.length})
-        </h2>
+      <GateSection
+        id="open-incidents"
+        title="Open incidents"
+        count={isOpenLoading ? undefined : open.length}
+        countLabel={`${open.length} open`}
+        description="Reported at this estate and not yet resolved or dismissed."
+      >
         {isOpenLoading ? (
-          <ListSkeleton rows={2} />
-        ) : open.length === 0 ? (
-          <EmptyState icon={ShieldCheck} size="compact" title="No open incidents right now." />
-        ) : (
-          <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-            {open.map((incident) => (
-              <IncidentCard key={incident.id} incident={incident} />
-            ))}
+          <div className="p-5">
+            <ListSkeleton rows={2} />
           </div>
+        ) : open.length === 0 ? (
+          <EmptyState bare size="compact" icon={ShieldCheck} title="No open incidents right now." />
+        ) : (
+          <ul className="divide-y divide-border">
+            {open.map((incident) => {
+              const tone =
+                incident.priority === 'critical'
+                  ? 'danger'
+                  : incident.priority === 'high'
+                    ? 'warning'
+                    : 'neutral';
+              return (
+                <li key={incident.id} className={`flex gap-3 px-5 py-4 ${gateRowEdge(tone)}`}>
+                  <GateRowIcon tone={tone}>
+                    <TriangleAlert />
+                  </GateRowIcon>
+                  {/* The shared card brings its own padding; the row supplies it here. */}
+                  <div className="min-w-0 flex-1 [&>div]:p-0">
+                    <IncidentCard incident={incident} />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         )}
-      </div>
+      </GateSection>
     </div>
   );
 }

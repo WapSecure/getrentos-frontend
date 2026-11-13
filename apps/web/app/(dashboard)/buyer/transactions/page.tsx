@@ -13,7 +13,9 @@ import {
   useToast,
 } from '@sureground/ui';
 import { BuyerEscrowTransactionCard } from '@/components/buyer/transactions/BuyerEscrowTransactionCard';
+import { RecordGridSkeleton, RecordToolbar } from '@/components/shared/records/RecordParts';
 import { PayDialog } from '@/components/shared/payments/PayDialog';
+import { useDepositIdentityNotice } from '@/components/shared/payments/DepositIdentityNotice';
 import { formatCurrency } from '@/lib/format';
 import { SALE_DEPOSIT_PROTECTION } from '@/lib/paymentCopy';
 import { buyerService } from '@/services/buyerService';
@@ -78,6 +80,7 @@ export default function BuyerTransactionsPage() {
     },
   });
   const paying = transactions.find((t) => t.id === payingId) ?? null;
+  const identityNotice = useDepositIdentityNotice(paying?.escrowStatus === 'deposit_pending');
   const payingDeposit = paying ? (paying.depositAmount ?? paying.purchasePrice) : 0;
 
   const filterOptions: { value: StatusFilter; label: string }[] = [
@@ -92,6 +95,7 @@ export default function BuyerTransactionsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Buying"
         title="Transactions"
         description={
           isLoading ? (
@@ -102,7 +106,7 @@ export default function BuyerTransactionsPage() {
         }
       />
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <RecordToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -111,7 +115,7 @@ export default function BuyerTransactionsPage() {
           }}
           placeholder="Search by property or owner..."
           label="Search transactions"
-          className="flex-1 max-w-sm"
+          className="flex-1 sm:max-w-sm"
         />
         <SegmentedControl
           size="sm"
@@ -122,9 +126,9 @@ export default function BuyerTransactionsPage() {
             setPage(1);
           }}
           segments={filterOptions}
-          className="max-w-full overflow-x-auto"
+          className="max-w-full overflow-x-auto sm:ml-auto"
         />
-      </div>
+      </RecordToolbar>
 
       <QueryState
         isLoading={isLoading}
@@ -143,10 +147,8 @@ export default function BuyerTransactionsPage() {
         }}
         scope="page"
         loading={
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" aria-busy="true">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-56 rounded-2xl" />
-            ))}
+          <div aria-busy="true">
+            <RecordGridSkeleton />
           </div>
         }
       >
@@ -189,6 +191,7 @@ export default function BuyerTransactionsPage() {
           providers={providers}
           providerError={providerError}
           busy={depositMutation.isPending}
+          blocked={identityNotice}
           onPay={() => depositMutation.mutate({ id: paying.id, provider: providers.provider })}
         />
       )}

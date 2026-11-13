@@ -2,20 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, ShieldAlert } from '@sureground/icons';
+import { Activity, AlertTriangle, Plus, Search, ShieldAlert } from '@sureground/icons';
 import { FraudAlertCard } from '@/components/admin/fraud/FraudAlertCard';
 import { FraudAlertDetailModal } from '@/components/admin/fraud/FraudAlertDetailModal';
 import { NewFraudAlertModal } from '@/components/admin/fraud/NewFraudAlertModal';
 import {
   CardSkeleton,
+  ConfirmDialog,
   EmptyState,
   PageErrorState,
   PageHeader,
   SearchInput,
-  Tabs,
-  TabsList,
-  TabsTrigger,
+  StatGroup,
+  useToast,
 } from '@sureground/ui';
+import { FilterChips, OpsToolbar } from '@/components/admin/ops/OpsParts';
 import { Button } from '@sureground/ui';
 import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
@@ -28,11 +29,45 @@ import type { FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';
 
 type StatusFilter = 'all' | FraudAlertStatus;
 type SeverityFilter = 'all' | FraudAlertSeverity;
+type PendingDecision = { id: string; subjectName: string; status: 'cleared' | 'confirmed' };
 
 const PAGE_SIZE = 12;
 
+const STATUS_TOASTS: Record<FraudAlertStatus, (subject: string) => string> = {
+  flagged: (subject) => `Alert on ${subject} flagged.`,
+  investigating: (subject) => `Alert on ${subject} moved to investigating.`,
+  cleared: (subject) => `Alert on ${subject} cleared.`,
+  confirmed: (subject) => `Alert on ${subject} confirmed as fraud.`,
+};
+
+const DECISION_COPY: Record<
+  PendingDecision['status'],
+  {
+    title: (subject: string) => string;
+    description: string;
+    label: string;
+    tone: 'danger' | 'primary';
+  }
+> = {
+  confirmed: {
+    title: (subject) => `Confirm fraud by ${subject}?`,
+    description:
+      'This records the alert as confirmed fraud against this account and closes it. It stays in the audit log; reopen it from the alert if this was a mistake.',
+    label: 'Confirm fraud',
+    tone: 'danger',
+  },
+  cleared: {
+    title: (subject) => `Clear the alert on ${subject}?`,
+    description:
+      'This records that no fraud was found and closes the alert. It stays in the audit log; reopen it from the alert if this was a mistake.',
+    label: 'Clear alert',
+    tone: 'primary',
+  },
+};
+
 export default function AdminFraudPage() {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const adminUser = useAdminUser();
   const canAttachEvidence = hasAdminPermission(adminUser?.roles, 'fraud.review');
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,14 +111,26 @@ export default function AdminFraudPage() {
 
   const updateStatusMutation = useMutation({
     meta: { showGlobalError: true },
-    mutationFn: ({ id, status }: { id: string; status: FraudAlertStatus }) =>
+    mutationFn: ({ id, status }: { id: string; status: FraudAlertStatus; subjectName: string }) =>
       unwrap(adminService.updateFraudAlertStatus(id, status)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'fraudAlerts'] }),
+    onSuccess: (_updated, { status, subjectName }) => {
+      toast.success(STATUS_TOASTS[status](subjectName));
+      return queryClient.invalidateQueries({ queryKey: ['admin', 'fraudAlerts'] });
+    },
   });
 
-  const updateStatus = (id: string, status: FraudAlertStatus) => {
-    if (status === 'flagged') return;
-    updateStatusMutation.mutate({ id, status });
+  // Clearing or confirming is a decision about a named person, so it is never a single click.
+  const [pendingDecision, setPendingDecision] = useState<PendingDecision | null>(null);
+
+  const updateStatus = (
+    alert: { id: string; subjectName: string },
+    status: Exclude<FraudAlertStatus, 'flagged'>
+  ) => {
+    if (status === 'investigating') {
+      updateStatusMutation.mutate({ id: alert.id, status, subjectName: alert.subjectName });
+      return;
+    }
+    setPendingDecision({ id: alert.id, subjectName: alert.subjectName, status });
   };
 
   const invalidateFraudAlerts = () =>
@@ -146,12 +193,21 @@ export default function AdminFraudPage() {
     queryFn: () =>
       unwrap(adminService.listFraudAlerts({ status: 'flagged', page: 1, pageSize: 1 })),
   });
+  // Same definition as the dashboard tile: every open alert, flagged or under investigation.
+  const { data: investigatingData, isError: investigatingCountError } = useQuery({
+    queryKey: ['admin', 'fraudAlerts', 'count', 'investigating'],
+    queryFn: () =>
+      unwrap(adminService.listFraudAlerts({ status: 'investigating', page: 1, pageSize: 1 })),
+  });
   const flaggedCount = flaggedData?.total ?? 0;
+  const investigatingCount = investigatingData?.total ?? 0;
+  const openCount = flaggedCount + investigatingCount;
+  const countsUnavailable = flaggedCountError || investigatingCountError;
 
-  const statusOptions: { value: StatusFilter; label: string }[] = [
+  const statusOptions: { value: StatusFilter; label: string; count?: number }[] = [
     { value: 'all', label: 'All' },
-    { value: 'flagged', label: 'Flagged' },
-    { value: 'investigating', label: 'Investigating' },
+    { value: 'flagged', label: 'Flagged', count: flaggedData?.total },
+    { value: 'investigating', label: 'Investigating', count: investigatingData?.total },
     { value: 'cleared', label: 'Cleared' },
     { value: 'confirmed', label: 'Confirmed' },
   ];
@@ -167,15 +223,13 @@ export default function AdminFraudPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Risk"
         title="Fraud and risk review"
-        description={
-          flaggedCountError
-            ? 'Flagged-alert count temporarily unavailable'
-            : `${flaggedCount} alert${flaggedCount === 1 ? '' : 's'} awaiting triage`
-        }
+        // The open-alert counts live in the strip below; the header only says what the page is for.
+        description="Triage new alerts, investigate them and record a decision."
         actions={
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" href="/admin/fraud/risk">
+            <Button variant="outline" href="/admin/fraud/risk" icon={<Activity />}>
               Risk decisions
             </Button>
             <Button icon={<Plus />} onClick={() => setShowCreate(true)}>
@@ -185,7 +239,32 @@ export default function AdminFraudPage() {
         }
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <StatGroup
+        title="Open alerts"
+        items={[
+          {
+            label: 'Awaiting triage',
+            value: flaggedCountError ? '–' : (flaggedData?.total ?? '–'),
+            subtitle: flaggedCountError ? 'Count unavailable' : 'Flagged, not yet picked up',
+            icon: AlertTriangle,
+            attention: flaggedCount > 0,
+          },
+          {
+            label: 'Under investigation',
+            value: investigatingCountError ? '–' : (investigatingData?.total ?? '–'),
+            subtitle: investigatingCountError ? 'Count unavailable' : 'Being worked on',
+            icon: Search,
+          },
+          {
+            label: 'Open in total',
+            value: countsUnavailable ? '–' : openCount,
+            subtitle: 'Same figure as the dashboard',
+            icon: ShieldAlert,
+          },
+        ]}
+      />
+
+      <OpsToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -207,27 +286,20 @@ export default function AdminFraudPage() {
           searchable={false}
           className="w-full sm:w-48"
         />
-      </div>
+      </OpsToolbar>
 
-      <Tabs
+      <FilterChips
+        label="Filter alerts by status"
         value={statusFilter}
-        onValueChange={(value) => {
-          setStatusFilter(value as StatusFilter);
+        onChange={(value) => {
+          setStatusFilter(value);
           setPage(1);
         }}
-        className=""
-      >
-        <TabsList className="max-w-full">
-          {statusOptions.map((option) => (
-            <TabsTrigger key={option.value} value={option.value}>
-              {option.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+        options={statusOptions}
+      />
 
       {isLoading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
             <CardSkeleton key={index} />
           ))}
@@ -240,18 +312,22 @@ export default function AdminFraudPage() {
           isRetrying={isFetching}
         />
       ) : alerts.length === 0 ? (
-        <EmptyState icon={ShieldAlert} title="No alerts match your filters" />
+        <EmptyState
+          icon={ShieldAlert}
+          title="No alerts match your filters"
+          description="Try another subject or entity, or clear the severity and status filters."
+        />
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {alerts.map((alert, index) => (
             <FraudAlertCard
               key={alert.id}
               alert={alert}
               delay={index * 0.05}
               onOpen={() => setActiveAlertId(alert.id)}
-              onInvestigate={() => updateStatus(alert.id, 'investigating')}
-              onClear={() => updateStatus(alert.id, 'cleared')}
-              onConfirm={() => updateStatus(alert.id, 'confirmed')}
+              onInvestigate={() => updateStatus(alert, 'investigating')}
+              onClear={() => updateStatus(alert, 'cleared')}
+              onConfirm={() => updateStatus(alert, 'confirmed')}
             />
           ))}
         </div>
@@ -286,7 +362,12 @@ export default function AdminFraudPage() {
         loading={activeAlertDetailLoading}
         onClose={() => setActiveAlertId(null)}
         onSeverityChange={(id, severity) => severityMutation.mutate({ id, severity })}
-        onStatusChange={(id, status) => updateStatus(id, status)}
+        onStatusChange={(id, status) =>
+          updateStatus(
+            { id, subjectName: activeAlertDetail?.subject.legalName ?? 'this account' },
+            status
+          )
+        }
         onReopen={(id) => reopenMutation.mutate(id)}
         isUpdating={
           updateStatusMutation.isPending || severityMutation.isPending || reopenMutation.isPending
@@ -298,6 +379,28 @@ export default function AdminFraudPage() {
         isAttachingEvidence={attachEvidenceMutation.isPending}
         onResolveEvidenceUrl={resolveEvidenceUrl}
       />
+
+      {pendingDecision ? (
+        <ConfirmDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setPendingDecision(null);
+          }}
+          title={DECISION_COPY[pendingDecision.status].title(pendingDecision.subjectName)}
+          description={DECISION_COPY[pendingDecision.status].description}
+          confirmLabel={DECISION_COPY[pendingDecision.status].label}
+          tone={DECISION_COPY[pendingDecision.status].tone}
+          isLoading={updateStatusMutation.isPending}
+          onConfirm={async () => {
+            try {
+              await updateStatusMutation.mutateAsync(pendingDecision);
+            } catch {
+              // The global mutation error handler already tells the reviewer it failed.
+            }
+            setPendingDecision(null);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

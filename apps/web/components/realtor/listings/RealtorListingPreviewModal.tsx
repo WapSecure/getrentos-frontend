@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import {
   Megaphone,
   MapPin,
@@ -76,7 +77,7 @@ export const RealtorListingPreviewModal = ({
               </DialogTitle>
               <p className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                 <MapPin className="w-3 h-3" />
-                {listing.city}, {listing.state}
+                {formatLocation(listing.city, listing.state)}
               </p>
               <p className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                 <User className="w-3 h-3" />

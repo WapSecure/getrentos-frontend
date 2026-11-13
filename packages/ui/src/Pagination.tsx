@@ -44,19 +44,19 @@ export const Pagination = ({
           type="button"
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
-          className="p-1.5 rounded-md hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="p-1.5 rounded-md transition-colors duration-150 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Previous page"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
-        <span className="px-2 text-foreground font-medium">
-          {page} / {pageCount}
+        <span className="px-2 tabular-nums text-muted-foreground">
+          <span className="font-semibold text-primary">{page}</span> / {pageCount}
         </span>
         <button
           type="button"
           onClick={() => onPageChange(page + 1)}
           disabled={page >= pageCount}
-          className="p-1.5 rounded-md hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="p-1.5 rounded-md transition-colors duration-150 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Next page"
         >
           <ChevronRight className="w-4 h-4" />

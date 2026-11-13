@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
-import { useTheme } from '../theme';
+import { useTheme, withAlpha } from '../theme';
 import { Text } from './Text';
 
 export interface SegmentOption<T extends string> {
@@ -48,7 +48,11 @@ export function SegmentedControl<T extends string>({
             style={[
               styles.segment,
               { borderRadius: radius.md - 3 },
-              active && [{ backgroundColor: colors.card }, shadows.xs],
+              // A blue hairline on the selected segment, so the choice reads as Sureground blue and not only by its label.
+              active && [
+                { backgroundColor: colors.card, borderColor: withAlpha(colors.primary, 0.3) },
+                shadows.xs,
+              ],
             ]}
           >
             {opt.icon}
@@ -93,6 +97,8 @@ const styles = StyleSheet.create({
     gap: 6,
     minHeight: 44,
     paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: 'transparent',
     paddingHorizontal: 6,
   },
 });

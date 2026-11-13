@@ -4,7 +4,7 @@ import { Card } from '@sureground/ui';
 import { motion } from 'framer-motion';
 import { Calendar, FileText, Mail, Phone, MapPin } from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
-import { leaseRentLabel } from '@/lib/leaseTerm';
+import { countRentCharges, leaseRentLabel } from '@/lib/leaseTerm';
 import type { Lease } from '@/services/renterService';
 
 interface LeaseDetailsProps {
@@ -62,7 +62,12 @@ export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
               <div className="flex items-center gap-2 mb-1">
                 <NairaSign className="w-4 h-4 text-primary" />
                 <span className="text-xs text-muted-foreground">
-                  {leaseRentLabel(lease.rentPeriod, lease.startDate, lease.endDate)}
+                  {leaseRentLabel(
+                    lease.rentPeriod,
+                    lease.startDate,
+                    lease.endDate,
+                    countRentCharges(lease.rentAmount, lease.paymentHistory ?? [])
+                  )}
                 </span>
               </div>
               <p className="text-sm font-medium text-foreground">
@@ -90,7 +95,7 @@ export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
             <h4 className="text-sm font-medium text-foreground mb-2">Landlord information</h4>
             <div className="p-3 rounded-lg bg-secondary">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary ring-1 ring-inset ring-primary/15">
                   {lease.landlord.name.charAt(0)}
                 </div>
                 <div className="flex-1">

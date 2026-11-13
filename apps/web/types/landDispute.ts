@@ -69,4 +69,7 @@ export interface LandDispute {
   evidence: LandDisputeEvidence[];
   events: LandDisputeEvent[];
   createdAt: string;
+  /** When Sureground will respond by (the staff response window); null while investigating or decided. */
+  respondBy?: string | null;
+  respondByParty?: 'SUREGROUND' | null;
 }

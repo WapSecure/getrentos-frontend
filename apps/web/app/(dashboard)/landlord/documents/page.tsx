@@ -22,10 +22,7 @@ import { ListState } from '@/components/shared/ListState';
 import { landlordService } from '@/services/landlordService';
 
 type DocumentCategory =
-  | 'lease_agreements'
-  | 'ownership_docs'
-  | 'escrow_contracts'
-  | 'inspection_reports';
+  'lease_agreements' | 'ownership_docs' | 'escrow_contracts' | 'inspection_reports';
 
 const categoryLabels: Record<DocumentCategory, string> = {
   lease_agreements: 'Lease agreements',
@@ -109,6 +106,7 @@ export default function LandlordDocumentsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Records"
         title="Documents"
         description={
           <>

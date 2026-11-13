@@ -478,10 +478,10 @@ Three decisions from the product owner, built on `feat/showroom-collections` in 
 - Backoffice: `/admin/showroom-collections` (sidebar, `collections.manage`), the same editor plus the Sponsored switch and the curator of each collection.
 - **Analytics:** `property_impression` and `property_card_click` with surface `{market}_collection`. No new event names.
 
-**Product decisions (open on 2026-11-11; three decided and built 2026-11-12, see below):**
+**Product decisions (open on 2026-11-11; all decided by 2026-11-12, see below):**
 
 - **Consent for staff curation across owners:** decided and built 2026-11-12 (notify and allow opt-out).
-- **Realtor display name:** still open. A realtor's collections show their company name, or their legal name when they have none.
+- **Realtor display name:** decided 2026-11-12: a realtor's collections show their company name when they have one, otherwise their legal name. This is the current behaviour, kept; nothing to build.
 - **The honesty word list:** kept strict and unchanged on 2026-11-12 ("best" and "inspected" are still refused), including for rule-based collections.
 - **Rule-based collections:** decided and built 2026-11-12 (staff only).
 - **Sponsored:** decided and built 2026-11-12 (a sponsor record is required).

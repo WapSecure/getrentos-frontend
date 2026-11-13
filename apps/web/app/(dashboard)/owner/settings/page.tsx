@@ -65,7 +65,11 @@ export default function OwnerSettingsPage() {
 
   return (
     <>
-      <PageHeader title="Settings" description="Manage your account preferences" />
+      <PageHeader
+        eyebrow="Account"
+        title="Settings"
+        description="Manage your account preferences"
+      />
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-64 shrink-0">

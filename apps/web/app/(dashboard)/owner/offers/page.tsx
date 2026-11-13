@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Handshake } from '@sureground/icons';
+import { RecordToolbar } from '@/components/shared/records/RecordParts';
 import { OfferCard } from '@/components/owner/offers/OfferCard';
 import { OfferNegotiationModal } from '@/components/owner/offers/OfferNegotiationModal';
 import { OfferComparisonPanel } from '@/components/shared/offers/OfferComparisonPanel';
@@ -150,6 +151,7 @@ export default function OwnerOffersPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Selling"
         title="Offers"
         description={
           <>
@@ -177,13 +179,13 @@ export default function OwnerOffersPage() {
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <RecordToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={setSearchQuery}
           placeholder="Search by buyer or property..."
           label="Search offers"
-          className="flex-1 max-w-sm"
+          className="min-w-0 flex-1 sm:max-w-sm"
         />
         <SegmentedControl
           size="sm"
@@ -194,9 +196,9 @@ export default function OwnerOffersPage() {
             setPage(1);
           }}
           segments={filterOptions}
-          className="max-w-full overflow-x-auto"
+          className="max-w-full overflow-x-auto sm:ml-auto"
         />
-      </div>
+      </RecordToolbar>
 
       {isLoading ? (
         <ListSkeleton rows={6} variant="cards" label="Loading offers" />

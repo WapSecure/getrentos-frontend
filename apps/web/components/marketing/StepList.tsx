@@ -9,8 +9,8 @@ export interface Step {
 export const StepList = ({ steps }: { steps: Step[] }) => (
   <ol className="grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
     {steps.map((step, index) => (
-      <li key={step.title} className="border-t border-foreground/80 pt-6">
-        <p className="label-caps mb-6 tabular-nums text-muted-foreground">
+      <li key={step.title} className="border-t-2 border-primary pt-6">
+        <p className="label-caps mb-6 tabular-nums text-primary">
           Step {String(index + 1).padStart(2, '0')}
         </p>
         <h3 className="font-display mb-3 text-[1.5rem] leading-tight font-normal">{step.title}</h3>

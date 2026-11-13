@@ -19,6 +19,8 @@ import { formatCurrency } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { buyerLandKeys, landLayoutKeys } from '@/lib/landSalesQueryKeys';
 import { landBuyerService, landLayoutService } from '@/services/landBuyerService';
+import { foreignIdentityService } from '@/services/foreignIdentityService';
+import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 import type { LandReservation } from '@/types/landBuyer';
 import { TrustLabelsList } from '@/components/shared/trust/TrustLabelsList';
 import { PaymentPlanCard } from './PaymentPlanCard';
@@ -37,6 +39,8 @@ export const StartPurchaseDialog = ({
   const [planId, setPlanId] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // DIA-07: asked before starting, so a large purchase is not refused with a 403.
+  const [fundsHold, setFundsHold] = useState<string | null>(null);
 
   const layout = useQuery({
     queryKey: landLayoutKeys.detail(reservation?.layoutId ?? ''),
@@ -50,15 +54,23 @@ export const StartPurchaseDialog = ({
   const needsAcceptance = notVerified.length > 0 && !accepted;
 
   const start = useMutation({
-    mutationFn: () =>
-      unwrap(
+    mutationFn: async () => {
+      const total = layout.data
+        ? quotePlot(reservation!.price, layout.data.fees.total, chosen!).totalPrice
+        : reservation!.price;
+      const hold = await foreignIdentityService.sourceOfFundsHold(total);
+      setFundsHold(hold);
+      if (hold) return null;
+      return unwrap(
         landBuyerService.startPurchase(
           reservation!.id,
           chosen!.id,
           notVerified.map((item) => item.key)
         )
-      ),
+      );
+    },
     onSuccess: (purchase) => {
+      if (!purchase) return;
       queryClient.invalidateQueries({ queryKey: buyerLandKeys.all });
       router.push(LAND_BUYER_ROUTES.purchase(purchase.id));
     },
@@ -69,6 +81,7 @@ export const StartPurchaseDialog = ({
     setPlanId(null);
     setAccepted(false);
     setError(null);
+    setFundsHold(null);
     onClose();
   };
 
@@ -153,6 +166,18 @@ export const StartPurchaseDialog = ({
                   onCheckedChange={setAccepted}
                   label="I have read what was not verified and accept it. I understand I can have my own lawyer check these before I pay."
                 />
+              </Alert>
+            )}
+
+            {fundsHold && (
+              <Alert variant="warning" title="Confirm your source of funds" className="mt-4">
+                {fundsHold}{' '}
+                <Link
+                  href={DIASPORA_ROUTES.BUYER_IDENTITY_ABROAD}
+                  className="font-medium text-primary hover:underline"
+                >
+                  Go to Identity abroad
+                </Link>
               </Alert>
             )}
 

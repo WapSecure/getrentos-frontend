@@ -1,12 +1,19 @@
 'use client';
 
-import { useEffect, useState, type KeyboardEvent, type ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Menu, X } from '@sureground/icons';
 import { Logo } from '@/components/ui/Logo';
 import { IconButton, SearchInput, ThemeToggle } from '@sureground/ui';
 import { RoleMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
 import type { NavigationGates, RoleNavigationConfig } from '@/lib/navigation/types';
+import {
+  SearchShortcutHint,
+  TopBarAccount,
+  TopBarDivider,
+  WorkspacePill,
+  useSlashToSearch,
+} from './TopBarParts';
 
 interface WorkspaceNavbarProps {
   search: {
@@ -34,6 +41,9 @@ export const WorkspaceNavbar = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const barRef = useRef<HTMLElement>(null);
+  const reduceMotion = useReducedMotion();
+  useSlashToSearch(barRef);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -61,21 +71,30 @@ export const WorkspaceNavbar = ({
   return (
     <>
       <nav
+        ref={barRef}
         aria-label="Top bar"
-        className={`workspace-navbar sticky top-0 z-50 ${isScrolled ? 'shadow-xs' : ''}`}
+        className={`workspace-navbar sticky top-0 z-50 transition-shadow duration-200 ${isScrolled ? 'shadow-xs' : ''}`}
       >
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-3">
-            <Logo size="md" className="shrink-0 [&>span]:sr-only sm:[&>span]:not-sr-only" />
+            <div className="flex min-w-0 shrink-0 items-center gap-3">
+              <Logo size="md" className="shrink-0 [&>span]:sr-only sm:[&>span]:not-sr-only" />
+              <TopBarDivider className="hidden lg:block" />
+              <WorkspacePill label={navigation.workspaceLabel} className="hidden lg:inline-flex" />
+            </div>
 
-            <div className="hidden md:flex flex-1 max-w-md mx-4">{searchBox}</div>
+            <div className="shell-search group relative mx-4 hidden max-w-md flex-1 md:flex">
+              {searchBox}
+              <SearchShortcutHint />
+            </div>
 
-            <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+            <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
               {actions}
               <ThemeToggle />
               {assistant}
               {notifications}
-              {profileMenu}
+              <TopBarDivider className="mx-1 hidden sm:block" />
+              <TopBarAccount>{profileMenu}</TopBarAccount>
 
               <IconButton
                 label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
@@ -87,16 +106,17 @@ export const WorkspaceNavbar = ({
             </div>
           </div>
 
-          <div className="md:hidden py-3">{searchBox}</div>
+          <div className="pb-3 md:hidden">{searchBox}</div>
         </div>
       </nav>
 
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
+            transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
             className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden bottom-0 overflow-y-auto overscroll-contain"
           >
             <RoleMobileNavigation

@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
   Chip,
+  FormAlert,
   NumberField,
   Text,
   TextField,
@@ -14,6 +15,7 @@ import {
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { buyerOffersApi, type BuyerFinancingType } from '@/lib/api/buyerOffers';
+import { foreignIdentityApi } from '@/lib/api/foreignIdentity';
 import type { BuyerListingTarget } from '@/lib/api/buyer';
 import { errorMessage } from '@/lib/api/client';
 import { VerificationGateNotice } from '@/components/VerificationGateNotice';
@@ -64,18 +66,25 @@ function OfferForm({
   const [depositAmount, setDepositAmount] = useState('');
   const [financingType, setFinancingType] = useState<BuyerFinancingType>('cash');
   const [message, setMessage] = useState('');
+  // DIA-07: asked before sending, so a large offer is not refused with a 403.
+  const [fundsHold, setFundsHold] = useState<string | null>(null);
 
   const mutation = useMutation({
-    mutationFn: () =>
-      buyerOffersApi.create({
+    mutationFn: async () => {
+      const hold = await foreignIdentityApi.sourceOfFundsHold(Number(amount));
+      setFundsHold(hold);
+      if (hold) return null;
+      return buyerOffersApi.create({
         listingId: listing.id,
         amount: Number(amount),
         depositAmount: depositAmount ? Number(depositAmount) : undefined,
         financingType,
         message: message.trim() || undefined,
-      }),
+      });
+    },
     onMutate: () => onSubmittingChange(true),
     onSuccess: (offer) => {
+      if (!offer) return;
       qc.invalidateQueries({ queryKey: ['buyer', 'offers'] });
       qc.invalidateQueries({ queryKey: qk.buyer.dashboard });
       toast.show('Offer submitted.', 'success');
@@ -136,6 +145,21 @@ function OfferForm({
         numberOfLines={3}
         editable={!mutation.isPending}
       />
+      {fundsHold ? (
+        <View style={{ gap: spacing.sm }}>
+          <FormAlert tone="warning" title="Confirm your source of funds" message={fundsHold} />
+          <Button
+            label="Go to Identity abroad"
+            variant="outline"
+            size="sm"
+            onPress={() => {
+              onClose();
+              router.push('/(app)/invest-identity');
+            }}
+            style={{ alignSelf: 'flex-start' }}
+          />
+        </View>
+      ) : null}
       <VerificationGateNotice
         error={mutation.error}
         scoreHref="/(app)/buyer-trust-profile"

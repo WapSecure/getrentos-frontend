@@ -35,7 +35,11 @@ export default function BuyerReviewsPage() {
 
   return (
     <>
-      <PageHeader title="Reviews" description="Reviews you've left for property owners" />
+      <PageHeader
+        eyebrow="Reputation"
+        title="Reviews"
+        description="Reviews you've left for property owners"
+      />
 
       <div className="mb-6 bg-accent border border-primary/30 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">

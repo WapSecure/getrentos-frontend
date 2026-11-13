@@ -17,7 +17,7 @@ import {
 
 import { useState } from 'react';
 import { CheckCircle2, ArrowUpCircle, Search, RotateCcw, Send } from '@sureground/icons';
-import { cn, formatCurrency, humaniseEnum } from '@sureground/shared';
+import { cn, codeLabel, formatCurrency, formatDateTime } from '@sureground/shared';
 import { EvidencePanel } from '@/components/shared/EvidencePanel';
 import { DisputeSummaryPanel } from './DisputeSummaryPanel';
 import type { Dispute, DisputeDetail, DisputeMessage, DisputeResolveOutcome } from '@/types/admin';
@@ -134,12 +134,8 @@ export const DisputeCaseModal = ({
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <Badge variant={STATUS_VARIANT[dispute.status]} className="capitalize">
-                {dispute.status.replace('_', ' ')}
-              </Badge>
-              <Badge variant="neutral" className="capitalize">
-                {dispute.category.replace('_', ' ')}
-              </Badge>
+              <Badge variant={STATUS_VARIANT[dispute.status]}>{codeLabel(dispute.status)}</Badge>
+              <Badge variant="neutral">{codeLabel(dispute.category)}</Badge>
             </div>
           </div>
         </div>
@@ -210,7 +206,7 @@ export const DisputeCaseModal = ({
             <div className="px-4 py-3 bg-success-subtle border-b border-border text-sm">
               <p className="font-medium text-success">
                 Resolution
-                {detail.resolvedAt ? ` · ${new Date(detail.resolvedAt).toLocaleString()}` : ''}
+                {detail.resolvedAt ? ` · ${formatDateTime(detail.resolvedAt)}` : ''}
               </p>
               <p className="text-muted-foreground mt-0.5">{detail.resolution}</p>
             </div>
@@ -222,7 +218,9 @@ export const DisputeCaseModal = ({
                 <p className="text-xs font-semibold text-foreground uppercase tracking-wide">
                   Escrow transaction
                 </p>
-                <Badge variant="neutral">{ESCROW_LABEL[tx.escrowStatus] ?? tx.escrowStatus}</Badge>
+                <Badge variant="neutral">
+                  {ESCROW_LABEL[tx.escrowStatus] ?? codeLabel(tx.escrowStatus)}
+                </Badge>
               </div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
                 {tx.property && (
@@ -233,7 +231,8 @@ export const DisputeCaseModal = ({
                 )}
                 {tx.offer && (
                   <p className="truncate">
-                    <span className="font-medium text-foreground">Offer:</span> {tx.offer.status}
+                    <span className="font-medium text-foreground">Offer:</span>{' '}
+                    {codeLabel(tx.offer.status)}
                   </p>
                 )}
                 {tx.buyer && (
@@ -270,10 +269,12 @@ export const DisputeCaseModal = ({
                       className="flex items-center gap-2 text-xs"
                     >
                       <span className="h-1.5 w-1.5 rounded-full bg-primary/60 shrink-0" />
-                      <span className="text-foreground font-medium">{event.eventType}</span>
-                      <span className="text-muted-foreground">{humaniseEnum(event.status)}</span>
+                      <span className="text-foreground font-medium">
+                        {codeLabel(event.eventType)}
+                      </span>
+                      <span className="text-muted-foreground">{codeLabel(event.status)}</span>
                       <span className="text-muted-foreground ml-auto">
-                        {new Date(event.createdAt).toLocaleString()}
+                        {formatDateTime(event.createdAt)}
                       </span>
                     </div>
                   ))}

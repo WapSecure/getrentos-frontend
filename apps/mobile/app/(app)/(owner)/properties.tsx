@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useMemo } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
@@ -144,7 +145,7 @@ function PropertyRow({
       accessibilityRole="button"
       accessibilityLabel={[
         p.name,
-        `${p.city}, ${p.state}`,
+        formatLocation(p.city, p.state),
         OWNER_VERIFICATION_LABEL[p.verificationStatus],
         listing ? `listing ${OWNER_LISTING_LABEL[listing.status]}` : 'not listed',
       ].join(', ')}
@@ -190,7 +191,7 @@ function PropertyRow({
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
           <MapPin size={11} color={colors.mutedForeground} />
           <Text variant="caption" color="mutedForeground" numberOfLines={1} style={{ flex: 1 }}>
-            {p.city}, {p.state}
+            {formatLocation(p.city, p.state)}
           </Text>
         </View>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>

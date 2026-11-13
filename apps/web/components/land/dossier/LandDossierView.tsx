@@ -1,6 +1,6 @@
 'use client';
 
-import { boundarySignOffText } from '@sureground/shared';
+import { boundarySignOffText, formatLocation } from '@sureground/shared';
 import { History, Printer } from '@sureground/icons';
 import { Alert, Badge, Button, EmptyState, PageHeader } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -44,7 +44,7 @@ export const LandDossierView = ({ dossier }: { dossier: LandDossier }) => {
         title={subject.title}
         description={
           <>
-            {subject.city}, {subject.state} · {formatCurrency(subject.price)}
+            {formatLocation(subject.city, subject.state)} · {formatCurrency(subject.price)}
             {subject.planName ? ` · ${subject.planName}` : ''} · generated{' '}
             {formatDate(dossier.generatedAt)}
           </>

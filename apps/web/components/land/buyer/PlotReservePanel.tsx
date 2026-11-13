@@ -238,8 +238,8 @@ export const PlotReservePanel = ({
       )}
 
       {conditionsOpen && (
-        <p className="text-xs text-muted-foreground">
-          Reservations open once the conditions on this estate are met.
+        <p className="text-xs text-warning">
+          Approved with conditions. Reservations open once the conditions on this estate are met.
         </p>
       )}
 

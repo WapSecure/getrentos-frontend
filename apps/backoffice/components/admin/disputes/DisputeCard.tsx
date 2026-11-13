@@ -3,8 +3,9 @@
 import { motion } from 'framer-motion';
 import { Gavel, Clock, Search, CheckCircle2, ArrowUpCircle } from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
-import { formatCurrency, formatDate } from '@sureground/shared';
+import { codeLabel, formatCurrency, formatDate } from '@sureground/shared';
 import type { Dispute, DisputeStatus } from '@/types/admin';
+import { FactGrid, IconTile } from '@/components/admin/ops/OpsParts';
 
 const statusConfig: Record<
   DisputeStatus,
@@ -16,10 +17,10 @@ const statusConfig: Record<
   escalated: { label: 'Escalated', icon: ArrowUpCircle, variant: 'danger' },
 };
 
-const priorityConfig: Record<Dispute['priority'], string> = {
-  high: 'text-destructive',
-  medium: 'text-warning',
-  low: 'text-muted-foreground',
+const priorityConfig: Record<Dispute['priority'], BadgeVariant> = {
+  high: 'danger',
+  medium: 'warning',
+  low: 'neutral',
 };
 
 interface DisputeCardProps {
@@ -39,13 +40,13 @@ export const DisputeCard = ({ dispute, onClick, delay = 0 }: DisputeCardProps) =
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
       onClick={onClick}
-      className="min-w-0 w-full max-w-full cursor-pointer overflow-hidden rounded-2xl border border-border/90 bg-card p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+      className="flex min-w-0 w-full max-w-full cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-card p-5 text-left shadow-xs transition-[border-color,box-shadow] duration-200 hover:border-primary/30 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex w-full items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="p-2.5 rounded-xl bg-accent shrink-0">
-            <Gavel className="w-4 h-4 text-primary" />
-          </div>
+          <IconTile>
+            <Gavel />
+          </IconTile>
           <div className="min-w-0">
             <h3 className="font-semibold text-foreground truncate">{dispute.title}</h3>
             <p className="text-xs text-muted-foreground truncate">
@@ -58,24 +59,29 @@ export const DisputeCard = ({ dispute, onClick, delay = 0 }: DisputeCardProps) =
         </Badge>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mt-4">
-        <div>
-          <p className="text-xs text-muted-foreground">Priority</p>
-          <p className={`text-sm font-medium capitalize ${priorityConfig[dispute.priority]}`}>
-            {dispute.priority}
-          </p>
-        </div>
-        {dispute.amount !== undefined && (
-          <div>
-            <p className="text-xs text-muted-foreground">Amount</p>
-            <p className="text-sm font-medium text-foreground">
-              {formatCurrency(dispute.amount, { compact: true })}
-            </p>
-          </div>
-        )}
-      </div>
+      <FactGrid
+        className="mt-4 w-full flex-1"
+        facts={[
+          {
+            label: 'Priority',
+            value: (
+              <Badge variant={priorityConfig[dispute.priority]} dot>
+                {codeLabel(dispute.priority)}
+              </Badge>
+            ),
+          },
+          dispute.amount !== undefined && {
+            label: 'Amount',
+            value: (
+              <span className="tabular-nums">
+                {formatCurrency(dispute.amount, { compact: true })}
+              </span>
+            ),
+          },
+        ]}
+      />
 
-      <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
+      <p className="mt-4 w-full border-t border-border pt-3 text-xs text-muted-foreground">
         Opened {formatDate(dispute.createdAt)}
       </p>
     </motion.button>

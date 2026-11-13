@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -148,7 +149,7 @@ export function DevelopmentEditorView({ id }: { id: string }) {
       </Link>
       <PageHeader
         title={d.name}
-        description={`${d.location.city}, ${d.location.state}`}
+        description={formatLocation(d.location.city, d.location.state)}
         actions={
           <Badge variant={STATUS_VARIANT[d.status]}>{DEVELOPMENT_STATUS_LABEL[d.status]}</Badge>
         }

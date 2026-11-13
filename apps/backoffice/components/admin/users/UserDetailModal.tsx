@@ -2,7 +2,8 @@
 
 import { Ban, CheckCircle2, ShieldAlert, BadgeCheck } from '@sureground/icons';
 import { Dialog, DialogContent, DialogTitle } from '@sureground/ui';
-import { Badge, Button } from '@sureground/ui';
+import { Badge, Button, type BadgeVariant } from '@sureground/ui';
+import { FactGrid } from '@/components/admin/ops/OpsParts';
 import { getInitials, formatDate, formatRelativeTime } from '@sureground/shared';
 import type { PlanTier, PlatformUser, UserAccountStatus } from '@/types/admin';
 import { roleLabel } from '@/lib/roleLabels';
@@ -17,6 +18,13 @@ interface UserDetailModalProps {
   onChangeSubscription: (userId: string, tier: PlanTier) => void;
   isChangingSubscription?: boolean;
 }
+
+const STATUS: Record<UserAccountStatus, { label: string; variant: BadgeVariant }> = {
+  active: { label: 'Active', variant: 'success' },
+  pending: { label: 'Pending', variant: 'warning' },
+  suspended: { label: 'Suspended', variant: 'warning' },
+  banned: { label: 'Banned', variant: 'danger' },
+};
 
 const planLabel = (tier: PlanTier) =>
   tier === 'ENTERPRISE' ? 'Enterprise' : tier === 'PRO' ? 'Pro' : 'Free';
@@ -34,19 +42,41 @@ export const UserDetailModal = ({
     <Dialog open={!!user} onOpenChange={(open) => !open && onClose()}>
       {user && (
         <DialogContent className="p-0">
-          <div className="p-4 border-b border-border flex justify-between items-center pr-12">
+          <div className="border-b border-border px-5 py-4 pr-12">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+              <div
+                aria-hidden="true"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary ring-1 ring-inset ring-primary/15"
+              >
                 {getInitials(user.fullName)}
               </div>
-              <div>
-                <DialogTitle className="font-semibold text-foreground">{user.fullName}</DialogTitle>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
+              <div className="min-w-0">
+                <DialogTitle className="font-semibold tracking-[-0.01em] text-foreground [overflow-wrap:anywhere]">
+                  {user.fullName}
+                </DialogTitle>
+                <p className="truncate text-xs text-muted-foreground" title={user.email}>
+                  {user.email}
+                </p>
               </div>
+              <Badge variant={STATUS[user.status].variant} dot className="ml-auto">
+                {STATUS[user.status].label}
+              </Badge>
             </div>
           </div>
 
-          <div className="p-4 space-y-4">
+          <div className="space-y-4 px-5 py-4">
+            <FactGrid
+              className="rounded-lg border border-border bg-secondary/30 p-3"
+              facts={[
+                {
+                  label: 'Trust score',
+                  value: <span className="tabular-nums">{user.trustScore}</span>,
+                },
+                { label: 'Joined', value: formatDate(user.joinedDate) },
+                { label: 'Last active', value: formatRelativeTime(user.lastActiveAt) },
+              ]}
+              columns={3}
+            />
             <div>
               <p className="text-xs text-muted-foreground mb-1.5">Roles</p>
               <div className="flex flex-wrap gap-1.5">
@@ -58,47 +88,31 @@ export const UserDetailModal = ({
               </div>
             </div>
 
-            <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
-              <div className="flex items-center justify-between px-3 py-2 text-sm">
-                <span className="text-muted-foreground">Plan</span>
-                <div className="flex items-center gap-2">
-                  <Badge variant={user.planTier === 'FREE' ? 'neutral' : 'info'}>
-                    {planLabel(user.planTier)}
-                  </Badge>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1 h-6 px-2 text-xs"
-                    isLoading={isChangingSubscription}
-                    onClick={() =>
-                      onChangeSubscription(user.id, user.planTier === 'FREE' ? 'PRO' : 'FREE')
-                    }
-                  >
-                    <BadgeCheck className="w-3 h-3" />
-                    {user.planTier === 'FREE' ? 'Upgrade to Pro' : 'Move to Free'}
-                  </Button>
-                </div>
-              </div>
-              <div className="flex items-center justify-between px-3 py-2 text-sm">
-                <span className="text-muted-foreground">Trust score</span>
-                <span className="text-foreground font-medium">{user.trustScore}</span>
-              </div>
-              <div className="flex items-center justify-between px-3 py-2 text-sm">
-                <span className="text-muted-foreground">Joined</span>
-                <span className="text-foreground font-medium">{formatDate(user.joinedDate)}</span>
-              </div>
-              <div className="flex items-center justify-between px-3 py-2 text-sm">
-                <span className="text-muted-foreground">Last active</span>
-                <span className="text-foreground font-medium">
-                  {formatRelativeTime(user.lastActiveAt)}
-                </span>
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm">
+              <span className="text-muted-foreground">Plan</span>
+              <div className="flex items-center gap-2">
+                <Badge variant={user.planTier === 'FREE' ? 'neutral' : 'primary'}>
+                  {planLabel(user.planTier)}
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1 h-6 px-2 text-xs"
+                  isLoading={isChangingSubscription}
+                  onClick={() =>
+                    onChangeSubscription(user.id, user.planTier === 'FREE' ? 'PRO' : 'FREE')
+                  }
+                >
+                  <BadgeCheck className="w-3 h-3" />
+                  {user.planTier === 'FREE' ? 'Upgrade to Pro' : 'Move to Free'}
+                </Button>
               </div>
             </div>
           </div>
 
           <UserSecurityActions userId={user.id} />
 
-          <div className="p-4 border-t border-border flex gap-2">
+          <div className="flex gap-2 border-t border-border bg-secondary/30 px-5 py-4">
             {/* Opening a profile lands on Close, not on a billing or account action. */}
             <Button
               variant="ghost"

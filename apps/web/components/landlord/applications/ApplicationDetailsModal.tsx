@@ -2,6 +2,7 @@
 
 import { Mail, Phone, ShieldCheck, Check, MessageSquareText } from '@sureground/icons';
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
+import { trustScoreDisplay } from '@sureground/shared';
 import { formatDate, getInitials } from '@/lib/format';
 import { ScreeningPanel } from '@/components/landlord/applications/ScreeningPanel';
 import type { RentalApplication } from '@/types/landlord';
@@ -55,7 +56,9 @@ export const ApplicationDetailsModal = ({
                 <ShieldCheck className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium text-foreground">Platform trust score</span>
               </div>
-              <span className="text-lg font-bold text-primary">{application.trustScore}</span>
+              <span className="text-lg font-bold text-primary">
+                {trustScoreDisplay(application.trustScore)}
+              </span>
             </div>
 
             <div>

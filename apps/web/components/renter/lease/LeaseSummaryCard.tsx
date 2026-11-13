@@ -101,7 +101,7 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
             </div>
 
             <div className="mt-3 pt-3 border-t border-border flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary ring-1 ring-inset ring-primary/15">
                 {lease.landlord.name.charAt(0)}
               </div>
               <div>

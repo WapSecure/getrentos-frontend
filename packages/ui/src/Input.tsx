@@ -54,7 +54,16 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           className
         )}
       >
-        {leadingIcon && <span className="shrink-0 text-muted-foreground">{leadingIcon}</span>}
+        {leadingIcon && (
+          <span
+            className={cn(
+              'shrink-0 text-muted-foreground transition-colors duration-150',
+              !field.invalid && !disabled && 'group-focus-within:text-primary'
+            )}
+          >
+            {leadingIcon}
+          </span>
+        )}
         <input
           ref={ref}
           id={field.id}

@@ -12,15 +12,16 @@ interface CtaLinkProps {
 }
 
 const VARIANTS = {
-  ink: 'bg-primary text-primary-foreground hover:bg-primary-hover',
-  outline: 'border border-foreground/70 text-foreground hover:bg-foreground hover:text-background',
+  ink: 'bg-primary text-primary-foreground shadow-sm shadow-primary/20 hover:bg-primary-hover',
+  outline:
+    'border border-primary/50 bg-card text-primary hover:border-primary hover:bg-primary hover:text-primary-foreground',
   // For use on a `bg-primary` band: they invert with it in either theme.
   light: 'bg-primary-foreground text-primary hover:bg-primary-foreground/90',
   'outline-light':
     'border border-primary-foreground/70 text-primary-foreground hover:bg-primary-foreground hover:text-primary',
 } as const;
 
-/** A link styled as a Brik button: sharp, 48px tall, tracked capitals. Server-rendered, no JS. */
+/** A link styled as a Brik button: sharp, 48px tall, tracked capitals, Sureground blue. Server-rendered, no JS. */
 export const CtaLink = ({
   href,
   children,
@@ -31,7 +32,7 @@ export const CtaLink = ({
   <Link
     href={href}
     className={cn(
-      'label-caps group inline-flex min-h-12 items-center justify-center gap-3 rounded-md px-6 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2',
+      'label-caps group inline-flex min-h-12 items-center justify-center gap-3 rounded-md px-6 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
       VARIANTS[variant],
       className
     )}

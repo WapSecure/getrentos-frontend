@@ -13,7 +13,7 @@ export const ApplicationsHeader = ({ onExport }: ApplicationsHeaderProps) => {
   return (
     <div>
       <RenterPageHeader
-        eyebrow=""
+        eyebrow="Renting"
         icon={FileText}
         title="My applications"
         description="Track every application, review its progress, and keep your next steps organised."

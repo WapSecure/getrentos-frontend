@@ -17,6 +17,7 @@ import {
   useToast,
   PageHeader,
 } from '@sureground/ui';
+import { RecordToolbar } from '@/components/shared/records/RecordParts';
 import { LeadCard } from '@/components/landlord/leads/LeadCard';
 import { ConfirmViewingModal } from '@/components/landlord/leads/ConfirmViewingModal';
 import { NudgeModal } from '@/components/landlord/leads/NudgeModal';
@@ -167,6 +168,7 @@ export default function LandlordLeadsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Lettings"
         title="Leads"
         description={
           <>
@@ -176,29 +178,29 @@ export default function LandlordLeadsPage() {
       />
       <LandlordLettingsNav />
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <SearchInput
-          value={searchQuery}
-          onValueChange={setSearchQuery}
-          placeholder="Search by name, email, or property..."
-          label="Search leads"
-          className="flex-1 max-w-sm"
-        />
-        <ToggleChip
-          pressed={staleOnly}
-          onPressedChange={() => {
-            setStaleOnly((current) => !current);
-            setPage(1);
-            setSelectedLeadIds([]);
-          }}
-          icon={<Flame />}
-          className="self-start sm:self-center"
-        >
-          Going cold
-        </ToggleChip>
-      </div>
+      <RecordToolbar className="sm:flex-col sm:items-stretch">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <SearchInput
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            placeholder="Search by name, email, or property..."
+            label="Search leads"
+            className="flex-1 sm:max-w-sm"
+          />
+          <ToggleChip
+            pressed={staleOnly}
+            onPressedChange={() => {
+              setStaleOnly((current) => !current);
+              setPage(1);
+              setSelectedLeadIds([]);
+            }}
+            icon={<Flame />}
+            className="self-start sm:self-center"
+          >
+            Going cold
+          </ToggleChip>
+        </div>
 
-      <div className="mb-6">
         <div
           className="flex gap-2 overflow-x-auto"
           role="group"
@@ -219,10 +221,10 @@ export default function LandlordLeadsPage() {
             </ToggleChip>
           ))}
         </div>
-      </div>
+      </RecordToolbar>
 
       {selectedLeadIds.length > 0 && (
-        <div className="flex items-center justify-between gap-3 mb-4 px-4 py-3 rounded-xl bg-accent border border-primary/20">
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/[0.06] px-4 py-3">
           <span className="text-sm font-medium text-foreground">
             {selectedLeadIds.length} selected
           </span>

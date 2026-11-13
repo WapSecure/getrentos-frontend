@@ -10,6 +10,7 @@ import {
   Globe,
   Handshake,
   KeyRound,
+  Scale,
   Search,
   Settings2,
   ShieldCheck,
@@ -86,6 +87,7 @@ const KIND_ICON: Record<InvestorAttentionKind, SgIcon> = {
   tour: Video,
   spending: Wallet,
   identity: Globe,
+  dispute: Scale,
 };
 
 const ROUTES = {
@@ -169,6 +171,7 @@ export default function InvestorWorkspace() {
       risk: ROUTES.risk,
       tours: buyer ? ROUTES.tours : undefined,
       approvals: owner ? ROUTES.approvals : undefined,
+      // No dispute screens on mobile yet, so a dispute opens its purchase workspace (no `dispute` link).
       identity: ROUTES.identity,
     },
   }).map((item) => ({

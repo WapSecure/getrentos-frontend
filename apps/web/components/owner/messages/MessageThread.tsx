@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Alert, Button, Input } from '@sureground/ui';
+import { Alert, Button, EmptyState, Input } from '@sureground/ui';
 import { Send, MessageCircle, Check, CheckCheck } from '@sureground/icons';
-import { getInitials } from '@/lib/format';
+import { RecordAvatar } from '@/components/shared/records/RecordParts';
 import { format } from 'date-fns';
 
 export interface ThreadMessage {
@@ -45,22 +45,24 @@ export const MessageThread = ({
   };
 
   return (
-    <div className="flex-1 bg-card rounded-2xl border border-border flex flex-col overflow-hidden">
-      <div className="p-4 border-b border-border flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs">
-          {getInitials(contactName)}
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-foreground">{contactName}</p>
+    <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
+      <div className="flex items-center gap-3 border-b border-border px-4 py-3.5">
+        <RecordAvatar name={contactName} size="sm" />
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-foreground">{contactName}</p>
           <p className="text-xs text-muted-foreground">{contactRole}</p>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 space-y-2.5 overflow-y-auto bg-secondary/30 p-4 sm:px-5">
         {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center">
-            <MessageCircle className="w-8 h-8 text-muted-foreground/50 mb-2" />
-            <p className="text-sm text-muted-foreground">No messages yet: say hello</p>
+          <div className="h-full flex flex-col items-center justify-center">
+            <EmptyState
+              icon={MessageCircle}
+              title="No messages yet: say hello"
+              size="compact"
+              bare
+            />
           </div>
         ) : (
           messages.map((message) => {
@@ -68,26 +70,28 @@ export const MessageThread = ({
             return (
               <div key={message.id} className={`flex ${isOwner ? 'justify-end' : 'justify-start'}`}>
                 <div
-                  className={`max-w-[70%] rounded-2xl px-3.5 py-2 ${
+                  className={`max-w-[80%] rounded-2xl px-3.5 py-2 shadow-xs sm:max-w-[70%] ${
                     isOwner
                       ? 'bg-primary text-primary-foreground rounded-br-sm'
-                      : 'bg-secondary text-foreground rounded-bl-sm'
+                      : 'border border-border bg-card text-foreground rounded-bl-sm'
                   }`}
                 >
-                  <p className="text-sm">{message.text}</p>
+                  <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                    {message.text}
+                  </p>
                   <div
                     className={`flex items-center gap-1 mt-1 ${isOwner ? 'justify-end' : 'justify-start'}`}
                   >
                     <span
-                      className={`text-2xs ${isOwner ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}
+                      className={`text-2xs ${isOwner ? 'text-primary-foreground/90' : 'text-muted-foreground'}`}
                     >
                       {format(new Date(message.timestamp), 'h:mm a')}
                     </span>
                     {isOwner &&
                       (message.read ? (
-                        <CheckCheck className="w-3 h-3 text-primary-foreground/60" />
+                        <CheckCheck className="w-3 h-3 text-primary-foreground/90" />
                       ) : (
-                        <Check className="w-3 h-3 text-primary-foreground/60" />
+                        <Check className="w-3 h-3 text-primary-foreground/90" />
                       ))}
                   </div>
                 </div>
@@ -97,7 +101,7 @@ export const MessageThread = ({
         )}
       </div>
 
-      <div className="border-t border-border p-3">
+      <div className="border-t border-border bg-card p-3">
         {errorMessage && (
           <Alert variant="danger" className="mb-2">
             {errorMessage}

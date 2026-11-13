@@ -82,6 +82,25 @@ export function withFont(
   return [style, theme.font(flat.fontWeight)];
 }
 
+/**
+ * A token colour at a given opacity, for soft tints such as the blue pill behind an active tab.
+ * Takes `#rgb` or `#rrggbb`; any other form is returned unchanged rather than guessed at.
+ */
+export function withAlpha(color: string, alpha: number): string {
+  const hex = color.trim().replace(/^#/, '');
+  if (!/^([0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) return color;
+  const full =
+    hex.length === 3
+      ? hex
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : hex;
+  const n = parseInt(full, 16);
+  const a = Math.max(0, Math.min(1, alpha));
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+}
+
 function buildTheme(scheme: ColorScheme, fonts: FontFamilies, displayFont?: string): Theme {
   return {
     scheme,

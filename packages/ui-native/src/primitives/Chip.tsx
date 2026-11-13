@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
-import { useTheme } from '../theme';
+import { useTheme, withAlpha } from '../theme';
 import { Text } from './Text';
 
 export interface ChipProps {
@@ -22,7 +22,7 @@ export function Chip({
   disabled = false,
   size = 'md',
 }: ChipProps) {
-  const { colors, radius } = useTheme();
+  const { colors, radius, scheme } = useTheme();
   const pad = size === 'sm' ? { v: 5, h: 10, gap: 5 } : { v: 8, h: 13, gap: 6 };
 
   const body = (
@@ -36,7 +36,10 @@ export function Chip({
         borderRadius: radius.full,
         borderWidth: 1,
         borderColor: selected ? colors.primary : colors.border,
-        backgroundColor: selected ? colors.accent : colors.card,
+        // Selected is Sureground blue: a soft tint of the primary, never a neutral or ink fill.
+        backgroundColor: selected
+          ? withAlpha(colors.primary, scheme === 'dark' ? 0.2 : 0.1)
+          : colors.card,
         opacity: disabled ? 0.45 : 1,
       }}
     >
@@ -45,7 +48,7 @@ export function Chip({
         variant={size === 'sm' ? 'caption' : 'callout'}
         style={{
           fontWeight: '600',
-          color: selected ? colors.accentForeground : colors.foreground,
+          color: selected ? colors.primary : colors.foreground,
         }}
       >
         {label}

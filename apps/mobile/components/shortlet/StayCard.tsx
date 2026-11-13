@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { memo } from 'react';
 import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
@@ -89,7 +90,7 @@ export const StayCard = memo(function StayCard({
               ) : null}
             </View>
             <Text variant="callout" color="mutedForeground" numberOfLines={1}>
-              {item.city}, {item.state} · {specs}
+              {formatLocation(item.city, item.state)} · {specs}
             </Text>
 
             <View style={{ marginTop: spacing.sm, gap: 2 }}>

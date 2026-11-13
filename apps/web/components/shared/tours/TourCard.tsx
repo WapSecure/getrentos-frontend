@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import type { ReactNode } from 'react';
 import {
   Badge,
@@ -121,7 +122,7 @@ export const TourCard = ({
                 </CardTitle>
                 <p className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
                   <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  {tour.city}, {tour.state}
+                  {formatLocation(tour.city, tour.state)}
                 </p>
               </div>
               <Badge dot variant={SITE_TOUR_STATUS_VARIANT[tour.status]}>

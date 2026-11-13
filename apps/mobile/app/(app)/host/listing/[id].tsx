@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -112,7 +113,7 @@ export default function HostListingDetail() {
         <DetailHeader
           eyebrow="Listing"
           title={l?.title ?? 'Listing'}
-          subtitle={l ? `${l.city}, ${l.state}` : undefined}
+          subtitle={l ? formatLocation(l.city, l.state) : undefined}
           onBack={() => goBack()}
         />
       </View>

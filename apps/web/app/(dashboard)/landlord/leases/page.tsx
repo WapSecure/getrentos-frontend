@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, FileCheck } from '@sureground/icons';
+import { RecordToolbar } from '@/components/shared/records/RecordParts';
 import { LeaseCard } from '@/components/landlord/leases/LeaseCard';
 import { CreateLeaseModal } from '@/components/landlord/leases/CreateLeaseModal';
 import { RenewalOfferModal } from '@/components/landlord/leases/RenewalOfferModal';
@@ -205,6 +206,7 @@ function LandlordLeasesPageContent() {
   return (
     <>
       <PageHeader
+        eyebrow="Lettings"
         title="Leases"
         description={
           <>
@@ -226,25 +228,27 @@ function LandlordLeasesPageContent() {
         }
       />
 
-      <div
-        className="mb-6 flex gap-2 overflow-x-auto"
-        role="group"
-        aria-label="Filter leases by status"
-      >
-        {statusFilters.map((option) => (
-          <ToggleChip
-            key={option.value}
-            size="sm"
-            pressed={filter === option.value}
-            onPressedChange={() => {
-              setFilter(option.value);
-              setPage(1);
-            }}
-          >
-            {option.label}
-          </ToggleChip>
-        ))}
-      </div>
+      <RecordToolbar>
+        <div
+          className="flex gap-2 overflow-x-auto"
+          role="group"
+          aria-label="Filter leases by status"
+        >
+          {statusFilters.map((option) => (
+            <ToggleChip
+              key={option.value}
+              size="sm"
+              pressed={filter === option.value}
+              onPressedChange={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
+            >
+              {option.label}
+            </ToggleChip>
+          ))}
+        </div>
+      </RecordToolbar>
 
       {isLoadingLeases ? (
         <ListSkeleton rows={6} variant="cards" label="Loading leases" />
@@ -255,7 +259,11 @@ function LandlordLeasesPageContent() {
           onRetry={() => void refetchLeases()}
         />
       ) : leases.length === 0 ? (
-        <EmptyState icon={FileCheck} title="No leases found" />
+        <EmptyState
+          icon={FileCheck}
+          title="No leases found"
+          description="Leases you create or draft from approved applications appear here."
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {leases.map((lease, index) => (

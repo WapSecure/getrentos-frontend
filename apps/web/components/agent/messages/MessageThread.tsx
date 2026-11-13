@@ -59,7 +59,7 @@ export const MessageThread = ({
   return (
     <Card className="flex-1 flex flex-col">
       <div className="p-4 border-b border-border flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs">
+        <div className="w-9 h-9 rounded-full bg-primary/10 ring-1 ring-inset ring-primary/15 flex items-center justify-center text-primary font-semibold text-xs">
           {getInitials(contactName)}
         </div>
         <div className="min-w-0">
@@ -95,15 +95,15 @@ export const MessageThread = ({
                     className={`flex items-center gap-1 mt-1 ${isAgent ? 'justify-end' : 'justify-start'}`}
                   >
                     <span
-                      className={`text-2xs ${isAgent ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}
+                      className={`text-2xs ${isAgent ? 'text-primary-foreground/90' : 'text-muted-foreground'}`}
                     >
                       {format(new Date(message.timestamp), 'h:mm a')}
                     </span>
                     {isAgent &&
                       (message.read ? (
-                        <CheckCheck className="w-3 h-3 text-primary-foreground/60" />
+                        <CheckCheck className="w-3 h-3 text-primary-foreground/90" />
                       ) : (
-                        <Check className="w-3 h-3 text-primary-foreground/60" />
+                        <Check className="w-3 h-3 text-primary-foreground/90" />
                       ))}
                   </div>
                 </div>

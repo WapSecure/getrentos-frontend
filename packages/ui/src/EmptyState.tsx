@@ -36,14 +36,11 @@ export const EmptyState = ({
     >
       <div
         className={cn(
-          'mx-auto flex items-center justify-center rounded-xl bg-secondary',
+          'mx-auto flex items-center justify-center rounded-xl bg-primary/[0.08] ring-1 ring-inset ring-primary/10',
           compact ? 'mb-4 h-10 w-10' : 'mb-5 h-14 w-14'
         )}
       >
-        <Icon
-          className={cn('text-muted-foreground', compact ? 'h-4 w-4' : 'h-5 w-5')}
-          aria-hidden="true"
-        />
+        <Icon className={cn('text-primary', compact ? 'h-4 w-4' : 'h-5 w-5')} aria-hidden="true" />
       </div>
       <p className={cn('font-semibold tracking-[-0.01em] text-foreground', compact && 'text-sm')}>
         {title}

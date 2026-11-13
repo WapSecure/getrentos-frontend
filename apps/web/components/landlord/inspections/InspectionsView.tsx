@@ -76,6 +76,7 @@ export function InspectionsView() {
   return (
     <>
       <PageHeader
+        eyebrow="Property care"
         title="Inspections"
         description="Condition reports at move-in, move-out, and routine checks."
         actions={

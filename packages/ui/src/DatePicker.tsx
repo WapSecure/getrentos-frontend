@@ -290,7 +290,7 @@ export const DatePicker = ({
                     type="button"
                     onClick={() => handleSelect(today)}
                     disabled={Boolean(isDisabled(today))}
-                    className="flex-1 rounded-lg py-1.5 text-center text-xs font-medium text-primary transition-colors hover:bg-accent focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/12 disabled:pointer-events-none disabled:opacity-40"
+                    className="flex-1 rounded-lg py-1.5 text-center text-xs font-medium text-primary transition-colors duration-150 hover:bg-primary/10 focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/12 disabled:pointer-events-none disabled:opacity-40"
                   >
                     Today
                   </button>

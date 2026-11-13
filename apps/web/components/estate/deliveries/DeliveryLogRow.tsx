@@ -1,6 +1,7 @@
 'use client';
 
 import { Badge, Button } from '@sureground/ui';
+import { collectionSummary } from '@sureground/shared';
 import type { DeliveryLog } from '@/types/estate';
 
 const statusVariant: Record<DeliveryLog['status'], 'warning' | 'success'> = {
@@ -23,7 +24,8 @@ const formatDateTime = (value: string) =>
 
 interface DeliveryLogRowProps {
   log: DeliveryLog;
-  onMarkCollected: () => void;
+  /** Omit to show the row read-only. */
+  onMarkCollected?: () => void;
   isMarkingCollected?: boolean;
 }
 
@@ -44,10 +46,13 @@ export const DeliveryLogRow = ({
           Received {formatDateTime(log.receivedAt)}
           {log.gateName ? ` · ${log.gateName}` : ''}
         </p>
+        {log.status === 'collected' && collectionSummary(log) && (
+          <p className="text-xs text-muted-foreground mt-0.5">{collectionSummary(log)}</p>
+        )}
       </div>
       <div className="flex items-center gap-3 shrink-0">
         <Badge variant={statusVariant[log.status]}>{statusLabels[log.status]}</Badge>
-        {log.status === 'received' && (
+        {log.status === 'received' && onMarkCollected && (
           <Button
             variant="outline"
             size="sm"

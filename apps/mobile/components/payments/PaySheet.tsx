@@ -34,6 +34,8 @@ export interface PaySheetProps {
   providerError?: string | null;
   onPay: () => void;
   busy?: boolean;
+  /** Why this payment can't start yet (e.g. identity not verified): shown first, and the pay button is disabled. */
+  blocked?: ReactNode;
 }
 
 function Step({ n, children }: { n?: number; children: string }) {
@@ -126,6 +128,7 @@ export function PaySheet({
   providerError,
   onPay,
   busy,
+  blocked,
 }: PaySheetProps) {
   const { colors, spacing, radius } = useTheme();
   // The payer covers the card or bank fee, so the receiver gets the full amount.
@@ -166,7 +169,7 @@ export function PaySheet({
             label={button}
             size="lg"
             icon={<Lock size={16} color={colors.primaryForeground} />}
-            disabled={!ready || feeLoading}
+            disabled={!ready || feeLoading || !!blocked}
             loading={busy || feeLoading}
             loadingLabel={busy ? 'Starting payment…' : 'Working out the fee…'}
             onPress={onPay}
@@ -222,6 +225,8 @@ export function PaySheet({
             </Text>
           </View>
         </View>
+
+        {blocked}
 
         {howMuch ? (
           <View style={{ gap: spacing.md }}>

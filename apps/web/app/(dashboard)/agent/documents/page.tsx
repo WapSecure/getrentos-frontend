@@ -108,6 +108,7 @@ export default function AgentDocumentsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Work"
         title="Documents"
         description={
           <>

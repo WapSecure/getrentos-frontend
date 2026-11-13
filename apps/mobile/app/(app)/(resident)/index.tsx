@@ -1,9 +1,10 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   Bell,
   CalendarCheck,
+  ChevronRight,
   Contact,
   DoorOpen,
   KeyRound,
@@ -22,6 +23,7 @@ import {
   Card,
   Divider,
   IconButton,
+  PressableScale,
   QueryState,
   Screen,
   SectionHeader,
@@ -101,6 +103,12 @@ export default function ResidentHome() {
   };
 
   const recent = announcements.data?.items ?? [];
+  // Passes the gate will still honour, for the visitors summary.
+  const activePasses = (passes.data?.items ?? []).filter(
+    (pass) =>
+      pass.status === 'pending' || pass.status === 'approved' || pass.status === 'checked_in'
+  );
+  const insideNow = activePasses.filter((pass) => pass.status === 'checked_in').length;
 
   const outstanding = (dues.data?.items ?? [])
     .filter((d) => d.status === 'pending' || d.status === 'overdue' || d.status === 'processing')
@@ -157,22 +165,43 @@ export default function ResidentHome() {
 
       <QueryState
         query={dues}
-        skeleton={<Skeleton height={90} radius={16} />}
+        skeleton={<Skeleton height={180} radius={radius.lg} />}
         errorTitle="We couldn't load your dues"
         errorDescription="Check your connection and try again before making a payment."
       >
-        <Card elevated>
+        <Card elevated padding={spacing['2xl']}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-            <ReceiptText size={18} color={colors.primary} />
-            <Text variant="bodyStrong" style={{ flex: 1 }}>
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: radius.lg,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: colors.accent,
+              }}
+            >
+              <ReceiptText size={16} color={colors.primary} />
+            </View>
+            <Text variant="label" color="mutedForeground" uppercase style={{ flex: 1 }}>
               Outstanding dues
             </Text>
             <BalanceVisibilityButton visible={showMoney} onToggle={toggleMoney} />
           </View>
-          <Text variant="title" style={{ marginTop: spacing.sm }}>
+          <Text variant="display" style={{ marginTop: spacing.md }}>
             {showMoney ? formatNaira(outstanding) : '••••••'}
           </Text>
-          <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md }}>
+          <Text variant="callout" color="mutedForeground" style={{ marginTop: spacing.xxs }}>
+            {outstanding > 0 ? 'Unpaid charges on your household' : 'Nothing to pay right now'}
+          </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              gap: spacing.sm,
+              marginTop: spacing.xl,
+            }}
+          >
             {outstanding > 0 ? (
               <Button
                 label="Pay dues"
@@ -191,6 +220,48 @@ export default function ResidentHome() {
           </View>
         </Card>
       </QueryState>
+
+      <PressableScale
+        onPress={() => router.push('/(app)/visitor-passes')}
+        accessibilityRole="button"
+        accessibilityLabel={
+          passes.data
+            ? `Visitor passes, ${activePasses.length} active, ${insideNow} inside now`
+            : 'Visitor passes'
+        }
+      >
+        <Card elevated>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+            <View
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: radius.lg,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: colors.accent,
+              }}
+            >
+              <KeyRound size={20} color={colors.primary} />
+            </View>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text variant="bodyStrong">Visitor passes</Text>
+              {passes.isPending ? (
+                <Skeleton height={12} width="60%" />
+              ) : (
+                <Text variant="caption" color="mutedForeground">
+                  {passes.data
+                    ? activePasses.length === 0
+                      ? 'No active passes. Issue one before a guest arrives.'
+                      : `${activePasses.length} active${insideNow > 0 ? ` · ${insideNow} inside now` : ''}`
+                    : 'Invite guests and answer the gate'}
+                </Text>
+              )}
+            </View>
+            <ChevronRight size={18} color={colors.mutedForeground} />
+          </View>
+        </Card>
+      </PressableScale>
 
       <Card elevated>
         <SectionHeader
@@ -219,7 +290,15 @@ export default function ResidentHome() {
           >
             {recent.map((a, i) => (
               <View key={a.id}>
-                <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
+                <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md }}>
+                  <View
+                    style={{
+                      width: 3,
+                      alignSelf: 'stretch',
+                      borderRadius: radius.full,
+                      backgroundColor: a.priority === 'urgent' ? colors.destructive : colors.border,
+                    }}
+                  />
                   <View style={{ flex: 1, gap: 2 }}>
                     <Text variant="bodyStrong" numberOfLines={1}>
                       {a.title}
@@ -240,35 +319,38 @@ export default function ResidentHome() {
         </View>
       </Card>
 
-      <View style={{ gap: spacing.sm }}>
+      <View style={{ gap: spacing.md }}>
         <SectionHeader
           title="Community services"
           description="Fast access to everyday estate tools"
         />
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
           {QUICK_LINKS.map(({ href, label, icon: Icon }) => (
-            <Pressable
+            <PressableScale
               key={href}
               onPress={() => router.push(href)}
+              haptic={false}
               accessibilityRole="button"
               accessibilityLabel={label}
-              style={({ pressed }) => ({
+              style={{
                 width: '31%',
                 minHeight: 104,
+                paddingHorizontal: spacing.xs,
+                paddingVertical: spacing.md,
                 borderRadius: radius.lg,
                 borderWidth: 1,
                 borderColor: colors.border,
-                backgroundColor: pressed ? colors.accent : colors.card,
+                backgroundColor: colors.card,
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: spacing.sm,
-              })}
+              }}
             >
               <View
                 style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: radius.md,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
                   alignItems: 'center',
                   justifyContent: 'center',
                   backgroundColor: colors.accent,
@@ -276,10 +358,10 @@ export default function ResidentHome() {
               >
                 <Icon size={19} color={colors.primary} />
               </View>
-              <Text variant="caption" style={{ fontWeight: '600' }} center>
+              <Text variant="caption" style={{ fontWeight: '600' }} center numberOfLines={2}>
                 {label}
               </Text>
-            </Pressable>
+            </PressableScale>
           ))}
         </View>
       </View>

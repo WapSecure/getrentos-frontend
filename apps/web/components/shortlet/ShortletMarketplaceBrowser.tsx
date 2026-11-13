@@ -20,7 +20,8 @@ import { Select } from '@sureground/ui/Select';
 import { Skeleton } from '@sureground/ui/Skeleton';
 import { ToggleChip } from '@sureground/ui/ToggleChip';
 import { BedDouble, ClipboardCheck, Heart, Star, Zap } from '@sureground/icons';
-import { imagePreviewOf, srcSetOf } from '@sureground/shared';
+import { formatLocation, imagePreviewOf, srcSetOf } from '@sureground/shared';
+import { Eyebrow } from '@/components/marketing/Eyebrow';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { SHORTLET_PAGE_SIZE } from '@/lib/marketFirstPage';
 import { SHORTLET_AMENITIES } from '@/lib/shortlet/essentials';
@@ -252,7 +253,7 @@ export const ShortletMarketplaceBrowser = ({
           })
         }
         title={listing.title}
-        location={`${listing.city}, ${listing.state}`}
+        location={formatLocation(listing.city, listing.state)}
         price={quote ? quote.total : listing.nightlyRate}
         priceUnit={quote ? 'total' : listing.pricingMode === 'PER_NIGHT' ? 'night' : undefined}
         image={listing.coverImageUrl}
@@ -338,8 +339,8 @@ export const ShortletMarketplaceBrowser = ({
     <div className="mx-auto max-w-7xl px-4 py-8">
       {!hideHeader && (
         <div className="mb-8 flex flex-col items-start gap-2.5 border-b border-border/60 pb-6">
-          <p className="label-caps text-muted-foreground">Short stays</p>
-          <h1 className="text-3xl font-bold tracking-[-0.02em] text-foreground sm:text-4xl">
+          <Eyebrow className="mb-2">Short stays</Eyebrow>
+          <h1 className="font-display text-[2.5rem] leading-[1.04] font-light tracking-[-0.02em] text-balance text-foreground sm:text-[3.25rem] lg:text-[3.75rem]">
             Shortlet stays
           </h1>
           <p className="text-muted-foreground sm:text-lg">
@@ -562,11 +563,11 @@ export const ShortletMarketplaceBrowser = ({
           empty={
             <EmptyState
               icon={BedDouble}
-              title={area ? 'No stays in this area' : 'No shortlets found'}
+              title={area ? 'No stays in this area' : 'No short stays match that'}
               description={
                 area
                   ? 'Move the map and search again, or clear the map area.'
-                  : 'Try adjusting your filters.'
+                  : 'Try a different area or dates, widen the price range, or clear a filter.'
               }
             />
           }
@@ -577,8 +578,8 @@ export const ShortletMarketplaceBrowser = ({
       ) : listings.length === 0 ? (
         <EmptyState
           icon={BedDouble}
-          title={area ? 'No stays in this area' : 'No shortlets found'}
-          description="Try adjusting your filters."
+          title={area ? 'No stays in this area' : 'No short stays match that'}
+          description="Try a different area or dates, widen the price range, or clear a filter."
         />
       ) : (
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 md:grid-cols-2 lg:grid-cols-3">

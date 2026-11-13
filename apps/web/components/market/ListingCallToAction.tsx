@@ -77,7 +77,7 @@ function SaleVisitActions({ id, title }: { id: string; title: string }) {
 }
 
 const PRIMARY =
-  'flex h-12 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2';
+  'flex h-12 w-full items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:bg-primary-hover motion-reduce:hover:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2';
 
 // The page is statically rendered, so the session is read after mount.
 export function ListingCallToAction({
@@ -85,6 +85,7 @@ export function ListingCallToAction({
   id,
   returnPath,
   underOffer,
+  notAcceptingApplications,
   compact = false,
   title,
   commercial = false,
@@ -93,6 +94,8 @@ export function ListingCallToAction({
   id: string;
   returnPath: string;
   underOffer?: boolean;
+  /** Rent only: the home is let, so there is nothing to enquire about or apply for. */
+  notAcceptingApplications?: boolean;
   compact?: boolean;
   /** The listing's name, for the tour and inspection dialogs. */
   title?: string;
@@ -110,6 +113,18 @@ export function ListingCallToAction({
       surface: compact ? 'sticky_bar' : 'listing_page',
       props: { variant: signedIn ? 'signed_in' : 'signed_out' },
     });
+
+  if (notAcceptingApplications) {
+    return (
+      <div className="rounded-xl border border-border bg-secondary/60 p-3 text-sm text-foreground">
+        <p className="font-semibold">Let, not accepting applications</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          This home has a tenant or an approved applicant, so it is not taking enquiries or
+          applications right now.
+        </p>
+      </div>
+    );
+  }
 
   if (underOffer) {
     return (

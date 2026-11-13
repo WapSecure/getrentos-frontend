@@ -9,7 +9,6 @@ import {
   Button,
   CardSkeleton,
   EmptyState,
-  ListSkeleton,
   Pagination,
   ToggleChip,
   PageHeader,
@@ -25,6 +24,12 @@ import {
 import { LiftWatchlistEntryModal } from '@/components/estate/watchlist/LiftWatchlistEntryModal';
 import { WatchlistEntryRow } from '@/components/estate/watchlist/WatchlistEntryRow';
 import type { WatchlistEntry, WatchlistStatus } from '@/types/estate';
+import {
+  EstateFilterChips,
+  EstateListSection,
+  EstateListSkeleton,
+  EstateRowList,
+} from '@/components/estate/shared/EstateListSection';
 
 const PAGE_SIZE = 10;
 
@@ -92,34 +97,31 @@ export default function EstateWatchlistPage() {
 
   if (!estate) return <RedirectToEstateSetup />;
 
+  const activeFilter = statusFilters.find((filter) => filter.value === statusFilter)!;
+
   return (
     <>
       <PageHeader
         title="Watch list"
-        description={
-          <>
-            {total} {total === 1 ? 'entry' : 'entries'} at {estate.name}
-          </>
-        }
+        description={`People and vehicles ${estate.name} has decided to refuse or keep an eye on.`}
         actions={
           <Button
             variant="primary"
-            className="gap-2"
+            icon={<Plus className="h-4 w-4" />}
             onClick={() => {
               addEntry.reset();
               setIsAddOpen(true);
             }}
           >
-            <Plus className="w-4 h-4" />
             Add to list
           </Button>
         }
       />
 
-      <Alert variant="neutral" className="mb-6">
+      <Alert variant="neutral" className="mb-6 rounded-2xl">
         <p>
           Everybody on this list is checked against at every way into the estate: a visitor pass
-          being used, a pass being issued, a walk-in at the barrier, and a vehicle being logged: as
+          being used, a pass being issued, a walk-in at the barrier, and a vehicle being logged, as
           well as by a guard searching the list. Names, phone numbers and plates are matched
           exactly, ignoring case, spacing and word order, so{' '}
           <span className="font-mono text-xs">lag 123 xy</span> matches{' '}
@@ -133,63 +135,82 @@ export default function EstateWatchlistPage() {
         </p>
       </Alert>
 
-      <div
-        className="flex flex-wrap gap-2 mb-6"
-        role="group"
-        aria-label="Filter watchlist by status"
+      <EstateListSection
+        id="watchlist"
+        title={statusFilter === 'all' ? 'Everyone on the list' : activeFilter.label}
+        count={isLoading ? undefined : total}
+        countLabel={`${total} ${total === 1 ? 'entry' : 'entries'}`}
+        description="Who is listed, why, and how they are matched at the gate."
+        toolbar={
+          <EstateFilterChips label="Filter watchlist by status">
+            {statusFilters.map((filter) => (
+              <ToggleChip
+                key={filter.value}
+                size="sm"
+                pressed={statusFilter === filter.value}
+                onPressedChange={() => {
+                  setStatusFilter(filter.value);
+                  setPage(1);
+                }}
+              >
+                {filter.label}
+              </ToggleChip>
+            ))}
+          </EstateFilterChips>
+        }
+        footer={
+          total > PAGE_SIZE ? (
+            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+          ) : undefined
+        }
       >
-        {statusFilters.map((filter) => (
-          <ToggleChip
-            key={filter.value}
-            pressed={statusFilter === filter.value}
-            onPressedChange={() => {
-              setStatusFilter(filter.value);
-              setPage(1);
-            }}
-          >
-            {filter.label}
-          </ToggleChip>
-        ))}
-      </div>
-
-      {isLoading ? (
-        <ListSkeleton rows={3} />
-      ) : entries.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
-          <EmptyState
-            icon={ShieldAlert}
-            title={statusFilter === 'all' ? 'Nobody is on the list' : 'Nothing here'}
-            description={
-              statusFilter === 'all'
-                ? 'Add somebody the estate has decided should not be admitted, or someone it wants to be told about.'
-                : 'No entries match this filter.'
-            }
-          />
-        </div>
-      ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {entries.map((entry) => (
-            <WatchlistEntryRow
-              key={entry.id}
-              entry={entry}
-              onLift={() => {
-                liftEntry.reset();
-                setLifting(entry);
-              }}
+        {isLoading ? (
+          <EstateListSkeleton />
+        ) : entries.length === 0 ? (
+          statusFilter === 'all' ? (
+            <EmptyState
+              bare
+              icon={ShieldAlert}
+              title="Nobody is on the list"
+              description="Add somebody the estate has decided should not be admitted, or someone it wants to be told about."
             />
-          ))}
-        </div>
-      )}
-
-      {total > 0 && (
-        <Pagination
-          page={page}
-          pageSize={PAGE_SIZE}
-          total={total}
-          onPageChange={setPage}
-          className="mt-6"
-        />
-      )}
+          ) : (
+            <EmptyState
+              bare
+              size="compact"
+              icon={ShieldAlert}
+              title="Nothing here"
+              description="No entries match this filter."
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setPage(1);
+                  }}
+                >
+                  Show everyone
+                </Button>
+              }
+            />
+          )
+        ) : (
+          <EstateRowList>
+            {entries.map((entry) => (
+              <li key={entry.id}>
+                <WatchlistEntryRow
+                  entry={entry}
+                  onLift={() => {
+                    liftEntry.reset();
+                    setLifting(entry);
+                  }}
+                />
+              </li>
+            ))}
+          </EstateRowList>
+        )}
+      </EstateListSection>
 
       <AddWatchlistEntryModal
         isOpen={isAddOpen}

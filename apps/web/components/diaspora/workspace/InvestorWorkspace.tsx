@@ -13,6 +13,7 @@ import {
   Handshake,
   KeyRound,
   Landmark,
+  Scale,
   Search,
   ShieldCheck,
   TrendingUp,
@@ -59,7 +60,7 @@ import {
   valuationSentence,
 } from '@sureground/shared';
 import { buyerKeys, investorKeys } from '@/lib/queryKeys';
-import { purchaseWorkspaceHref } from '@/lib/transactionWorkspace';
+import { purchaseDisputeHref, purchaseWorkspaceHref } from '@/lib/transactionWorkspace';
 import { buyerService } from '@/services/buyerService';
 import { investorService } from '@/services/investorService';
 import { siteTourKeys, siteTourService } from '@/services/siteTourService';
@@ -129,6 +130,7 @@ const KIND_ICON: Record<InvestorAttentionKind, SgIcon> = {
   tour: Video,
   spending: Wallet,
   identity: Globe,
+  dispute: Scale,
 };
 
 /** Shaped like the loaded page: queue, figures and purchases on the left, the rail on the right. */
@@ -272,6 +274,7 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
       tours: links.tours,
       approvals: links.approvals,
       identity: links.identityAbroad,
+      dispute: purchaseDisputeHref,
     },
   }).map((item) => ({
     ...item,

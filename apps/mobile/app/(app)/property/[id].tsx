@@ -16,12 +16,14 @@ import {
   Search,
 } from '@sureground/icons/native';
 import {
+  Avatar,
   Badge,
   Button,
   Card,
   Chip,
   Divider,
   IconButton,
+  IconTile,
   LinkButton,
   listingArea,
   Price,
@@ -61,7 +63,7 @@ import { ListingCheckCard } from '@/components/property/ListingCheckCard';
 import { AffordabilityCard } from '@/components/property/AffordabilityCard';
 import { VideoTourSheet } from '@/components/video/VideoTourSheet';
 import { FilmedOnSite } from '@/components/video/FilmedOnSite';
-import { tidyPlace, trustChainLabel } from '@sureground/shared';
+import { formatLocation, trustChainLabel } from '@sureground/shared';
 
 export default function PropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -158,7 +160,7 @@ export default function PropertyDetail() {
             query={query}
             isEmpty={query.data === null}
             empty={{
-              icon: <Search size={34} color={colors.mutedForeground} />,
+              icon: <IconTile Icon={Search} size="xl" />,
               title: 'This home is no longer listed',
               description: 'It may have been let or taken down. Keep browsing for homes like it.',
               action: <Button label="Back to Discover" onPress={() => router.back()} />,
@@ -174,21 +176,28 @@ export default function PropertyDetail() {
             {p ? (
               <>
                 <View style={{ gap: 6 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                    <Price amount={p.price} period={p.period} variant="title" />
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: spacing.sm,
+                    }}
+                  >
+                    <Price amount={p.price} period={p.period} variant="title" color="primary" />
                     {p.trustChain?.steps.length ? (
-                      <Badge
-                        label={trustChainLabel(p.trustChain).label}
-                        tone={
-                          trustChainLabel(p.trustChain).tone === 'verified'
-                            ? 'success'
-                            : trustChainLabel(p.trustChain).tone === 'partial'
-                              ? 'info'
-                              : 'warning'
-                        }
-                      />
+                      trustChainLabel(p.trustChain).tone === 'verified' ? (
+                        <VerifiedPill label={trustChainLabel(p.trustChain).label} />
+                      ) : (
+                        <Badge
+                          label={trustChainLabel(p.trustChain).label}
+                          tone={
+                            trustChainLabel(p.trustChain).tone === 'partial' ? 'info' : 'warning'
+                          }
+                        />
+                      )
                     ) : p.verified ? (
-                      <Badge label="Verified" tone="success" />
+                      <VerifiedPill label="Verified" />
                     ) : null}
                   </View>
                   <Text variant="heading" headingLevel={1}>
@@ -197,7 +206,7 @@ export default function PropertyDetail() {
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                     <MapPin size={13} color={colors.mutedForeground} />
                     <Text variant="callout" color="mutedForeground">
-                      {tidyPlace(p.address ? `${p.address}, ${p.location}` : p.location)}
+                      {formatLocation(p.address, p.location)}
                     </Text>
                   </View>
                   {p.addressHidden ? (
@@ -281,15 +290,41 @@ export default function PropertyDetail() {
                     <Text variant="bodyStrong" headingLevel={2}>
                       Listed by
                     </Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <Text variant="body">{p.landlordName}</Text>
-                      {p.landlordVerified ? <ShieldCheck size={14} color={colors.success} /> : null}
-                    </View>
-                    {p.landlordReviews ? (
-                      <Text variant="caption" color="mutedForeground">
-                        {p.landlordRating?.toFixed(1)} ★ · {p.landlordReviews} reviews
-                      </Text>
-                    ) : null}
+                    <Card
+                      elevated
+                      padding={spacing.lg}
+                      accessible
+                      accessibilityLabel={[
+                        p.landlordName,
+                        p.landlordVerified ? 'verified' : null,
+                        p.landlordReviews
+                          ? `rated ${p.landlordRating?.toFixed(1)} from ${p.landlordReviews} reviews`
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .join(', ')}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
+                    >
+                      <Avatar name={p.landlordName} size={44} />
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <Text variant="bodyStrong" numberOfLines={1}>
+                          {p.landlordName}
+                        </Text>
+                        {p.landlordVerified ? (
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                            <ShieldCheck size={13} color={colors.primary} />
+                            <Text variant="caption" color="primary" style={{ fontWeight: '700' }}>
+                              Verified
+                            </Text>
+                          </View>
+                        ) : null}
+                        {p.landlordReviews ? (
+                          <Text variant="caption" color="mutedForeground">
+                            {p.landlordRating?.toFixed(1)} ★ · {p.landlordReviews} reviews
+                          </Text>
+                        ) : null}
+                      </View>
+                    </Card>
                   </View>
                 ) : null}
 
@@ -344,18 +379,7 @@ export default function PropertyDetail() {
                       elevated
                       style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
                     >
-                      <View
-                        style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: 20,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: colors.accent,
-                        }}
-                      >
-                        <PlayCircle size={20} color={colors.primary} />
-                      </View>
+                      <IconTile Icon={PlayCircle} size="lg" />
                       <View style={{ flex: 1 }}>
                         <Text variant="bodyStrong">Video tour</Text>
                         {p.videoTourFilmedOnSite ? (
@@ -462,7 +486,7 @@ export default function PropertyDetail() {
               onPress={() => {
                 trackShowroom({ name: 'property_share', listingId: p.id, market: 'rent' });
                 Share.share({
-                  message: `${p.title} · ${p.location}\n${env.webUrl}${marketWebPath('rent', p.id)}`,
+                  message: `${p.title} · ${formatLocation(p.location)}\n${env.webUrl}${marketWebPath('rent', p.id)}`,
                 }).catch(() => undefined);
               }}
               accessibilityLabel="Share this home"
@@ -519,7 +543,6 @@ export default function PropertyDetail() {
             ) : (
               <Button
                 label="Find similar homes"
-                variant="secondary"
                 fullWidth={false}
                 onPress={() => router.push('/(app)/(renter)/discover')}
               />
@@ -554,6 +577,29 @@ export default function PropertyDetail() {
           onExpired={() => void query.refetch()}
         />
       ) : null}
+    </View>
+  );
+}
+
+/** The Sureground Verified mark: the brand blue, solid, with the shield. */
+function VerifiedPill({ label }: { label: string }) {
+  const { colors, radius } = useTheme();
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        paddingVertical: 3,
+        paddingHorizontal: 10,
+        borderRadius: radius.full,
+        backgroundColor: colors.primary,
+      }}
+    >
+      <ShieldCheck size={13} color={colors.primaryForeground} />
+      <Text variant="caption" style={{ color: colors.primaryForeground, fontWeight: '700' }}>
+        {label}
+      </Text>
     </View>
   );
 }

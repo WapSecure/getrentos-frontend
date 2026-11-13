@@ -133,6 +133,7 @@ export const FOREIGN_PURPOSE_LABEL: Record<ForeignPurpose, string> = {
   FOREIGN_IDENTITY: 'Passport (diaspora)',
   FOREIGN_ADDRESS: 'Proof of address abroad',
   FOREIGN_BANK_STATEMENT: 'Bank statement from abroad',
+  SOURCE_OF_FUNDS: 'Source of funds',
 };
 
 export const isForeignPurpose = (purpose?: string | null): purpose is ForeignPurpose =>

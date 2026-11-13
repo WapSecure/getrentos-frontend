@@ -1,3 +1,4 @@
+import { formatLocation, isListingVerified } from '@sureground/shared';
 import { useEffect, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
@@ -152,7 +153,7 @@ export default function LandMarketplace() {
                       {item.title}
                     </Text>
                     <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                      {[item.address, item.city].filter(Boolean).join(', ')}
+                      {formatLocation(item.address, item.city)}
                     </Text>
                     <Price amount={item.price} variant="bodyStrong" style={{ marginTop: 2 }} />
                     <Text variant="caption" color="mutedForeground">
@@ -173,7 +174,7 @@ export default function LandMarketplace() {
                         label={LAND_DILIGENCE_LABEL[item.diligence.status]}
                         tone={LAND_DILIGENCE_TONE[item.diligence.status]}
                       />
-                      {item.isVerified ? (
+                      {isListingVerified(item) ? (
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
                           <ShieldCheck size={13} color={colors.success} />
                           <Text variant="caption" style={{ color: colors.success }}>

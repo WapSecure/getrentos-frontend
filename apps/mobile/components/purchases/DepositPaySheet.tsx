@@ -10,6 +10,7 @@ import { SALE_DEPOSIT_PROTECTION } from '@/lib/paymentCopy';
 import { PaySheet } from '@/components/payments/PaySheet';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
+import { useDepositIdentityNotice } from '@/components/purchases/DepositIdentityNotice';
 
 /**
  * Paying a sale's deposit into Payment Protection: the provider choice, the checkout and what to
@@ -65,6 +66,7 @@ export function DepositPaySheet({
     },
   });
   const amount = tx ? (tx.depositAmount ?? tx.purchasePrice) : 0;
+  const identityNotice = useDepositIdentityNotice(open && !!tx, close);
 
   return (
     <PaySheet
@@ -81,6 +83,7 @@ export function DepositPaySheet({
       providers={providers}
       providerError={providerError}
       busy={deposit.isPending}
+      blocked={identityNotice}
       onPay={() => tx && deposit.mutate({ id: tx.id, provider: providers.provider })}
     />
   );

@@ -67,6 +67,7 @@ import {
   applyLastApplication,
   EMPLOYMENT_STATUSES,
   type LastApplicationDetails,
+  formatLocation,
 } from '@sureground/shared';
 import { AddressInput } from '@/components/forms/AddressInput';
 
@@ -458,7 +459,7 @@ export default function ApplyToRent() {
           <Text variant="bodyStrong">Apply to rent</Text>
           {property ? (
             <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-              {property.title} · {property.location}
+              {property.title} · {formatLocation(property.location)}
             </Text>
           ) : null}
         </View>

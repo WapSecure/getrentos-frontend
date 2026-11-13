@@ -4,9 +4,15 @@ import { useQuery } from '@tanstack/react-query';
 import {
   AlertTriangle,
   BadgeCheck,
+  Building2,
+  CalendarClock,
+  CheckCircle2,
+  ChevronRight,
   ClipboardCheck,
   ClipboardList,
+  Clock,
   MessageCircleQuestion,
+  PlayCircle,
   Users,
 } from '@sureground/icons/native';
 import {
@@ -14,6 +20,7 @@ import {
   Card,
   EmptyState,
   IconButton,
+  IconTile,
   QueryState,
   Screen,
   SectionHeader,
@@ -79,12 +86,14 @@ export default function AgentHome() {
             label: 'Assigned',
             value: d.assignedTasks,
             subtitle: 'Not started, not yet due',
+            Icon: ClipboardList,
             onPress: toTasks,
           },
           {
             label: 'In progress',
             value: d.inProgressTasks,
             subtitle: 'Currently underway',
+            Icon: PlayCircle,
             onPress: toTasks,
           },
           {
@@ -92,12 +101,14 @@ export default function AgentHome() {
             value: d.overdueTasks,
             subtitle: 'Needs attention',
             attention: d.overdueTasks > 0,
+            Icon: Clock,
             onPress: toTasks,
           },
           {
             label: 'Completed',
             value: d.completedThisWeek ?? 0,
             subtitle: 'Last 7 days',
+            Icon: CheckCircle2,
             onPress: toTasks,
           },
         ]}
@@ -120,6 +131,7 @@ export default function AgentHome() {
           {
             label: 'Assigned to you',
             value: d.assignedProperties,
+            Icon: Building2,
             onPress: () => router.push('/(app)/agent-properties'),
           },
         ]}
@@ -172,6 +184,8 @@ export default function AgentHome() {
             tone="warning"
             title={`${dashboard.data.overdueTasks} overdue ${dashboard.data.overdueTasks === 1 ? 'task' : 'tasks'}`}
             detail="Take a look before they pile up"
+            eyebrow="Overdue"
+            actionLabel="Open my tasks"
             onPress={toTasks}
           />
         ) : null}
@@ -191,11 +205,14 @@ export default function AgentHome() {
           />
 
           {!dashboard.data?.upcomingTasks.length ? (
-            <EmptyState
-              icon={<ClipboardCheck size={30} color={colors.mutedForeground} />}
-              title="You're all caught up"
-              description="New field assignments will appear here when they are scheduled."
-            />
+            <Card padding="none">
+              <EmptyState
+                size="compact"
+                icon={<IconTile Icon={ClipboardCheck} size="xl" />}
+                title="You're all caught up"
+                description="New field assignments will appear here when they are scheduled."
+              />
+            </Card>
           ) : (
             dashboard.data.upcomingTasks.map((task: AgentTask) => (
               <Pressable
@@ -205,31 +222,45 @@ export default function AgentHome() {
                 accessibilityLabel={`${task.title}, ${AGENT_TASK_TYPE_LABEL[task.type]}, ${AGENT_TASK_STATUS_LABEL[task.status]}, due ${formatDate(task.dueAt, 'short')}`}
                 accessibilityHint="Opens task details"
               >
-                <Card elevated>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'flex-start',
-                      justifyContent: 'space-between',
-                      gap: spacing.sm,
-                    }}
-                  >
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Text variant="bodyStrong" numberOfLines={1}>
-                        {task.title}
-                      </Text>
-                      <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                        {AGENT_TASK_TYPE_LABEL[task.type]} · {task.property.title}
-                      </Text>
-                      <Text variant="caption" color="mutedForeground">
-                        Due {formatDate(task.dueAt, 'short')}
-                      </Text>
+                <Card
+                  elevated
+                  padding={spacing.lg}
+                  style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md }}
+                >
+                  <IconTile Icon={ClipboardList} />
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Text variant="bodyStrong" numberOfLines={1}>
+                      {task.title}
+                    </Text>
+                    <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                      {AGENT_TASK_TYPE_LABEL[task.type]} · {task.property.title}
+                    </Text>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: spacing.sm,
+                        marginTop: 4,
+                      }}
+                    >
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                        <CalendarClock size={12} color={colors.mutedForeground} />
+                        <Text variant="caption" color="mutedForeground">
+                          Due {formatDate(task.dueAt, 'short')}
+                        </Text>
+                      </View>
+                      <Badge
+                        label={AGENT_TASK_STATUS_LABEL[task.status]}
+                        tone={AGENT_TASK_STATUS_TONE[task.status]}
+                      />
                     </View>
-                    <Badge
-                      label={AGENT_TASK_STATUS_LABEL[task.status]}
-                      tone={AGENT_TASK_STATUS_TONE[task.status]}
-                    />
                   </View>
+                  <ChevronRight
+                    size={18}
+                    color={colors.mutedForeground}
+                    style={{ alignSelf: 'center' }}
+                  />
                 </Card>
               </Pressable>
             ))

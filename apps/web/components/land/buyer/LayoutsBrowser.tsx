@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -139,7 +140,7 @@ export const LayoutsBrowser = () => {
                 <h2 className="mt-3 text-lg font-semibold text-foreground">{layout.name}</h2>
                 <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                   <MapPin className="h-3.5 w-3.5" aria-hidden />
-                  {layout.city}, {layout.state}
+                  {formatLocation(layout.city, layout.state)}
                 </p>
                 {layout.description && (
                   <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { SimilarListings } from '@/components/market/SimilarListings';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { isAuthenticated } from '@sureground/shared';
+import { isAuthenticated, formatLocation } from '@sureground/shared';
 import { Badge } from '@sureground/ui/Badge';
 import { Breadcrumbs } from '@sureground/ui/Breadcrumbs';
 import { Button } from '@sureground/ui/Button';
@@ -239,7 +239,7 @@ export function ShortletListingDetail({
             <h1 className="text-2xl font-semibold tracking-tight">{listing.title}</h1>
             <p className="mt-1 flex items-center gap-1 text-muted-foreground">
               <MapPin className="h-4 w-4" />{' '}
-              {listing.address || `${listing.city}, ${listing.state}`}
+              {listing.address || formatLocation(listing.city, listing.state)}
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Badge variant="success">{listing.hostName}</Badge>

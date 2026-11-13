@@ -32,6 +32,7 @@ import { TenancyStandingPanel } from '@/components/landlord/TenancyStandingPanel
 import { ApplicantSummaryPanel } from '@/components/landlord/ApplicantSummaryPanel';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { trustScoreDisplay } from '@sureground/shared';
 
 const OPEN_STATUSES: ApplicationStatus[] = ['pending', 'under_review'];
 
@@ -212,8 +213,7 @@ function ApplicationCard({
               <Price amount={a.monthlyIncome} period="month" variant="caption" compact />
             </Detail>
             <Detail label="Trust">
-              {/* 0 only means no rental history yet; a bare 0 reads as a red flag. */}
-              <Text variant="caption">{a.trustScore > 0 ? a.trustScore : 'New to Sureground'}</Text>
+              <Text variant="caption">{trustScoreDisplay(a.trustScore)}</Text>
             </Detail>
           </View>
           {/* Full width: in a third of the card, "Self-employed — Consultant" broke over three lines. */}

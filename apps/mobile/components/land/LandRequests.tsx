@@ -13,7 +13,14 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
-import { approvalOutcomeMessage, type CoApprovalPendingStep } from '@sureground/shared';
+import {
+  approvalOutcomeMessage,
+  coApprovalConfirmDescription,
+  HANDOVER_NOT_DELIVERED_NOTE,
+  pendingApprovalStatus,
+  stepAwaitingDelivery,
+  type CoApprovalPendingStep,
+} from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import {
   deviceTimeZone,
@@ -283,14 +290,17 @@ export function CoApprovalCard({
   );
   const stepLabel = (step: CoApprovalPendingStep) =>
     step.releasesDeposit
-      ? `${labelFor(step.milestoneKey)} (releases the deposit)`
+      ? `${labelFor(step.milestoneKey)} (approves the deposit release)`
       : labelFor(step.milestoneKey);
   const confirmApprove = (step: CoApprovalPendingStep) =>
     Alert.alert(
       'Give your approval?',
-      step.releasesDeposit
-        ? `“${stepLabel(step)}”. Once the buyer has approved too, the deposit held under Payment Protection is released to the seller. Approve only what you have seen yourself.`
-        : `“${stepLabel(step)}”. Once the buyer has approved too, the step is confirmed. Approve only what you have seen yourself.`,
+      coApprovalConfirmDescription({
+        viewer: isBuyer ? 'buyer' : 'representative',
+        stepLabel: stepLabel(step),
+        releasesDeposit: step.releasesDeposit,
+        representativeName: c.representative?.name,
+      }),
       [
         { text: 'Not yet', style: 'cancel' },
         { text: 'Approve', onPress: () => approve.mutate(step) },
@@ -319,22 +329,22 @@ export function CoApprovalCard({
             <View key={p.milestoneKey} style={{ gap: spacing.xs }}>
               <Text variant="callout">{stepLabel(p)}</Text>
               <Text variant="caption" color="mutedForeground">
-                {isBuyer
-                  ? `${p.buyerApproved ? 'You approved' : 'Waiting for you'} · ${
-                      p.representativeApproved
-                        ? 'representative approved'
-                        : 'waiting for your representative'
-                    }`
-                  : `${p.buyerApproved ? 'The buyer approved' : 'Waiting for the buyer'} · ${
-                      p.representativeApproved ? 'you approved' : 'waiting for you'
-                    }`}
+                {pendingApprovalStatus(p, isBuyer ? 'buyer' : 'representative')}
               </Text>
+              {stepAwaitingDelivery(p) ? (
+                <Text variant="caption" color="mutedForeground">
+                  {HANDOVER_NOT_DELIVERED_NOTE}
+                </Text>
+              ) : null}
               {!isBuyer && !p.representativeApproved ? (
                 <Button
                   label="Approve"
                   size="sm"
                   loading={approve.isPending && approve.variables?.milestoneKey === p.milestoneKey}
-                  disabled={approve.isPending}
+                  disabled={approve.isPending || stepAwaitingDelivery(p)}
+                  accessibilityHint={
+                    stepAwaitingDelivery(p) ? HANDOVER_NOT_DELIVERED_NOTE : undefined
+                  }
                   onPress={() => confirmApprove(p)}
                   style={{ alignSelf: 'flex-start' }}
                 />

@@ -1,4 +1,4 @@
-import { BadgeCheck, Camera, Info, Video } from '@sureground/icons';
+import { BadgeCheck, Camera, Info, ShieldCheck, Video } from '@sureground/icons';
 import type { ShowroomListing } from '@sureground/shared/showroom';
 import { valuationNote, valuationSentence } from '@sureground/shared';
 import { VerificationSummaryCard } from '@/components/shared/trust/VerificationSummaryCard';
@@ -16,9 +16,20 @@ export function ShowroomTrust({ listing }: { listing: ShowroomListing }) {
 
   return (
     <section aria-labelledby="trust" className="border-t border-border/70 pt-8">
-      <h2 id="trust" className="text-xl font-semibold tracking-tight text-foreground">
-        What has been checked
-      </h2>
+      <div className="flex items-center gap-3">
+        <span
+          aria-hidden="true"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground"
+        >
+          <ShieldCheck className="h-5 w-5" />
+        </span>
+        <h2
+          id="trust"
+          className="font-display text-[1.625rem] leading-tight font-normal tracking-[-0.01em] text-foreground sm:text-[1.875rem]"
+        >
+          What has been checked
+        </h2>
+      </div>
       {/* The chain is what the header badge and the browse card read from, step by step. */}
       {chain && (
         <div className="mt-4">
@@ -34,9 +45,9 @@ export function ShowroomTrust({ listing }: { listing: ShowroomListing }) {
       <ul className="mt-4 space-y-3 text-sm">
         {/* The bare flag is only the fallback, where the API sends neither a chain nor a summary. */}
         {!summary && !chain && (
-          <li className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+          <li className="flex items-start gap-3 rounded-md border border-border bg-card p-4">
             {listing.verified ? (
-              <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-success" aria-hidden="true" />
+              <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
             ) : (
               <Info className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
             )}
@@ -78,7 +89,7 @@ export function ShowroomTrust({ listing }: { listing: ShowroomListing }) {
           </li>
         )}
         {filmed && (
-          <li className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+          <li className="flex items-start gap-3 rounded-md border border-border bg-card p-4">
             <Video className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
             <div>
               <p className="font-medium text-foreground">Video filmed on site</p>
@@ -91,8 +102,8 @@ export function ShowroomTrust({ listing }: { listing: ShowroomListing }) {
           </li>
         )}
         {photoCount > 0 && (
-          <li className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
-            <Camera className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <li className="flex items-start gap-3 rounded-md border border-border bg-card p-4">
+            <Camera className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
             <div>
               <p className="font-medium text-foreground">Photos supplied by the lister</p>
               <p className="mt-1 text-muted-foreground">

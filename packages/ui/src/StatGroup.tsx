@@ -52,13 +52,13 @@ function Figure({ item }: { item: StatGroupItem }) {
           {item.href && (
             <ChevronRight
               aria-hidden="true"
-              className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5"
+              className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 transition-[color,transform] duration-150 group-hover:translate-x-0.5 group-hover:text-primary"
             />
           )}
         </p>
         {Icon && (
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-secondary">
-            <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
           </span>
         )}
       </div>

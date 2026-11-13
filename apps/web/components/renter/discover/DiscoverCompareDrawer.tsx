@@ -1,19 +1,10 @@
 'use client';
 
-import {
-  X,
-  Bed,
-  Bath,
-  Square,
-  MapPin,
-  Star,
-  Shield,
-  ShieldCheck,
-  GitCompare,
-} from '@sureground/icons';
+import { formatLocation } from '@sureground/shared';
+import { X, Bed, Bath, Square, MapPin, Star, ShieldCheck, GitCompare } from '@sureground/icons';
 import { Property } from '@/types/renter';
 import { ShortlistComparison } from './ShortlistComparison';
-import { trustChainLabel } from '@sureground/shared';
+import { compareRating, compareVerification } from '@/lib/compareRows';
 import {
   Dialog,
   DialogContent,
@@ -106,7 +97,7 @@ export const DiscoverCompareDrawer = ({
                       <td key={property.id} className="py-3 px-4">
                         <div className="flex items-center gap-1 text-sm">
                           <MapPin className="w-3 h-3 text-muted-foreground" />
-                          {property.location}
+                          {formatLocation(property.location)}
                         </div>
                       </td>
                     ))}
@@ -146,53 +137,45 @@ export const DiscoverCompareDrawer = ({
                   </tr>
                   <tr>
                     <td className="py-3 px-4 text-sm text-muted-foreground">Rating</td>
-                    {properties.map((property) => (
-                      <td key={property.id} className="py-3 px-4">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-primary text-primary" />
-                          {property.rating}
-                        </div>
-                      </td>
-                    ))}
+                    {properties.map((property) => {
+                      const rating = compareRating(property);
+                      return (
+                        <td key={property.id} className="py-3 px-4">
+                          {rating ? (
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 fill-primary text-primary" />
+                              {rating}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">No reviews yet</span>
+                          )}
+                        </td>
+                      );
+                    })}
                   </tr>
+                  {/* One row, read from the trust chain the cards show, so it cannot contradict them. */}
                   <tr>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">Verified</td>
-                    {properties.map((property) => (
-                      <td key={property.id} className="py-3 px-4">
-                        {property.verified ? (
-                          <span className="inline-flex items-center gap-1 text-success">
-                            <Shield className="w-4 h-4" />
-                            Yes
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground">No</span>
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">Trust chain</td>
-                    {properties.map((property) => (
-                      <td key={property.id} className="py-3 px-4">
-                        {property.trustChain ? (
+                    <td className="py-3 px-4 text-sm text-muted-foreground">Verification</td>
+                    {properties.map((property) => {
+                      const verification = compareVerification(property);
+                      return (
+                        <td key={property.id} className="py-3 px-4">
                           <span
-                            title={property.trustChain.steps
+                            title={property.trustChain?.steps
                               .map((s) => `${s.met ? '✓' : '○'} ${s.label}`)
                               .join('\n')}
                             className={`inline-flex items-center gap-1 ${
-                              trustChainLabel(property.trustChain).tone === 'verified'
+                              verification.tone === 'verified'
                                 ? 'text-success'
                                 : 'text-muted-foreground'
                             }`}
                           >
                             <ShieldCheck className="w-4 h-4" />
-                            {trustChainLabel(property.trustChain).label}
+                            {verification.label}
                           </span>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </td>
-                    ))}
+                        </td>
+                      );
+                    })}
                   </tr>
                 </tbody>
               </table>

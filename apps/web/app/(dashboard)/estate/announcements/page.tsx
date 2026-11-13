@@ -9,7 +9,6 @@ import {
   CardSkeleton,
   ConfirmDialog,
   EmptyState,
-  ListSkeleton,
   Pagination,
   PageHeader,
   useToast,
@@ -21,6 +20,11 @@ import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { AnnouncementModal } from '@/components/estate/announcements/AnnouncementModal';
 import { AnnouncementCard } from '@/components/estate/announcements/AnnouncementCard';
 import type { Announcement } from '@/types/estate';
+import {
+  EstateListSection,
+  EstateListSkeleton,
+  EstateRowList,
+} from '@/components/estate/shared/EstateListSection';
 
 const PAGE_SIZE = 10;
 
@@ -103,72 +107,66 @@ export default function EstateAnnouncementsPage() {
     }
   };
 
+  const openNew = () => {
+    setEditingAnnouncement(null);
+    setIsModalOpen(true);
+  };
+
   return (
     <>
       <PageHeader
         title="Announcements"
-        description={
-          <>
-            {isAnnouncementsLoading ? (
-              'Loading…'
-            ) : (
-              <>
-                {total} announcement{total === 1 ? '' : 's'}
-              </>
-            )}{' '}
-            in {estate.name}
-          </>
-        }
+        description={`Notices every household in ${estate.name} can read.`}
         actions={
-          <Button
-            variant="primary"
-            className="gap-2"
-            onClick={() => {
-              setEditingAnnouncement(null);
-              setIsModalOpen(true);
-            }}
-          >
-            <Plus className="w-4 h-4" />
+          <Button variant="primary" icon={<Plus className="h-4 w-4" />} onClick={openNew}>
             New announcement
           </Button>
         }
       />
 
-      {isAnnouncementsLoading ? (
-        <ListSkeleton rows={3} />
-      ) : announcements.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
+      <EstateListSection
+        id="announcements"
+        title="Posted"
+        count={isAnnouncementsLoading ? undefined : total}
+        countLabel={`${total} announcement${total === 1 ? '' : 's'}`}
+        description="Edit a notice to correct it, or delete it to take it down for everyone."
+        footer={
+          total > PAGE_SIZE ? (
+            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+          ) : undefined
+        }
+      >
+        {isAnnouncementsLoading ? (
+          <EstateListSkeleton />
+        ) : announcements.length === 0 ? (
           <EmptyState
+            bare
             icon={Megaphone}
             title="No announcements yet"
-            description="Post a notice for all households in this estate to see."
+            description="Post a notice for all households in this estate to see, such as a water outage or a meeting date."
+            action={
+              <Button variant="outline" size="sm" onClick={openNew}>
+                Post the first notice
+              </Button>
+            }
           />
-        </div>
-      ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {announcements.map((announcement) => (
-            <AnnouncementCard
-              key={announcement.id}
-              announcement={announcement}
-              onEdit={() => {
-                setEditingAnnouncement(announcement);
-                setIsModalOpen(true);
-              }}
-              onRemove={() => setRemoving(announcement)}
-            />
-          ))}
-        </div>
-      )}
-
-      {total > 0 && (
-        <Pagination
-          page={page}
-          pageSize={PAGE_SIZE}
-          total={total}
-          onPageChange={setPage}
-          className="mt-6"
-        />
-      )}
+        ) : (
+          <EstateRowList>
+            {announcements.map((announcement) => (
+              <li key={announcement.id}>
+                <AnnouncementCard
+                  announcement={announcement}
+                  onEdit={() => {
+                    setEditingAnnouncement(announcement);
+                    setIsModalOpen(true);
+                  }}
+                  onRemove={() => setRemoving(announcement)}
+                />
+              </li>
+            ))}
+          </EstateRowList>
+        )}
+      </EstateListSection>
 
       <AnnouncementModal
         key={editingAnnouncement?.id ?? 'new'}

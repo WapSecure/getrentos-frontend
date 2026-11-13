@@ -1,13 +1,26 @@
+import { formatLocation } from '@sureground/shared';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, Building2, Info, MessageCircleQuestion } from '@sureground/icons/native';
+import {
+  AlertTriangle,
+  Banknote,
+  Building2,
+  ChevronRight,
+  Info,
+  MessageCircleQuestion,
+  Users,
+  Wallet,
+  Wrench,
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   Button,
   Card,
   EmptyState,
   FormAlert,
   IconButton,
+  IconTile,
   PressableScale,
   QueryState,
   Screen,
@@ -117,7 +130,6 @@ function Workspace() {
         <Button
           label="See your engagements"
           size="sm"
-          variant="secondary"
           onPress={() => router.push('/(app)/(manager)/engagements')}
           style={{ alignSelf: 'flex-start' }}
         />
@@ -141,7 +153,7 @@ function Workspace() {
         <Card padding={0}>
           <EmptyState
             size="compact"
-            icon={<Building2 size={24} color={colors.mutedForeground} />}
+            icon={<IconTile Icon={Building2} size="xl" />}
             title="No property in this engagement yet"
             description={`The property shows here once it's added. For ${selected.ownerName ?? 'the owner'} · ${noticeSummary(selected)}`}
           />
@@ -155,18 +167,19 @@ function Workspace() {
             accessibilityLabel={`Open ${p.title}`}
           >
             <Card style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'center' }}>
-              <Building2 size={22} color={colors.primary} />
+              <IconTile Icon={Building2} size="lg" />
               <View style={{ flex: 1, gap: 2 }}>
                 <Text variant="bodyStrong" numberOfLines={1}>
                   {p.title}
                 </Text>
                 <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                  {p.address}, {p.city}
+                  {formatLocation(p.address, p.city)}
                 </Text>
                 <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
                   Open the property
                 </Text>
               </View>
+              <ChevronRight size={18} color={colors.primary} />
             </Card>
           </PressableScale>
         ))
@@ -183,9 +196,9 @@ function Workspace() {
 }
 
 const SEVERITY = {
-  urgent: { tone: 'destructive' as const, Icon: AlertTriangle },
+  urgent: { tone: 'danger' as const, Icon: AlertTriangle },
   soon: { tone: 'warning' as const, Icon: AlertTriangle },
-  info: { tone: 'info' as const, Icon: Info },
+  info: { tone: 'primary' as const, Icon: Info },
 };
 
 function mobileRoute(path: string): string | null {
@@ -198,7 +211,7 @@ function mobileRoute(path: string): string | null {
 }
 
 function Attention({ items }: { items: AttentionItem[] }) {
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   if (items.length === 0) return null;
   return (
     <Card style={{ gap: spacing.md }}>
@@ -207,8 +220,8 @@ function Attention({ items }: { items: AttentionItem[] }) {
         const { tone, Icon } = SEVERITY[item.severity] ?? SEVERITY.info;
         const route = item.link ? mobileRoute(item.link.path) : null;
         const body = (
-          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <Icon size={16} color={colors[tone]} style={{ marginTop: 2 }} />
+          <View style={{ flexDirection: 'row', gap: spacing.md, minHeight: 44 }}>
+            <IconTile Icon={Icon} tone={tone} size="sm" />
             <View style={{ flex: 1, gap: 2 }}>
               <Text variant="callout" style={{ fontWeight: '600' }}>
                 {item.title}
@@ -248,23 +261,27 @@ function FirmFigures() {
   const d = q.data;
   if (!d) return <Skeleton height={160} />;
   const pct = (v: number | null) => (v === null ? '—' : `${Math.round(v)}%`);
-  const tiles = [
+  const tiles: { label: string; value: string; note: string; Icon: SgIcon }[] = [
     {
+      Icon: Users,
       label: 'Clients',
       value: String(d.clients.active),
       note: `${d.clients.pending} pending${d.clients.endedLast90Days ? ` · ${d.clients.endedLast90Days} ended (90 days)` : ''}`,
     },
     {
+      Icon: Building2,
       label: 'Occupancy',
       value: pct(d.portfolio.occupancyRate),
       note: `${d.portfolio.occupiedUnits} of ${d.portfolio.units} units · ${d.portfolio.properties} properties`,
     },
     {
+      Icon: Banknote,
       label: 'Rent this month',
       value: pct(d.rentThisMonth.collectionRate),
       note: `${formatNaira(d.rentThisMonth.collected)} of ${formatNaira(d.rentThisMonth.due)}`,
     },
     {
+      Icon: Wallet,
       label: 'Commission this month',
       value: formatNaira(d.commissionsThisMonth),
       note: `${d.team.active} on the team`,
@@ -284,15 +301,24 @@ function FirmFigures() {
           <Card
             key={t.label}
             padding={spacing.md}
-            style={{ flexBasis: '47%', flexGrow: 1, gap: 2 }}
+            style={{ flexBasis: '47%', flexGrow: 1, gap: 4 }}
           >
-            <Text variant="caption" color="mutedForeground">
-              {t.label}
-            </Text>
-            <Text variant="heading">{t.value}</Text>
-            <Text variant="caption" color="mutedForeground" numberOfLines={2}>
-              {t.note}
-            </Text>
+            <View
+              accessible
+              accessibilityLabel={`${t.label}: ${t.value}. ${t.note}`}
+              style={{ gap: 4 }}
+            >
+              <IconTile Icon={t.Icon} size="sm" />
+              <Text variant="caption" color="mutedForeground" numberOfLines={2}>
+                {t.label}
+              </Text>
+              <Text variant="heading" style={{ fontVariant: ['tabular-nums'] }}>
+                {t.value}
+              </Text>
+              <Text variant="caption" color="mutedForeground" numberOfLines={2}>
+                {t.note}
+              </Text>
+            </View>
           </Card>
         ))}
       </View>
@@ -328,7 +354,10 @@ function FirmFigures() {
         )}
       </Card>
       <Card style={{ gap: 4 }}>
-        <Text variant="bodyStrong">Maintenance</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <IconTile Icon={Wrench} size="sm" />
+          <Text variant="bodyStrong">Maintenance</Text>
+        </View>
         <Text variant="callout" color="mutedForeground">
           {d.maintenance.open} open · {d.maintenance.resolvedThisMonth} resolved this month
         </Text>

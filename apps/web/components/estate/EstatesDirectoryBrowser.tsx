@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -41,9 +42,7 @@ const EstateCard = ({ estate }: { estate: EstateDirectoryEntry }) => {
 
         <p className="flex items-start gap-1.5 text-sm text-muted-foreground">
           <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-          <span>
-            {estate.address}, {estate.city}, {estate.state}
-          </span>
+          <span>{formatLocation(estate.address, estate.city, estate.state)}</span>
         </p>
 
         {estate.bio && <p className="line-clamp-2 text-sm text-muted-foreground">{estate.bio}</p>}

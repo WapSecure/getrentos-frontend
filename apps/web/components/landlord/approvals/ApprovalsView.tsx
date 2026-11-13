@@ -124,6 +124,7 @@ export function ApprovalsView({ propertyId }: ApprovalsViewProps = {}) {
       {!scoped && (
         <>
           <PageHeader
+            eyebrow="Workflow"
             title="Approvals"
             description="Spend your manager wants to make above your approval limit."
           />

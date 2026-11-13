@@ -140,7 +140,7 @@ export default function RealtorOfferDetail() {
                   tone={o.status === 'ACCEPTED' ? 'success' : 'info'}
                   message={
                     o.status === 'ACCEPTED'
-                      ? 'Your client accepted this offer. The buyer pays the deposit to Sureground, which holds it until the buyer confirms receipt.'
+                      ? 'Your client accepted this offer. The buyer pays the deposit to Sureground, which holds it until the handover is done and the buyer confirms.'
                       : 'This offer is settled and can’t be countered.'
                   }
                 />

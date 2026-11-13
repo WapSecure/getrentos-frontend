@@ -426,6 +426,8 @@ export const estateManagerApi = {
   violations: (estateId: string, status?: string) =>
     apiFetch<Violation[]>(`/estate/${estateId}/violations${toQuery({ status })}`),
 
+  startIncident: (estateId: string, id: string) =>
+    apiFetch<Incident>(`/estate/${estateId}/incidents/${id}/start`, { method: 'PATCH' }),
   closeIncident: (estateId: string, id: string, how: 'resolve' | 'dismiss', notes?: string) =>
     apiFetch<Incident>(`/estate/${estateId}/incidents/${id}/${how}`, {
       method: 'PATCH',

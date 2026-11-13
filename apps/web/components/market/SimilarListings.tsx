@@ -63,8 +63,11 @@ export function SimilarListings({
 
   return (
     <section aria-labelledby="similar-listings" className="mt-14 border-t border-border pt-10">
-      <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Keep exploring</p>
-      <h2 id="similar-listings" className="mt-1 text-2xl font-semibold tracking-tight">
+      <p className="label-caps text-primary">Keep exploring</p>
+      <h2
+        id="similar-listings"
+        className="font-display mt-3 text-[1.875rem] leading-tight font-normal tracking-[-0.01em] sm:text-[2.25rem]"
+      >
         Similar listings
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">

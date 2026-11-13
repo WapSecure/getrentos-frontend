@@ -79,6 +79,7 @@ export function DepositsView() {
   return (
     <>
       <PageHeader
+        eyebrow="Money"
         title="Deposits"
         description="Hold, deduct against, and return tenant security deposits."
         actions={

@@ -7,12 +7,13 @@ import { NotAssignedToEstate } from '@/components/gateman/NotAssignedToEstate';
 import {
   Alert,
   Button,
-  Card,
   CardSkeleton,
   DocumentUpload,
+  EmptyState,
   Field,
   Input,
   ListSkeleton,
+  PageHeader,
   Select,
 } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
@@ -20,6 +21,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
 import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
 import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
+import { GateRowIcon, GateSection } from '@/components/gateman/GateSection';
 import { estateKeys } from '@/lib/queryKeys';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 
@@ -30,6 +32,9 @@ const purposeOptions = [
   { value: 'STAFF', label: 'Staff' },
   { value: 'OTHER', label: 'Other' },
 ];
+
+const purposeLabel = (purpose: string) =>
+  purposeOptions.find((option) => option.value === purpose.toUpperCase())?.label ?? 'Other';
 
 const formatTime = (value: string) =>
   new Intl.DateTimeFormat('en-NG', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
@@ -126,127 +131,186 @@ export default function GatemanVehiclesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="text-center">
-        <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3">
-          <Car className="w-7 h-7" />
-        </div>
-        <h1 className="text-xl font-bold text-foreground">{estate.name}</h1>
-        <p className="text-muted-foreground text-sm mt-1">Log a vehicle entering the estate.</p>
-      </div>
+      <PageHeader title={estate.name} description="Log a vehicle entering the estate." />
 
-      <Card className="p-6 space-y-4">
-        <Field label="Plate number">
-          <Input
-            type="text"
-            value={plateNumber}
-            onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
-            placeholder="ABC123XY"
-            inputClassName="text-center text-xl tracking-[0.15em] font-bold uppercase"
-          />
-        </Field>
+      <section
+        aria-labelledby="log-vehicle-title"
+        className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+      >
+        <header className="border-b border-border px-5 py-4">
+          <h2 id="log-vehicle-title" className="text-base font-semibold text-foreground">
+            Log a vehicle
+          </h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Only the plate is needed. Add the rest if you have time.
+          </p>
+        </header>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field label="Description" optionalLabel="(optional)">
+        <div className="space-y-6 p-5 sm:p-6">
+          <Field label="Plate number">
             <Input
               type="text"
-              value={vehicleDescription}
-              onChange={(e) => setVehicleDescription(e.target.value)}
-              placeholder="e.g. Black Camry"
+              value={plateNumber}
+              onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
+              placeholder="ABC123XY"
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              className="min-h-16 rounded-lg border-2 border-foreground/60 px-4 sm:min-h-16"
+              leadingIcon={<PlateBolt />}
+              trailingIcon={<PlateBolt />}
+              inputClassName="pl-[0.2em] text-center font-mono text-2xl font-bold uppercase tracking-[0.2em] placeholder:text-muted-foreground/40"
             />
           </Field>
-          <Field label="Driver" optionalLabel="(optional)">
-            <Input
-              type="text"
-              value={driverName}
-              onChange={(e) => setDriverName(e.target.value)}
-              placeholder="e.g. Tunde"
+
+          <fieldset>
+            <legend className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Vehicle and driver
+            </legend>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label="Description" optionalLabel="(optional)">
+                <Input
+                  type="text"
+                  value={vehicleDescription}
+                  onChange={(e) => setVehicleDescription(e.target.value)}
+                  placeholder="e.g. Black Camry"
+                />
+              </Field>
+              <Field label="Driver" optionalLabel="(optional)">
+                <Input
+                  type="text"
+                  value={driverName}
+                  onChange={(e) => setDriverName(e.target.value)}
+                  placeholder="e.g. Tunde"
+                />
+              </Field>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Visit
+            </legend>
+            <div
+              className={`grid grid-cols-1 gap-3 ${gateOptions.length > 0 ? 'sm:grid-cols-2' : ''}`}
+            >
+              <Field label="Purpose">
+                <Select value={purpose} onValueChange={setPurpose} options={purposeOptions} />
+              </Field>
+              {gateOptions.length > 0 && (
+                <Field label="Gate">
+                  <Select
+                    value={effectiveGateId}
+                    onValueChange={setGateId}
+                    options={[{ value: '', label: 'Not specified' }, ...gateOptions]}
+                  />
+                </Field>
+              )}
+            </div>
+          </fieldset>
+
+          <Field label="Photo" optionalLabel="(optional)">
+            <DocumentUpload
+              value={photo ? [{ id: 'photo', file: photo }] : []}
+              onChange={(items) => setPhoto(items[0]?.file ?? null)}
+              accept="image/*"
+              multiple={false}
+              label=""
             />
           </Field>
+
+          {refusal && (
+            <WatchlistBlockedNotice
+              message={refusal.message}
+              matches={refusal.matches}
+              onOverride={(reason) => logEntry.mutate({ overrideReason: reason })}
+              onDefer={() => {
+                setRefusal(null);
+                setOverrideError(null);
+                setPlateNumber('');
+              }}
+              isOverriding={logEntry.isPending}
+              error={overrideError}
+            />
+          )}
+
+          {error && <Alert variant="danger">{error}</Alert>}
+
+          <WatchlistWarning warning={warning ?? undefined} />
         </div>
 
-        <Field label="Purpose">
-          <Select value={purpose} onValueChange={setPurpose} options={purposeOptions} />
-        </Field>
-
-        {gateOptions.length > 0 && (
-          <Field label="Gate">
-            <Select
-              value={effectiveGateId}
-              onValueChange={setGateId}
-              options={[{ value: '', label: 'Not specified' }, ...gateOptions]}
-            />
-          </Field>
-        )}
-
-        <Field label="Photo" optionalLabel="(optional)">
-          <DocumentUpload
-            value={photo ? [{ id: 'photo', file: photo }] : []}
-            onChange={(items) => setPhoto(items[0]?.file ?? null)}
-            accept="image/*"
-            multiple={false}
-            label=""
-          />
-        </Field>
-
-        <Button
-          variant="primary"
-          fullWidth
-          disabled={!plateNumber.trim()}
-          isLoading={logEntry.isPending}
-          loadingText="Logging…"
-          onClick={() => {
-            setError(null);
-            setRefusal(null);
-            setOverrideError(null);
-            setWarning(null);
-            logEntry.mutate({});
-          }}
-        >
-          Log vehicle
-        </Button>
-
-        {refusal && (
-          <WatchlistBlockedNotice
-            message={refusal.message}
-            matches={refusal.matches}
-            onOverride={(reason) => logEntry.mutate({ overrideReason: reason })}
-            onDefer={() => {
+        <div className="border-t border-border bg-secondary/40 px-5 py-4 sm:px-6">
+          <Button
+            variant="primary"
+            fullWidth
+            size="lg"
+            icon={<Car className="h-4 w-4" />}
+            disabled={!plateNumber.trim()}
+            isLoading={logEntry.isPending}
+            loadingText="Logging…"
+            onClick={() => {
+              setError(null);
               setRefusal(null);
               setOverrideError(null);
-              setPlateNumber('');
+              setWarning(null);
+              logEntry.mutate({});
             }}
-            isOverriding={logEntry.isPending}
-            error={overrideError}
-          />
-        )}
+          >
+            Log vehicle
+          </Button>
+        </div>
+      </section>
 
-        {error && <Alert variant="danger">{error}</Alert>}
-
-        <WatchlistWarning warning={warning ?? undefined} />
-      </Card>
-
-      <div>
-        <h2 className="text-sm font-semibold text-foreground mb-3">
-          Currently Inside ({inside.length})
-        </h2>
+      <GateSection
+        id="vehicles-inside"
+        title="Currently inside"
+        count={isInsideLoading ? undefined : inside.length}
+        countLabel={`${inside.length} inside`}
+        description="Vehicles logged in at this estate that have not been marked as exited."
+      >
         {isInsideLoading ? (
-          <ListSkeleton rows={2} />
+          <div className="p-5">
+            <ListSkeleton rows={2} />
+          </div>
         ) : inside.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No vehicles currently logged inside.</p>
+          <EmptyState
+            bare
+            size="compact"
+            icon={Car}
+            title="No vehicles inside"
+            description="When you log a vehicle, it appears here until you mark it as exited."
+          />
         ) : (
-          <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
+          <ul className="divide-y divide-border">
             {inside.map((log) => (
-              <div key={log.id} className="p-3 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{log.plateNumber}</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {log.vehicleDescription || log.purpose} · entered {formatTime(log.enteredAt)}
-                    {log.gateName ? ` · ${log.gateName}` : ''}
-                  </p>
+              <li key={log.id} className="flex items-center justify-between gap-3 px-5 py-4">
+                <div className="flex min-w-0 items-center gap-3">
+                  <GateRowIcon>
+                    <Car />
+                  </GateRowIcon>
+                  <div className="min-w-0">
+                    <p className="inline-flex max-w-full rounded-md border border-foreground/40 px-2 py-0.5 font-mono text-sm font-bold tracking-[0.12em] text-foreground">
+                      <span className="truncate">{log.plateNumber}</span>
+                    </p>
+                    {(log.vehicleDescription || log.driverName) && (
+                      <p className="mt-1 truncate text-xs text-muted-foreground">
+                        {[
+                          log.vehicleDescription,
+                          log.driverName ? `Driver: ${log.driverName}` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </p>
+                    )}
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {purposeLabel(log.purpose)} · entered {formatTime(log.enteredAt)}
+                      {log.gateName ? ` · ${log.gateName}` : ''}
+                    </p>
+                  </div>
                 </div>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="lg"
                   className="shrink-0"
                   icon={<ExitIcon className="w-3.5 h-3.5" />}
                   disabled={markExited.isPending}
@@ -256,11 +320,16 @@ export default function GatemanVehiclesPage() {
                 >
                   Exit
                 </Button>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
-      </div>
+      </GateSection>
     </div>
   );
 }
+
+/** Decorative bolt heads, so the plate field reads as a number plate. */
+const PlateBolt = () => (
+  <span aria-hidden="true" className="block h-1.5 w-1.5 rounded-full bg-foreground/25" />
+);

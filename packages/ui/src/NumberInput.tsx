@@ -84,7 +84,16 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
           controlShell({ invalid: field.invalid, disabled, readOnly, wraps: true })
         )}
       >
-        {leadingIcon && <span className="shrink-0 text-muted-foreground">{leadingIcon}</span>}
+        {leadingIcon && (
+          <span
+            className={cn(
+              'shrink-0 text-muted-foreground transition-colors duration-150',
+              !field.invalid && !disabled && 'group-focus-within:text-primary'
+            )}
+          >
+            {leadingIcon}
+          </span>
+        )}
         <input
           ref={ref}
           type={masked ? 'password' : 'text'}

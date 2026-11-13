@@ -166,7 +166,7 @@ export function DocumentUpload({
         }}
         className={cn(
           'cursor-pointer border-2 border-dashed rounded-xl px-4 py-6 text-center transition-colors',
-          dragActive ? 'border-primary bg-accent' : 'border-border hover:border-primary',
+          dragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary',
           disabled && 'cursor-not-allowed opacity-60'
         )}
       >

@@ -105,10 +105,10 @@ export const LandPurchaseSchedule = ({
   return (
     <LandCaseSection title="Payment schedule" icon={CalendarClock}>
       {installments.length === 0 ? (
-        <PanelMessage>No installments on this contract.</PanelMessage>
+        <PanelMessage>No instalments on this contract.</PanelMessage>
       ) : (
         <DataTable
-          caption="Installments on this contract"
+          caption="Instalments on this contract"
           density="compact"
           columns={columns}
           data={installments}

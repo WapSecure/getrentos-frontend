@@ -23,7 +23,7 @@ import { agencyApi } from '@/lib/api/agency';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
-import { AccountFooter, AccountHeader, AppearanceFooter } from '@/components/account/AccountParts';
+import { AccountFooter, AppearanceFooter, ProfileCard } from '@/components/account/AccountParts';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -149,7 +149,7 @@ export default function AgencyAccount() {
 
   return (
     <Screen>
-      <AccountHeader
+      <ProfileCard
         role="Property manager"
         fallbackName="Sureground manager"
         note={dashboard.data?.firmName}

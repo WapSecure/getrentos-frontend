@@ -87,6 +87,7 @@ export function FinancialsOverviewView() {
   return (
     <>
       <PageHeader
+        eyebrow="Money"
         title="Financials"
         description="Track income, expenses, and profitability"
         actions={

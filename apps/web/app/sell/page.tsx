@@ -42,7 +42,7 @@ const STEPS = [
   },
   {
     title: 'A protected deposit',
-    body: 'The buyer pays the deposit to Sureground. It is released to you once they confirm receipt.',
+    body: 'The buyer pays the deposit to Sureground. It is released to you once you have handed over and they confirm.',
   },
 ];
 
@@ -57,7 +57,7 @@ const FAQ: Faq[] = [
   },
   {
     q: 'When do I receive the money?',
-    a: 'The buyer’s deposit is held by Sureground and released to you once they confirm receipt of the property and documents. If they raise a dispute, it stays held while it is resolved.',
+    a: 'The buyer’s deposit is held by Sureground and released to you once you have handed over the property (keys and vacant possession for a home) and they confirm. If they raise a dispute, it stays held while it is resolved.',
   },
   {
     q: 'What does it cost?',

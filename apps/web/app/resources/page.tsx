@@ -5,6 +5,7 @@ import { Navigation } from '@/components/layout/Navigation';
 import { Container } from '@/components/marketing/Container';
 import { availableGuides } from '@/components/resources/availableGuides';
 import { LegalNote } from '@/components/resources/LegalNote';
+import { Eyebrow } from '@/components/marketing/Eyebrow';
 
 export const metadata: Metadata = {
   title: 'Guides: payments, checks and buying from abroad',
@@ -21,7 +22,7 @@ export default async function ResourcesPage() {
       <main id="main" className="bg-background">
         <section aria-labelledby="page-title" className="pt-24 pb-12 md:pt-32 md:pb-16">
           <Container>
-            <p className="label-caps mb-5 text-muted-foreground">Guides</p>
+            <Eyebrow className="mb-5">Guides</Eyebrow>
             <h1
               id="page-title"
               className="max-w-[18ch] text-[2.5rem] leading-[1.04] font-light tracking-[-0.02em] text-balance sm:text-[3.25rem] lg:text-[4rem]"

@@ -5,12 +5,17 @@ import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   canReleaseDeposit,
+  handoverAwaitingDelivery,
+  RELEASE_BLOCKED_NOTE,
+  depositReleaseStage,
   documentLinkLabel,
   formatDualTime,
   humaniseCode,
   moneyVariant,
   nextActionTarget,
+  releaseDialogDescription,
   releaseOutcome,
+  releaseStageNote,
   withStepUpSummary,
   workspaceProgress,
   type WorkspaceSection,
@@ -47,6 +52,11 @@ import {
 } from '@sureground/ui';
 import { AcquisitionStatusBadges } from './AcquisitionStatusBadges';
 import { usePurchaseDisputes } from './usePurchaseDisputes';
+import {
+  LAND_DISPUTE_STATUS,
+  respondByText,
+  SALE_DISPUTE_STATUS,
+} from '@/components/shared/disputes/DisputeParts';
 import { MilestoneTimeline } from '@/components/land/buyer/MilestoneTimeline';
 import { ReportLandProblemDialog } from '@/components/land/disputes/ReportLandProblemDialog';
 import { ConditionsPanel } from '@/components/land/closing/ConditionsPanel';
@@ -54,6 +64,7 @@ import { PerfectionPanel } from '@/components/land/closing/PerfectionPanel';
 import { ActivityFeed } from '@/components/shared/activity/ActivityFeed';
 import { browserTimeZone } from '@/components/shared/forms/TimeZoneSelect';
 import { CoApprovalCard } from '@/components/shared/representatives/CoApprovalCard';
+import { purchaseHistoryItems } from '@/lib/purchaseHistory';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
 import { PURCHASE_ROUTES } from '@/lib/constants/purchaseRoutes';
@@ -63,7 +74,6 @@ import { buyerService } from '@/services/buyerService';
 import { landBuyerService } from '@/services/landBuyerService';
 import { transactionWorkspaceService } from '@/services/transactionWorkspaceService';
 import type { LandClosingCondition } from '@/types/landClosing';
-import type { LandDispute } from '@/types/landDispute';
 import {
   REPRESENTATIVE_RELATIONSHIP_LABELS,
   REPRESENTATIVE_SCOPE_SHORT_LABELS,
@@ -71,7 +81,6 @@ import {
   type RepresentativeScope,
 } from '@/types/landRepresentative';
 import type {
-  SaleDispute,
   TransactionWorkspace,
   WorkspaceCondition,
   WorkspaceProfessional,
@@ -131,21 +140,6 @@ const CTA_LABEL: Record<WorkspaceSection, string> = {
   approvals: 'Give your approval',
   deposit: 'Review the deposit',
   steps: 'Review the steps',
-};
-
-const SALE_DISPUTE_STATUS: Record<SaleDispute['status'], string> = {
-  OPEN: 'Open',
-  UNDER_REVIEW: 'Under review',
-  ESCALATED: 'Escalated',
-  RESOLVED: 'Decided',
-};
-
-const LAND_DISPUTE_STATUS: Record<LandDispute['status'], string> = {
-  OPEN: 'Open',
-  UNDER_INVESTIGATION: 'Under investigation',
-  RESOLVED: 'Decided',
-  APPEALED: 'Appealed',
-  CLOSED: 'Closed',
 };
 
 const SectionCard = ({
@@ -210,6 +204,11 @@ const RailList = ({
   </ul>
 );
 
+/** The representative who gives the second approval, by name where the workspace knows it. */
+const approvingRepresentativeName = (data: TransactionWorkspace): string | undefined =>
+  data.coApproval.representative?.name ??
+  data.representatives.find((r) => r.approvesPayments)?.name;
+
 /**
  * One purchase as its buyer, its seller or the buyer's representative sees it (DIA-15): three
  * separate statuses, the next action, the steps, the legal transfer, approvals, people, documents
@@ -227,6 +226,7 @@ export const TransactionWorkspaceView = ({
   const toast = useToast();
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [releasing, setReleasing] = useState(false);
+  const [refunding, setRefunding] = useState(false);
   const [releaseNotice, setReleaseNotice] = useState<string | null>(null);
   const [viewerTimeZone] = useState(() => browserTimeZone());
   const [disputingDeposit, setDisputingDeposit] = useState(false);
@@ -306,11 +306,28 @@ export const TransactionWorkspaceView = ({
       ),
     onSuccess: (result) => {
       setReleasing(false);
-      const outcome = releaseOutcome(result.release);
+      const outcome = releaseOutcome(
+        result.release,
+        data ? approvingRepresentativeName(data) : undefined
+      );
       // Waiting for the second approval: nothing moved, so the message stays on the page.
       setReleaseNotice(outcome.waiting ? outcome.message : null);
       refresh();
       toast.success(outcome.message);
+    },
+    onError: (reason: Error) => toast.error(reason.message),
+  });
+
+  // The route re-authenticates; the backend checks again that the handover has not started.
+  const refund = useMutation({
+    mutationFn: () =>
+      withStepUpSummary(`Take back the deposit for ${data?.propertyTitle ?? 'this purchase'}`, () =>
+        unwrap(buyerService.refundTransaction(txId))
+      ),
+    onSuccess: () => {
+      setRefunding(false);
+      refresh();
+      toast.success('The purchase is cancelled and your deposit is being refunded.');
     },
     onError: (reason: Error) => toast.error(reason.message),
   });
@@ -337,6 +354,11 @@ export const TransactionWorkspaceView = ({
   const progress = workspaceProgress(data);
   const target = nextActionTarget(data);
   const releasable = canReleaseDeposit(data);
+  // The deposit stands for the handover: it cannot be released before the seller delivers it.
+  const releaseBlocked = releasable && handoverAwaitingDelivery(data);
+  const representativeName = approvingRepresentativeName(data);
+  const releaseStage = depositReleaseStage(data);
+  const releaseNote = isBuyer ? releaseStageNote(releaseStage, representativeName) : null;
   const hasDisputes =
     disputes.milestones.length + disputes.sale.length + disputes.land.length > 0 ||
     disputes.canDisputeDeposit ||
@@ -561,7 +583,7 @@ export const TransactionWorkspaceView = ({
               />
             ) : (
               <ActivityFeed
-                items={data.history}
+                items={purchaseHistoryItems(data.history, data.representatives)}
                 viewerTimeZone={viewerTimeZone}
                 headingLevel="h3"
               />
@@ -580,12 +602,33 @@ export const TransactionWorkspaceView = ({
               <Badge dot variant={moneyVariant(moneyStatus.code)}>
                 {moneyStatus.label}
               </Badge>
-              {releasable ? (
+              {releaseBlocked ? (
                 <>
-                  <p className="text-sm text-muted-foreground">
-                    Release it only once you have received the property and the documents you
-                    agreed.
+                  <p id="deposit-release-blocked" className="text-sm text-muted-foreground">
+                    {RELEASE_BLOCKED_NOTE}
                   </p>
+                  <Button
+                    className="w-full"
+                    icon={<ShieldCheck className="h-4 w-4" aria-hidden />}
+                    disabled
+                    aria-describedby="deposit-release-blocked"
+                  >
+                    Release the deposit
+                  </Button>
+                </>
+              ) : releasable ? (
+                <>
+                  {releaseStage === 'BOTH_APPROVED' ? (
+                    <p className="text-sm font-medium text-foreground" role="status">
+                      {releaseNote}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Release it only once you have received the property and the documents you
+                      agreed.
+                      {releaseNote ? ` ${releaseNote}` : ''}
+                    </p>
+                  )}
                   <Button
                     className="w-full"
                     icon={<ShieldCheck className="h-4 w-4" aria-hidden />}
@@ -593,7 +636,16 @@ export const TransactionWorkspaceView = ({
                   >
                     Release the deposit
                   </Button>
+                  {data.deposit?.refundable && (
+                    <Button variant="outline" className="w-full" onClick={() => setRefunding(true)}>
+                      Take my deposit back
+                    </Button>
+                  )}
                 </>
+              ) : isBuyer && releaseStage === 'WAITING_FOR_REPRESENTATIVE' ? (
+                <p className="text-sm text-muted-foreground" role="status">
+                  {releaseNote}
+                </p>
               ) : (
                 isSeller && (
                   <p className="text-sm text-muted-foreground">
@@ -618,7 +670,11 @@ export const TransactionWorkspaceView = ({
                       ...disputes.sale.map((d) => ({
                         id: `sale-${d.id}`,
                         title: d.title,
-                        detail: `Deposit · opened ${formatDate(d.createdAt)} · Sureground decides`,
+                        // Its thread is in the buyer portal; the seller has no web workspace yet.
+                        href: isBuyer ? PURCHASE_ROUTES.buyerDepositDispute(d.id) : undefined,
+                        detail: d.respondBy
+                          ? respondByText(d.respondBy, viewerTimeZone)
+                          : `Deposit · opened ${formatDate(d.createdAt)} · Sureground decides`,
                         badge: (
                           <Badge variant={d.status === 'RESOLVED' ? 'neutral' : 'warning'}>
                             {SALE_DISPUTE_STATUS[d.status] ?? humaniseCode(d.status)}
@@ -628,11 +684,13 @@ export const TransactionWorkspaceView = ({
                       ...disputes.land.map((d) => ({
                         id: `land-${d.id}`,
                         title: `Land case ${d.reference}`,
-                        href: `/land/disputes/${encodeURIComponent(d.id)}`,
+                        href: PURCHASE_ROUTES.landDispute(d.id),
                         detail:
                           d.canAppeal && d.appealDeadline
                             ? `Appeal by ${formatDate(d.appealDeadline)}, ${formatDualTime(d.appealDeadline, viewerTimeZone)}`
-                            : `Opened ${formatDate(d.createdAt)}`,
+                            : d.respondBy
+                              ? respondByText(d.respondBy, viewerTimeZone)
+                              : `Opened ${formatDate(d.createdAt)}`,
                         badge: (
                           <Badge variant={d.canAppeal ? 'info' : 'neutral'}>
                             {d.canAppeal
@@ -858,10 +916,24 @@ export const TransactionWorkspaceView = ({
         open={releasing}
         onOpenChange={(open) => !open && setReleasing(false)}
         title="Release the deposit to the seller?"
-        description="Release only once you have received the property and the documents you agreed; it cannot be undone. If two-person approval is on, nothing moves until your representative approves too. This does not complete the legal transfer."
-        confirmLabel="Release the deposit"
+        description={releaseDialogDescription(releaseStage, representativeName)}
+        confirmLabel={
+          releaseStage === 'SINGLE' || releaseStage === 'BOTH_APPROVED'
+            ? 'Release the deposit'
+            : 'Record my approval'
+        }
         isLoading={release.isPending}
         onConfirm={() => release.mutateAsync().catch(() => undefined)}
+      />
+
+      <ConfirmDialog
+        open={refunding}
+        onOpenChange={(open) => !open && setRefunding(false)}
+        title="Take your deposit back?"
+        description="This cancels the purchase and refunds the deposit Payment Protection holds. It cannot be undone. You can only do this before the seller starts the handover; after that, raise a dispute instead."
+        confirmLabel="Take my deposit back"
+        isLoading={refund.isPending}
+        onConfirm={() => refund.mutateAsync().catch(() => undefined)}
       />
     </div>
   );

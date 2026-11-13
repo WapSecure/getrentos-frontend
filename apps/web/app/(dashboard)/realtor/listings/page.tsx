@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Megaphone } from '@sureground/icons';
+import { RecordGridSkeleton, RecordToolbar } from '@/components/shared/records/RecordParts';
 import { RealtorListingCard } from '@/components/realtor/listings/RealtorListingCard';
 import { RealtorListingPreviewModal } from '@/components/realtor/listings/RealtorListingPreviewModal';
 import { CommercialDetailsDialog } from '@/components/landlord/listings/EditCommercialDetailsDialog';
@@ -14,7 +15,6 @@ import {
 import {
   Button,
   EmptyState,
-  ListSkeleton,
   PageErrorState,
   Pagination,
   SearchInput,
@@ -127,6 +127,7 @@ export default function RealtorListingsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Work"
         title="Listings"
         description={
           <>
@@ -152,7 +153,7 @@ export default function RealtorListingsPage() {
         className="mb-6"
       />
 
-      <div className="mb-6 flex min-w-0 flex-col gap-3 sm:flex-row">
+      <RecordToolbar className="min-w-0">
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -164,7 +165,7 @@ export default function RealtorListingsPage() {
           className="min-w-0 flex-1 sm:max-w-sm"
         />
         <div
-          className="flex w-full min-w-0 max-w-full gap-1 overflow-x-auto pb-1 sm:w-auto"
+          className="flex w-full min-w-0 max-w-full gap-2 overflow-x-auto sm:ml-auto sm:w-auto"
           role="group"
           aria-label="Filter listings by status"
         >
@@ -182,10 +183,12 @@ export default function RealtorListingsPage() {
             </ToggleChip>
           ))}
         </div>
-      </div>
+      </RecordToolbar>
 
       {isLoading ? (
-        <ListSkeleton variant="cards" rows={3} label="Loading listings" />
+        <div role="status" aria-busy="true" aria-label="Loading listings">
+          <RecordGridSkeleton />
+        </div>
       ) : listingsQuery.isError && !data ? (
         <PageErrorState
           title="Listings are unavailable"

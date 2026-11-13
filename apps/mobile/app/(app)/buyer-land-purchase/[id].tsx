@@ -1,3 +1,4 @@
+import { lateFeeSentence } from '@sureground/shared';
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -49,6 +50,7 @@ import { TitlePerfection } from '@/components/land/TitlePerfection';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 import { PaySheet } from '@/components/payments/PaySheet';
+import { useDepositIdentityNotice } from '@/components/purchases/DepositIdentityNotice';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
@@ -305,6 +307,11 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
     },
   });
   const payable = PAYABLE.has(p.status) && !!p.nextDue;
+  // Only the initial deposit is gated; installments on a plan already under way are not.
+  const identityNotice = useDepositIdentityNotice(
+    sheetOpen && p.status === 'PENDING_DEPOSIT',
+    closeSheet
+  );
   return (
     <Card style={{ gap: spacing.sm }}>
       <Text variant="bodyStrong">
@@ -343,6 +350,7 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
             providers={providers}
             providerError={providerError}
             busy={pay.isPending}
+            blocked={identityNotice}
             onPay={() => pay.mutate(providers.provider)}
           />
         </>
@@ -442,9 +450,8 @@ function Schedule({ p }: { p: BuyerPurchaseDetail }) {
         </Text>
       ) : null}
       <Text variant="caption" color="mutedForeground">
-        {p.terms.gracePeriodDays} days’ grace on each instalment, then a{' '}
-        {formatBps(p.terms.lateFeeBps)} late fee. Default after {p.terms.defaultAfterDays} days
-        overdue.
+        {lateFeeSentence(p.terms.lateFeeBps, p.terms.gracePeriodDays)} Default after{' '}
+        {p.terms.defaultAfterDays} days overdue.
       </Text>
     </Card>
   );
