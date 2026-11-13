@@ -6,6 +6,8 @@ export interface PageHeaderProps {
   title: ReactNode;
   description?: ReactNode;
   eyebrow?: string;
+  /** `brand` (the default) sets the eyebrow in Sureground blue; `muted` keeps it grey. */
+  eyebrowTone?: 'brand' | 'muted';
   actions?: ReactNode;
   meta?: ReactNode;
   /** Where this page sits; the last item is the page itself. */
@@ -17,6 +19,7 @@ export function PageHeader({
   title,
   description,
   eyebrow,
+  eyebrowTone = 'brand',
   actions,
   meta,
   breadcrumbs,
@@ -29,7 +32,16 @@ export function PageHeader({
           <Breadcrumbs items={breadcrumbs} className="mb-3" />
         ) : null}
         {eyebrow ? (
-          <p className="mb-2 text-sm font-medium text-muted-foreground">{eyebrow}</p>
+          <p
+            className={cn(
+              'mb-2 text-sm',
+              eyebrowTone === 'brand'
+                ? 'font-semibold text-primary'
+                : 'font-medium text-muted-foreground'
+            )}
+          >
+            {eyebrow}
+          </p>
         ) : null}
         <h1 className="page-title">{title}</h1>
         {description ? <p className="page-description">{description}</p> : null}

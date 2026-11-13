@@ -20,7 +20,7 @@ export type RadioTone = 'primary' | 'neutral' | 'success' | 'warning' | 'destruc
 const TONE = {
   primary: {
     dot: 'border-primary bg-primary',
-    card: 'border-primary bg-card shadow-[inset_0_0_0_1px_var(--primary)]',
+    card: 'border-primary bg-primary/[0.04] shadow-[inset_0_0_0_1px_var(--primary)]',
   },
   neutral: {
     dot: 'border-foreground/60 bg-foreground/60',
@@ -129,12 +129,12 @@ export function RadioGroup<T extends string>({
           <span
             aria-hidden="true"
             className={cn(
-              'flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border transition-colors',
+              'flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border transition-colors duration-150',
               checked
                 ? TONE[option.tone ?? 'primary'].dot
                 : field.invalid
                   ? 'border-destructive/70 bg-card'
-                  : 'border-border bg-card'
+                  : 'border-border bg-card group-enabled:group-hover:border-primary/60'
             )}
           >
             <span
@@ -169,12 +169,12 @@ export function RadioGroup<T extends string>({
                       ? TONE[option.tone ?? 'primary'].card
                       : field.invalid
                         ? 'border-destructive/60 bg-card'
-                        : 'border-border bg-card hover:border-foreground/20',
+                        : 'border-border bg-card hover:border-primary/40',
                     isDisabled && 'opacity-55'
                   )
                 : cn(
                     'flex items-start gap-2.5 rounded-md',
-                    'focus-visible:ring-4 focus-visible:ring-primary/12',
+                    'focus-visible:ring-4 focus-visible:ring-primary/20',
                     isDisabled && 'opacity-55'
                   )
             )}

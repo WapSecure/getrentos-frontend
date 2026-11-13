@@ -82,7 +82,7 @@ export function SegmentedControl<T extends string>({
               size === 'sm' ? 'min-h-8 px-2.5 text-xs' : 'min-h-9 px-3 text-sm',
               iconOnly && (size === 'sm' ? 'w-8 px-0' : 'w-9 px-0'),
               active
-                ? 'bg-card text-foreground shadow-xs'
+                ? 'bg-card text-primary shadow-xs ring-1 ring-primary/20'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
@@ -98,7 +98,9 @@ export function SegmentedControl<T extends string>({
                   'rounded-full px-1.5 text-xs tabular-nums',
                   segment.countTone === 'warning'
                     ? 'bg-warning-subtle text-warning'
-                    : 'bg-foreground/[0.06] text-foreground/75'
+                    : active
+                      ? 'bg-primary/10 font-semibold text-primary'
+                      : 'bg-foreground/[0.06] text-foreground/75'
                 )}
               >
                 {segment.count}

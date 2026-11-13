@@ -30,7 +30,7 @@ export function Breadcrumbs({
               {item.href && !current ? (
                 <Link
                   href={item.href}
-                  className="truncate rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="truncate rounded-sm transition-colors duration-150 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {item.label}
                 </Link>

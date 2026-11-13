@@ -75,7 +75,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       danger:
         'bg-destructive text-destructive-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.12),0_1px_2px_rgb(0_0_0/0.10)] hover:brightness-95',
       'danger-ghost': 'bg-transparent text-destructive hover:bg-destructive-subtle',
-      link: 'bg-transparent text-primary underline-offset-4 hover:underline',
+      link: 'bg-transparent text-primary decoration-primary/40 underline-offset-4 hover:text-primary-hover hover:underline',
     };
 
     const sizes = {

@@ -30,8 +30,10 @@ export const Card = ({
         'overflow-hidden rounded-xl border bg-card text-card-foreground shadow-xs',
         selected ? 'border-primary shadow-[inset_0_0_0_1px_var(--primary)]' : 'border-border',
         (hover || interactive) &&
-          'transition-[border-color,box-shadow] duration-150 hover:border-foreground/15 hover:shadow-sm',
+          'transition-[border-color,box-shadow] duration-150 hover:shadow-sm',
+        hover && !interactive && !selected && 'hover:border-foreground/15',
         interactive && 'relative focus-within:ring-4 focus-within:ring-primary/12',
+        interactive && !selected && 'hover:border-primary/40',
         className
       )}
     >
