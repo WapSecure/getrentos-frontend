@@ -1,12 +1,7 @@
+import type { MaintenanceCategoryCode } from '@sureground/shared';
 import type { EvidenceItem } from '@/types/admin';
 
-export type MaintenanceCategory =
-  | 'PLUMBING'
-  | 'ELECTRICAL'
-  | 'INTERNET'
-  | 'SECURITY'
-  | 'APPLIANCES'
-  | 'OTHER';
+export type MaintenanceCategory = MaintenanceCategoryCode;
 export type MaintenancePriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 export type MaintenanceRequestStatus =
   | 'SUBMITTED'

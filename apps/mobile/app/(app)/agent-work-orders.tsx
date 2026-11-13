@@ -18,6 +18,7 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
+import { maintenanceCategoryLabel } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentWorkOrder, type AgentWorkOrderStatus } from '@/lib/api/agent';
 import { errorMessage } from '@/lib/api/client';
@@ -152,7 +153,8 @@ export default function AgentWorkOrders() {
                         {item.issueTitle}
                       </Text>
                       <Text variant="caption" color="mutedForeground">
-                        {item.propertyTitle} · {item.unitName} · {item.category}
+                        {item.propertyTitle} · {item.unitName} ·{' '}
+                        {maintenanceCategoryLabel(item.category)}
                       </Text>
                     </View>
                     <Badge label={meta.label} tone={meta.tone} />

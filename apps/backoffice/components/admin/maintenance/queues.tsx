@@ -4,7 +4,12 @@ import { useState, type ReactNode } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CalendarClock, Clock3, Hammer, ReceiptText, Scroll, Wrench } from '@sureground/icons';
 import { Badge, Button, ConfirmDialog, useToast, type BadgeVariant } from '@sureground/ui';
-import { unwrap } from '@sureground/shared';
+import {
+  MAINTENANCE_CATEGORY_GROUPS,
+  MAINTENANCE_CATEGORY_LABELS,
+  maintenanceCategoryLabel,
+  unwrap,
+} from '@sureground/shared';
 import { adminMaintenanceService } from '@/services/adminMaintenanceService';
 import { MaintenanceQueuePage, type MaintenanceQueueConfig } from './MaintenanceQueuePage';
 import { AssignVendorDialog } from './AssignVendorDialog';
@@ -60,7 +65,7 @@ const titleCase = (value: string) =>
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
-const categoryLabel = (category: MaintenanceCategory) => titleCase(category);
+const categoryLabel = (category: MaintenanceCategory) => maintenanceCategoryLabel(category);
 
 const workOrderStatusVariant = (status: MaintenanceRequestStatus): BadgeVariant => {
   const map: Record<MaintenanceRequestStatus, BadgeVariant> = {
@@ -121,14 +126,10 @@ const priorityOptions: { value: MaintenancePriority; label: string }[] = [
   { value: 'HIGH', label: 'High' },
   { value: 'URGENT', label: 'Urgent' },
 ];
-const categoryOptions: { value: MaintenanceCategory; label: string }[] = [
-  { value: 'PLUMBING', label: 'Plumbing' },
-  { value: 'ELECTRICAL', label: 'Electrical' },
-  { value: 'INTERNET', label: 'Internet' },
-  { value: 'SECURITY', label: 'Security' },
-  { value: 'APPLIANCES', label: 'Appliances' },
-  { value: 'OTHER', label: 'Other' },
-];
+const categoryOptions: { value: MaintenanceCategory; label: string }[] =
+  MAINTENANCE_CATEGORY_GROUPS.flatMap((group) =>
+    group.categories.map((value) => ({ value, label: MAINTENANCE_CATEGORY_LABELS[value] }))
+  );
 const planStatusOptions: { value: PreventivePlanStatus; label: string }[] = [
   { value: 'ACTIVE', label: 'Active' },
   { value: 'PAUSED', label: 'Paused' },

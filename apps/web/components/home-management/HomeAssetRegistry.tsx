@@ -26,7 +26,8 @@ import { DatePicker } from '@sureground/ui';
 import { EmptyState } from '@sureground/ui';
 import { Skeleton } from '@sureground/ui';
 import { Field } from '@sureground/ui';
-import { Input } from '@sureground/ui';
+import { Input, ToggleChip } from '@sureground/ui';
+import { HOME_ASSET_CATEGORY_SUGGESTIONS } from '@sureground/shared';
 import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
 import { useToast } from '@sureground/ui';
@@ -477,8 +478,30 @@ export function HomeAssetRegistry({
                   onChange={(event) =>
                     setForm((current) => ({ ...current, category: event.target.value }))
                   }
-                  placeholder="e.g. Power, HVAC, appliance"
+                  placeholder="e.g. Generator, borehole, air conditioner"
                 />
+                <div
+                  role="group"
+                  aria-label="Common asset categories"
+                  className="mt-2 flex flex-wrap gap-1.5"
+                >
+                  {HOME_ASSET_CATEGORY_SUGGESTIONS.map((suggestion) => (
+                    <ToggleChip
+                      key={suggestion}
+                      size="sm"
+                      pressed={form.category === suggestion}
+                      onPressedChange={() =>
+                        setForm((current) => ({
+                          ...current,
+                          category: suggestion,
+                          name: current.name.trim() ? current.name : suggestion,
+                        }))
+                      }
+                    >
+                      {suggestion}
+                    </ToggleChip>
+                  ))}
+                </div>
               </Field>
               <Field label="Manufacturer" htmlFor="asset-manufacturer">
                 <Input

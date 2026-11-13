@@ -33,3 +33,5 @@ export * from './deliveryCollection';
 export * from './propertyRent';
 export * from './landLateFee';
 export * from './personContact';
+export * from './maintenance';
+export * from './careTemplates';

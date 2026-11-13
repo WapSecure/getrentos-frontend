@@ -20,6 +20,7 @@ import {
   type BadgeVariant,
   PageHeader,
 } from '@sureground/ui';
+import { maintenanceCategoryLabel } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService, type AgentWorkOrder } from '@/services/agentService';
 
@@ -122,7 +123,7 @@ export default function AgentWorkOrdersPage() {
                       {wo.fieldCompletedAt && <Badge variant="success">Reported done</Badge>}
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {wo.propertyTitle} · {wo.unitName} · {wo.category}
+                      {wo.propertyTitle} · {wo.unitName} · {maintenanceCategoryLabel(wo.category)}
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">{wo.description}</p>
                     {wo.fieldReport && (

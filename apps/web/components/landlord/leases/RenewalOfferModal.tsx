@@ -118,17 +118,19 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
 
   return (
     <Dialog open={!!lease} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent padded={false}>
-        <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3">
+      <DialogContent size="lg" padded={false} className="flex max-h-[88dvh] flex-col">
+        <div className="shrink-0 px-5 py-4 pr-12 border-b border-border flex justify-between items-center gap-3 sm:px-6">
           <div className="min-w-0">
-            <DialogTitle className="font-semibold text-foreground">Send renewal offer</DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+            <DialogTitle className="text-lg font-semibold text-foreground">
+              Send renewal offer
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground mt-0.5">
               To {lease.tenantName}: {lease.unitName}
             </DialogDescription>
           </div>
         </div>
 
-        <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div className="min-h-0 flex-1 p-5 space-y-4 overflow-y-auto overscroll-contain sm:px-6">
           {canAdvise && (
             <RenewalAdvicePanel
               advice={advice.data}
@@ -145,20 +147,32 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
             <span className="font-medium text-foreground">{formatCurrency(lease.rentAmount)}</span>
           </div>
 
-          <Field
-            label={`New ${leaseRentLabel(rentPeriod, lease.leaseStart, lease.leaseEnd).toLowerCase()} (₦)`}
-            required
-            hint={`${Number(increasePct) >= 0 ? '+' : ''}${increasePct}% vs current rent`}
-          >
-            <CurrencyInput
-              prefix="₦"
-              value={newRent}
-              onValueChange={(v) => {
-                setNewRent(v === 0 ? '' : String(v));
-                setTouched((t) => ({ ...t, rent: true }));
-              }}
-            />
-          </Field>
+          <div className="grid gap-4 sm:grid-cols-2 sm:gap-3">
+            <Field
+              label={`New ${leaseRentLabel(rentPeriod, lease.leaseStart, lease.leaseEnd).toLowerCase()} (₦)`}
+              required
+              hint={`${Number(increasePct) >= 0 ? '+' : ''}${increasePct}% vs current rent`}
+            >
+              <CurrencyInput
+                prefix="₦"
+                value={newRent}
+                onValueChange={(v) => {
+                  setNewRent(v === 0 ? '' : String(v));
+                  setTouched((t) => ({ ...t, rent: true }));
+                }}
+              />
+            </Field>
+
+            <Field label="New lease end date" required>
+              <DatePicker
+                value={newEndDate}
+                onChange={(v) => {
+                  setNewEndDate(v);
+                  setTouched((t) => ({ ...t, end: true }));
+                }}
+              />
+            </Field>
+          </div>
 
           {activeCheck && (
             <Alert
@@ -168,16 +182,6 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
               {activeCheck.advisory}
             </Alert>
           )}
-
-          <Field label="New lease end date" required>
-            <DatePicker
-              value={newEndDate}
-              onChange={(v) => {
-                setNewEndDate(v);
-                setTouched((t) => ({ ...t, end: true }));
-              }}
-            />
-          </Field>
 
           <Field
             label={`Note to ${lease.tenantName || 'the tenant'}`}
@@ -201,7 +205,7 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
           )}
         </div>
 
-        <div className="p-4 border-t border-border flex gap-3">
+        <div className="shrink-0 px-5 py-4 border-t border-border flex gap-3 sm:px-6">
           <Button variant="ghost" fullWidth disabled={isSubmitting} onClick={onClose}>
             Cancel
           </Button>
@@ -219,7 +223,7 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
           </Button>
         </div>
         {errorMessage && (
-          <div className="px-4 pb-4">
+          <div className="shrink-0 px-5 pb-4 sm:px-6">
             <Alert variant="danger">{errorMessage}</Alert>
           </div>
         )}

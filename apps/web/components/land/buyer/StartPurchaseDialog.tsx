@@ -87,9 +87,9 @@ export const StartPurchaseDialog = ({
 
   return (
     <Dialog open={Boolean(reservation)} onOpenChange={(open) => !open && close()}>
-      <DialogContent className="p-0">
+      <DialogContent size="lg" padded={false} className="max-h-[88dvh] overscroll-contain">
         {reservation && (
-          <div className="max-h-[85vh] overflow-y-auto p-5">
+          <div className="p-5 sm:p-6">
             <DialogTitle className="text-lg font-semibold text-foreground">
               Start your purchase
             </DialogTitle>
@@ -110,7 +110,7 @@ export const StartPurchaseDialog = ({
                 This estate has no active payment plan right now, so a purchase cannot start.
               </p>
             ) : (
-              <fieldset className="mt-4 space-y-3">
+              <fieldset className={`mt-4 grid gap-3 ${plans.length > 1 ? 'sm:grid-cols-2' : ''}`}>
                 <legend className="sr-only">Payment plan</legend>
                 {plans.map((plan) => (
                   <label

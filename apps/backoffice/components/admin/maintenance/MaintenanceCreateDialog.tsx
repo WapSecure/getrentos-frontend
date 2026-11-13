@@ -16,7 +16,11 @@ import {
   Select,
   useToast,
 } from '@sureground/ui';
-import { unwrap } from '@sureground/shared';
+import {
+  MAINTENANCE_CATEGORY_GROUPS,
+  MAINTENANCE_CATEGORY_LABELS,
+  unwrap,
+} from '@sureground/shared';
 import { adminMaintenanceService } from '@/services/adminMaintenanceService';
 
 export type CreateKind = 'vendor' | 'sla' | 'plan';
@@ -106,7 +110,7 @@ export function MaintenanceCreateDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-        <DialogContent className="p-6">
+        <DialogContent size="lg" className="max-h-[88dvh] overscroll-contain">
           <DialogTitle className="font-semibold">{title}</DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             Select linked records using searchable fields. The new configuration becomes visible
@@ -131,15 +135,20 @@ export function MaintenanceCreateDialog({
                 <Field label="Vendor name">
                   <Input value={form.name ?? ''} onChange={(e) => set('name')(e.target.value)} />
                 </Field>
-                <Field label="Service type">
-                  <Input
-                    value={form.serviceType ?? ''}
-                    onChange={(e) => set('serviceType')(e.target.value)}
-                  />
-                </Field>
-                <Field label="Phone">
-                  <Input value={form.phone ?? ''} onChange={(e) => set('phone')(e.target.value)} />
-                </Field>
+                <div className="grid gap-4 sm:grid-cols-2 sm:gap-3">
+                  <Field label="Service type">
+                    <Input
+                      value={form.serviceType ?? ''}
+                      onChange={(e) => set('serviceType')(e.target.value)}
+                    />
+                  </Field>
+                  <Field label="Phone">
+                    <Input
+                      value={form.phone ?? ''}
+                      onChange={(e) => set('phone')(e.target.value)}
+                    />
+                  </Field>
+                </div>
               </>
             )}
             {kind !== 'vendor' && (
@@ -207,14 +216,13 @@ export function MaintenanceCreateDialog({
                     <Select
                       value={form.category}
                       onValueChange={set('category')}
-                      options={[
-                        'PLUMBING',
-                        'ELECTRICAL',
-                        'INTERNET',
-                        'SECURITY',
-                        'APPLIANCES',
-                        'OTHER',
-                      ].map((value) => ({ value, label: value }))}
+                      options={MAINTENANCE_CATEGORY_GROUPS.flatMap((group) =>
+                        group.categories.map((value) => ({
+                          value,
+                          label: MAINTENANCE_CATEGORY_LABELS[value],
+                          group: group.label,
+                        }))
+                      )}
                       ariaLabel="Category"
                     />
                   </Field>
