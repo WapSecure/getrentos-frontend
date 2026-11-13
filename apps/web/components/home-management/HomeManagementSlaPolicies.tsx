@@ -14,6 +14,10 @@ import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
 import { Switch } from '@sureground/ui';
 import { useToast } from '@sureground/ui';
+import {
+  HomeManagementSectionHeading,
+  useCreateRequest,
+} from '@/components/home-management/HomeManagementSectionHeading';
 import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import {
@@ -174,12 +178,17 @@ const policyFormError = (form: SlaPolicyForm) => {
 interface HomeManagementSlaPoliciesProps {
   properties: HomeManagementProperty[];
   isPropertiesLoading?: boolean;
+  /** Set by the page header's Add menu; see useCreateRequest. */
+  createRequest?: number;
+  onCreateRequestHandled?: () => void;
 }
 
 // Edits are scoped by property so one home's service promise can't silently apply to another.
 export function HomeManagementSlaPolicies({
   properties,
   isPropertiesLoading = false,
+  createRequest,
+  onCreateRequestHandled,
 }: HomeManagementSlaPoliciesProps) {
   const queryClient = useQueryClient();
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
@@ -299,6 +308,23 @@ export function HomeManagementSlaPolicies({
     if (!mutationPending) setDialogState(null);
   };
 
+  // Waits for the property's policies so it knows which priorities are still free.
+  const policiesReady =
+    !isPropertiesLoading && !policiesQuery.isLoading && !activePoliciesQuery.isLoading;
+  useCreateRequest(
+    createRequest,
+    () => openCreate(),
+    () => {
+      if (!effectivePropertyId) {
+        toast.info('Add a property before setting service standards.');
+      } else if (remainingPriorities.length === 0) {
+        toast.info('Every priority already has a service policy for this property.');
+      }
+      onCreateRequestHandled?.();
+    },
+    policiesReady
+  );
+
   const submitPolicy = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!dialogState || validationError || !effectivePropertyId) return;
@@ -321,58 +347,49 @@ export function HomeManagementSlaPolicies({
   };
 
   return (
-    <section aria-labelledby="sla-policies-heading" className="mt-10">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-medium text-primary">Service standards</p>
-          <h2
-            id="sla-policies-heading"
-            className="mt-1 text-2xl font-semibold tracking-[-0.02em] text-foreground"
-          >
-            Set the care promise for every home.
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Define response, resolution, and escalation windows before a maintenance issue puts a
-            resident or asset at risk.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Select
-            ariaLabel="Select property for service policies"
-            className="min-w-56"
-            disabled={isPropertiesLoading || properties.length === 0}
-            value={effectivePropertyId}
-            onValueChange={(propertyId) => {
-              setSelectedPropertyId(propertyId);
-              setPage(1);
-            }}
-            placeholder={isPropertiesLoading ? 'Loading properties…' : 'Select a property'}
-            options={properties.map((property) => ({
-              value: property.id,
-              label: propertyLabel(property),
-            }))}
-          />
-          <Button
-            icon={<Plus className="h-4 w-4" />}
-            rounded="md"
-            disabled={
-              !effectivePropertyId ||
-              policiesQuery.isLoading ||
-              activePoliciesQuery.isLoading ||
-              remainingPriorities.length === 0
-            }
-            title={
-              remainingPriorities.length === 0
-                ? 'Every priority already has a policy for this property'
-                : undefined
-            }
-            onClick={() => openCreate()}
-          >
-            Add policy
-          </Button>
-        </div>
-      </div>
+    <section aria-labelledby="sla-policies-heading">
+      <HomeManagementSectionHeading
+        id="sla-policies-heading"
+        title="Service standards"
+        description="How quickly each priority of request should be answered, fixed and escalated, set per property."
+        actions={
+          <>
+            <Select
+              ariaLabel="Select property for service policies"
+              className="min-w-56"
+              disabled={isPropertiesLoading || properties.length === 0}
+              value={effectivePropertyId}
+              onValueChange={(propertyId) => {
+                setSelectedPropertyId(propertyId);
+                setPage(1);
+              }}
+              placeholder={isPropertiesLoading ? 'Loading properties…' : 'Select a property'}
+              options={properties.map((property) => ({
+                value: property.id,
+                label: propertyLabel(property),
+              }))}
+            />
+            <Button
+              icon={<Plus className="h-4 w-4" />}
+              rounded="md"
+              disabled={
+                !effectivePropertyId ||
+                policiesQuery.isLoading ||
+                activePoliciesQuery.isLoading ||
+                remainingPriorities.length === 0
+              }
+              title={
+                remainingPriorities.length === 0
+                  ? 'Every priority already has a policy for this property'
+                  : undefined
+              }
+              onClick={() => openCreate()}
+            >
+              Add policy
+            </Button>
+          </>
+        }
+      />
 
       <div className="mt-5">
         {isPropertiesLoading ||
@@ -383,13 +400,13 @@ export function HomeManagementSlaPolicies({
           <EmptyState
             icon={Settings2}
             title="Add a property before defining service standards"
-            description="SLA policies are isolated per property to keep operational commitments clear and auditable."
+            description="Service standards are set per property, so each home keeps its own targets."
           />
         ) : policiesQuery.isError && !policiesQuery.data ? (
           <EmptyState
             icon={CircleAlert}
             title="Service policies could not be loaded"
-            description="Refresh the page to try again. Your existing service commitments have not been changed."
+            description="Refresh the page to try again. Your existing service standards have not changed."
             action={
               <Button
                 size="sm"

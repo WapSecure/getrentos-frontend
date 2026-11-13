@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   CalendarClock,
@@ -12,7 +12,6 @@ import {
   UserRound,
   Wrench,
 } from '@sureground/icons';
-import { NairaSign } from '@sureground/ui/NairaSign';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
@@ -28,6 +27,10 @@ import { Textarea } from '@sureground/ui';
 import { useToast } from '@sureground/ui';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@sureground/ui';
+import {
+  HomeManagementSectionHeading,
+  useCreateRequest,
+} from '@/components/home-management/HomeManagementSectionHeading';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -225,6 +228,11 @@ interface HomeManagementWorkOrderQueueProps {
   compact?: boolean;
   /** An owner looking at a property someone else manages: the jobs and their evidence, no actions. */
   readOnly?: boolean;
+  /** Off where the page header already offers "Create work order", so the action is not shown twice. */
+  showCreateAction?: boolean;
+  /** Set by the page header's "Create work order"; see useCreateRequest. */
+  createRequest?: number;
+  onCreateRequestHandled?: () => void;
 }
 
 export function HomeManagementWorkOrderQueue({
@@ -241,6 +249,9 @@ export function HomeManagementWorkOrderQueue({
   viewerRole,
   compact = false,
   readOnly = false,
+  showCreateAction = true,
+  createRequest,
+  onCreateRequestHandled,
 }: HomeManagementWorkOrderQueueProps) {
   const queryClient = useQueryClient();
   const [costs, setCosts] = useState<Record<string, string>>({});
@@ -440,6 +451,8 @@ export function HomeManagementWorkOrderQueue({
     setIsCreateOpen(true);
   };
 
+  useCreateRequest(readOnly ? undefined : createRequest, openCreateDialog, onCreateRequestHandled);
+
   const closeCreateDialog = () => {
     if (!createWorkOrder.isPending && !createUnit.isPending) {
       setIsCreateOpen(false);
@@ -525,9 +538,6 @@ export function HomeManagementWorkOrderQueue({
     cancelWorkOrder.mutate({ id: lifecycleDialog.workOrder.id, reason: note });
   };
 
-  const pendingApprovals = workOrders.filter(isApprovalPending);
-  const activeWorkOrders = workOrders.filter(isOpen);
-  const overdueWorkOrders = workOrders.filter(isOverdue);
   const isResolvingLifecycleWorkOrder = lifecycleDialog?.action === 'resolve';
   const lifecycleActionLabel = isResolvingLifecycleWorkOrder
     ? 'Resolve work order'
@@ -544,75 +554,39 @@ export function HomeManagementWorkOrderQueue({
     lifecycleCost.trim() !== '' && Number.isInteger(lifecycleCostValue) && lifecycleCostValue >= 0;
   const canSubmitLifecycleAction = !lifecycleCostNeeded || lifecycleCostValid;
 
+  const createButton = (
+    <Button
+      icon={<ClipboardPlus className="h-4 w-4" />}
+      rounded="md"
+      disabled={isPropertiesLoading || properties.length === 0}
+      title={
+        isPropertiesLoading
+          ? 'Loading your property portfolio'
+          : properties.length === 0
+            ? 'Add a property and unit before creating a work order'
+            : undefined
+      }
+      onClick={openCreateDialog}
+    >
+      Create work order
+    </Button>
+  );
+
   return (
     <section
       aria-labelledby={compact ? undefined : 'work-order-queue-heading'}
       aria-label={compact ? 'Work orders' : undefined}
-      className={compact ? undefined : 'mt-10'}
     >
-      <div
-        className={
-          compact
-            ? 'flex justify-end'
-            : 'flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between'
-        }
-      >
-        {!compact && (
-          <div>
-            <p className="text-sm font-medium text-primary">Work order control</p>
-            <h2
-              id="work-order-queue-heading"
-              className="mt-1 text-2xl font-semibold tracking-[-0.02em] text-foreground"
-            >
-              Keep spend and service delivery under control.
-            </h2>
-            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Review operational work, approve planned spend, and spot care requests that are at
-              risk of missing their due date.
-            </p>
-          </div>
-        )}
-        <div className="flex flex-wrap items-center gap-2">
-          {!readOnly && (
-            <Button
-              icon={<ClipboardPlus className="h-4 w-4" />}
-              rounded="md"
-              disabled={isPropertiesLoading || properties.length === 0}
-              title={
-                isPropertiesLoading
-                  ? 'Loading your property portfolio'
-                  : properties.length === 0
-                    ? 'Add a property and unit before creating a work order'
-                    : undefined
-              }
-              onClick={openCreateDialog}
-            >
-              Create work order
-            </Button>
-          )}
-          {!compact && (
-            <>
-              <QueueStat
-                icon={<NairaSign className="h-4 w-4" />}
-                label="Needs approval on page"
-                value={pendingApprovals.length}
-                urgent={pendingApprovals.length > 0}
-              />
-              <QueueStat
-                icon={<Clock3 className="h-4 w-4" />}
-                label="Open on page"
-                value={activeWorkOrders.length}
-              />
-              <QueueStat
-                icon={<CircleAlert className="h-4 w-4" />}
-                label="Overdue on page"
-                value={overdueWorkOrders.length}
-                urgent={overdueWorkOrders.length > 0}
-              />
-            </>
-          )}
-        </div>
-      </div>
+      {compact ? (
+        !readOnly && <div className="flex justify-end">{createButton}</div>
+      ) : (
+        <HomeManagementSectionHeading
+          id="work-order-queue-heading"
+          title="Work orders"
+          description="Requests and planned work, with approvals, vendors, quotes and invoices for each job."
+          actions={!readOnly && showCreateAction ? createButton : undefined}
+        />
+      )}
 
       <div className="mt-5">
         {isLoading ? (
@@ -704,7 +678,7 @@ export function HomeManagementWorkOrderQueue({
                           <Badge variant={status.variant}>{status.label}</Badge>
                           <Badge variant={priority.variant}>{priority.label}</Badge>
                           {workOrder.isEmergency && <Badge variant="danger">Emergency</Badge>}
-                          {slaBreached && <Badge variant="danger">SLA breached</Badge>}
+                          {slaBreached && <Badge variant="danger">Service target missed</Badge>}
                           {workOrder.acknowledgedAt && (
                             <Badge variant="success">Acknowledged</Badge>
                           )}
@@ -1296,8 +1270,8 @@ export function HomeManagementWorkOrderQueue({
                   <p className="text-sm font-semibold text-foreground">Emergency work order</p>
                   <p className="mt-1 max-w-xl text-xs leading-5 text-muted-foreground">
                     Use only for an active safety, security, or habitability risk. This forces
-                    urgent priority, applies the property&apos;s emergency SLA, and routes the work
-                    into the escalation queue when emergency routing is enabled.
+                    urgent priority, applies the property&apos;s emergency service target, and
+                    routes the work into the escalation queue when emergency routing is enabled.
                   </p>
                 </div>
                 <Switch
@@ -1389,8 +1363,8 @@ export function HomeManagementWorkOrderQueue({
                 <div>
                   <p className="text-sm font-semibold text-foreground">Require budget approval</p>
                   <p className="mt-1 max-w-xl text-xs leading-5 text-muted-foreground">
-                    Keep this work in the approval queue before committing spend. A different
-                    authorised operator will record the approved budget with an audit trail.
+                    Keep this work in the approval queue before committing spend. Someone else with
+                    approval rights records the approved budget, and the decision is kept on record.
                   </p>
                 </div>
                 <Switch
@@ -1569,31 +1543,5 @@ export function HomeManagementWorkOrderQueue({
         isAssigning={assignVendor.isPending && assignVendor.variables?.id === triage.requestId}
       />
     </section>
-  );
-}
-
-function QueueStat({
-  icon,
-  label,
-  value,
-  urgent = false,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: number;
-  urgent?: boolean;
-}) {
-  return (
-    <div
-      className={
-        urgent
-          ? 'flex items-center gap-2 rounded-full border border-destructive/20 bg-destructive/5 px-3 py-2 text-destructive'
-          : 'flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-muted-foreground'
-      }
-    >
-      {icon}
-      <span className="text-xs font-medium">{label}</span>
-      <span className="text-sm font-semibold">{value}</span>
-    </div>
   );
 }

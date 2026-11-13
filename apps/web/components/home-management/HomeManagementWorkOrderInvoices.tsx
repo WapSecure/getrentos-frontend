@@ -363,7 +363,7 @@ export function HomeManagementWorkOrderInvoices({
       await invalidateInvoiceViews();
       setPage(1);
       setActionDialog(null);
-      toast.success('Invoice submitted for a different operator to approve.');
+      toast.success('Invoice submitted. Someone else with approval rights must approve it.');
     },
     onError: (error) => {
       toast.error(error.message || 'Unable to submit this invoice.');
@@ -873,7 +873,7 @@ export function HomeManagementWorkOrderInvoices({
                               </p>
                             ) : createdByCurrentUser ? (
                               <p className="rounded-xl bg-secondary px-3 py-2 text-xs leading-5 text-muted-foreground">
-                                A different authorised operator must approve the invoice you
+                                Someone else with approval rights must approve an invoice you
                                 created.
                               </p>
                             ) : null}
@@ -1254,7 +1254,7 @@ export function HomeManagementWorkOrderInvoices({
               </DialogTitle>
               <DialogDescription className="mt-1 text-sm leading-6 text-muted-foreground">
                 {actionDialog.action === 'submit'
-                  ? `Submit “${invoiceNumberLabel(actionDialog.invoice)}” for approval. A different authorised operator must approve it.`
+                  ? `Submit “${invoiceNumberLabel(actionDialog.invoice)}” for approval. Someone else with approval rights must approve it.`
                   : actionDialog.action === 'approve'
                     ? `Approve “${invoiceNumberLabel(actionDialog.invoice)}” at ${formatInvoiceCurrency(actionDialog.invoice.totalAmount, actionDialog.invoice.currency)}. This makes it ready for finance review; it does not initiate or confirm payment.`
                     : actionDialog.action === 'reject'

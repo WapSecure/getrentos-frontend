@@ -6,6 +6,7 @@ import { Badge } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { EmptyState } from '@sureground/ui';
 import { ListSkeleton } from '@sureground/ui';
+import { HomeManagementSectionHeading } from '@/components/home-management/HomeManagementSectionHeading';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -80,31 +81,24 @@ export function HomeManagementRecordsPanel({ role }: HomeManagementRecordsPanelP
   const visibleRecords = records.slice(0, MAX_VISIBLE_RECORDS);
 
   return (
-    <section aria-labelledby="home-records-heading" className="mt-10">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm font-medium text-primary">Home records</p>
-          <h2
-            id="home-records-heading"
-            className="mt-1 text-2xl font-semibold tracking-[-0.02em] text-foreground"
+    <section aria-labelledby="home-records-heading">
+      <HomeManagementSectionHeading
+        id="home-records-heading"
+        title="Documents"
+        description="The latest documents linked to your properties."
+        actions={
+          <Button
+            href={documentsPath}
+            size="sm"
+            variant="outline"
+            rounded="md"
+            icon={<FolderOpen className="h-4 w-4" />}
+            iconPosition="right"
           >
-            Documents that keep operations accountable.
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Recent property-linked records, available from your secure document workspace.
-          </p>
-        </div>
-        <Button
-          href={documentsPath}
-          size="sm"
-          variant="outline"
-          rounded="md"
-          icon={<FolderOpen className="h-4 w-4" />}
-          iconPosition="right"
-        >
-          All documents
-        </Button>
-      </div>
+            All documents
+          </Button>
+        }
+      />
 
       <div className="mt-5 overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
         {isLoading ? (
@@ -168,7 +162,7 @@ export function HomeManagementRecordsPanel({ role }: HomeManagementRecordsPanelP
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-        <span className="mr-1 text-muted-foreground">Continue operations:</span>
+        <span className="mr-1 text-muted-foreground">Related:</span>
         {role === 'landlord' && (
           <Button
             href={ROUTES.LANDLORD_MAINTENANCE}
