@@ -1,6 +1,14 @@
 'use client';
 
-import { useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import {
+  Fragment,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
 import { Check, ChevronDown, Search, X } from '@sureground/icons';
 import { cn } from '@sureground/shared';
@@ -13,6 +21,8 @@ export interface SelectOption {
   /** For rich/non-string labels. */
   searchText?: string;
   disabled?: boolean;
+  /** Options sharing a group sit under one heading; keep them adjacent in `options`. */
+  group?: string;
 }
 
 interface SelectProps {
@@ -225,29 +235,38 @@ export function Select({
             onKeyDown={onListKeyDown}
             className="max-h-64 overflow-y-auto overscroll-contain"
           >
-            {visibleOptions.map((option) => (
-              <button
-                key={option.value}
-                disabled={option.disabled}
-                type="button"
-                role="option"
-                aria-selected={option.value === value}
-                onClick={() => {
-                  onValueChange(option.value);
-                  handleOpenChange(false);
-                }}
-                className={cn(
-                  'relative flex w-full cursor-pointer select-none items-center rounded-md py-2 pl-3 pr-9 text-left text-sm text-foreground outline-none transition-colors hover:bg-secondary focus:bg-secondary disabled:pointer-events-none disabled:opacity-45',
-                  option.value === value && 'font-semibold text-primary'
+            {visibleOptions.map((option, index) => (
+              <Fragment key={option.value}>
+                {option.group && option.group !== visibleOptions[index - 1]?.group && (
+                  <div
+                    role="presentation"
+                    className="px-3 pb-1 pt-3 text-xs font-medium text-muted-foreground first:pt-1"
+                  >
+                    {option.group}
+                  </div>
                 )}
-              >
-                {option.label}
-                {option.value === value && (
-                  <span className="absolute right-3 inline-flex items-center text-primary">
-                    <Check className="h-4 w-4" />
-                  </span>
-                )}
-              </button>
+                <button
+                  disabled={option.disabled}
+                  type="button"
+                  role="option"
+                  aria-selected={option.value === value}
+                  onClick={() => {
+                    onValueChange(option.value);
+                    handleOpenChange(false);
+                  }}
+                  className={cn(
+                    'relative flex w-full cursor-pointer select-none items-center rounded-md py-2 pl-3 pr-9 text-left text-sm text-foreground outline-none transition-colors hover:bg-secondary focus:bg-secondary disabled:pointer-events-none disabled:opacity-45',
+                    option.value === value && 'font-semibold text-primary'
+                  )}
+                >
+                  {option.label}
+                  {option.value === value && (
+                    <span className="absolute right-3 inline-flex items-center text-primary">
+                      <Check className="h-4 w-4" />
+                    </span>
+                  )}
+                </button>
+              </Fragment>
             ))}
             {visibleOptions.length === 0 && (
               <p className="px-3 py-6 text-center text-sm text-muted-foreground" role="status">

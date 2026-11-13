@@ -26,6 +26,7 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
+import { HOME_ASSET_CATEGORY_SUGGESTIONS } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi, type Asset, type AssetStatus } from '@/lib/api/homeCare';
 import { errorMessage } from '@/lib/api/client';
@@ -42,12 +43,9 @@ const STATUS: Record<AssetStatus, { label: string; tone: Tone }> = {
   NEEDS_SERVICE: { label: 'Needs service', tone: 'warning' },
   RETIRED: { label: 'Retired', tone: 'neutral' },
 };
+// The shared suggestions first, then the other common kinds; always ending with Other.
 const ASSET_KINDS = [
-  'Air conditioner',
-  'Generator',
-  'Inverter',
-  'Water pump',
-  'Borehole',
+  ...HOME_ASSET_CATEGORY_SUGGESTIONS,
   'Fridge',
   'Water heater',
   'Gate motor',

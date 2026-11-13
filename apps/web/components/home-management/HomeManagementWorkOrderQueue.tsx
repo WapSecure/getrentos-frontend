@@ -45,7 +45,15 @@ import {
   type HomeManagementVendor,
   type HomeManagementWorkOrder,
 } from '@/services/homeManagementService';
-import { AWAITING_OWNER_MESSAGE, isAwaitingOwnerApproval } from '@sureground/shared';
+import {
+  AWAITING_OWNER_MESSAGE,
+  isAwaitingOwnerApproval,
+  maintenanceCategoryLabel,
+} from '@sureground/shared';
+import {
+  MaintenanceCategoryIcon,
+  maintenanceCategorySelectOptions,
+} from '@/components/renter/maintenance/MaintenanceCategoryIcon';
 import type { AwaitingOwnerApproval } from '@/types/managed';
 
 const panelFallback = () => <Skeleton className="h-40 w-full rounded-lg" />;
@@ -89,14 +97,7 @@ const priorityMeta: Record<
   URGENT: { label: 'Urgent', variant: 'danger' },
 };
 
-const categoryOptions: Array<{ value: HomeManagementMaintenanceCategory; label: string }> = [
-  { value: 'PLUMBING', label: 'Plumbing' },
-  { value: 'ELECTRICAL', label: 'Electrical' },
-  { value: 'INTERNET', label: 'Internet' },
-  { value: 'SECURITY', label: 'Security' },
-  { value: 'APPLIANCES', label: 'Appliances' },
-  { value: 'OTHER', label: 'Other' },
-];
+const categoryOptions = maintenanceCategorySelectOptions();
 
 const priorityOptions: Array<{ value: HomeManagementWorkOrder['priority']; label: string }> = [
   { value: 'LOW', label: 'Low' },
@@ -719,8 +720,11 @@ export function HomeManagementWorkOrderQueue({
                         ) : null}
                         <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
                           <span className="inline-flex items-center gap-1.5">
-                            <Wrench className="h-3.5 w-3.5" />
-                            {workOrder.category.replace(/_/g, ' ')}
+                            <MaintenanceCategoryIcon
+                              category={workOrder.category}
+                              className="h-3.5 w-3.5"
+                            />
+                            {maintenanceCategoryLabel(workOrder.category)}
                           </span>
                           <span className="inline-flex items-center gap-1.5">
                             <ClipboardCheck className="h-3.5 w-3.5" />

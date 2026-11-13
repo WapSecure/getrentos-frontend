@@ -28,12 +28,13 @@ import {
 } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
-  CATEGORIES,
-  categoryLabel,
-  homeCareApi,
-  type Category,
-  type Plan,
-} from '@/lib/api/homeCare';
+  CARE_TEMPLATES,
+  careTemplateFirstDueDate,
+  careTemplateNotes,
+  findCareTemplate,
+} from '@sureground/shared';
+import { CategoryPicker } from '@/components/maintenance/CategoryPicker';
+import { categoryLabel, homeCareApi, type Category, type Plan } from '@/lib/api/homeCare';
 import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
@@ -187,8 +188,10 @@ function AddPlan({ onDone }: { onDone: () => void }) {
   const homes = useMyHomes();
   const [propertyId, setPropertyId] = useState(homes.data?.[0]?.id ?? '');
   const [assetId, setAssetId] = useState<string | undefined>();
+  const [templateId, setTemplateId] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<Category>('APPLIANCES');
+  const [notes, setNotes] = useState('');
   const [frequency, setFrequency] = useState(90);
   const [firstDue, setFirstDue] = useState(() => toISODate(new Date(Date.now() + 7 * 86_400_000)));
   const [vendorId, setVendorId] = useState<string | undefined>();
@@ -204,6 +207,7 @@ function AddPlan({ onDone }: { onDone: () => void }) {
         assetId,
         title: title.trim(),
         category,
+        notes: notes.trim() || undefined,
         frequencyDays: frequency,
         nextDueAt: new Date(`${firstDue}T09:00:00`).toISOString(),
         assignedVendorId: vendorId,
@@ -215,9 +219,42 @@ function AddPlan({ onDone }: { onDone: () => void }) {
       onDone();
     },
   });
+  const template = findCareTemplate(templateId);
+  const applyTemplate = (id: string) => {
+    const next = findCareTemplate(id);
+    if (!next || id === templateId) {
+      setTemplateId(null);
+      return;
+    }
+    setTemplateId(id);
+    setTitle(next.title);
+    setCategory(next.category);
+    setFrequency(next.frequencyDays);
+    setFirstDue(careTemplateFirstDueDate(next));
+    setNotes(careTemplateNotes(next));
+  };
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={{ gap: spacing.md }}>
+        <View style={{ gap: spacing.sm }}>
+          <Text variant="bodyStrong">Start from a template</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+            {CARE_TEMPLATES.map((t) => (
+              <Chip
+                key={t.id}
+                label={t.title}
+                size="sm"
+                selected={templateId === t.id}
+                onPress={() => applyTemplate(t.id)}
+              />
+            ))}
+          </View>
+          <Text variant="caption" color="mutedForeground">
+            {template
+              ? `${template.summary} These are typical intervals, so change anything to suit your home.`
+              : 'Common routines for Nigerian homes. Everything stays editable before you save.'}
+          </Text>
+        </View>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
           {(homes.data ?? []).map((h) => (
             <Chip
@@ -255,17 +292,7 @@ function AddPlan({ onDone }: { onDone: () => void }) {
           onChangeText={setTitle}
           hint="e.g. Service the generator"
         />
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          {CATEGORIES.map((c) => (
-            <Chip
-              key={c.value}
-              label={c.label}
-              size="sm"
-              selected={category === c.value}
-              onPress={() => setCategory(c.value)}
-            />
-          ))}
-        </View>
+        <CategoryPicker<Category> value={category} onChange={setCategory} />
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
           {FREQUENCIES.map((f) => (
             <Chip
@@ -281,6 +308,14 @@ function AddPlan({ onDone }: { onDone: () => void }) {
           value={firstDue}
           onChange={setFirstDue}
           min={toISODate(new Date())}
+        />
+        <TextField
+          label="Checklist or instructions"
+          value={notes}
+          onChangeText={setNotes}
+          multiline
+          maxLength={2000}
+          hint="Optional. Copied into each work order this plan raises."
         />
         <VendorPicker value={vendorId} onChange={setVendorId} optional />
         {add.error ? (

@@ -19,6 +19,7 @@ import {
   Select,
   Textarea,
 } from '@sureground/ui';
+import { maintenanceCategoryLabel, maintenanceStatusLabel } from '@sureground/shared';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import {
@@ -330,8 +331,8 @@ export function HandoverView({ transferId }: { transferId: string }) {
             <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
               {snap.openWork.map((w) => (
                 <li key={w.id}>
-                  {w.category.toLowerCase().replace(/_/g, ' ')}: {w.description.slice(0, 80)} (
-                  {w.status.toLowerCase()})
+                  {maintenanceCategoryLabel(w.category)}: {w.description.slice(0, 80)} (
+                  {maintenanceStatusLabel(w.status).toLowerCase()})
                 </li>
               ))}
             </ul>

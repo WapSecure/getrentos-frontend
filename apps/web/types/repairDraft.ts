@@ -1,6 +1,8 @@
+import type { MaintenanceCategoryKey } from '@sureground/shared';
+
 export interface RepairDraft {
   title: string;
-  category: 'plumbing' | 'electrical' | 'internet' | 'security' | 'appliances' | 'other';
+  category: MaintenanceCategoryKey;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   description: string;
   isEmergency: boolean;

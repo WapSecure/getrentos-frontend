@@ -1,3 +1,4 @@
+import type { MaintenanceCategoryCode } from '@sureground/shared';
 import type { InvoiceCheck } from '@/types/invoiceCheck';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import { providerQuery } from '@/services/paymentStatusService';
@@ -57,13 +58,7 @@ export type HomeManagementSlaPoliciesParams = HomeManagementPageParams & {
 
 export type HomeAssetStatus = 'ACTIVE' | 'NEEDS_SERVICE' | 'RETIRED';
 export type PreventivePlanStatus = 'ACTIVE' | 'PAUSED' | 'COMPLETED';
-export type HomeManagementMaintenanceCategory =
-  | 'PLUMBING'
-  | 'ELECTRICAL'
-  | 'INTERNET'
-  | 'SECURITY'
-  | 'APPLIANCES'
-  | 'OTHER';
+export type HomeManagementMaintenanceCategory = MaintenanceCategoryCode;
 
 export type HomeManagementProperty = {
   id: string;
@@ -121,6 +116,8 @@ export type PreventiveMaintenancePlan = {
   assetId?: string | null;
   title: string;
   category: HomeManagementMaintenanceCategory;
+  /** Checklist or instructions copied into each work order the plan raises. */
+  notes?: string | null;
   frequencyDays: number;
   nextDueAt: string;
   lastCompletedAt?: string | null;
@@ -153,6 +150,7 @@ export type CreatePreventivePlanInput = {
   assetId?: string;
   title: string;
   category: HomeManagementMaintenanceCategory;
+  notes?: string;
   frequencyDays: number;
   nextDueAt: string;
   assignedVendorId?: string;

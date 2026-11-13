@@ -1,11 +1,15 @@
-import type {
-  DuplicateAcknowledgement,
-  EvidenceDocument,
-  MaintenancePhoto,
-  WorkOrderEvidence,
-  WorkOrderFeedback,
-  WorkOrderFeedbackInput,
-  WorkOrderPhotoStage,
+import {
+  MAINTENANCE_CATEGORY_CODES,
+  MAINTENANCE_CATEGORY_LABELS,
+  maintenanceCategoryLabel,
+  type DuplicateAcknowledgement,
+  type EvidenceDocument,
+  type MaintenanceCategoryCode,
+  type MaintenancePhoto,
+  type WorkOrderEvidence,
+  type WorkOrderFeedback,
+  type WorkOrderFeedbackInput,
+  type WorkOrderPhotoStage,
 } from '@sureground/shared';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
@@ -17,7 +21,7 @@ import { providerQuery, type PaymentProvider } from './paymentStatus';
 
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 export type WorkOrderStatus = 'SUBMITTED' | 'ASSIGNED' | 'IN_PROGRESS' | 'RESOLVED' | 'CANCELLED';
-export type Category = 'PLUMBING' | 'ELECTRICAL' | 'INTERNET' | 'SECURITY' | 'APPLIANCES' | 'OTHER';
+export type Category = MaintenanceCategoryCode;
 export type AssetStatus = 'ACTIVE' | 'NEEDS_SERVICE' | 'RETIRED';
 
 export interface HomeCareDashboard {
@@ -142,6 +146,8 @@ export interface Plan {
   propertyId: string;
   title: string;
   category: Category;
+  /** Checklist copied into each work order the plan raises. */
+  notes?: string | null;
   frequencyDays: number;
   nextDueAt: string;
   lastCompletedAt?: string | null;
@@ -394,6 +400,7 @@ export const homeCareApi = {
     assetId?: string;
     title: string;
     category: Category;
+    notes?: string;
     frequencyDays: number;
     nextDueAt: string;
     assignedVendorId?: string;
@@ -420,14 +427,9 @@ export const homeCareApi = {
     ),
 };
 
-export const CATEGORIES: { value: Category; label: string }[] = [
-  { value: 'PLUMBING', label: 'Plumbing' },
-  { value: 'ELECTRICAL', label: 'Electrical' },
-  { value: 'APPLIANCES', label: 'Appliances' },
-  { value: 'SECURITY', label: 'Security' },
-  { value: 'INTERNET', label: 'Internet' },
-  { value: 'OTHER', label: 'Other' },
-];
+export const CATEGORIES: { value: Category; label: string }[] = MAINTENANCE_CATEGORY_CODES.map(
+  (value) => ({ value, label: MAINTENANCE_CATEGORY_LABELS[value] })
+);
 
 export const PRIORITIES: { value: Priority; label: string }[] = [
   { value: 'LOW', label: 'Low' },
@@ -444,8 +446,7 @@ export const STATUS_LABEL: Record<WorkOrderStatus, string> = {
   CANCELLED: 'Cancelled',
 };
 
-export const categoryLabel = (c: string) =>
-  CATEGORIES.find((x) => x.value === c)?.label ?? c.charAt(0) + c.slice(1).toLowerCase();
+export const categoryLabel = (c: string) => maintenanceCategoryLabel(c);
 
 export function minutesLabel(m: number): string {
   if (m < 60) return `${m} min`;

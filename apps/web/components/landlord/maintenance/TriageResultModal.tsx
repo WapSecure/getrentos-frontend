@@ -13,10 +13,13 @@ import {
   Select,
   Textarea,
 } from '@sureground/ui';
-import { categoryIcons } from '@/components/landlord/maintenance/MaintenanceRequestCard';
+import { maintenanceCategoryLabel } from '@sureground/shared';
+import {
+  MaintenanceCategoryIcon,
+  maintenanceCategorySelectOptions,
+} from '@/components/renter/maintenance/MaintenanceCategoryIcon';
 import { maintenancePriorityBadges } from '@/lib/statusBadge';
 import type {
-  MaintenanceCategory,
   MaintenancePriority,
   MaintenanceTriage,
   MaintenanceTriageCategory,
@@ -24,14 +27,6 @@ import type {
   MaintenanceTriageUrgency,
 } from '@/types/maintenance';
 
-const CATEGORIES: MaintenanceTriageCategory[] = [
-  'PLUMBING',
-  'ELECTRICAL',
-  'INTERNET',
-  'SECURITY',
-  'APPLIANCES',
-  'OTHER',
-];
 const URGENCIES: MaintenanceTriageUrgency[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
 
 interface TriageResultModalProps {
@@ -44,9 +39,6 @@ interface TriageResultModalProps {
   isDeciding?: boolean;
   canAssignVendor?: boolean;
 }
-
-const categoryLabel = (category: MaintenanceCategory): string =>
-  category.charAt(0).toUpperCase() + category.slice(1);
 
 export const TriageResultModal = ({
   triage,
@@ -114,16 +106,17 @@ const TriageBody = ({
   const [reason, setReason] = useState('');
   const canDecide = Boolean(onDecide && triage.reviewId);
 
-  const category = triage.category.toLowerCase() as MaintenanceCategory;
   const urgency = triage.urgency.toLowerCase() as MaintenancePriority;
-  const CategoryIcon = categoryIcons[category] ?? categoryIcons.other;
   const priority = maintenancePriorityBadges[urgency] ?? maintenancePriorityBadges.low;
 
   return (
     <div className="p-5 space-y-5 sm:p-6">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="neutral" icon={<CategoryIcon className="w-3 h-3" />}>
-          {categoryLabel(category)}
+        <Badge
+          variant="neutral"
+          icon={<MaintenanceCategoryIcon category={triage.category} className="w-3 h-3" />}
+        >
+          {maintenanceCategoryLabel(triage.category)}
         </Badge>
         <Badge variant={priority.variant}>{priority.label}</Badge>
         {triage.needsVendor && <Badge variant="info">Needs a vendor</Badge>}
@@ -154,10 +147,7 @@ const TriageBody = ({
                 id="triage-category"
                 value={editCategory}
                 onValueChange={(v) => setEditCategory(v as MaintenanceTriageCategory)}
-                options={CATEGORIES.map((c) => ({
-                  value: c,
-                  label: categoryLabel(c.toLowerCase() as MaintenanceCategory),
-                }))}
+                options={maintenanceCategorySelectOptions()}
               />
             </div>
             <div className="space-y-1">
