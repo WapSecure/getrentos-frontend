@@ -98,6 +98,8 @@ export type TranslationKey =
   | 'dashboard.stats.viewings_scheduled_subtitle'
   | 'dashboard.stats.current_lease'
   | 'dashboard.stats.current_lease_subtitle'
+  | 'dashboard.stats.no_lease'
+  | 'dashboard.stats.no_lease_subtitle'
   | 'dashboard.stats.total_rent_paid'
   | 'dashboard.stats.total_rent_paid_subtitle'
   | 'dashboard.applications.title'
@@ -202,6 +204,8 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'dashboard.stats.viewings_scheduled_subtitle': 'This week',
     'dashboard.stats.current_lease': 'Current lease',
     'dashboard.stats.current_lease_subtitle': 'Active lease',
+    'dashboard.stats.no_lease': 'None yet',
+    'dashboard.stats.no_lease_subtitle': 'Your lease appears here once you rent',
     'dashboard.stats.total_rent_paid': 'Total rent paid',
     'dashboard.stats.total_rent_paid_subtitle': 'Lifetime',
     'dashboard.applications.title': 'My applications',
@@ -305,6 +309,8 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'dashboard.stats.viewings_scheduled_subtitle': 'Dis week',
     'dashboard.stats.current_lease': 'Agreement wey dey now',
     'dashboard.stats.current_lease_subtitle': 'Agreement wey dey run',
+    'dashboard.stats.no_lease': 'Nothing yet',
+    'dashboard.stats.no_lease_subtitle': 'Your agreement go show here when you rent',
     'dashboard.stats.total_rent_paid': 'Total Rent Wey I Don Pay',
     'dashboard.stats.total_rent_paid_subtitle': 'From day one',
     'dashboard.applications.title': 'My application dem',

@@ -83,7 +83,7 @@ export const PhoneSignup = ({ onSubmit, isLoading }: PhoneSignupProps) => {
           {...register('phone')}
           leadingIcon={<Phone className="w-4 h-4" />}
           inputClassName="py-3"
-          placeholder="+1 234 567 8900"
+          placeholder="0803 123 4567"
         />
       </Field>
 
