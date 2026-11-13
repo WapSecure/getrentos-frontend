@@ -248,11 +248,14 @@ export function DeliverForm({
   propertyId,
   saving,
   onDeliver,
+  releasedAfterAllSteps = false,
 }: {
   milestone: Milestone;
   propertyId?: string | null;
   saving: boolean;
   onDeliver: (input: { note?: string; documentId?: string }) => void;
+  /** A land sale: the deposit is released once, after every required step, never per step. */
+  releasedAfterAllSteps?: boolean;
 }) {
   const { spacing } = useTheme();
   const [note, setNote] = useState('');
@@ -269,8 +272,9 @@ export function DeliverForm({
   return (
     <View style={{ gap: spacing.lg }}>
       <Text variant="callout" color="mutedForeground">
-        The buyer is asked to confirm this step. Its share is released to you only once they do, and
-        they can dispute it if it was not done.
+        {releasedAfterAllSteps
+          ? 'The buyer is asked to confirm this step, and can dispute it if it was not done. Nothing is released per step: the deposit is released to you only after the buyer has confirmed every required step.'
+          : 'The buyer is asked to confirm this step. Its share is released to you only once they do, and they can dispute it if it was not done.'}
       </Text>
       <TextField
         label="Note to the buyer (optional)"

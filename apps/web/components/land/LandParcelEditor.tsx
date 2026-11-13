@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import {
   Alert,
   Button,
+  ConfirmDialog,
   DocumentUploadDialog,
   Field,
   Input,
@@ -84,6 +85,7 @@ export const LandParcelEditor = ({
   );
   const [utilitiesText, setUtilitiesText] = useState((record.parcel?.utilities ?? []).join(', '));
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [confirmingArea, setConfirmingArea] = useState(false);
   const savedCorners = useMemo(
     () => boundaryCorners(record.parcel?.boundaryGeometry),
     [record.parcel?.boundaryGeometry]
@@ -132,9 +134,12 @@ export const LandParcelEditor = ({
   const diligence = record.diligence ?? record.parcel?.diligence;
   const propertyTitle = record.property.title || record.property.name || 'Land parcel';
 
+  const ownershipApproved = record.property.verificationStatus === 'APPROVED';
   const evidenceHint = useMemo(() => {
     if (diligence?.status === 'VERIFIED') {
-      return 'This parcel passed the current diligence review and can be published once ownership verification is approved.';
+      return ownershipApproved
+        ? 'This parcel passed the current diligence review and its ownership is verified, so you can publish a sale listing.'
+        : 'This parcel passed the current diligence review and can be published once ownership verification is approved.';
     }
     if (diligence?.status === 'CONDITIONAL') {
       return 'This parcel passed diligence subject to conditions. It can be listed now; reservations and offers open once the conditions are met.';
@@ -146,11 +151,15 @@ export const LandParcelEditor = ({
       return diligence.findings || 'Review the compliance note and upload the requested evidence.';
     }
     return 'Add parcel details and title evidence. Compliance will review them before a sale listing can be published.';
-  }, [diligence]);
+  }, [diligence, ownershipApproved]);
 
   const update = <K extends keyof LandParcelInput>(key: K, value: LandParcelInput[K]) => {
     setParcel((current) => ({ ...current, [key]: value }));
   };
+
+  // An outline more than half off the declared area is usually drawn at the wrong zoom or with the
+  // wrong unit, so saving it takes an explicit confirmation.
+  const areaFarOff = areaMismatch !== null && Math.abs(areaMismatch.ratio - 1) > 0.5;
 
   const handleSave = async () => {
     // Survey-plan beacons go as entered, with their coordinate system, so the boundary history keeps the plan's own numbers.
@@ -174,6 +183,14 @@ export const LandParcelEditor = ({
         .map((utility) => utility.trim())
         .filter(Boolean),
     });
+  };
+
+  const requestSave = () => {
+    if (areaFarOff) {
+      setConfirmingArea(true);
+      return;
+    }
+    void handleSave();
   };
 
   return (
@@ -459,7 +476,7 @@ export const LandParcelEditor = ({
           <Button
             variant="primary"
             rounded="lg"
-            onClick={handleSave}
+            onClick={requestSave}
             disabled={parcel.areaValue <= 0 || isSaving}
             isLoading={isSaving}
             icon={<Save className="h-4 w-4" />}
@@ -469,9 +486,30 @@ export const LandParcelEditor = ({
         </div>
       </section>
 
+      <ConfirmDialog
+        open={confirmingArea}
+        onOpenChange={setConfirmingArea}
+        title="Save an outline that does not match the area?"
+        description={
+          areaMismatch
+            ? `The outline covers about ${formatArea(areaMismatch.outlinedSqm)}, but the declared area is ${formatArea(areaMismatch.statedSqm)}. Buyers see both. Check the corners and the area unit, or save it as it is.`
+            : ''
+        }
+        confirmLabel="Save anyway"
+        tone="primary"
+        isLoading={isSaving}
+        onConfirm={async () => {
+          await handleSave();
+          setConfirmingArea(false);
+        }}
+      />
+
       <DocumentUploadDialog
         open={uploadOpen}
         onOpenChange={setUploadOpen}
+        // Same words as the documents section's upload, so the two read as one action.
+        title="Upload a document"
+        categoryLabel="Document type"
         categories={[
           { value: 'C_OF_O', label: 'Certificate of Occupancy (C of O)' },
           { value: 'DEED', label: 'Deed' },

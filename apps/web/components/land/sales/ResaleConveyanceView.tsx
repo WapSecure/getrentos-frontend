@@ -147,6 +147,7 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
         onOpenChange={(open) => !open && setDelivering(null)}
         isSaving={deliver.isPending}
         onDeliver={(milestone, input) => deliver.mutate({ milestone, input })}
+        releasedAfterAllSteps
       />
     </>
   );

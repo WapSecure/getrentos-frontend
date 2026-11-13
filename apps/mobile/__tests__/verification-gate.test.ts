@@ -38,7 +38,7 @@ describe('verification gates', () => {
       tier: 2,
     });
     expect(readGate(err)?.message).toBe(
-      "You're on Trust Tier 2 (identity verified). This needs financial verification (Trust Tier 3)."
+      "You're on Trust Tier 2. This needs financial verification (Trust Tier 3)."
     );
   });
 

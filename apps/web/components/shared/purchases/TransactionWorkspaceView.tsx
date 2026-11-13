@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   canReleaseDeposit,
-  handoverAwaitingDelivery,
-  RELEASE_BLOCKED_NOTE,
+  releaseBlockedNote,
   depositReleaseStage,
   documentLinkLabel,
   formatDualTime,
@@ -89,7 +88,7 @@ import type {
 
 const PLAN_LABEL: Record<TransactionWorkspace['plan'], string> = {
   BUILT_HOME: 'Built home',
-  LAND_RESALE: 'Land resale',
+  LAND_RESALE: 'Land sale',
 };
 
 const PROFESSIONAL_LABEL: Record<WorkspaceProfessional['role'], string> = {
@@ -107,8 +106,16 @@ const CONDITION_STATUSES = new Set<LandClosingCondition['status']>([
   'FAILED',
 ]);
 
-/** The workspace's lean condition, in the shape the shared conditions panel reads. */
-const toClosingCondition = (condition: WorkspaceCondition): LandClosingCondition => {
+/**
+ * The workspace's lean condition, in the shape the shared conditions panel reads. The panel shows
+ * the shared remedy once below the list, so a condition repeats it only when its own differs, and
+ * never once it is met or waived.
+ */
+const toClosingCondition = (
+  condition: WorkspaceCondition,
+  _index: number,
+  all: readonly WorkspaceCondition[]
+): LandClosingCondition => {
   const status = CONDITION_STATUSES.has(condition.status as LandClosingCondition['status'])
     ? (condition.status as LandClosingCondition['status'])
     : 'PENDING';
@@ -119,7 +126,12 @@ const toClosingCondition = (condition: WorkspaceCondition): LandClosingCondition
     deadline: condition.deadline,
     failed: status === 'FAILED',
     remedy: condition.remedy,
-    note: condition.remedy ? `If it is not met: ${condition.remedy}` : undefined,
+    note:
+      condition.remedy &&
+      condition.remedy !== all[0]?.remedy &&
+      (status === 'PENDING' || status === 'DELIVERED')
+        ? `If it is not met: ${condition.remedy}`
+        : undefined,
     deliveredByDeveloper: false,
   };
 };
@@ -354,8 +366,9 @@ export const TransactionWorkspaceView = ({
   const progress = workspaceProgress(data);
   const target = nextActionTarget(data);
   const releasable = canReleaseDeposit(data);
-  // The deposit stands for the handover: it cannot be released before the seller delivers it.
-  const releaseBlocked = releasable && handoverAwaitingDelivery(data);
+  // The deposit waits for the handover (built home) or every required land step and condition.
+  const releaseBlockedReason = releasable ? releaseBlockedNote(data) : null;
+  const releaseBlocked = releaseBlockedReason !== null;
   const representativeName = approvingRepresentativeName(data);
   const releaseStage = depositReleaseStage(data);
   const releaseNote = isBuyer ? releaseStageNote(releaseStage, representativeName) : null;
@@ -605,7 +618,7 @@ export const TransactionWorkspaceView = ({
               {releaseBlocked ? (
                 <>
                   <p id="deposit-release-blocked" className="text-sm text-muted-foreground">
-                    {RELEASE_BLOCKED_NOTE}
+                    {releaseBlockedReason}
                   </p>
                   <Button
                     className="w-full"

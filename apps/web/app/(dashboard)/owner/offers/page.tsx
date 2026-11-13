@@ -16,7 +16,10 @@ import { Handshake } from '@sureground/icons';
 import { RecordToolbar } from '@/components/shared/records/RecordParts';
 import { OfferCard } from '@/components/owner/offers/OfferCard';
 import { OfferNegotiationModal } from '@/components/owner/offers/OfferNegotiationModal';
-import { OfferComparisonPanel } from '@/components/shared/offers/OfferComparisonPanel';
+import {
+  markCounterSent,
+  OfferComparisonPanel,
+} from '@/components/shared/offers/OfferComparisonPanel';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys, sellerOfferKeys } from '@/lib/queryKeys';
@@ -92,7 +95,10 @@ export default function OwnerOffersPage() {
   const counterMutation = useMutation({
     mutationFn: ({ offerId, amount, note }: { offerId: string; amount: number; note?: string }) =>
       unwrap(ownerService.counterOffer(offerId, amount, note)),
-    onSuccess: (_result, { offerId }) => invalidate(offerId),
+    onSuccess: (_result, { offerId, amount }) => {
+      markCounterSent(queryClient, offerId, amount);
+      invalidate(offerId);
+    },
   });
 
   const handleAccept = async (offerId: string) => {

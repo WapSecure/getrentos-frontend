@@ -72,7 +72,7 @@ export const OwnerPropertyCard = ({
   const purchasePrice = property.purchasePrice ?? 0;
   // No valuation, no appreciation: computing it anyway printed NaN% and ₦0.
   const appreciation =
-    property.estimatedValue != null && purchasePrice > 0
+    !!property.estimatedValue && purchasePrice > 0
       ? ((property.estimatedValue - purchasePrice) / purchasePrice) * 100
       : null;
 
@@ -151,8 +151,8 @@ export const OwnerPropertyCard = ({
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
           <div>
             <p className="text-xs text-muted-foreground">Estimated value</p>
-            {property.estimatedValue == null ? (
-              <p className="text-sm font-semibold text-muted-foreground">Not set</p>
+            {!property.estimatedValue ? (
+              <p className="text-sm font-semibold text-muted-foreground">No estimate yet</p>
             ) : (
               <p className="text-sm font-semibold text-foreground">
                 {formatCurrency(property.estimatedValue, { compact: true })}

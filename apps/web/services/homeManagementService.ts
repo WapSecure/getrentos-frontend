@@ -691,7 +691,8 @@ export const homeManagementService = {
         body: JSON.stringify(data),
       })
     ),
-  listEscalations: (propertyId: string, params: HomeManagementPageParams = {}) =>
+  /** No property: every property the caller manages here. */
+  listEscalations: (propertyId: string | undefined, params: HomeManagementPageParams = {}) =>
     safeCall(() =>
       authFetch<Paginated<HomeManagementEscalation>>(
         `/home-management/escalations${toQuery({ propertyId, ...params })}`

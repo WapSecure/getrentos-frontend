@@ -83,6 +83,7 @@ const relativeDeadline = (value?: string | null) => {
 
 const isEmergency = (escalation: HomeManagementEscalation) => Boolean(escalation.isEmergency);
 const ESCALATION_PAGE_SIZE = 10;
+const ALL_PROPERTIES = '';
 
 interface HomeManagementEscalationQueueProps {
   properties: HomeManagementProperty[];
@@ -95,7 +96,8 @@ export function HomeManagementEscalationQueue({
   isPropertiesLoading = false,
 }: HomeManagementEscalationQueueProps) {
   const queryClient = useQueryClient();
-  const [selectedPropertyId, setSelectedPropertyId] = useState('');
+  // '' is every property, the default.
+  const [selectedPropertyId, setSelectedPropertyId] = useState(ALL_PROPERTIES);
   const [page, setPage] = useState(1);
   const [escalationConfirmation, setEscalationConfirmation] =
     useState<HomeManagementEscalation | null>(null);
@@ -104,17 +106,17 @@ export function HomeManagementEscalationQueue({
   const effectivePropertyId =
     selectedPropertyId && properties.some((property) => property.id === selectedPropertyId)
       ? selectedPropertyId
-      : (properties[0]?.id ?? '');
+      : ALL_PROPERTIES;
 
   const escalationsQuery = useQuery({
-    enabled: Boolean(effectivePropertyId),
+    enabled: properties.length > 0,
     queryKey: [
       ...homeManagementKeys.escalations(effectivePropertyId || undefined),
       { page, pageSize: ESCALATION_PAGE_SIZE },
     ],
     queryFn: () =>
       unwrap(
-        homeManagementService.listEscalations(effectivePropertyId, {
+        homeManagementService.listEscalations(effectivePropertyId || undefined, {
           page,
           pageSize: ESCALATION_PAGE_SIZE,
         })
@@ -179,11 +181,14 @@ export function HomeManagementEscalationQueue({
         setSelectedPropertyId(propertyId);
         setPage(1);
       }}
-      placeholder={isPropertiesLoading ? 'Loading properties…' : 'Select a property'}
-      options={properties.map((property) => ({
-        value: property.id,
-        label: propertyLabel(property),
-      }))}
+      placeholder={isPropertiesLoading ? 'Loading properties…' : 'All properties'}
+      options={[
+        { value: ALL_PROPERTIES, label: 'All properties' },
+        ...properties.map((property) => ({
+          value: property.id,
+          label: propertyLabel(property),
+        })),
+      ]}
     />
   );
 
@@ -191,7 +196,7 @@ export function HomeManagementEscalationQueue({
   if (!isPropertiesLoading && properties.length === 0) return null;
   const selectedProperty = properties.find((property) => property.id === effectivePropertyId);
   if (
-    selectedProperty &&
+    !isPropertiesLoading &&
     !escalationsQuery.isLoading &&
     !escalationsQuery.isError &&
     totalEscalations === 0
@@ -207,7 +212,9 @@ export function HomeManagementEscalationQueue({
             <span id="escalation-queue-heading" className="font-medium text-foreground">
               No live escalations
             </span>{' '}
-            at {propertyLabel(selectedProperty)}. Every open job there is within its service target.
+            {selectedProperty
+              ? `at ${propertyLabel(selectedProperty)}. Every open job there is within its service target.`
+              : 'across your properties. Every open job is within its service target.'}
           </p>
         </div>
         {properties.length > 1 && propertySelect}
@@ -230,19 +237,13 @@ export function HomeManagementEscalationQueue({
       />
 
       <div className="mt-5">
-        {isPropertiesLoading || (Boolean(effectivePropertyId) && escalationsQuery.isLoading) ? (
+        {isPropertiesLoading || escalationsQuery.isLoading ? (
           <EscalationLoadingState />
         ) : properties.length === 0 ? (
           <EmptyState
             icon={ShieldAlert}
             title="Add a property before reviewing service risk"
             description="Escalations belong to a property, so add one first."
-          />
-        ) : !effectivePropertyId ? (
-          <EmptyState
-            icon={ShieldAlert}
-            title="Select a property to review escalations"
-            description="Choose a property to see its live escalations."
           />
         ) : escalationsQuery.isError && !escalationsQuery.data ? (
           <EmptyState

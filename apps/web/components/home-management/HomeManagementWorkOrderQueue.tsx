@@ -666,9 +666,16 @@ export function HomeManagementWorkOrderQueue({
                   !approvalPending &&
                   workOrder.approvedCost !== null &&
                   workOrder.approvedCost !== undefined;
+                // Until spend is approved, the estimate entered on creation is the figure to show.
+                const hasEstimateOnly =
+                  !approvalPending &&
+                  !hasApprovedCost &&
+                  workOrder.estimatedCost !== null &&
+                  workOrder.estimatedCost !== undefined &&
+                  workOrder.estimatedCost > 0;
                 const showControlPanel = readOnly
-                  ? hasApprovedCost
-                  : isOpen(workOrder) || approvalPending || hasApprovedCost;
+                  ? hasApprovedCost || hasEstimateOnly
+                  : isOpen(workOrder) || approvalPending || hasApprovedCost || hasEstimateOnly;
 
                 return (
                   <article key={workOrder.id} className="p-5">
@@ -834,6 +841,13 @@ export function HomeManagementWorkOrderQueue({
                               <p className="text-xs text-muted-foreground">Approved spend</p>
                               <p className="mt-1 font-semibold text-foreground">
                                 {formatCurrency(workOrder.approvedCost)}
+                              </p>
+                            </div>
+                          ) : hasEstimateOnly ? (
+                            <div className="rounded-xl bg-secondary/70 px-4 py-3 text-right">
+                              <p className="text-xs text-muted-foreground">Estimated</p>
+                              <p className="mt-1 font-semibold text-foreground">
+                                {formatCurrency(workOrder.estimatedCost ?? 0)}
                               </p>
                             </div>
                           ) : null}

@@ -91,6 +91,8 @@ export const NIGERIA_STATE_CITIES: Record<string, string[]> = {
     'Amuwo-Odofin',
     'Oshodi',
     'Ikoyi',
+    'Ibeju-Lekki',
+    'Magodo',
   ],
   Nasarawa: ['Lafia', 'Keffi', 'Akwanga', 'Karu', 'Nasarawa', 'Doma', 'Wamba'],
   Niger: ['Minna', 'Bida', 'Suleja', 'Kontagora', 'Mokwa', 'Agaie', 'Lapai', 'Kutigi'],

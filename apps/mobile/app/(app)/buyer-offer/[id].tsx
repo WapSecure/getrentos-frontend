@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronLeft } from '@sureground/icons/native';
+import { offerFigures } from '@sureground/shared';
 import {
   Badge,
   Button,
@@ -47,6 +48,11 @@ export default function BuyerOfferDetail() {
   });
 
   const thread = threadQuery.data ?? [];
+  // The opening offer is always the buyer's, so its sender identifies the buyer in the thread.
+  const buyerSenderId = thread.find((m) => m.type === 'offer')?.senderId;
+  const figures = offer
+    ? offerFigures(thread, offer.offerAmount, (m) => m.senderId === buyerSenderId)
+    : null;
 
   const offerSkeleton = (
     <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
@@ -147,7 +153,15 @@ export default function BuyerOfferDetail() {
                   <Text variant="caption" color="mutedForeground">
                     Your offer
                   </Text>
-                  <Price amount={offer.offerAmount} variant="bodyStrong" />
+                  <Price amount={figures?.buyerAmount ?? offer.offerAmount} variant="bodyStrong" />
+                  {figures?.sellerCounter !== undefined ? (
+                    <>
+                      <Text variant="caption" color="mutedForeground" style={{ marginTop: 4 }}>
+                        Seller&apos;s counter
+                      </Text>
+                      <Price amount={figures.sellerCounter} variant="bodyStrong" />
+                    </>
+                  ) : null}
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                   <Text variant="caption" color="mutedForeground">

@@ -149,6 +149,7 @@ export default function OwnerLandResale() {
             propertyId={property ?? null}
             saving={deliver.isPending}
             onDeliver={(input) => deliver.mutate(input)}
+            releasedAfterAllSteps
           />
         ) : null}
       </Sheet>

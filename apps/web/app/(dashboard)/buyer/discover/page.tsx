@@ -137,10 +137,15 @@ export default function BuyerDiscoverPage() {
         eyebrow="Homes for sale"
         title="Discover properties"
         description={
-          <>
-            <span className="data-value font-medium text-foreground">{total}</span> propert
-            {total === 1 ? 'y' : 'ies'} for sale
-          </>
+          // No count until the first page arrives, so it never reads "0 properties" while loading.
+          data ? (
+            <>
+              <span className="data-value font-medium text-foreground">{total}</span> propert
+              {total === 1 ? 'y' : 'ies'} for sale
+            </>
+          ) : (
+            <Skeleton className="inline-block h-4 w-36 align-middle" />
+          )
         }
       />
 

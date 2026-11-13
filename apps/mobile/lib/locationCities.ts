@@ -34,6 +34,8 @@ export const NIGERIA_STATE_CITIES: Record<string, string[]> = {
     'Epe',
     'Ikorodu',
     'Ikoyi',
+    'Ibeju-Lekki',
+    'Magodo',
   ],
   Nasarawa: ['Lafia', 'Keffi', 'Akwanga', 'Karu'],
   Niger: ['Minna', 'Bida', 'Suleja', 'Kontagora'],

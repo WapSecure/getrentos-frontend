@@ -160,7 +160,7 @@ export const DatePicker = ({
           aria-expanded={open}
           aria-label={
             ariaLabel && !field.labelId
-              ? `${ariaLabel}: ${selected ? format(selected, 'MMMM d, yyyy') : placeholder}`
+              ? `${ariaLabel}: ${selected ? format(selected, 'd MMMM yyyy') : placeholder}`
               : undefined
           }
           aria-labelledby={field.labelId ?? (ariaLabel ? undefined : valueId)}
@@ -184,7 +184,7 @@ export const DatePicker = ({
             id={valueId}
             className={cn('truncate', selected ? 'text-foreground' : 'text-muted-foreground')}
           >
-            {selected ? format(selected, 'MMM d, yyyy') : placeholder}
+            {selected ? format(selected, 'd MMM yyyy') : placeholder}
           </span>
           <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         </button>
@@ -263,7 +263,7 @@ export const DatePicker = ({
                         type="button"
                         data-day={format(day, 'yyyy-MM-dd')}
                         tabIndex={focusable ? 0 : -1}
-                        aria-label={format(day, 'EEEE, MMMM d, yyyy')}
+                        aria-label={format(day, 'EEEE d MMMM yyyy')}
                         aria-pressed={Boolean(isSelected)}
                         aria-current={isToday(day) ? 'date' : undefined}
                         onClick={() => handleSelect(day)}
