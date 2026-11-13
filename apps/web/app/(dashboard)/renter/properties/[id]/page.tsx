@@ -43,6 +43,7 @@ import { CommuteCalculator } from '@/components/renter/discover/features/Commute
 import { RentVsBuyCalculator } from '@/components/renter/discover/features/RentVsBuyCalculator';
 import { NeighborhoodCompare } from '@/components/renter/discover/features/NeighborhoodCompare';
 import { formatPrice, monthlyEquivalent } from '@/types/renter';
+import { format, isValid, parseISO } from 'date-fns';
 import type { TourModalMode } from '@/types/virtual-tour';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import { renterService, type SavedListingItem } from '@/services/renterService';
@@ -158,6 +159,13 @@ export default function PropertyDetailPage() {
     router.push(`${ROUTES.RENTER_DISCOVER}?compare=open`);
   };
 
+  // A date-only "2026-12-01" is read as that local day, then shown as "1 Dec 2026".
+  const availableFromDate = property.availableFrom ? parseISO(property.availableFrom) : null;
+  const availableFrom =
+    availableFromDate && isValid(availableFromDate)
+      ? format(availableFromDate, 'd MMM yyyy')
+      : null;
+
   const openTour = (mode: TourModalMode) => {
     setTourMode(mode);
     setTourOpen(true);
@@ -257,13 +265,15 @@ export default function PropertyDetailPage() {
                   {property.bathrooms} {property.bathrooms === 1 ? 'bath' : 'baths'}
                 </span>
               </li>
-              <li className="flex items-center gap-2.5 px-4 py-3">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Square className="h-4 w-4" aria-hidden="true" />
-                </span>
-                <span className="text-sm text-foreground">{property.size} sqm</span>
-              </li>
-              {(property.acceptingApplications === false || property.availableFrom) && (
+              {property.size > 0 && (
+                <li className="flex items-center gap-2.5 px-4 py-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Square className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <span className="text-sm text-foreground">{property.size} sqm</span>
+                </li>
+              )}
+              {(property.acceptingApplications === false || availableFrom) && (
                 <li className="flex items-center gap-2.5 px-4 py-3">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Calendar className="h-4 w-4" aria-hidden="true" />
@@ -271,7 +281,7 @@ export default function PropertyDetailPage() {
                   <span className="text-sm text-foreground">
                     {property.acceptingApplications === false
                       ? 'Let, not accepting applications'
-                      : `Available ${property.availableFrom}`}
+                      : `Available ${availableFrom}`}
                   </span>
                 </li>
               )}

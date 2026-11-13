@@ -174,6 +174,14 @@ const ESTATE_FALLBACK: [prefix: string, route: string][] = [
   ['ESTATE_POLL_', '/(app)/estate-polls'],
 ];
 
+/**
+ * Landlord screens the backend links anyone who controls a property to (landlord, owner, manager).
+ * An owner reads them in their own portal. Mirrors PORTAL_LINKS in apps/web/lib/portalLinks.ts.
+ */
+const OWNER_LANDLORD_LINKS: Record<string, string> = {
+  '/(app)/landlord-viewings': '/(app)/owner-viewings?tab=renters',
+};
+
 const HOST_PORTALS = new Set<Portal>(['owner', 'landlord']);
 
 // Others (confirmed, cancelled) go to whichever side didn't act, so they can't be routed by type alone.
@@ -261,7 +269,7 @@ export function routeForNotification(
     return `/(app)/shortlet-stay/${bookingId}`;
   }
   const direct = routeForActionUrl(actionUrl);
-  if (direct) return direct;
+  if (direct) return (portal === 'owner' && OWNER_LANDLORD_LINKS[direct]) || direct;
   // The developer answered: their answer shows under "Your questions" on the development screen.
   // DEVELOPMENT_ENQUIRY_REMINDER (to the developer's firm) is left to the notification list: the
   // app has no developer inbox, and the public page cannot answer a question.
