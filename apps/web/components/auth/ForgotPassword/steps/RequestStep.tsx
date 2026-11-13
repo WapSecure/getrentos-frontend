@@ -31,7 +31,7 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
   const validatePhone = (phone: string) => {
     if (!phone) return 'Phone number is required';
     if (!VALIDATION_PATTERNS.PHONE.test(phone))
-      return 'Please enter a valid phone number (e.g., +1 234 567 8900)';
+      return 'Enter a valid phone number, for example 0803 123 4567';
     return '';
   };
 
