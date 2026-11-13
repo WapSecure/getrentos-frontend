@@ -291,4 +291,5 @@ export const adminKeys = {
     ['admin', 'property-authorities', params?.status ?? 'all'] as const,
   aiUsage: (days: number) => ['admin', 'ai', 'usage', days] as const,
   aiReviews: ['admin', 'ai', 'reviews'] as const,
+  listingWarnings: ['admin', 'ai', 'listingWarnings'] as const,
 };

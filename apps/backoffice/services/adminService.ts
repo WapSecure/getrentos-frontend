@@ -32,6 +32,8 @@ import type {
   AdminProfile,
   AiUsageSummary,
   AiReviewsSummary,
+  ListingWarningDecision,
+  ListingWarningQueueItem,
   AdminStaffMember,
   AdminStaffApproval,
   AdminStaffRole,
@@ -802,6 +804,23 @@ export const adminService = {
 
   async getAiReviews(days?: number): Promise<ApiResponse<AiReviewsSummary>> {
     return safeCall(() => authFetch(`/admin/ai/reviews${days ? `?days=${days}` : ''}`));
+  },
+
+  async listListingWarnings(): Promise<ApiResponse<ListingWarningQueueItem[]>> {
+    return safeCall(() => authFetch('/admin/ai/reviews/listing-warnings'));
+  },
+
+  async decideListingWarning(
+    reviewId: string,
+    decision: ListingWarningDecision,
+    note?: string
+  ): Promise<ApiResponse<{ reviewId: string; outcome: 'CLEARED' | 'CONFIRMED' }>> {
+    return safeCall(() =>
+      authFetch(`/admin/ai/reviews/listing-warnings/${reviewId}/decision`, {
+        method: 'POST',
+        body: JSON.stringify({ decision, ...(note?.trim() ? { note: note.trim() } : {}) }),
+      })
+    );
   },
 
   async updatePlatformConfig(config: PlatformConfig): Promise<ApiResponse<PlatformConfig>> {
