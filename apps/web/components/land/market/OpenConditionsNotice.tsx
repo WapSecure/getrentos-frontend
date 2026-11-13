@@ -14,7 +14,7 @@ export const OpenConditionsNotice = ({
 }) => {
   if (!conditions?.length) return null;
   return (
-    <Alert variant="info" icon={CircleDashed} title="Verified with conditions">
+    <Alert variant="warning" icon={CircleDashed} title="Approved with conditions">
       <p>
         Sureground approved this land subject to the following. {capitalise(action)} open once they
         are met.

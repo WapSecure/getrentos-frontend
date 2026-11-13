@@ -68,3 +68,32 @@ test('falls back to the flag without a trust chain', () => {
   assert.equal(listingVerification({}).verified, false);
   assert.equal(listingVerification({ trustChain: null, verified: false }).tone, 'pending');
 });
+
+test('approval with conditions is never verified, whatever the chain or flag says', () => {
+  const fullChain = chain({ owner: true, authority: true, property: true });
+  for (const listing of [
+    { isVerified: true, diligence: { status: 'CONDITIONAL' } },
+    { verified: true, verificationSummary: { status: 'CONDITIONALLY_APPROVED' } },
+    // A stale chain that still shows every link met.
+    { trustChain: fullChain, verificationSummary: { status: 'CONDITIONALLY_APPROVED' } },
+    { trustChain: fullChain, diligence: { status: 'conditional' } },
+  ]) {
+    assert.equal(isListingVerified(listing), false);
+    assert.deepEqual(listingVerification(listing), {
+      verified: false,
+      label: 'Approved with conditions',
+      tone: 'pending',
+    });
+  }
+});
+
+test('unconditional approval still reads as verified', () => {
+  assert.equal(isListingVerified({ isVerified: true, diligence: { status: 'VERIFIED' } }), true);
+  assert.equal(
+    isListingVerified({
+      trustChain: chain({ owner: true, authority: true, property: true }),
+      verificationSummary: { status: 'INVESTMENT_ELIGIBLE' },
+    }),
+    true
+  );
+});

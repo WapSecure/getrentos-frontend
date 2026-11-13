@@ -47,7 +47,7 @@ export const DILIGENCE: Record<
   VERIFIED: { label: 'Verified', tone: 'success' },
   REJECTED: { label: 'Not verified', tone: 'danger' },
   EXPIRED: { label: 'Expired', tone: 'warning' },
-  CONDITIONAL: { label: 'Verified with conditions', tone: 'info' },
+  CONDITIONAL: { label: 'Approved with conditions', tone: 'warning' },
   SUSPENDED: { label: 'Suspended', tone: 'danger' },
 };
 

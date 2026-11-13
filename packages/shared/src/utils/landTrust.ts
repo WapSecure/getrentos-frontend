@@ -95,7 +95,8 @@ export const LAND_DILIGENCE_STATUS: Record<
   // "Rejected", not "Not verified": the latter reads like "not checked yet".
   REJECTED: { label: 'Rejected', tone: 'danger' },
   EXPIRED: { label: 'Expired', tone: 'warning' },
-  CONDITIONAL: { label: 'Verified with conditions', tone: 'info' },
+  // Conditions are still outstanding, so never "verified" and never the success colour.
+  CONDITIONAL: { label: 'Approved with conditions', tone: 'warning' },
   SUSPENDED: { label: 'Suspended', tone: 'danger' },
 };
 

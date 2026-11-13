@@ -98,7 +98,7 @@ export default function LandEstate() {
             {(e.openConditions ?? []).length ? (
               <FormAlert
                 tone="warning"
-                title="Verified with conditions"
+                title="Approved with conditions"
                 message={`Plot reservations open once they are met.\n${e
                   .openConditions!.map(
                     (c) => `• ${c.text}${c.dueAt ? ` (expected by ${formatDate(c.dueAt)})` : ''}`

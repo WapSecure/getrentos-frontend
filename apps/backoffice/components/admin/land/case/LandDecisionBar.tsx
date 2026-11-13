@@ -25,7 +25,7 @@ import {
   Textarea,
   DatePicker,
 } from '@sureground/ui';
-import { unwrap } from '@sureground/shared';
+import { LAND_DILIGENCE_STATUS, normalizeLandDiligenceStatus, unwrap } from '@sureground/shared';
 import { adminLandService } from '@/services/adminLandService';
 import type { AdminLandDiligenceDetail } from '@/types/land';
 import { gaveFirstApproval } from './LandApprovalBanner';
@@ -166,7 +166,11 @@ export const LandDecisionBar = ({
               </>
             ) : (
               <>
-                This case is {status.replaceAll('_', ' ').toLowerCase()}
+                {/* Shared label: a CONDITIONAL case reads "approved with conditions", never "verified". */}
+                This case is{' '}
+                <span className={status === 'CONDITIONAL' ? 'font-medium text-warning' : undefined}>
+                  {LAND_DILIGENCE_STATUS[normalizeLandDiligenceStatus(status)].label.toLowerCase()}
+                </span>
                 {diligence.reviewedByName && ` (decided by ${diligence.reviewedByName})`}. Decisions
                 open again when the owner resubmits.
               </>
