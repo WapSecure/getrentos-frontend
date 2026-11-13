@@ -13,6 +13,7 @@ import {
   coApprovalConfirmDescription,
   HANDOVER_NOT_DELIVERED_NOTE,
   pendingApprovalStatus,
+  personContactLabel,
   stepAwaitingDelivery,
 } from '@sureground/shared';
 import type { CoApprovalPendingStep } from '@/types/landRepresentative';
@@ -255,7 +256,7 @@ export const CoApprovalCard = ({
                     placeholder="Choose a representative"
                     options={approvers.map((a) => ({
                       value: a.id,
-                      label: a.name ?? a.email ?? a.id,
+                      label: a.name ?? personContactLabel(a) ?? a.id,
                     }))}
                   />
                 </div>

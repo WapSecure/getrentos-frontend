@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Users } from '@sureground/icons/native';
+import { personContactLabel } from '@sureground/shared';
 import {
   Badge,
   Button,
@@ -101,7 +102,7 @@ function Principal({ appointment: a }: { appointment: Appointment }) {
     <Card style={{ gap: spacing.sm }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <Text variant="bodyStrong" style={{ flex: 1 }}>
-          {a.name ?? a.email}
+          {a.name ?? personContactLabel(a)}
         </Text>
         <Badge label={status.label} tone={status.tone} />
       </View>

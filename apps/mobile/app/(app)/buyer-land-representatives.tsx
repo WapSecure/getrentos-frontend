@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { Linking, RefreshControl, ScrollView, Share, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -16,7 +16,15 @@ import {
 } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
-  emailOk,
+  isNoAccountMessage,
+  personContactLabel,
+  readContactInput,
+  ROUTES,
+  signupInviteMessage,
+  whatsappShareUrl,
+} from '@sureground/shared';
+import { MessageCircle, Share2 } from '@sureground/icons/native';
+import {
   landBuyerExtrasApi,
   REP_RELATIONSHIPS,
   REP_SCOPES,
@@ -29,6 +37,10 @@ import { formatDate } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { env } from '@/lib/env';
+
+const NO_ACCOUNT_MESSAGE =
+  'No Sureground account uses that phone number or email. Ask them to sign up first, then appoint them.';
 
 const scopeLabel = (s: RepScope) => REP_SCOPES.find((x) => x.value === s)?.label ?? s;
 
@@ -97,15 +109,16 @@ function AppointmentRow({ appointment: a }: { appointment: Appointment }) {
     onError: (e) => toast.show(errorMessage(e, 'Could not end the appointment.'), 'error'),
   });
   const status = REP_STATUS[a.status];
+  const contactLabel = personContactLabel(a);
   const len = reason.trim().length;
   return (
     <Card style={{ gap: spacing.sm }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <View style={{ flex: 1 }}>
-          <Text variant="bodyStrong">{a.name ?? a.email}</Text>
+          <Text variant="bodyStrong">{a.name ?? contactLabel}</Text>
           <Text variant="caption" color="mutedForeground">
             {REP_RELATIONSHIPS.find((r) => r.value === a.relationship)?.label ?? a.relationship}
-            {a.name ? ` · ${a.email}` : ''}
+            {a.name && contactLabel ? ` · ${contactLabel}` : ''}
           </Text>
         </View>
         <Badge label={status.label} tone={status.tone} />
@@ -160,14 +173,18 @@ function AppointForm() {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
-  const [email, setEmail] = useState('');
+  const [contact, setContact] = useState('');
+  const [touched, setTouched] = useState(false);
+  const [noAccount, setNoAccount] = useState(false);
+  const input = readContactInput(contact);
+  const contactOk = input.kind === 'email' || input.kind === 'phone';
   const [relationship, setRelationship] = useState<string | undefined>();
   const [scopes, setScopes] = useState<RepScope[]>(['VIEW']);
   const [note, setNote] = useState('');
   const appoint = useMutation({
     mutationFn: () =>
       landBuyerExtrasApi.appoint({
-        email: email.trim(),
+        contact,
         relationship: relationship!,
         scopes,
         ...(note.trim() ? { note: note.trim() } : {}),
@@ -175,10 +192,16 @@ function AppointForm() {
     onSuccess: (list) => {
       qc.setQueryData(qk.buyerLand.representatives, list);
       toast.show('Invitation sent. They need to accept it.', 'success');
-      setEmail('');
+      setContact('');
+      setTouched(false);
+      setNoAccount(false);
       setNote('');
     },
-    onError: (e) => toast.show(errorMessage(e, 'Could not send the invitation.'), 'error'),
+    onError: (e) => {
+      const message = errorMessage(e, 'Could not send the invitation.');
+      if (isNoAccountMessage(message)) setNoAccount(true);
+      else toast.show(message, 'error');
+    },
   });
   const toggle = (s: RepScope) =>
     setScopes((x) => (x.includes(s) ? x.filter((y) => y !== s) : [...x, s]));
@@ -190,12 +213,19 @@ function AppointForm() {
         payments. They accept the appointment themselves.
       </Text>
       <TextField
-        label="Their email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
+        label="Their phone number or email"
+        hint="The one they signed up with, for example 0803 123 4567"
+        value={contact}
+        onChangeText={(v) => {
+          setContact(v);
+          setNoAccount(false);
+        }}
+        onBlur={() => setTouched(true)}
+        error={touched && input.kind === 'invalid' ? input.message : undefined}
         autoCapitalize="none"
+        autoCorrect={false}
       />
+      {noAccount && <InviteToSignUp />}
       <ChipSelect
         label="Relationship"
         options={[...REP_RELATIONSHIPS]}
@@ -225,9 +255,43 @@ function AppointForm() {
       <Button
         label="Send invitation"
         loading={appoint.isPending}
-        disabled={!emailOk(email) || !relationship || scopes.length === 0 || appoint.isPending}
+        disabled={!contactOk || !relationship || scopes.length === 0 || appoint.isPending}
         onPress={() => appoint.mutate()}
       />
     </Card>
+  );
+}
+
+/** Nobody has that phone number or email yet: share the plain signup link (no tracking, nothing about either person). */
+function InviteToSignUp() {
+  const { colors, spacing, radius } = useTheme();
+  const signupUrl = `${env.webUrl}${ROUTES.SIGNUP}`;
+  const text = signupInviteMessage(signupUrl);
+  return (
+    <View
+      accessibilityRole="alert"
+      style={{
+        gap: spacing.sm,
+        padding: spacing.md,
+        borderRadius: radius.lg,
+        backgroundColor: colors.accent,
+      }}
+    >
+      <Text variant="bodyStrong">They are not on Sureground yet</Text>
+      <Text variant="callout" color="mutedForeground">
+        {NO_ACCOUNT_MESSAGE}
+      </Text>
+      <Button
+        label="Share an invite link"
+        icon={<Share2 size={16} color={colors.primaryForeground} />}
+        onPress={() => Share.share({ message: text }).catch(() => undefined)}
+      />
+      <Button
+        label="Send on WhatsApp"
+        variant="outline"
+        icon={<MessageCircle size={16} color={colors.foreground} />}
+        onPress={() => Linking.openURL(whatsappShareUrl(text)).catch(() => undefined)}
+      />
+    </View>
   );
 }

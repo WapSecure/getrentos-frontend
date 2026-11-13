@@ -16,9 +16,11 @@ import {
   Toast,
 } from '@sureground/ui';
 import { UserPlus } from '@sureground/icons';
+import { isNoAccountMessage, personContactLabel, readContactInput } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { representativeKeys, representativeService } from '@/services/representativeService';
+import { InviteToSignUp } from './InviteToSignUp';
 import {
   REPRESENTATIVE_RELATIONSHIP_LABELS,
   REPRESENTATIVE_SCOPE_LABELS,
@@ -27,6 +29,9 @@ import {
   type RepresentativeRelationship,
   type RepresentativeScope,
 } from '@/types/landRepresentative';
+
+const NO_ACCOUNT_MESSAGE =
+  'No Sureground account uses that phone number or email. Ask them to sign up first, then appoint them.';
 
 const SCOPE_OPTIONS = (Object.keys(REPRESENTATIVE_SCOPE_LABELS) as RepresentativeScope[]).map(
   (scope) => ({ value: scope, label: REPRESENTATIVE_SCOPE_LABELS[scope] })
@@ -44,14 +49,16 @@ const AppointmentRow = ({
   const [ending, setEnding] = useState(false);
   const [reason, setReason] = useState('');
   const live = appointment.status === 'INVITED' || appointment.status === 'ACTIVE';
+  const contactLabel = personContactLabel(appointment);
   return (
     <li>
       <Card className="p-4">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="font-medium text-foreground">{appointment.name ?? appointment.email}</p>
+            <p className="font-medium text-foreground">{appointment.name ?? contactLabel}</p>
             <p className="text-xs text-muted-foreground">
-              {REPRESENTATIVE_RELATIONSHIP_LABELS[appointment.relationship]} · {appointment.email}
+              {REPRESENTATIVE_RELATIONSHIP_LABELS[appointment.relationship]}
+              {contactLabel ? ` · ${contactLabel}` : ''}
             </p>
           </div>
           <Badge
@@ -114,7 +121,9 @@ const AppointmentRow = ({
 
 export const RepresentativesManager = () => {
   const queryClient = useQueryClient();
-  const [email, setEmail] = useState('');
+  const [contact, setContact] = useState('');
+  const [contactTouched, setContactTouched] = useState(false);
+  const [noAccount, setNoAccount] = useState<string | null>(null);
   const [relationship, setRelationship] = useState<RepresentativeRelationship | ''>('');
   const [scopes, setScopes] = useState<RepresentativeScope[]>(['VIEW']);
   const [note, setNote] = useState('');
@@ -130,7 +139,7 @@ export const RepresentativesManager = () => {
     mutationFn: () =>
       unwrap(
         representativeService.appoint({
-          email,
+          contact,
           relationship: relationship as RepresentativeRelationship,
           scopes,
           note,
@@ -138,13 +147,18 @@ export const RepresentativesManager = () => {
       ),
     onSuccess: (next) => {
       queryClient.setQueryData(representativeKeys.mine, next);
-      setEmail('');
+      setContact('');
+      setContactTouched(false);
+      setNoAccount(null);
       setRelationship('');
       setScopes(['VIEW']);
       setNote('');
       setToast({ message: 'Invitation sent. They need to accept it.', variant: 'success' });
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => {
+      if (isNoAccountMessage(reason.message)) setNoAccount(NO_ACCOUNT_MESSAGE);
+      else setToast({ message: reason.message, variant: 'error' });
+    },
   });
   const revoke = useMutation({
     mutationFn: (v: { id: string; reason: string }) =>
@@ -156,8 +170,11 @@ export const RepresentativesManager = () => {
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
 
+  const contactInput = readContactInput(contact);
+  const contactError =
+    contactTouched && contactInput.kind === 'invalid' ? contactInput.message : undefined;
   const canSubmit =
-    /\S+@\S+\.\S+/.test(email.trim()) &&
+    (contactInput.kind === 'email' || contactInput.kind === 'phone') &&
     relationship !== '' &&
     scopes.length > 0 &&
     !appoint.isPending;
@@ -183,12 +200,25 @@ export const RepresentativesManager = () => {
               if (canSubmit) appoint.mutate();
             }}
           >
-            <Field label="Their email on Sureground" htmlFor="rep-email">
+            <Field
+              label="Their phone number or email on Sureground"
+              htmlFor="rep-contact"
+              hint="The one they signed up with, for example 0803 123 4567"
+              error={contactError}
+            >
               <Input
-                id="rep-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="rep-contact"
+                type="text"
+                inputMode="email"
+                autoComplete="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                value={contact}
+                onChange={(e) => {
+                  setContact(e.target.value);
+                  setNoAccount(null);
+                }}
+                onBlur={() => setContactTouched(true)}
               />
             </Field>
             <Field label="Who they are to you">
@@ -221,6 +251,11 @@ export const RepresentativesManager = () => {
                 onChange={(e) => setNote(e.target.value)}
               />
             </Field>
+            {noAccount && (
+              <div className="sm:col-span-2">
+                <InviteToSignUp message={noAccount} />
+              </div>
+            )}
             <div className="sm:col-span-2">
               <Button type="submit" disabled={!canSubmit} isLoading={appoint.isPending}>
                 Send invitation
