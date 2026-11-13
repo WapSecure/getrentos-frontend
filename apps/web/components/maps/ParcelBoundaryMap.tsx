@@ -50,10 +50,12 @@ export const ParcelBoundaryMap = ({
       if (cancelled || !containerRef.current) return;
       leafletRef.current = L;
       const start = cornersRef.current[0] ?? center ?? LAGOS_POINT;
-      const map = L.map(containerRef.current, { zoomControl: true }).setView(
-        [start.latitude, start.longitude],
-        cornersRef.current.length || center ? 17 : 12
-      );
+      // The map sits inside scrolling pages and modals, so the mouse wheel scrolls the page
+      // rather than zooming; the zoom buttons, double-click and pinch still zoom.
+      const map = L.map(containerRef.current, {
+        zoomControl: true,
+        scrollWheelZoom: false,
+      }).setView([start.latitude, start.longitude], cornersRef.current.length || center ? 17 : 12);
       addBaseTiles(L, map);
       if (editable) {
         map.on('click', (e: { latlng: { lat: number; lng: number } }) => {
