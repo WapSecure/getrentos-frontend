@@ -10,7 +10,13 @@ import {
   CheckCircle2,
   XCircle,
 } from '@sureground/icons';
-import { Badge, Button, Card } from '@sureground/ui';
+import { Badge, Button } from '@sureground/ui';
+import {
+  RecordActions,
+  RecordFacts,
+  RecordIconTile,
+  recordCardClass,
+} from '@/components/shared/records/RecordParts';
 import { formatDate } from '@/lib/format';
 import { taskStatusBadges } from '@/lib/statusBadge';
 import type { AgentTask, TaskType, TaskPriority } from '@/types/agent';
@@ -51,78 +57,77 @@ export const TaskCard = ({
     task.status === 'assigned' || task.status === 'in_progress' || task.status === 'overdue';
 
   return (
-    <Card className="p-4">
-      <article>
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="p-2.5 rounded-xl bg-accent shrink-0">
-              <TypeIcon className="w-4 h-4 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-semibold text-foreground truncate">{task.title}</h3>
-              <p className="text-xs text-muted-foreground truncate">{task.propertyAddress}</p>
-            </div>
-          </div>
-          <Badge variant={status.variant} icon={status.icon && <status.icon className="w-3 h-3" />}>
-            {status.label}
-          </Badge>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 mt-4">
-          <div>
-            <p className="text-xs text-muted-foreground">Assigned by</p>
-            <p className="text-sm font-medium text-foreground truncate">{task.assignedBy}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Priority</p>
-            <p className={`text-sm font-medium ${priority.className}`}>{priority.label}</p>
+    <article className={recordCardClass()}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <RecordIconTile icon={TypeIcon} />
+          <div className="min-w-0">
+            <h3 className="font-semibold text-foreground truncate">{task.title}</h3>
+            <p className="text-xs text-muted-foreground truncate">{task.propertyAddress}</p>
           </div>
         </div>
+        <Badge
+          variant={status.variant}
+          icon={status.icon && <status.icon className="w-3 h-3" />}
+          className="shrink-0"
+        >
+          {status.label}
+        </Badge>
+      </div>
 
-        <p className="flex items-center gap-1 text-xs text-muted-foreground mt-3">
-          <Clock className="w-3 h-3" />
-          Due {formatDate(task.dueDate)}
-        </p>
+      <RecordFacts
+        facts={[
+          { label: 'Assigned by', value: task.assignedBy },
+          {
+            label: 'Priority',
+            value: <span className={priority.className}>{priority.label}</span>,
+          },
+        ]}
+      />
 
-        {isActionable && (
-          <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+      <p className="flex items-center gap-1 text-xs text-muted-foreground mt-3">
+        <Clock className="w-3 h-3" aria-hidden="true" />
+        Due {formatDate(task.dueDate)}
+      </p>
+
+      {isActionable && (
+        <RecordActions className="flex-nowrap">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-destructive"
+            icon={<XCircle className="w-3.5 h-3.5" />}
+            onClick={onCancel}
+            disabled={isUpdating}
+          >
+            Cancel
+          </Button>
+          <div className="flex-1" />
+          {task.status !== 'in_progress' ? (
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="text-destructive"
-              icon={<XCircle className="w-3.5 h-3.5" />}
-              onClick={onCancel}
-              disabled={isUpdating}
+              icon={<PlayCircle className="w-3.5 h-3.5" />}
+              onClick={onStart}
+              isLoading={isUpdating}
             >
-              Cancel
+              Start
             </Button>
-            <div className="flex-1" />
-            {task.status !== 'in_progress' ? (
-              <Button
-                variant="outline"
-                size="sm"
-                icon={<PlayCircle className="w-3.5 h-3.5" />}
-                onClick={onStart}
-                isLoading={isUpdating}
-              >
-                Start
-              </Button>
-            ) : (
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<CheckCircle2 className="w-3.5 h-3.5" />}
-                onClick={onComplete}
-                isLoading={isUpdating}
-              >
-                {task.type === 'inspection' || task.type === 'verification'
-                  ? 'Continue work'
-                  : 'Complete'}
-              </Button>
-            )}
-          </div>
-        )}
-      </article>
-    </Card>
+          ) : (
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+              onClick={onComplete}
+              isLoading={isUpdating}
+            >
+              {task.type === 'inspection' || task.type === 'verification'
+                ? 'Continue work'
+                : 'Complete'}
+            </Button>
+          )}
+        </RecordActions>
+      )}
+    </article>
   );
 };

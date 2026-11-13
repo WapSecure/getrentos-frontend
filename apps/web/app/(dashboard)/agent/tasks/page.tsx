@@ -7,7 +7,6 @@ import {
   Alert,
   Button,
   EmptyState,
-  ListSkeleton,
   PageErrorState,
   Pagination,
   SearchInput,
@@ -18,6 +17,7 @@ import {
   PageHeader,
 } from '@sureground/ui';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { RecordGridSkeleton, RecordToolbar } from '@/components/shared/records/RecordParts';
 import { TaskCard } from '@/components/agent/tasks/TaskCard';
 import type { AgentTask, TaskStatus, TaskType } from '@/types/agent';
 import { ROUTES } from '@/lib/constants/auth';
@@ -109,6 +109,7 @@ export default function AgentTasksPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Work"
         title="Tasks"
         description={
           <>
@@ -123,7 +124,7 @@ export default function AgentTasksPage() {
         </Alert>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+      <RecordToolbar className="mb-4">
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -132,7 +133,7 @@ export default function AgentTasksPage() {
           }}
           placeholder="Search by title or property..."
           label="Search tasks"
-          className="flex-1 max-w-sm"
+          className="flex-1 sm:max-w-sm"
         />
         <Select
           value={typeFilter}
@@ -142,9 +143,9 @@ export default function AgentTasksPage() {
           }}
           ariaLabel="Filter by task type"
           options={typeOptions}
-          className="sm:w-48"
+          className="sm:ml-auto sm:w-48"
         />
-      </div>
+      </RecordToolbar>
 
       <Tabs
         value={statusFilter}
@@ -164,7 +165,9 @@ export default function AgentTasksPage() {
       </Tabs>
 
       {tasksQuery.isLoading ? (
-        <ListSkeleton variant="cards" rows={3} label="Loading tasks" />
+        <div role="status" aria-busy="true" aria-label="Loading tasks">
+          <RecordGridSkeleton />
+        </div>
       ) : tasksQuery.isError && !tasksData ? (
         <PageErrorState
           title="Tasks are unavailable"

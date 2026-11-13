@@ -215,6 +215,7 @@ export default function RealtorCommissionsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Work"
         title="Commissions"
         description="Earned when a sale settles, not when an offer is accepted"
         actions={

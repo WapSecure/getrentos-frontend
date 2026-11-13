@@ -84,6 +84,7 @@ export default function AgentWorkOrdersPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Work"
         title="Work orders"
         description="On-site maintenance jobs assigned to you. Start a job, add photos, and report it done — the property owner reviews and closes it."
       />

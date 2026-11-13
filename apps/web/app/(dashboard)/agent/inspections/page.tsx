@@ -112,6 +112,7 @@ function AgentInspectionsPageContent() {
   return (
     <>
       <PageHeader
+        eyebrow="Work"
         title="Inspections"
         description={
           <>

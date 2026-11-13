@@ -7,6 +7,7 @@ export default function BuyerLandInspectionsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Buying"
         title="Independent inspections"
         description="An accredited inspector visits land you are considering and reports with geotagged, timestamped photos. Sureground checks each report before you see it."
         actions={

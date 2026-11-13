@@ -85,7 +85,7 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
     <div className="group p-4 hover:bg-secondary transition-colors">
       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
         <div className="flex min-w-0 items-center gap-3 flex-1">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary ring-1 ring-inset ring-primary/15">
             {getInitials(roommate.name)}
           </div>
 

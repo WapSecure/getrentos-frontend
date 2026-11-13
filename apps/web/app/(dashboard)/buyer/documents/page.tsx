@@ -11,6 +11,7 @@ import {
   SegmentedControl,
   PageHeader,
 } from '@sureground/ui';
+import { RecordIconTile, RecordToolbar } from '@/components/shared/records/RecordParts';
 import { DocumentUploadDialog, type UploadedDocumentData } from '@sureground/ui';
 import { DocumentPreviewButton } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
@@ -82,6 +83,7 @@ export default function BuyerDocumentsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Buying"
         title="Documents"
         description={
           <>
@@ -100,7 +102,7 @@ export default function BuyerDocumentsPage() {
         }
       />
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <RecordToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -109,7 +111,7 @@ export default function BuyerDocumentsPage() {
           }}
           placeholder="Search documents..."
           label="Search documents"
-          className="flex-1 max-w-sm"
+          className="flex-1 sm:max-w-sm"
         />
         <SegmentedControl
           size="sm"
@@ -120,9 +122,9 @@ export default function BuyerDocumentsPage() {
             setPage(1);
           }}
           segments={categoryFilters}
-          className="max-w-full overflow-x-auto"
+          className="max-w-full overflow-x-auto sm:ml-auto"
         />
-      </div>
+      </RecordToolbar>
 
       <QueryState
         isLoading={documentsQuery.isLoading}
@@ -134,24 +136,22 @@ export default function BuyerDocumentsPage() {
         scope="page"
         loading={<ListSkeleton rows={6} />}
       >
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
+        <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
           {documents.map((doc) => (
             <div
               key={doc.id}
-              className="flex items-center gap-3 p-4 hover:bg-secondary transition-colors"
+              className="flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-primary/[0.03] sm:px-5"
             >
-              <div className="p-2 rounded-lg bg-secondary shrink-0">
-                <FileText className="w-4 h-4 text-muted-foreground" />
-              </div>
+              <RecordIconTile icon={FileText} size="sm" />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-foreground truncate">{doc.name}</p>
                 <p className="text-xs text-muted-foreground">
                   {categoryLabels[doc.category]}
-                  {doc.propertyTitle ? ` • ${doc.propertyTitle}` : ''}
+                  {doc.propertyTitle ? ` · ${doc.propertyTitle}` : ''}
                 </p>
               </div>
-              <div className="hidden sm:block text-xs text-muted-foreground whitespace-nowrap">
-                {formatDate(doc.uploadedAt)} • {doc.sizeLabel}
+              <div className="hidden sm:block text-xs text-muted-foreground tabular-nums whitespace-nowrap">
+                {formatDate(doc.uploadedAt)} · {doc.sizeLabel}
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 {doc.downloadUrl && (

@@ -64,6 +64,7 @@ export default function BuyerSavedPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Buying"
         title="Saved properties"
         description={
           isLoading ? (

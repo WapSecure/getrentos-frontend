@@ -250,7 +250,7 @@ export function HomeOverviewView() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
             <div className="mb-4 flex items-center gap-2">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/15">
                 <House className="h-5 w-5" />
               </span>
               <Badge variant="success" icon={<ShieldCheck className="h-3.5 w-3.5" />}>

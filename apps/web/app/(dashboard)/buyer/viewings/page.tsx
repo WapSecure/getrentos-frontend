@@ -76,6 +76,7 @@ function BuyerViewingsPageContent() {
   return (
     <>
       <PageHeader
+        eyebrow="Buying"
         title="Viewing requests"
         description={
           viewingsQuery.isLoading ? (

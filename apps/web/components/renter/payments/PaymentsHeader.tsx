@@ -13,7 +13,7 @@ export const PaymentsHeader = ({ onExport }: PaymentsHeaderProps) => {
   return (
     <div>
       <RenterPageHeader
-        eyebrow=""
+        eyebrow="Money"
         icon={CreditCard}
         title="Payments"
         description="Manage rent, payment methods, receipts, and your complete payment history."

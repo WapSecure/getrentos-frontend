@@ -134,12 +134,20 @@ export const MaintenanceCard = ({
   return (
     <div
       onClick={handleViewDetails}
-      className="p-4 hover:bg-secondary transition-colors cursor-pointer group"
+      className="group cursor-pointer px-4 py-4 transition-colors hover:bg-primary/[0.03] sm:px-5"
     >
       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-        <div className="flex-1">
+        <span
+          aria-hidden="true"
+          className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/15 sm:flex"
+        >
+          <MaintenanceCategoryIcon category={request.category} className="h-4.5 w-4.5" />
+        </span>
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-semibold text-foreground">{request.title}</h3>
+            <h3 className="font-semibold text-foreground transition-colors group-hover:text-primary">
+              {request.title}
+            </h3>
             {request.isEmergency && (
               <Badge variant="danger" icon={<AlertTriangle className="h-3 w-3" />}>
                 Emergency
@@ -161,7 +169,7 @@ export const MaintenanceCard = ({
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-muted-foreground">
             <span>{request.propertyName}</span>
-            <span>•</span>
+            <span aria-hidden="true">·</span>
             <span className="inline-flex items-center gap-1">
               <MaintenanceCategoryIcon category={request.category} className="h-3.5 w-3.5" />
               {maintenanceCategoryLabel(request.category)}

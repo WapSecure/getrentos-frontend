@@ -39,7 +39,7 @@ export default function BuyerDeveloperQuestionsPage() {
 
   return (
     <>
-      <PageHeader title={COPY.historyTitle} description={COPY.historyLead} />
+      <PageHeader eyebrow="Buying" title={COPY.historyTitle} description={COPY.historyLead} />
 
       <QueryState
         isLoading={query.isLoading}

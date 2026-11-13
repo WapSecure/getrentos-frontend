@@ -53,7 +53,7 @@ export const ConversationList = ({
                 activeId === conversation.id ? 'bg-accent' : 'hover:bg-secondary'
               }`}
             >
-              <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
+              <div className="w-9 h-9 rounded-full bg-primary/10 ring-1 ring-inset ring-primary/15 flex items-center justify-center text-primary font-semibold text-xs shrink-0">
                 {getInitials(conversation.participantName)}
               </div>
               <div className="min-w-0 flex-1">

@@ -8,6 +8,7 @@ export default function AgentHomeManagementPage() {
   return (
     <div className="p-6">
       <PageHeader
+        eyebrow="Work"
         title="Home management"
         description="Assets, care plans, work orders and vendors for the properties you manage."
       />

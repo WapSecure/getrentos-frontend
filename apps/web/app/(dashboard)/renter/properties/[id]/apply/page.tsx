@@ -201,6 +201,7 @@ export default function PropertyApplyPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Renting"
         breadcrumbs={[
           { label: property.title, href: buildRoute.renterPropertyDetail(property.id) },
           { label: 'Apply to rent' },

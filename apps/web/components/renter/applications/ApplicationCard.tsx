@@ -17,6 +17,7 @@ import { Badge, Button, IconButton } from '@sureground/ui';
 import { applicationStatusBadges } from '@/lib/statusBadge';
 import { pluralize } from '@/lib/format';
 import { Application } from '@/types/renter';
+import { RecordIconTile, recordCardClass } from '@/components/shared/records/RecordParts';
 
 interface ApplicationCardProps {
   application: Application;
@@ -52,13 +53,11 @@ export const ApplicationCard = ({
 
   if (viewMode === 'list') {
     return (
-      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-[border-color,box-shadow] hover:border-foreground/15 hover:shadow-sm">
-        <div className="flex flex-col sm:flex-row">
-          <div className="relative flex h-32 w-full shrink-0 items-center justify-center bg-muted sm:w-40">
-            <Home className="w-8 h-8 text-muted-foreground" />
-          </div>
+      <div className={recordCardClass()}>
+        <div className="flex items-start gap-3.5">
+          <RecordIconTile icon={Home} />
 
-          <div className="flex-1 p-4">
+          <div className="min-w-0 flex-1">
             <div className="flex flex-wrap justify-between items-start gap-2">
               <div>
                 <h3 className="font-semibold text-foreground hover:text-primary transition-colors">
@@ -148,9 +147,9 @@ export const ApplicationCard = ({
   }
 
   return (
-    <div className="group overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-[border-color,box-shadow] hover:border-foreground/15 hover:shadow-sm">
-      <div className="relative flex h-32 items-center justify-center bg-muted">
-        <Home className="w-10 h-10 text-muted-foreground" />
+    <div className={`group overflow-hidden ${recordCardClass()} p-0 sm:p-0`}>
+      <div className="relative flex h-24 items-center justify-center border-b border-border bg-primary/[0.05]">
+        <RecordIconTile icon={Home} />
         <Badge
           variant={status.variant}
           icon={status.icon && <status.icon className="w-3 h-3" />}
@@ -184,7 +183,7 @@ export const ApplicationCard = ({
           </div>
         </div>
 
-        <div className="flex justify-between items-center mt-3 pt-3 border-t border-border">
+        <div className="flex justify-between items-center mt-4 pt-3 border-t border-border">
           <div>
             <span className="font-bold text-primary">
               {formatPrice(application.price, application.period)}
