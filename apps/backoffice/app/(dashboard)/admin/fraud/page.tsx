@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, ShieldAlert } from '@sureground/icons';
+import { Activity, AlertTriangle, Plus, Search, ShieldAlert } from '@sureground/icons';
 import { FraudAlertCard } from '@/components/admin/fraud/FraudAlertCard';
 import { FraudAlertDetailModal } from '@/components/admin/fraud/FraudAlertDetailModal';
 import { NewFraudAlertModal } from '@/components/admin/fraud/NewFraudAlertModal';
@@ -13,11 +13,10 @@ import {
   PageErrorState,
   PageHeader,
   SearchInput,
-  Tabs,
-  TabsList,
-  TabsTrigger,
+  StatGroup,
   useToast,
 } from '@sureground/ui';
+import { FilterChips, OpsToolbar } from '@/components/admin/ops/OpsParts';
 import { Button } from '@sureground/ui';
 import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
@@ -203,11 +202,12 @@ export default function AdminFraudPage() {
   const flaggedCount = flaggedData?.total ?? 0;
   const investigatingCount = investigatingData?.total ?? 0;
   const openCount = flaggedCount + investigatingCount;
+  const countsUnavailable = flaggedCountError || investigatingCountError;
 
-  const statusOptions: { value: StatusFilter; label: string }[] = [
+  const statusOptions: { value: StatusFilter; label: string; count?: number }[] = [
     { value: 'all', label: 'All' },
-    { value: 'flagged', label: 'Flagged' },
-    { value: 'investigating', label: 'Investigating' },
+    { value: 'flagged', label: 'Flagged', count: flaggedData?.total },
+    { value: 'investigating', label: 'Investigating', count: investigatingData?.total },
     { value: 'cleared', label: 'Cleared' },
     { value: 'confirmed', label: 'Confirmed' },
   ];
@@ -223,15 +223,16 @@ export default function AdminFraudPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Risk"
         title="Fraud and risk review"
         description={
-          flaggedCountError || investigatingCountError
+          countsUnavailable
             ? 'Open-alert count temporarily unavailable'
             : `${openCount} open alert${openCount === 1 ? '' : 's'}: ${flaggedCount} awaiting triage, ${investigatingCount} under investigation`
         }
         actions={
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" href="/admin/fraud/risk">
+            <Button variant="outline" href="/admin/fraud/risk" icon={<Activity />}>
               Risk decisions
             </Button>
             <Button icon={<Plus />} onClick={() => setShowCreate(true)}>
@@ -241,7 +242,32 @@ export default function AdminFraudPage() {
         }
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <StatGroup
+        title="Open alerts"
+        items={[
+          {
+            label: 'Awaiting triage',
+            value: flaggedCountError ? '–' : (flaggedData?.total ?? '–'),
+            subtitle: flaggedCountError ? 'Count unavailable' : 'Flagged, not yet picked up',
+            icon: AlertTriangle,
+            attention: flaggedCount > 0,
+          },
+          {
+            label: 'Under investigation',
+            value: investigatingCountError ? '–' : (investigatingData?.total ?? '–'),
+            subtitle: investigatingCountError ? 'Count unavailable' : 'Being worked on',
+            icon: Search,
+          },
+          {
+            label: 'Open in total',
+            value: countsUnavailable ? '–' : openCount,
+            subtitle: 'Same figure as the dashboard',
+            icon: ShieldAlert,
+          },
+        ]}
+      />
+
+      <OpsToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -263,27 +289,20 @@ export default function AdminFraudPage() {
           searchable={false}
           className="w-full sm:w-48"
         />
-      </div>
+      </OpsToolbar>
 
-      <Tabs
+      <FilterChips
+        label="Filter alerts by status"
         value={statusFilter}
-        onValueChange={(value) => {
-          setStatusFilter(value as StatusFilter);
+        onChange={(value) => {
+          setStatusFilter(value);
           setPage(1);
         }}
-        className=""
-      >
-        <TabsList className="max-w-full">
-          {statusOptions.map((option) => (
-            <TabsTrigger key={option.value} value={option.value}>
-              {option.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+        options={statusOptions}
+      />
 
       {isLoading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
             <CardSkeleton key={index} />
           ))}
@@ -296,9 +315,13 @@ export default function AdminFraudPage() {
           isRetrying={isFetching}
         />
       ) : alerts.length === 0 ? (
-        <EmptyState icon={ShieldAlert} title="No alerts match your filters" />
+        <EmptyState
+          icon={ShieldAlert}
+          title="No alerts match your filters"
+          description="Try another subject or entity, or clear the severity and status filters."
+        />
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {alerts.map((alert, index) => (
             <FraudAlertCard
               key={alert.id}

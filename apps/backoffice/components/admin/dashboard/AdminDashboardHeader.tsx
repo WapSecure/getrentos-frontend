@@ -14,6 +14,7 @@ export const AdminDashboardHeader = ({ greeting, firstName }: AdminDashboardHead
   const canReviewVerifications = useAdminCan('verifications.review');
   return (
     <PageHeader
+      eyebrow="Operations console"
       title={`${greeting}, ${firstName}`}
       description="Review platform activity, risk queues, and client-money operations."
       actions={

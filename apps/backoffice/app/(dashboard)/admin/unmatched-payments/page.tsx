@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CircleAlert } from '@sureground/icons';
+import { CircleAlert, Coins } from '@sureground/icons';
 import {
   Badge,
   Button,
@@ -17,6 +17,7 @@ import {
   useToast,
   PageHeader,
 } from '@sureground/ui';
+import { FactGrid, IconTile } from '@/components/admin/ops/OpsParts';
 import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -72,8 +73,16 @@ export default function UnmatchedPaymentsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Money"
         title="Unmatched payments"
         description="Payments the gateway confirmed for an amount that did not match what they were for. The payer has paid; refund it or apply it by hand, then record what you did."
+        meta={
+          query.data ? (
+            <Badge variant={filter === 'OPEN' && items.length > 0 ? 'warning' : 'neutral'} dot>
+              {items.length} {filter === 'OPEN' ? 'open' : 'resolved'}
+            </Badge>
+          ) : undefined
+        }
       />
 
       <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
@@ -106,17 +115,20 @@ export default function UnmatchedPaymentsPage() {
           {items.map((p: UnmatchedPayment) => {
             const diff = Number(p.receivedAmountKobo) - Number(p.expectedAmountKobo);
             return (
-              <Card key={p.id} className="p-5">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-medium text-foreground">
-                      {KIND_LABEL[p.kind] ?? p.kind} · received {naira(p.receivedAmountKobo)},
-                      expected {naira(p.expectedAmountKobo)}
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {formatDate(p.createdAt)} · reference {p.reference}
-                      {p.entityId ? ` · charge ${p.entityId}` : ''}
-                    </p>
+              <Card key={p.id} className="overflow-hidden p-0">
+                <div className="flex flex-wrap items-start justify-between gap-3 px-5 pt-5">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <IconTile tone={p.status === 'OPEN' ? 'primary' : 'neutral'}>
+                      <Coins />
+                    </IconTile>
+                    <div className="min-w-0">
+                      <p className="font-semibold tracking-[-0.01em] text-foreground">
+                        {KIND_LABEL[p.kind] ?? p.kind}
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        Confirmed {formatDate(p.createdAt)}
+                      </p>
+                    </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={diff < 0 ? 'warning' : 'info'}>
@@ -124,39 +136,58 @@ export default function UnmatchedPaymentsPage() {
                         ? `Short by ${naira(String(-diff))}`
                         : `Over by ${naira(String(diff))}`}
                     </Badge>
-                    <Badge variant={p.status === 'OPEN' ? 'warning' : 'success'}>
+                    <Badge variant={p.status === 'OPEN' ? 'warning' : 'success'} dot>
                       {p.status === 'OPEN' ? 'Open' : 'Resolved'}
                     </Badge>
                   </div>
                 </div>
 
-                {p.status === 'RESOLVED' ? (
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    {p.resolution}
-                    {p.resolvedAt ? ` · ${formatDate(p.resolvedAt)}` : ''}
-                  </p>
-                ) : canResolve ? (
-                  <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-start">
-                    <Textarea
-                      value={notes[p.id] ?? ''}
-                      onChange={(e) => setNotes((n) => ({ ...n, [p.id]: e.target.value }))}
-                      placeholder="What was done, e.g. Refunded in full on Paystack, ref RF-123"
-                      className="min-h-[72px] flex-1"
-                      aria-label={`Resolution for ${p.reference}`}
-                    />
-                    <Button
-                      onClick={() => resolve.mutate({ id: p.id, resolution: notes[p.id] ?? '' })}
-                      disabled={(notes[p.id] ?? '').trim().length < 10 || resolve.isPending}
-                      isLoading={resolve.isPending && resolve.variables?.id === p.id}
-                    >
-                      Mark resolved
-                    </Button>
-                  </div>
-                ) : (
-                  <p className="mt-3 text-xs text-muted-foreground">
-                    Resolving needs the rent-finance approval permission.
-                  </p>
-                )}
+                <FactGrid
+                  columns={4}
+                  className="mx-5 mt-4 rounded-lg border border-border bg-secondary/30 p-3"
+                  facts={[
+                    {
+                      label: 'Received',
+                      value: <span className="tabular-nums">{naira(p.receivedAmountKobo)}</span>,
+                    },
+                    {
+                      label: 'Expected',
+                      value: <span className="tabular-nums">{naira(p.expectedAmountKobo)}</span>,
+                    },
+                    { label: 'Reference', value: p.reference, mono: true },
+                    !!p.entityId && { label: 'Charge', value: p.entityId, mono: true },
+                  ]}
+                />
+
+                <div className="px-5 pb-5">
+                  {p.status === 'RESOLVED' ? (
+                    <p className="mt-4 text-sm text-muted-foreground">
+                      {p.resolution}
+                      {p.resolvedAt ? ` · ${formatDate(p.resolvedAt)}` : ''}
+                    </p>
+                  ) : canResolve ? (
+                    <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-start">
+                      <Textarea
+                        value={notes[p.id] ?? ''}
+                        onChange={(e) => setNotes((n) => ({ ...n, [p.id]: e.target.value }))}
+                        placeholder="What was done, e.g. Refunded in full on Paystack, ref RF-123"
+                        className="min-h-[72px] flex-1"
+                        aria-label={`Resolution for ${p.reference}`}
+                      />
+                      <Button
+                        onClick={() => resolve.mutate({ id: p.id, resolution: notes[p.id] ?? '' })}
+                        disabled={(notes[p.id] ?? '').trim().length < 10 || resolve.isPending}
+                        isLoading={resolve.isPending && resolve.variables?.id === p.id}
+                      >
+                        Mark resolved
+                      </Button>
+                    </div>
+                  ) : (
+                    <p className="mt-4 text-xs text-muted-foreground">
+                      Resolving needs the rent-finance approval permission.
+                    </p>
+                  )}
+                </div>
               </Card>
             );
           })}

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { HandCoins } from '@sureground/icons';
+import { Clock, HandCoins, PauseCircle, XCircle } from '@sureground/icons';
 import {
   Badge,
   Button,
@@ -13,6 +13,7 @@ import {
   ListSkeleton,
   PageErrorState,
   PageHeader,
+  StatGroup,
   Tabs,
   TabsList,
   TabsTrigger,
@@ -29,6 +30,13 @@ import {
   type PayoutRail,
   type PayoutSource,
 } from '@/services/adminPayoutIssuesService';
+import { FactGrid, IconTile } from '@/components/admin/ops/OpsParts';
+
+const sumOf = (rows: { amount: number }[] | undefined) =>
+  (rows ?? []).reduce((total, row) => total + row.amount, 0);
+
+const countFigure = (rows: { amount: number }[] | undefined, loaded: boolean) =>
+  loaded ? (rows?.length ?? 0) : '–';
 
 type View = 'failed' | 'stuck' | 'waiting';
 
@@ -121,8 +129,42 @@ export default function PayoutIssuesPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Money"
         title="Payouts needing attention"
         description="Payouts the bank refused, payouts that stopped before any money was sent, and transfers the bank has held for over a day, on every rail in one place. Retry a failed one once its account is right; sort a stuck one out by hand; check a waiting one with the payment company first."
+      />
+
+      <StatGroup
+        title="Across every rail"
+        className="mb-6"
+        items={[
+          {
+            label: 'Failed',
+            value: countFigure(query.data?.failed, !!query.data),
+            subtitle: query.data
+              ? `${formatCurrency(sumOf(query.data.failed))} refused by the bank`
+              : 'Refused by the bank',
+            icon: XCircle,
+            attention: (query.data?.failed.length ?? 0) > 0,
+          },
+          {
+            label: 'Stuck before sending',
+            value: countFigure(query.data?.stuck, !!query.data),
+            subtitle: query.data
+              ? `${formatCurrency(sumOf(query.data.stuck))} not sent`
+              : 'Stopped before any money was sent',
+            icon: PauseCircle,
+            attention: (query.data?.stuck.length ?? 0) > 0,
+          },
+          {
+            label: 'Waiting on the bank',
+            value: countFigure(query.data?.waiting, !!query.data),
+            subtitle: query.data
+              ? `${formatCurrency(sumOf(query.data.waiting))} held over a day`
+              : 'Held for over a day',
+            icon: Clock,
+          },
+        ]}
       />
 
       <Tabs value={view} onValueChange={(v) => setView(v as View)}>
@@ -157,17 +199,33 @@ export default function PayoutIssuesPage() {
             {query.data?.waiting.map((w) => (
               <Card key={`${w.kind}-${w.id}`} className="p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-medium text-foreground">
-                      {formatCurrency(w.amount)} · {w.beneficiary}
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {RAIL[w.kind]} · with the bank since {formatDate(w.since)} · reference{' '}
-                      {w.reference}
-                    </p>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <IconTile>
+                      <Clock />
+                    </IconTile>
+                    <div className="min-w-0">
+                      <p className="font-semibold tracking-[-0.01em] text-foreground">
+                        {w.beneficiary}
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">{RAIL[w.kind]}</p>
+                    </div>
                   </div>
-                  <Badge variant="info">Waiting</Badge>
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg font-semibold tabular-nums text-foreground">
+                      {formatCurrency(w.amount)}
+                    </span>
+                    <Badge variant="info" dot>
+                      Waiting
+                    </Badge>
+                  </div>
                 </div>
+                <FactGrid
+                  className="mt-4 rounded-lg border border-border bg-secondary/30 p-3"
+                  facts={[
+                    { label: 'With the bank since', value: formatDate(w.since) },
+                    { label: 'Reference', value: w.reference, mono: true },
+                  ]}
+                />
                 <p className="mt-3 text-xs text-muted-foreground">
                   Look this reference up on the payment company’s dashboard before doing anything:
                   it may still land, so sending it again could pay twice. If it is asking for an
@@ -192,46 +250,67 @@ export default function PayoutIssuesPage() {
           {items.map((p) => (
             <Card key={`${p.rail}-${p.id}`} className="p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-medium text-foreground">
-                    {formatCurrency(p.amount)} · {p.beneficiary}
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {RAIL[p.rail]} · started {formatDate(p.createdAt)} · {p.id}
-                  </p>
-                  {p.destination !== undefined && (
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {payoutAccountLabel(p.destination) ?? 'No payout account on file'}
-                      {p.destination?.accountChanged && (
-                        <Badge variant="warning" className="ml-2">
-                          Account changed
-                        </Badge>
-                      )}
+                <div className="flex min-w-0 items-center gap-3">
+                  <IconTile tone={view === 'failed' && !p.held ? 'danger' : 'warning'}>
+                    {view === 'failed' ? <XCircle /> : <PauseCircle />}
+                  </IconTile>
+                  <div className="min-w-0">
+                    <p className="font-semibold tracking-[-0.01em] text-foreground">
+                      {p.beneficiary}
                     </p>
-                  )}
+                    <p className="mt-0.5 text-xs text-muted-foreground">{RAIL[p.rail]}</p>
+                  </div>
                 </div>
-                <Badge
-                  variant={
-                    p.held?.needsApproval && isApproved(p)
-                      ? 'success'
-                      : p.held
-                        ? 'warning'
-                        : view === 'failed'
-                          ? 'danger'
-                          : 'warning'
-                  }
-                >
-                  {p.held
-                    ? p.held.needsApproval
-                      ? isApproved(p)
-                        ? 'Approved, ready to retry'
-                        : 'Needs approval'
-                      : 'Held by a limit'
-                    : view === 'failed'
-                      ? 'Failed'
-                      : 'Not sent'}
-                </Badge>
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-lg font-semibold tabular-nums text-foreground">
+                    {formatCurrency(p.amount)}
+                  </span>
+                  <Badge
+                    dot
+                    variant={
+                      p.held?.needsApproval && isApproved(p)
+                        ? 'success'
+                        : p.held
+                          ? 'warning'
+                          : view === 'failed'
+                            ? 'danger'
+                            : 'warning'
+                    }
+                  >
+                    {p.held
+                      ? p.held.needsApproval
+                        ? isApproved(p)
+                          ? 'Approved, ready to retry'
+                          : 'Needs approval'
+                        : 'Held by a limit'
+                      : view === 'failed'
+                        ? 'Failed'
+                        : 'Not sent'}
+                  </Badge>
+                </div>
               </div>
+
+              <FactGrid
+                columns={3}
+                className="mt-4 rounded-lg border border-border bg-secondary/30 p-3"
+                facts={[
+                  { label: 'Started', value: formatDate(p.createdAt) },
+                  { label: 'Payout', value: p.id, mono: true },
+                  p.destination !== undefined && {
+                    label: 'Payout account',
+                    value: (
+                      <>
+                        {payoutAccountLabel(p.destination) ?? 'No payout account on file'}
+                        {p.destination?.accountChanged && (
+                          <Badge variant="warning" className="ml-2">
+                            Account changed
+                          </Badge>
+                        )}
+                      </>
+                    ),
+                  },
+                ]}
+              />
 
               {p.held ? (
                 <p className="mt-3 text-sm text-foreground">
