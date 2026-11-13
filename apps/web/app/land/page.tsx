@@ -5,6 +5,7 @@ import { LandMarketplaceBrowser } from '@/components/land/LandMarketplaceBrowser
 import { ListingItemListJsonLd } from '@/components/seo/ListingItemListJsonLd';
 import { fetchFirstPage, isFilteredView, landFirstPagePath } from '@/lib/marketFirstPage';
 import { mapPublicLand } from '@/lib/publicLandMap';
+import { SITE_OG_IMAGES } from '@/lib/site';
 
 const baseMetadata: Metadata = {
   title: 'Land: Reviewed Land Listings',
@@ -12,6 +13,7 @@ const baseMetadata: Metadata = {
     'Browse land listings with a dated diligence review that shows what was checked, and payments held until you confirm each step.',
   alternates: { canonical: '/land' },
   openGraph: {
+    images: SITE_OG_IMAGES,
     title: 'Land: Reviewed Land Listings',
     description: 'Browse land listings with a dated, scoped diligence review on Sureground.',
     url: '/land',

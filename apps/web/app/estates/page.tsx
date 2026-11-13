@@ -6,6 +6,7 @@ import { PageHero } from '@/components/marketing/PageHero';
 import { EstatesDirectoryBrowser } from '@/components/estate/EstatesDirectoryBrowser';
 import type { EstateDirectoryEntry } from '@/types/estate-marketplace';
 import type { Paginated } from '@/lib/apiHelpers';
+import { SITE_OG_IMAGES } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'Estates: browse homes by estate',
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
     'Browse homes marketed by estates across Nigeria. See the live listings inside each estate, and whether the estate or the owner listed each one.',
   alternates: { canonical: '/estates' },
   openGraph: {
+    images: SITE_OG_IMAGES,
     title: 'Estates on Sureground',
     description: 'Browse homes inside estates across Nigeria, and see who listed each one.',
     url: '/estates',

@@ -10,6 +10,7 @@ import { LandingHero } from '@/components/marketing/LandingHero';
 import { SectionIntro } from '@/components/marketing/SectionIntro';
 import { photos } from '@/components/marketing/photos';
 import { ROUTES } from '@/lib/constants/auth';
+import { SITE_OG_IMAGES } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'For Realtors and Agencies',
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
     'Run your property business on Sureground: listings and your own public page, leads, viewings and offers, commission payouts, and agency tools for teams.',
   alternates: { canonical: '/agents' },
   openGraph: {
+    images: SITE_OG_IMAGES,
     title: 'Sureground for realtors and agencies',
     description: 'Listings, leads, offers and commissions in one workspace.',
     url: '/agents',

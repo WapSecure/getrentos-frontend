@@ -4,13 +4,15 @@ import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { DiasporaInvestLanding } from '@/components/diaspora/public/DiasporaInvestLanding';
 import { diasporaInvestEnabled } from '@/lib/diasporaAvailability';
+import { SITE_OG_IMAGES } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'Diaspora Invest: Buy and Manage Property in Nigeria from Abroad',
+  title: 'Buy and manage property in Nigeria from abroad',
   description:
     'Sureground Diaspora Invest: find, buy, own and manage property in Nigeria from abroad, with checks by named professionals, Sureground Payment Protection and one workspace for everything.',
   alternates: { canonical: '/diaspora' },
   openGraph: {
+    images: SITE_OG_IMAGES,
     title: 'Sureground Diaspora Invest',
     description: 'Invest back home, with evidence.',
     url: '/diaspora',
