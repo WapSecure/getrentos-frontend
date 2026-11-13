@@ -3,6 +3,7 @@
 import { Pin, PinOff, Archive, ArchiveRestore, Home } from '@sureground/icons';
 import { Badge, IconButton, type BadgeVariant } from '@sureground/ui';
 import { Conversation } from '@/types/messages';
+import { RecordAvatar } from '@/components/shared/records/RecordParts';
 
 interface ConversationItemProps {
   conversation: Conversation;
@@ -32,20 +33,11 @@ export const ConversationItem = ({
   onPin,
   onArchive,
 }: ConversationItemProps) => {
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((word) => word[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
-  };
-
   return (
     <div
       className={`group relative p-3 rounded-xl cursor-pointer transition-all ${
         isSelected
-          ? 'bg-accent border border-primary/20'
+          ? 'bg-primary/[0.06] border border-primary/25'
           : 'hover:bg-secondary border border-transparent'
       }`}
       onClick={onSelect}
@@ -62,9 +54,7 @@ export const ConversationItem = ({
     >
       <div className="flex items-start gap-3">
         <div className="relative shrink-0">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-            {getInitials(conversation.participantName)}
-          </div>
+          <RecordAvatar name={conversation.participantName} className="h-12 w-12" />
           {conversation.unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive rounded-full flex items-center justify-center text-2xs text-destructive-foreground font-medium">
               {conversation.unreadCount}

@@ -7,6 +7,7 @@ import { Badge, Button, Card } from '@sureground/ui';
 import { AcquisitionStatusBadges } from '@/components/shared/purchases/AcquisitionStatusBadges';
 import { PURCHASE_ROUTES } from '@/lib/constants/purchaseRoutes';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { RecordIconTile } from '@/components/shared/records/RecordParts';
 import type { BuyerEscrowTransaction, BuyerEscrowStatus } from '@/types/buyer';
 
 // Only the deposit is held under Payment Protection, so these name the deposit, not the price.
@@ -60,18 +61,23 @@ export const BuyerEscrowTransactionCard = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
     >
-      <Card interactive className="p-4">
+      <Card interactive className="group rounded-2xl p-4 hover:border-primary/30 sm:p-5">
         <Link
           href={PURCHASE_ROUTES.buyerWorkspace(transaction.id)}
           aria-label={`Open ${transaction.propertyTitle}`}
-          className="absolute inset-0 z-10 rounded-lg focus:outline-none"
+          className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
         />
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h3 className="truncate font-semibold text-foreground">{transaction.propertyTitle}</h3>
-            <p className="truncate text-xs text-muted-foreground">
-              Seller: {transaction.ownerName}
-            </p>
+          <div className="flex min-w-0 items-center gap-3">
+            <RecordIconTile icon={isFrozen || isRefunded ? ShieldAlert : ShieldCheck} />
+            <div className="min-w-0">
+              <h3 className="truncate font-semibold text-foreground transition-colors group-hover:text-primary">
+                {transaction.propertyTitle}
+              </h3>
+              <p className="truncate text-xs text-muted-foreground">
+                Seller: {transaction.ownerName}
+              </p>
+            </div>
           </div>
           <Badge
             variant={
@@ -96,7 +102,7 @@ export const BuyerEscrowTransactionCard = ({
           </Badge>
         </div>
 
-        <p className="mt-3 text-lg font-bold text-primary">
+        <p className="mt-4 text-lg font-bold tabular-nums text-primary">
           {formatCurrency(transaction.purchasePrice, { compact: true })}
         </p>
         <p className="text-xs text-muted-foreground">
@@ -119,7 +125,7 @@ export const BuyerEscrowTransactionCard = ({
           </p>
         )}
 
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
           <p className="text-xs text-muted-foreground">
             Opened {formatDate(transaction.createdAt)}
           </p>

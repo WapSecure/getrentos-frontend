@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import {
+  Handshake,
   Wallet,
   CreditCard,
   Banknote,
@@ -14,6 +15,7 @@ import {
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { formatCurrency, formatDate, formatAskingDifference } from '@/lib/format';
 import type { BuyerOffer, BuyerOfferStatus, FinancingType } from '@/types/buyer';
+import { RecordIconTile, recordCardClass } from '@/components/shared/records/RecordParts';
 
 const statusConfig: Record<
   BuyerOfferStatus,
@@ -94,22 +96,31 @@ export const BuyerOfferCard = ({ offer, onClick, delay = 0 }: BuyerOfferCardProp
           onClick();
         }
       }}
-      className="bg-card rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 border border-border p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
+      className={`group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${recordCardClass()}`}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="font-semibold text-foreground truncate">{offer.propertyTitle}</h3>
-          <p className="text-xs text-muted-foreground truncate">Owner: {offer.ownerName}</p>
+        <div className="flex min-w-0 items-center gap-3">
+          <RecordIconTile icon={Handshake} />
+          <div className="min-w-0">
+            <h3 className="truncate font-semibold text-foreground transition-colors group-hover:text-primary">
+              {offer.propertyTitle}
+            </h3>
+            <p className="text-xs text-muted-foreground truncate">Owner: {offer.ownerName}</p>
+          </div>
         </div>
-        <Badge variant={status.variant} icon={<StatusIcon className="w-3 h-3" />}>
+        <Badge
+          variant={status.variant}
+          icon={<StatusIcon className="w-3 h-3" />}
+          className="shrink-0"
+        >
           {status.label}
         </Badge>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mt-4">
+      <div className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-secondary/60 px-3.5 py-3">
         <div>
           <p className="text-xs text-muted-foreground">Your offer</p>
-          <p className="text-sm font-bold text-foreground">
+          <p className="text-sm font-semibold tabular-nums text-primary">
             {formatCurrency(offer.offerAmount, { compact: true })}
           </p>
           <p className={`text-xs ${diffPct >= 0 ? 'text-success' : 'text-destructive'}`}>

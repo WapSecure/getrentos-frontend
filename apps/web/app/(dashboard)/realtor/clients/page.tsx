@@ -5,12 +5,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Users } from '@sureground/icons';
+import { RecordGridSkeleton, RecordToolbar } from '@/components/shared/records/RecordParts';
 import { ClientCard } from '@/components/realtor/clients/ClientCard';
 import { AddClientModal } from '@/components/realtor/clients/AddClientModal';
 import {
   Button,
   EmptyState,
-  ListSkeleton,
   PageErrorState,
   Pagination,
   SearchInput,
@@ -97,6 +97,7 @@ export default function RealtorClientsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Clients"
         title="Clients"
         description={
           <>
@@ -120,7 +121,7 @@ export default function RealtorClientsPage() {
         className="mb-6"
       />
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <RecordToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -129,7 +130,7 @@ export default function RealtorClientsPage() {
           }}
           placeholder="Search clients..."
           label="Search clients"
-          className="flex-1 max-w-sm"
+          className="flex-1 sm:max-w-sm"
         />
         <Tabs
           value={filter}
@@ -146,10 +147,12 @@ export default function RealtorClientsPage() {
             ))}
           </TabsList>
         </Tabs>
-      </div>
+      </RecordToolbar>
 
       {isLoading ? (
-        <ListSkeleton variant="cards" rows={3} label="Loading clients" />
+        <div role="status" aria-busy="true" aria-label="Loading clients">
+          <RecordGridSkeleton />
+        </div>
       ) : clientsQuery.isError && !data ? (
         <PageErrorState
           title="Clients are unavailable"

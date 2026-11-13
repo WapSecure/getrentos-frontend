@@ -116,6 +116,7 @@ function AgentVerificationsPageContent() {
   return (
     <>
       <PageHeader
+        eyebrow="Work"
         title="Verification visits"
         description={
           <>

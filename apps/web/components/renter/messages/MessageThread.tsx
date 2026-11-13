@@ -5,6 +5,7 @@ import { Home } from '@sureground/icons';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
 import { Conversation } from '@/types/messages';
+import { RecordAvatar } from '@/components/shared/records/RecordParts';
 
 interface MessageThreadProps {
   conversation: Conversation;
@@ -30,22 +31,11 @@ export const MessageThread = ({ conversation, onSendMessage, currentUser }: Mess
     return Promise.resolve(false);
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((word) => word[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
-  };
-
   return (
-    <div className="bg-card rounded-xl border border-border flex flex-col h-[calc(100vh-300px)] min-h-[500px]">
+    <div className="bg-card rounded-2xl border border-border shadow-xs flex flex-col h-[calc(100vh-300px)] min-h-[500px]">
       <div className="p-4 border-b border-border flex items-center">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-            {getInitials(conversation.participantName)}
-          </div>
+          <RecordAvatar name={conversation.participantName} className="h-10 w-10" />
           <div>
             <h3 className="font-semibold text-foreground">{conversation.participantName}</h3>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">

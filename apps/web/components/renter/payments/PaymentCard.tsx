@@ -70,9 +70,9 @@ export const PaymentCard = ({
   const left = leftToPay(payment);
 
   return (
-    <article className="group p-4 transition-colors hover:bg-secondary/50 sm:p-5">
+    <article className="group p-4 transition-colors hover:bg-primary/[0.03] sm:p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/15">
           <StatusIcon className="h-5 w-5" aria-hidden="true" />
         </div>
 

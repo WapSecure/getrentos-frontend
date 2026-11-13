@@ -95,7 +95,7 @@ export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
             <h4 className="text-sm font-medium text-foreground mb-2">Landlord information</h4>
             <div className="p-3 rounded-lg bg-secondary">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary ring-1 ring-inset ring-primary/15">
                   {lease.landlord.name.charAt(0)}
                 </div>
                 <div className="flex-1">

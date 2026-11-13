@@ -141,6 +141,7 @@ export default function BuyerMessagesPage() {
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col">
       <PageHeader
+        eyebrow="Inbox"
         title="Messages"
         description="Communicate with owners, realtors, and support"
         meta={

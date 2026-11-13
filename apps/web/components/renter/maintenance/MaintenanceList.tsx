@@ -78,10 +78,12 @@ export const MaintenanceList = ({
   return (
     <>
       <Card>
-        <div className="p-4 border-b border-border">
+        <div className="border-b border-border px-4 py-4 sm:px-5">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h2 className="font-semibold text-foreground">Maintenance requests</h2>
+              <h2 className="text-base font-semibold tracking-[-0.015em] text-foreground">
+                Maintenance requests
+              </h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {pluralize(filteredRequests.length, 'request')} found
               </p>

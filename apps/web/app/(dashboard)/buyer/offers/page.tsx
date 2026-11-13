@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Handshake } from '@sureground/icons';
+import { RecordGridSkeleton, RecordToolbar } from '@/components/shared/records/RecordParts';
 import { BuyerOfferCard } from '@/components/buyer/offers/BuyerOfferCard';
 import { MAKE_OFFER_DRAFT_KEY, MakeOfferModal } from '@/components/buyer/offers/MakeOfferModal';
 import { BuyerOfferNegotiationModal } from '@/components/buyer/offers/BuyerOfferNegotiationModal';
@@ -13,7 +14,6 @@ import {
   QueryState,
   SearchInput,
   SegmentedControl,
-  Skeleton,
   hasSessionDraft,
   useToast,
   PageHeader,
@@ -180,6 +180,7 @@ function BuyerOffersPageContent() {
   return (
     <>
       <PageHeader
+        eyebrow="Buying"
         title="Offers"
         description={
           <>
@@ -209,7 +210,7 @@ function BuyerOffersPageContent() {
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <RecordToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -218,7 +219,7 @@ function BuyerOffersPageContent() {
           }}
           placeholder="Search by property..."
           label="Search offers"
-          className="flex-1 max-w-sm"
+          className="flex-1 sm:max-w-sm"
         />
         <SegmentedControl
           size="sm"
@@ -229,9 +230,9 @@ function BuyerOffersPageContent() {
             setPage(1);
           }}
           segments={filterOptions}
-          className="max-w-full overflow-x-auto"
+          className="max-w-full overflow-x-auto sm:ml-auto"
         />
-      </div>
+      </RecordToolbar>
 
       <QueryState
         isLoading={offersQuery.isLoading}
@@ -249,10 +250,8 @@ function BuyerOffersPageContent() {
         }}
         scope="page"
         loading={
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" aria-busy="true">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-48 rounded-2xl" />
-            ))}
+          <div aria-busy="true">
+            <RecordGridSkeleton />
           </div>
         }
       >

@@ -62,6 +62,7 @@ export default function AgentReviewsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Reputation"
         title="Reviews & reputation"
         description="See how clients and admins rate your fieldwork"
       />

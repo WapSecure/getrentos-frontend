@@ -11,6 +11,7 @@ import {
   Bath,
 } from '@sureground/icons';
 import { Badge, Card, type BadgeVariant } from '@sureground/ui';
+import { RecordIconTile } from '@/components/shared/records/RecordParts';
 import { formatCurrency } from '@/lib/format';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';
 
@@ -35,10 +36,13 @@ export const RealtorListingCard = ({ listing, onClick }: RealtorListingCardProps
   const StatusIcon = status.icon;
 
   return (
-    <Card interactive>
-      <div className="relative h-40 bg-muted">
+    <Card
+      interactive
+      className="group rounded-2xl hover:border-primary/30 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background"
+    >
+      <div className="relative h-32 border-b border-border bg-primary/[0.05]">
         <div className="absolute inset-0 flex items-center justify-center">
-          <Megaphone className="w-12 h-12 text-muted-foreground" />
+          <RecordIconTile icon={Megaphone} />
         </div>
         <Badge
           variant={status.variant}
@@ -52,8 +56,8 @@ export const RealtorListingCard = ({ listing, onClick }: RealtorListingCardProps
         </Badge>
       </div>
 
-      <div className="p-4">
-        <h3 className="font-semibold text-foreground truncate">
+      <div className="p-4 sm:p-5">
+        <h3 className="truncate font-semibold text-foreground transition-colors group-hover:text-primary">
           <button
             type="button"
             onClick={onClick}
@@ -68,7 +72,7 @@ export const RealtorListingCard = ({ listing, onClick }: RealtorListingCardProps
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">Client: {listing.clientName}</p>
 
-        <p className="text-lg font-bold text-primary mt-3">
+        <p className="text-lg font-bold tabular-nums text-primary mt-3">
           {formatCurrency(listing.price, { compact: true })}
           {listing.category === 'rental' ? '/yr' : ''}
         </p>
