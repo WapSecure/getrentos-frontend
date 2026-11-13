@@ -13,7 +13,8 @@ const baseMetadata: Metadata = {
   alternates: { canonical: '/shortlets' },
   openGraph: {
     title: 'Shortlets: Furnished Short-Stay Apartments',
-    description: 'Book verified, furnished short-stay apartments and homes on Sureground.',
+    description:
+      'Book furnished short-stay apartments and homes in Nigeria. See the total before you pay, with your payment held until after check-in.',
     url: '/shortlets',
     type: 'website',
   },
