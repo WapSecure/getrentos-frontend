@@ -97,43 +97,45 @@ export const ManagedIntakeDialog = ({
 
   return (
     <Dialog open={!!property} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto p-0">
-        <div className="border-b border-border p-4">
-          <DialogTitle className="font-semibold text-foreground">
+      <DialogContent size="lg" padded={false} className="max-h-[88dvh] overscroll-contain">
+        <div className="border-b border-border p-5 pr-12 sm:px-6">
+          <DialogTitle className="text-lg font-semibold text-foreground">
             Ask Sureground to manage {property?.name}
           </DialogTitle>
-          <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
+          <DialogDescription className="mt-0.5 text-sm text-muted-foreground">
             Tell us about the property. We visit, then send you a proposal to accept. Nothing is
             agreed until you accept it.
           </DialogDescription>
         </div>
 
-        <div className="space-y-4 p-4">
-          <Field label="Service level">
-            <Select
-              ariaLabel="Service level"
-              value={tier}
-              onValueChange={(v) => setTier(v as ServicingTier)}
-              options={cards.map((c) => ({
-                value: c.tier,
-                label: `${c.name}: ${c.feePct}% of rent collected`,
-              }))}
-            />
-          </Field>
+        <div className="space-y-4 p-5 sm:px-6">
+          <div className="grid gap-4 sm:grid-cols-2 sm:gap-3">
+            <Field label="Service level">
+              <Select
+                ariaLabel="Service level"
+                value={tier}
+                onValueChange={(v) => setTier(v as ServicingTier)}
+                options={cards.map((c) => ({
+                  value: c.tier,
+                  label: `${c.name}: ${c.feePct}% of rent collected`,
+                }))}
+              />
+            </Field>
 
-          <Field label="What kind of property is it?">
-            <Select
-              ariaLabel="What kind of property is it?"
-              value={propertyClass}
-              onValueChange={(v) => setPropertyClass(v as ManagedPropertyClass)}
-              options={Object.entries(PROPERTY_CLASS_LABEL).map(([value, label]) => ({
-                value,
-                label,
-              }))}
-            />
-          </Field>
+            <Field label="What kind of property is it?">
+              <Select
+                ariaLabel="What kind of property is it?"
+                value={propertyClass}
+                onValueChange={(v) => setPropertyClass(v as ManagedPropertyClass)}
+                options={Object.entries(PROPERTY_CLASS_LABEL).map(([value, label]) => ({
+                  value,
+                  label,
+                }))}
+              />
+            </Field>
+          </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Field label="Units">
               <NumberInput value={unitCount} onValueChange={setUnitCount} />
             </Field>
@@ -143,14 +145,14 @@ export const ManagedIntakeDialog = ({
             >
               <NumberInput value={occupied} onValueChange={setOccupied} />
             </Field>
+            <Field
+              label="Rent a year across the property"
+              hint="Optional. Used for the fee estimate."
+              className="col-span-2 sm:col-span-1"
+            >
+              <CurrencyInput prefix="₦" value={rentRoll || ''} onValueChange={setRentRoll} />
+            </Field>
           </div>
-
-          <Field
-            label="Rent a year across the property"
-            hint="Optional. Used for the fee estimate."
-          >
-            <CurrencyInput prefix="₦" value={rentRoll || ''} onValueChange={setRentRoll} />
-          </Field>
 
           <Field label="What do you need help with?">
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -190,7 +192,7 @@ export const ManagedIntakeDialog = ({
           {error && <Alert variant="danger">{error}</Alert>}
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-border p-4">
+        <div className="flex justify-end gap-2 border-t border-border p-5 sm:px-6">
           <Button variant="ghost" onClick={onClose} disabled={submit.isPending}>
             Cancel
           </Button>

@@ -59,19 +59,19 @@ export const TriageResultModal = ({
   canAssignVendor = false,
 }: TriageResultModalProps) => (
   <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-    <DialogContent className="p-0">
-      <div className="p-4 border-b border-border">
+    <DialogContent size="lg" padded={false} className="max-h-[88dvh]">
+      <div className="px-5 py-4 pr-12 border-b border-border sm:px-6">
         <DialogTitle className="flex items-center gap-2 text-xl font-semibold tracking-[-0.02em] text-foreground">
           <Sparkles className="w-4.5 h-4.5 text-primary" />
           Automated triage
         </DialogTitle>
-        <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+        <DialogDescription className="text-sm text-muted-foreground mt-0.5">
           A suggested category, urgency and work order for this request. Review before you act.
         </DialogDescription>
       </div>
 
       {!triage ? (
-        <div className="p-4">
+        <div className="p-5 sm:p-6">
           <p className="text-sm text-muted-foreground">Reading the request…</p>
         </div>
       ) : (
@@ -120,7 +120,7 @@ const TriageBody = ({
   const priority = maintenancePriorityBadges[urgency] ?? maintenancePriorityBadges.low;
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-5 space-y-5 sm:p-6">
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="neutral" icon={<CategoryIcon className="w-3 h-3" />}>
           {categoryLabel(category)}

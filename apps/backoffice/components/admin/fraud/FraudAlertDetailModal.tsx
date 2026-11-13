@@ -92,7 +92,11 @@ export const FraudAlertDetailModal = ({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-lg overflow-hidden flex flex-col p-0">
+      <DialogContent
+        size="lg"
+        padded={false}
+        className="flex max-h-[88dvh] flex-col overflow-hidden"
+      >
         <div className="shrink-0 border-b border-border px-5 py-4 pr-12">
           <div className="flex items-start gap-3">
             <IconTile tone={isTerminal ? 'neutral' : severity.tone}>
@@ -119,7 +123,7 @@ export const FraudAlertDetailModal = ({
           </div>
         </div>
 
-        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 py-4">
           {loading ? (
             <div className="space-y-3" role="status" aria-label="Loading alert detail">
               <Skeleton className="h-3 w-1/4" />

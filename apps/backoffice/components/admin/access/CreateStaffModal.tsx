@@ -71,8 +71,8 @@ export const CreateStaffModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-0">
-        <div className="p-6">
+      <DialogContent size="lg" padded={false}>
+        <div className="p-6 sm:p-7">
           <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
             <ShieldPlus className="h-5 w-5 text-primary" />
           </div>
@@ -84,26 +84,28 @@ export const CreateStaffModal = ({
           </DialogDescription>
 
           <form method="post" onSubmit={handleSubmit} className="mt-5 space-y-4">
-            <Field label="Full name" htmlFor="staff-name" required>
-              <Input
-                id="staff-name"
-                value={legalName}
-                onChange={(e) => setLegalName(e.target.value)}
-                placeholder="e.g. Ada Obi"
-                autoComplete="off"
-              />
-            </Field>
+            <div className="grid gap-4 sm:grid-cols-2 sm:gap-3">
+              <Field label="Full name" htmlFor="staff-name" required>
+                <Input
+                  id="staff-name"
+                  value={legalName}
+                  onChange={(e) => setLegalName(e.target.value)}
+                  placeholder="e.g. Ada Obi"
+                  autoComplete="off"
+                />
+              </Field>
 
-            <Field label="Work email" htmlFor="staff-email" required>
-              <Input
-                id="staff-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="ada@getsureground.io"
-                autoComplete="off"
-              />
-            </Field>
+              <Field label="Work email" htmlFor="staff-email" required>
+                <Input
+                  id="staff-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="ada@getsureground.io"
+                  autoComplete="off"
+                />
+              </Field>
+            </div>
 
             <Field label="Role" hint={role ? ADMIN_ROLE_DETAILS[role].description : undefined}>
               <Select
