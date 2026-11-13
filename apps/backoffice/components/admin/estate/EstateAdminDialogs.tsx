@@ -71,16 +71,23 @@ export function HouseholdEditorDialog({
           if (!open) onClose();
         }}
       >
-        <DialogContent className="p-6">
+        <DialogContent size="lg">
           <DialogTitle className="font-semibold">Correct household</DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             Changes apply platform-wide and are written to the audit trail.
           </DialogDescription>
           <div className="mt-5 space-y-4">
-            <Field label="Unit label">
-              <Input value={unitLabel} onChange={(e) => setUnitLabel(e.target.value)} />
-            </Field>
             <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Unit label">
+                <Input value={unitLabel} onChange={(e) => setUnitLabel(e.target.value)} />
+              </Field>
+              <Field label="Status">
+                <Select
+                  value={status}
+                  onValueChange={(v) => setStatus(v as typeof status)}
+                  options={householdStatusOptions}
+                />
+              </Field>
               <Field label="Contact phone">
                 <Input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
               </Field>
@@ -88,13 +95,6 @@ export function HouseholdEditorDialog({
                 <Input value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
               </Field>
             </div>
-            <Field label="Status">
-              <Select
-                value={status}
-                onValueChange={(v) => setStatus(v as typeof status)}
-                options={householdStatusOptions}
-              />
-            </Field>
             {household?.residentLinked && (
               <Checkbox
                 checked={unlinkResident}

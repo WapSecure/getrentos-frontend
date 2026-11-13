@@ -118,69 +118,77 @@ export const PaymentDetailsModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="p-0 sm:p-0">
-        <div className="p-4 pr-12 border-b border-border">
-          <DialogTitle className="font-semibold text-foreground">Payment details</DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+      <DialogContent size="lg" padded={false} className="max-h-[88dvh]">
+        <div className="px-5 py-4 pr-12 border-b border-border sm:px-6">
+          <DialogTitle className="text-lg font-semibold text-foreground">
+            Payment details
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground mt-0.5">
             {payment.propertyName}
           </DialogDescription>
         </div>
 
-        <div className="p-4 space-y-4">
-          <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-secondary">
-            <div>
-              <p className="text-xs text-muted-foreground">
-                {isPayable ? 'Still to pay' : 'Amount'}
-              </p>
-              <p className="text-2xl font-bold text-primary">
-                {formatCurrency(isPayable ? left : payment.amount)}
-              </p>
+        <div className="p-5 space-y-5 sm:p-6">
+          <div className="grid gap-5 md:grid-cols-2 md:items-start">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-3 p-4 rounded-xl bg-secondary">
+                <div>
+                  <p className="text-xs text-muted-foreground">
+                    {isPayable ? 'Still to pay' : 'Amount'}
+                  </p>
+                  <p className="text-2xl font-bold text-primary">
+                    {formatCurrency(isPayable ? left : payment.amount)}
+                  </p>
+                </div>
+                <Badge variant={status.variant}>{status.label}</Badge>
+              </div>
+
+              <InvoiceLines
+                lines={payment.lines}
+                periodStart={payment.periodStart}
+                periodEnd={payment.periodEnd}
+              />
+
+              {payment.escrowStatus !== 'not_funded' && (
+                <Alert variant="info" icon={Shield} title="Where your money is">
+                  {escrowStatusBadges[payment.escrowStatus]?.label ?? payment.escrowStatus}
+                  {payment.escrowStatus === 'held' && (
+                    <p className="text-xs mt-1">
+                      {releaseAction === 'release-now' ? (
+                        payment.releaseDate ? (
+                          <>
+                            Held under Sureground Payment Protection. It releases to your landlord
+                            on {formatLagosDate(payment.releaseDate)}, or now if you choose to
+                            release it.
+                          </>
+                        ) : (
+                          <>Held under Sureground Payment Protection until you release it.</>
+                        )
+                      ) : (
+                        <>
+                          Held under Sureground Payment Protection so you have the home in hand
+                          first.{' '}
+                          {payment.releaseDate ? (
+                            <>
+                              It releases to your landlord on {formatLagosDate(payment.releaseDate)}
+                              , or sooner, the moment you confirm you&apos;ve moved in.
+                            </>
+                          ) : (
+                            <>It stays held until you confirm you&apos;ve moved in.</>
+                          )}
+                        </>
+                      )}
+                    </p>
+                  )}
+                </Alert>
+              )}
             </div>
-            <Badge variant={status.variant}>{status.label}</Badge>
+
+            <DescriptionList items={facts} layout="rows" className="-my-3" />
           </div>
 
-          <InvoiceLines
-            lines={payment.lines}
-            periodStart={payment.periodStart}
-            periodEnd={payment.periodEnd}
-          />
-
-          <DescriptionList items={facts} layout="rows" />
-
-          {payment.escrowStatus !== 'not_funded' && (
-            <Alert variant="info" icon={Shield} title="Where your money is">
-              {escrowStatusBadges[payment.escrowStatus]?.label ?? payment.escrowStatus}
-              {payment.escrowStatus === 'held' && (
-                <p className="text-xs mt-1">
-                  {releaseAction === 'release-now' ? (
-                    payment.releaseDate ? (
-                      <>
-                        Held under Sureground Payment Protection. It releases to your landlord on{' '}
-                        {formatLagosDate(payment.releaseDate)}, or now if you choose to release it.
-                      </>
-                    ) : (
-                      <>Held under Sureground Payment Protection until you release it.</>
-                    )
-                  ) : (
-                    <>
-                      Held under Sureground Payment Protection so you have the home in hand first.{' '}
-                      {payment.releaseDate ? (
-                        <>
-                          It releases to your landlord on {formatLagosDate(payment.releaseDate)}, or
-                          sooner — the moment you confirm you&apos;ve moved in.
-                        </>
-                      ) : (
-                        <>It stays held until you confirm you&apos;ve moved in.</>
-                      )}
-                    </>
-                  )}
-                </p>
-              )}
-            </Alert>
-          )}
-
           {(isHeld || payment.receiptUrl) && (
-            <div className="flex flex-wrap gap-2 pt-2">
+            <div className="flex flex-wrap gap-2 border-t border-border pt-4">
               {isHeld && releaseAction && (
                 <Button
                   variant={releaseAction === 'confirm-move-in' ? 'primary' : 'outline'}

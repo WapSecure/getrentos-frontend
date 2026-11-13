@@ -113,7 +113,11 @@ export function DiscoveryMap({
         await import('leaflet-draw');
         if (cancelled || !containerRef.current) return;
         leafletRef.current = L;
-        const map = L.map(containerRef.current, { zoomControl: true, attributionControl: true });
+        const map = L.map(containerRef.current, {
+          zoomControl: true,
+          attributionControl: true,
+          scrollWheelZoom: false,
+        });
         addBaseTiles(L, map);
         map.setView(LAGOS, 11);
         // Only a move the person made offers "Search this area"; fitting to results does not.

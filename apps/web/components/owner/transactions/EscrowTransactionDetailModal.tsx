@@ -125,7 +125,11 @@ export const EscrowTransactionDetailModal = ({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden p-0 sm:max-w-lg">
+      <DialogContent
+        size="lg"
+        padded={false}
+        className="flex max-h-[88dvh] flex-col overflow-hidden"
+      >
         <div className="shrink-0 border-b border-border p-4 pr-12">
           <DialogTitle className="font-semibold text-foreground">
             {transaction.propertyName}
@@ -135,7 +139,7 @@ export const EscrowTransactionDetailModal = ({
           </DialogDescription>
         </div>
 
-        <div className="flex-1 space-y-5 overflow-y-auto p-4">
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain p-4">
           <div className="flex items-center justify-between rounded-lg bg-secondary/60 p-3">
             <span className="text-sm text-muted-foreground">Sale price</span>
             <span className="text-lg font-bold text-primary">

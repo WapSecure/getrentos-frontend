@@ -161,8 +161,8 @@ export const LandRegistrationDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={close}>
-      <DialogContent className="p-0">
-        <div className="border-b border-border p-5">
+      <DialogContent size="lg" padded={false} className="flex max-h-[88dvh] flex-col">
+        <div className="shrink-0 border-b border-border p-5 pr-12 sm:px-6">
           <div className="flex items-start gap-3">
             <span className="rounded-xl bg-primary/10 p-2.5 text-primary">
               <MapPinned className="h-5 w-5" />
@@ -179,7 +179,7 @@ export const LandRegistrationDialog = ({
           </div>
         </div>
 
-        <div className="max-h-[68vh] space-y-4 overflow-y-auto p-5">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-5 sm:px-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Land title" required className="sm:col-span-2">
               <Input
@@ -298,7 +298,7 @@ export const LandRegistrationDialog = ({
           {error && <Alert variant="danger">{error}</Alert>}
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-border p-5">
+        <div className="flex shrink-0 justify-end gap-3 border-t border-border p-5 sm:px-6">
           <Button variant="ghost" rounded="lg" onClick={() => close(false)} disabled={isSubmitting}>
             Cancel
           </Button>

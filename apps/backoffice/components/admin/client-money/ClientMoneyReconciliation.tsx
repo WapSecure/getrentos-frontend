@@ -183,7 +183,7 @@ export function ClientMoneyReconciliation() {
       )}
 
       <Dialog open={attestOpen} onOpenChange={setAttestOpen}>
-        <DialogContent>
+        <DialogContent size="lg">
           <DialogTitle className="text-lg font-semibold text-foreground">
             Record what the bank holds
           </DialogTitle>
@@ -207,17 +207,19 @@ export function ClientMoneyReconciliation() {
                 className="w-full"
               />
             </Field>
-            <Field label="Business date" required>
-              <DatePicker value={asOfDate} onChange={setAsOfDate} className="w-full" />
-            </Field>
-            <Field label="Balance in the pool" required>
-              <CurrencyInput
-                prefix="₦"
-                value={balance}
-                onValueChange={setBalance}
-                placeholder="0"
-              />
-            </Field>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Business date" required>
+                <DatePicker value={asOfDate} onChange={setAsOfDate} className="w-full" />
+              </Field>
+              <Field label="Balance in the pool" required>
+                <CurrencyInput
+                  prefix="₦"
+                  value={balance}
+                  onValueChange={setBalance}
+                  placeholder="0"
+                />
+              </Field>
+            </div>
             <Field label="Where the figure came from" hint="Optional. e.g. GTB *4821 closing">
               <Input
                 value={note}

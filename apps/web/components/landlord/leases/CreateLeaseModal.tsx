@@ -125,17 +125,19 @@ export const CreateLeaseModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
-      <DialogContent padded={false} className="flex flex-col">
-        <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3 shrink-0">
+      <DialogContent size="lg" padded={false} className="flex max-h-[88dvh] flex-col">
+        <div className="px-5 py-4 pr-12 border-b border-border flex justify-between items-center gap-3 shrink-0 sm:px-6">
           <div className="min-w-0">
-            <DialogTitle className="font-semibold text-foreground">Create lease</DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+            <DialogTitle className="text-lg font-semibold text-foreground">
+              Create lease
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground mt-0.5">
               Draft a new lease agreement
             </DialogDescription>
           </div>
         </div>
 
-        <div className="p-4 space-y-4 overflow-y-auto flex-1">
+        <div className="min-h-0 flex-1 p-5 space-y-4 overflow-y-auto overscroll-contain sm:px-6">
           {vacantUnits.length === 0 ? (
             <EmptyState
               icon={DoorOpen}
@@ -146,45 +148,48 @@ export const CreateLeaseModal = ({
             />
           ) : (
             <>
-              <Field label="Unit" required>
-                <Select
-                  value={unitId}
-                  onValueChange={handleUnitChange}
-                  placeholder="Select a vacant unit"
-                  options={vacantUnits.map((u) => ({
-                    value: u.id,
-                    label: `${u.propertyName}: ${u.unitName}`,
-                  }))}
-                />
-              </Field>
-
-              <div>
-                <Field label="Tenant name" required>
-                  <Input
-                    type="text"
-                    value={tenantName}
-                    onChange={(e) => setTenantName(e.target.value)}
-                    placeholder="Full legal name"
+              <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-3">
+                <Field label="Unit" required>
+                  <Select
+                    value={unitId}
+                    onValueChange={handleUnitChange}
+                    placeholder="Select a vacant unit"
+                    options={vacantUnits.map((u) => ({
+                      value: u.id,
+                      label: `${u.propertyName}: ${u.unitName}`,
+                    }))}
                   />
                 </Field>
-                {selectedUnit?.approvedApplicant ? (
-                  <p className="mt-1.5 flex items-start gap-1.5 text-xs text-success">
-                    <BadgeCheck className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                    <span>
-                      {selectedUnit.approvedApplicant.name} was approved for this unit. This lease
-                      is linked to their account so they can review and sign it in their own portal.
-                    </span>
-                  </p>
-                ) : selectedUnit ? (
-                  <p className="mt-1.5 text-xs text-muted-foreground">
-                    No approved applicant for this unit: the lease is recorded against this name
-                    only, and the tenant will not see it in a Sureground account.
-                  </p>
-                ) : (
-                  <p className="mt-1.5 text-xs text-muted-foreground">
-                    Choose a unit first: an approved applicant for it is filled in here.
-                  </p>
-                )}
+
+                <div>
+                  <Field label="Tenant name" required>
+                    <Input
+                      type="text"
+                      value={tenantName}
+                      onChange={(e) => setTenantName(e.target.value)}
+                      placeholder="Full legal name"
+                    />
+                  </Field>
+                  {selectedUnit?.approvedApplicant ? (
+                    <p className="mt-1.5 flex items-start gap-1.5 text-xs text-success">
+                      <BadgeCheck className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      <span>
+                        {selectedUnit.approvedApplicant.name} was approved for this unit. This lease
+                        is linked to their account so they can review and sign it in their own
+                        portal.
+                      </span>
+                    </p>
+                  ) : selectedUnit ? (
+                    <p className="mt-1.5 text-xs text-muted-foreground">
+                      No approved applicant for this unit: the lease is recorded against this name
+                      only, and the tenant will not see it in a Sureground account.
+                    </p>
+                  ) : (
+                    <p className="mt-1.5 text-xs text-muted-foreground">
+                      Choose a unit first: an approved applicant for it is filled in here.
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -196,7 +201,7 @@ export const CreateLeaseModal = ({
                 </Field>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <Field label="Rent period" required>
                   <Select
                     value={rentPeriod}
@@ -228,7 +233,7 @@ export const CreateLeaseModal = ({
         </div>
 
         {vacantUnits.length > 0 && (
-          <div className="p-4 border-t border-border flex gap-3 shrink-0">
+          <div className="px-5 py-4 border-t border-border flex gap-3 shrink-0 sm:px-6">
             <Button
               variant="outline"
               fullWidth

@@ -75,33 +75,35 @@ export const AddUnitModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
-      <DialogContent padded={false}>
-        <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3">
+      <DialogContent size="lg" padded={false} className="max-h-[88dvh] overscroll-contain">
+        <div className="px-5 py-4 pr-12 border-b border-border flex justify-between items-center gap-3 sm:px-6">
           <div className="min-w-0">
-            <DialogTitle className="font-semibold text-foreground">Add unit</DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+            <DialogTitle className="text-lg font-semibold text-foreground">Add unit</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground mt-0.5">
               Define a new unit within a property
             </DialogDescription>
           </div>
         </div>
 
-        <div className="p-4 space-y-4">
-          <Field label="Property" required>
-            <Select
-              value={propertyId}
-              onValueChange={setSelectedPropertyId}
-              options={properties.map((p) => ({ value: p.id, label: p.name }))}
-            />
-          </Field>
+        <div className="p-5 space-y-4 sm:px-6">
+          <div className="grid gap-4 sm:grid-cols-2 sm:gap-3">
+            <Field label="Property" required>
+              <Select
+                value={propertyId}
+                onValueChange={setSelectedPropertyId}
+                options={properties.map((p) => ({ value: p.id, label: p.name }))}
+              />
+            </Field>
 
-          <Field label="Unit name" required>
-            <Input
-              type="text"
-              value={unitName}
-              onChange={(e) => setUnitName(e.target.value)}
-              placeholder="e.g. Unit 3B"
-            />
-          </Field>
+            <Field label="Unit name" required>
+              <Input
+                type="text"
+                value={unitName}
+                onChange={(e) => setUnitName(e.target.value)}
+                placeholder="e.g. Unit 3B"
+              />
+            </Field>
+          </div>
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Bedrooms">
@@ -142,7 +144,7 @@ export const AddUnitModal = ({
           </Field>
         </div>
 
-        <div className="p-4 border-t border-border flex gap-3">
+        <div className="px-5 py-4 border-t border-border flex gap-3 sm:px-6">
           <Button
             variant="primary"
             fullWidth
