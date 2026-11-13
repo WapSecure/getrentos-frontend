@@ -616,6 +616,7 @@ export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBro
               <div className="min-w-0 lg:max-h-[88dvh] lg:overflow-y-auto lg:overscroll-contain">
                 <div className="relative h-56 bg-muted sm:h-72 lg:h-80">
                   {activeListing.coverImageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- signed listing photo with its own srcSet variants
                     <img
                       src={activeListing.coverImageUrl}
                       srcSet={srcSetOf(activeListing.imageVariants)}
