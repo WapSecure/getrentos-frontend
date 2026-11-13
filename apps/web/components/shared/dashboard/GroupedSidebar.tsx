@@ -153,7 +153,7 @@ function SidebarLink({
       className="sidebar-item"
     >
       <Icon className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
-      <span className="sidebar-item-label min-w-0 flex-1 truncate" title={item.label}>
+      <span className="sidebar-item-label min-w-0 flex-1 truncate" title={typeof item.label === 'string' ? item.label : undefined}>
         {item.label}
       </span>
       {item.locked && (
