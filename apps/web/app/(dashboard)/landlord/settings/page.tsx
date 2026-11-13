@@ -47,7 +47,11 @@ export default function LandlordSettingsPage() {
 
   return (
     <>
-      <PageHeader title="Settings" description="Manage your account preferences and automation" />
+      <PageHeader
+        eyebrow="Account"
+        title="Settings"
+        description="Manage your account preferences and automation"
+      />
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-64 shrink-0">

@@ -51,6 +51,7 @@ export default function LandlordReviewsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Reputation"
         title="Reviews & reputation"
         description="See how tenants rate their experience with you"
       />

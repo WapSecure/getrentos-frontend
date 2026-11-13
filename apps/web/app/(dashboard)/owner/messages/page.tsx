@@ -118,7 +118,11 @@ export default function OwnerMessagesPage() {
 
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col">
-      <PageHeader title="Messages" description="Communicate with buyers, realtors, and support" />
+      <PageHeader
+        eyebrow="Inbox"
+        title="Messages"
+        description="Communicate with buyers, realtors, and support"
+      />
 
       <div className="flex min-h-0 flex-1 gap-4">
         <div

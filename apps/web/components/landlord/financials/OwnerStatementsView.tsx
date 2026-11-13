@@ -231,6 +231,7 @@ export function OwnerStatementsView() {
   return (
     <>
       <PageHeader
+        eyebrow="Money"
         title="Owner statements"
         description="Generate a per-period statement from real rent income, expenses, and management fees"
         actions={

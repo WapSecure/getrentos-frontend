@@ -151,6 +151,7 @@ export default function LandlordOffersPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Lettings"
         title="Offers"
         description={
           <>

@@ -17,6 +17,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Building2 } from '@sureground/icons';
+import { RecordToolbar } from '@/components/shared/records/RecordParts';
 import { PropertyCard } from '@/components/landlord/properties/PropertyCard';
 import {
   ADD_PROPERTY_DRAFT_KEY,
@@ -208,6 +209,7 @@ export default function LandlordPropertiesPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Portfolio"
         title="Properties"
         description={
           <>
@@ -229,15 +231,19 @@ export default function LandlordPropertiesPage() {
         }
       />
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <RecordToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={setSearchQuery}
           placeholder="Search by name or city..."
           label="Search properties"
-          className="flex-1 max-w-sm"
+          className="flex-1 sm:max-w-sm"
         />
-        <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Filter properties">
+        <div
+          className="flex gap-2 overflow-x-auto sm:ml-auto"
+          role="group"
+          aria-label="Filter properties"
+        >
           {filterOptions.map((option) => (
             <ToggleChip
               key={option.value}
@@ -252,7 +258,7 @@ export default function LandlordPropertiesPage() {
             </ToggleChip>
           ))}
         </div>
-      </div>
+      </RecordToolbar>
 
       {isLoadingProperties ? (
         <div

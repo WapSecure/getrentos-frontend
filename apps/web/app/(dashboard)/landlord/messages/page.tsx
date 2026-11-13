@@ -100,6 +100,7 @@ export default function LandlordMessagesPage() {
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col">
       <PageHeader
+        eyebrow="Inbox"
         title="Messages"
         description="Communicate with tenants, vendors, and applicants"
       />

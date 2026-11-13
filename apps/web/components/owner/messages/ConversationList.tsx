@@ -2,7 +2,8 @@
 
 import { MessageCircle } from '@sureground/icons';
 import { EmptyState, SearchInput } from '@sureground/ui';
-import { getInitials, formatRelativeTime } from '@/lib/format';
+import { formatRelativeTime } from '@/lib/format';
+import { RecordAvatar } from '@/components/shared/records/RecordParts';
 
 export interface Conversation {
   id: string;
@@ -49,19 +50,21 @@ export const ConversationList = ({
               type="button"
               onClick={() => onSelect(conversation.id)}
               aria-current={activeId === conversation.id ? 'true' : undefined}
-              className={`w-full flex items-start gap-3 p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
-                activeId === conversation.id ? 'bg-accent' : 'hover:bg-secondary'
+              className={`relative flex w-full items-start gap-3 px-3 py-3.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
+                activeId === conversation.id
+                  ? 'bg-primary/[0.06] before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-primary'
+                  : 'hover:bg-secondary/70'
               }`}
             >
-              <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
-                {getInitials(conversation.participantName)}
-              </div>
+              <RecordAvatar name={conversation.participantName} size="sm" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-medium text-foreground truncate">
+                  <p
+                    className={`truncate text-sm text-foreground ${conversation.unreadCount > 0 ? 'font-semibold' : 'font-medium'}`}
+                  >
                     {conversation.participantName}
                   </p>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  <span className="whitespace-nowrap text-xs tabular-nums text-muted-foreground">
                     {formatRelativeTime(conversation.lastMessageTime)}
                   </span>
                 </div>
@@ -71,7 +74,7 @@ export const ConversationList = ({
                 <p className="text-xs text-muted-foreground truncate">{conversation.lastMessage}</p>
               </div>
               {conversation.unreadCount > 0 && (
-                <span className="shrink-0 w-5 h-5 rounded-full bg-primary text-primary-foreground text-2xs font-bold flex items-center justify-center">
+                <span className="mt-0.5 flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-2xs font-bold text-primary-foreground">
                   {conversation.unreadCount}
                 </span>
               )}

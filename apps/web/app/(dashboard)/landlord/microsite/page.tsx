@@ -103,6 +103,7 @@ export default function LandlordMicrositePage() {
   return (
     <div className="max-w-2xl">
       <PageHeader
+        eyebrow="Marketing"
         title="Microsite"
         description="A public page showcasing your listings: share one link instead of the whole app."
       />

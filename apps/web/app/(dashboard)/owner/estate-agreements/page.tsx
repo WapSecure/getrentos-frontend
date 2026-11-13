@@ -174,6 +174,7 @@ export default function OwnerEstateAgreementsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
       <PageHeader
+        eyebrow="Portfolio"
         title="Estate requests"
         description="Estates can ask to add your property and advertise it. Nothing changes until you approve: a property joins an estate only with your approval. You keep ownership and control of any money: an estate only ever gains the right to market."
       />

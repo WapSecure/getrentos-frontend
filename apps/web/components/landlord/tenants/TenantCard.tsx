@@ -4,7 +4,13 @@ import { motion } from 'framer-motion';
 import { MessageCircle, FileCheck, ShieldCheck, Home } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
 import { paymentStatusBadges } from '@/lib/statusBadge';
-import { formatDate, getInitials } from '@/lib/format';
+import { formatDate } from '@/lib/format';
+import {
+  RecordActions,
+  RecordAvatar,
+  RecordFacts,
+  recordCardClass,
+} from '@/components/shared/records/RecordParts';
 import type { Tenant, RentPaymentStatus } from '@/types/landlord';
 import { ROUTES } from '@/lib/constants/auth';
 import { trustScoreDisplay } from '@sureground/shared';
@@ -40,17 +46,17 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-card rounded-2xl border border-border p-4"
+      className={recordCardClass()}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
-            {getInitials(tenant.name)}
-          </div>
+          <RecordAvatar name={tenant.name} />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <h3 className="truncate font-semibold text-foreground">{tenant.name}</h3>
-              {tenant.verified && <ShieldCheck className="w-3.5 h-3.5 text-success" />}
+              {tenant.verified && (
+                <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-success" aria-label="Verified" />
+              )}
             </div>
             <p className="truncate text-xs text-muted-foreground">{tenant.email}</p>
           </div>
@@ -63,23 +69,21 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
         </Badge>
       </div>
 
-      <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-4">
-        <Home className="w-4 h-4 text-muted-foreground/60" />
-        {tenant.propertyName} • {tenant.unitName}
-      </div>
-      <div className="flex items-center justify-between mt-2">
-        <p className="text-xs text-muted-foreground">
-          {moveInLabel} {formatDate(tenant.moveInDate)}
-        </p>
-        <div className="flex items-center gap-1">
-          <span className="text-xs font-medium text-muted-foreground">Trust score</span>
-          <span className="text-xs font-bold text-primary">
-            {trustScoreDisplay(tenant.trustScore)}
-          </span>
-        </div>
+      <div className="mt-3 flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
+        <Home className="h-4 w-4 shrink-0 text-primary/70" aria-hidden="true" />
+        <span className="truncate">
+          {tenant.propertyName} · {tenant.unitName}
+        </span>
       </div>
 
-      <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+      <RecordFacts
+        facts={[
+          { label: moveInLabel, value: formatDate(tenant.moveInDate) },
+          { label: 'Trust score', value: trustScoreDisplay(tenant.trustScore), tone: 'brand' },
+        ]}
+      />
+
+      <RecordActions className="flex-nowrap">
         <Button
           href={ROUTES.LANDLORD_MESSAGES}
           variant="outline"
@@ -100,7 +104,7 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
           <FileCheck className="w-3.5 h-3.5" />
           View lease
         </Button>
-      </div>
+      </RecordActions>
     </motion.div>
   );
 };

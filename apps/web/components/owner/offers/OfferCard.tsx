@@ -3,7 +3,14 @@
 import { motion } from 'framer-motion';
 import { Wallet, CreditCard, Banknote } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
-import { formatAskingDifference, formatCurrency, formatDate, getInitials } from '@/lib/format';
+import { formatAskingDifference, formatCurrency, formatDate } from '@/lib/format';
+import { cn } from '@/lib/cn';
+import {
+  RecordActions,
+  RecordAvatar,
+  RecordFacts,
+  recordCardClass,
+} from '@/components/shared/records/RecordParts';
 import { offerStatusBadges } from '@/lib/statusBadge';
 import type { SaleOffer, FinancingType } from '@/types/owner';
 
@@ -40,7 +47,7 @@ export const OfferCard = ({ offer, onClick, delay = 0 }: OfferCardProps) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="relative rounded-2xl border border-border bg-card p-4 transition-all duration-300 hover:shadow-lg focus-within:ring-2 focus-within:ring-ring"
+      className={cn(recordCardClass(), 'relative focus-within:ring-2 focus-within:ring-ring')}
     >
       <button
         type="button"
@@ -50,9 +57,7 @@ export const OfferCard = ({ offer, onClick, delay = 0 }: OfferCardProps) => {
       />
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
-            {getInitials(offer.buyerName)}
-          </div>
+          <RecordAvatar name={offer.buyerName} />
           <div className="min-w-0">
             <h3 className="font-semibold text-foreground truncate">{offer.buyerName}</h3>
             <p className="text-xs text-muted-foreground truncate">{offer.propertyName}</p>
@@ -63,26 +68,35 @@ export const OfferCard = ({ offer, onClick, delay = 0 }: OfferCardProps) => {
         </Badge>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mt-4">
-        <div>
-          <p className="text-xs text-muted-foreground">Offer amount</p>
-          <p className="text-sm font-bold text-foreground">
-            {formatCurrency(offer.offerAmount, { compact: true })}
-          </p>
-          <p className={`text-xs ${diffPct >= 0 ? 'text-success' : 'text-destructive'}`}>
-            {formatAskingDifference(diffPct)}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground">Financing</p>
-          <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
-            <FinancingIcon className="w-3.5 h-3.5 text-muted-foreground" />
-            {financingLabels[offer.financingType]}
-          </p>
-        </div>
-      </div>
+      <RecordFacts
+        facts={[
+          {
+            label: 'Offer amount',
+            value: (
+              <>
+                {formatCurrency(offer.offerAmount, { compact: true })}
+                <span
+                  className={`ml-1.5 text-xs font-medium ${diffPct >= 0 ? 'text-success' : 'text-destructive'}`}
+                >
+                  {formatAskingDifference(diffPct)}
+                </span>
+              </>
+            ),
+            tone: 'brand',
+          },
+          {
+            label: 'Financing',
+            value: (
+              <span className="flex items-center gap-1.5">
+                <FinancingIcon className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true" />
+                {financingLabels[offer.financingType]}
+              </span>
+            ),
+          },
+        ]}
+      />
 
-      <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
+      <RecordActions className="flex-nowrap justify-between gap-3">
         <p className="text-xs text-muted-foreground">Submitted {formatDate(offer.submittedAt)}</p>
         <Button
           variant={needsOwner ? 'primary' : 'outline'}
@@ -92,7 +106,7 @@ export const OfferCard = ({ offer, onClick, delay = 0 }: OfferCardProps) => {
         >
           {needsOwner ? 'Respond' : offer.awaiting === 'buyer' ? "Buyer's turn" : 'View'}
         </Button>
-      </div>
+      </RecordActions>
     </motion.div>
   );
 };

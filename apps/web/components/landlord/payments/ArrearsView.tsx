@@ -16,6 +16,7 @@ import {
 import { formatCurrency, formatDate } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
+import { RecordAvatar, RecordIconTile } from '@/components/shared/records/RecordParts';
 import { CollectionPlanPanel } from '@/components/shared/collections/CollectionPlanPanel';
 import { landlordService } from '@/services/landlordService';
 
@@ -65,6 +66,7 @@ export function ArrearsView() {
   return (
     <>
       <PageHeader
+        eyebrow="Money"
         title="Arrears"
         description="Rent payments flagged overdue by the automatic arrears check, oldest first"
       />
@@ -74,11 +76,14 @@ export function ArrearsView() {
       ) : (
         summary && (
           <Card className="mb-6 flex flex-wrap items-center justify-between gap-3 p-5">
-            <div>
-              <p className="text-sm text-muted-foreground">Total in arrears</p>
-              <p className="text-2xl font-bold text-foreground mt-1">
-                {formatCurrency(totalOverdue)}
-              </p>
+            <div className="flex items-center gap-3.5">
+              <RecordIconTile icon={AlertTriangle} />
+              <div>
+                <p className="text-sm text-muted-foreground">Total in arrears</p>
+                <p className="data-value mt-0.5 text-2xl font-bold text-foreground">
+                  {formatCurrency(totalOverdue)}
+                </p>
+              </div>
             </div>
             <p className="text-sm text-muted-foreground">
               {overdueCount} payment{overdueCount === 1 ? '' : 's'} overdue
@@ -108,7 +113,7 @@ export function ArrearsView() {
           description="Overdue rent payments will appear here automatically once flagged past their due date."
         />
       ) : (
-        <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
           {payments.map((payment) => {
             const overdueDays = daysOverdue(payment.dueDate);
             const stage = ladderStage(overdueDays);
@@ -116,19 +121,22 @@ export function ArrearsView() {
             return (
               <div
                 key={payment.id}
-                className="p-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2"
+                className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 p-4 transition-colors hover:bg-primary/[0.03] sm:px-5"
               >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">
-                    {payment.tenantName || 'Tenant'} · {payment.propertyName} ({payment.unitName})
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {isLateFee ? 'Late fee · ' : ''}Due {formatDate(payment.dueDate)} ·{' '}
-                    {overdueDays} day{overdueDays === 1 ? '' : 's'} overdue
-                  </p>
+                <div className="flex min-w-0 items-center gap-3">
+                  <RecordAvatar name={payment.tenantName || 'Tenant'} size="sm" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {payment.tenantName || 'Tenant'} · {payment.propertyName} ({payment.unitName})
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {isLateFee ? 'Late fee · ' : ''}Due {formatDate(payment.dueDate)} ·{' '}
+                      {overdueDays} day{overdueDays === 1 ? '' : 's'} overdue
+                    </p>
+                  </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-sm font-semibold text-foreground">
+                  <span className="text-right text-sm font-semibold tabular-nums text-foreground">
                     {formatCurrency(payment.amount - (payment.amountPaid ?? 0))}
                     {(payment.amountPaid ?? 0) > 0 && (
                       <span className="block text-xs font-normal text-muted-foreground">

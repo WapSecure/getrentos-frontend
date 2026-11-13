@@ -19,6 +19,7 @@ import { StarRating } from '@/components/landlord/vendors/StarRating';
 import { formatVisit } from '@/components/landlord/vendors/VendorCard';
 import type { LandlordMaintenanceRequest } from '@/types/landlord';
 import type { MaintenanceCategory } from '@/types/maintenance';
+import { RecordIconTile, recordCardClass } from '@/components/shared/records/RecordParts';
 
 export const categoryIcons: Record<MaintenanceCategory, React.ElementType> = {
   plumbing: Droplets,
@@ -64,12 +65,10 @@ export const MaintenanceRequestCard = ({
   const isBusy = isMarkingResolved || isEscalating;
 
   return (
-    <article className="rounded-xl border border-border bg-card p-4 shadow-xs">
+    <article className={recordCardClass()}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="p-2 rounded-lg bg-secondary shrink-0">
-            <CategoryIcon className="w-4 h-4 text-muted-foreground" />
-          </div>
+          <RecordIconTile icon={CategoryIcon} />
           <div className="min-w-0">
             <h3 className="font-semibold text-foreground truncate">{request.issueTitle}</h3>
             <p className="text-xs text-muted-foreground truncate">
@@ -91,7 +90,7 @@ export const MaintenanceRequestCard = ({
 
       <p className="text-sm text-muted-foreground mt-3 line-clamp-2">{request.description}</p>
       {request.workOrderScope && (
-        <p className="mt-2 rounded-md bg-secondary/40 px-3 py-2 text-sm text-foreground line-clamp-3">
+        <p className="mt-2 rounded-xl bg-secondary/60 px-3.5 py-2.5 text-sm text-foreground line-clamp-3">
           <span className="font-medium">Agreed scope: </span>
           {request.workOrderScope}
         </p>

@@ -7,6 +7,7 @@ export default function OwnerToursPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Selling"
         title="Video tour requests"
         description="Buyers who cannot visit ask you to show them round on a video call. Offer times in daylight, join on time, and note what you showed."
         actions={

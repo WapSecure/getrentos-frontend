@@ -19,6 +19,12 @@ import { leaseRentLabel } from '@/lib/leaseTerm';
 import { leaseStatusBadges } from '@/lib/statusBadge';
 import { landlordService } from '@/services/landlordService';
 import type { Lease } from '@/types/landlord';
+import {
+  RecordActions,
+  RecordAvatar,
+  RecordFacts,
+  recordCardClass,
+} from '@/components/shared/records/RecordParts';
 
 const daysUntil = (dateString: string) => {
   return Math.ceil((new Date(dateString).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -63,34 +69,34 @@ export const LeaseCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-card rounded-2xl border border-border p-4"
+      className={recordCardClass()}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <h3 className="font-semibold text-foreground truncate">{lease.tenantName}</h3>
-          <p className="text-xs text-muted-foreground truncate">
-            {lease.propertyName} • {lease.unitName}
-          </p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <RecordAvatar name={lease.tenantName} />
+          <div className="min-w-0">
+            <h3 className="font-semibold text-foreground truncate">{lease.tenantName}</h3>
+            <p className="text-xs text-muted-foreground truncate">
+              {lease.propertyName} · {lease.unitName}
+            </p>
+          </div>
         </div>
         <Badge variant={status.variant}>{status.label}</Badge>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mt-4">
-        <div>
-          <p className="text-xs text-muted-foreground">Lease period</p>
-          <p className="text-sm font-medium text-foreground">
-            {formatDate(lease.leaseStart)} – {formatDate(lease.leaseEnd)}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground">
-            {leaseRentLabel(lease.rentPeriod, lease.leaseStart, lease.leaseEnd)}
-          </p>
-          <p className="text-sm font-medium text-foreground">
-            {formatCurrency(lease.rentAmount, { compact: true })}
-          </p>
-        </div>
-      </div>
+      <RecordFacts
+        facts={[
+          {
+            label: 'Lease period',
+            value: `${formatDate(lease.leaseStart)} – ${formatDate(lease.leaseEnd)}`,
+          },
+          {
+            label: leaseRentLabel(lease.rentPeriod, lease.leaseStart, lease.leaseEnd),
+            value: formatCurrency(lease.rentAmount, { compact: true }),
+            tone: 'brand',
+          },
+        ]}
+      />
 
       {isExpiringSoon && (
         <p className="text-xs text-warning mt-3 rounded-xl bg-warning-subtle px-2.5 py-1.5">
@@ -121,7 +127,7 @@ export const LeaseCard = ({
         </p>
       )}
 
-      <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+      <RecordActions className="flex-nowrap">
         {lease.status === 'draft' && (
           <Button
             variant="primary"
@@ -212,7 +218,7 @@ export const LeaseCard = ({
             {lease.pendingRenewalOffer ? 'Replace offer' : 'Create new lease'}
           </Button>
         )}
-      </div>
+      </RecordActions>
 
       {lease.pendingRenewalOffer ? (
         <div className="mt-3 p-3 rounded-xl bg-warning-subtle border border-warning/30 flex gap-2">

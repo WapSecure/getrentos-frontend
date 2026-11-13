@@ -213,6 +213,7 @@ export default function LandlordNoticesPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Compliance"
         title="Notices"
         description={
           notices.length === 0

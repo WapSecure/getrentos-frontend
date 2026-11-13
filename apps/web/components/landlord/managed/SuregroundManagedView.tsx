@@ -297,6 +297,7 @@ export const SuregroundManagedView = ({
   return (
     <>
       <PageHeader
+        eyebrow="Sureground Managed"
         title="Get your property managed"
         description={
           <>
