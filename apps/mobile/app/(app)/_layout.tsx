@@ -69,6 +69,7 @@ export default function AppLayout() {
         <Stack.Screen name="(estate)" />
         <Stack.Screen name="buyer-listing/[id]" options={DETAIL_OPTIONS} />
         <Stack.Screen name="developments" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="developer-questions" options={DETAIL_OPTIONS} />
         <Stack.Screen name="buyer-offer/[id]" options={DETAIL_OPTIONS} />
         <Stack.Screen name="buyer-conversation/[id]" options={DETAIL_OPTIONS} />
         <Stack.Screen name="buyer-profile" options={DETAIL_OPTIONS} />
