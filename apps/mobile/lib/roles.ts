@@ -163,14 +163,14 @@ export const SIGNUP_ROLES: SignupRole[] = [
   {
     id: 'realtor',
     name: 'Realtor',
-    tagline: 'Bring listings, schedule tours, negotiate on behalf.',
+    tagline: 'Bring listings, arrange viewings and negotiate for your clients.',
     icon: 'Users',
     requires: ['identity', 'license'],
   },
   {
     id: 'agent',
     name: 'Agent',
-    tagline: 'Operate on behalf with scoped, delegated permissions.',
+    tagline: 'Act for landlords and owners, with only the permissions they give you.',
     icon: 'UserCheck',
     requires: ['identity'],
   },

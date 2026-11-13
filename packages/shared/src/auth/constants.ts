@@ -75,7 +75,7 @@ export const ROLES = {
   REALTOR: {
     id: 'realtor',
     name: 'Realtor',
-    description: 'Bring listings, schedule tours, negotiate on behalf.',
+    description: 'Bring listings, arrange viewings and negotiate for your clients.',
     icon: 'Users',
     requiresVerification: ['identity', 'license'],
     canAddLater: true,
@@ -85,7 +85,7 @@ export const ROLES = {
   AGENT: {
     id: 'agent',
     name: 'Agent',
-    description: 'Operate on behalf with scoped, delegated permissions.',
+    description: 'Act for landlords and owners, with only the permissions they give you.',
     icon: 'UserCheck',
     requiresVerification: ['identity'],
     canAddLater: true,
