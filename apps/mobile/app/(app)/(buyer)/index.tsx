@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import {
   BedDouble,
   Bell,
+  CheckCircle2,
+  ChevronRight,
   MessageCircleQuestion,
   CalendarClock,
   FileSignature,
@@ -11,14 +13,17 @@ import {
   Heart,
   Home as HomeIcon,
   LandPlot,
+  MapPin,
   Search,
   Wallet,
   type SgIcon,
 } from '@sureground/icons/native';
 import {
+  Button,
   Card,
   EmptyState,
   IconButton,
+  IconTile,
   Price,
   QueryState,
   Screen,
@@ -97,12 +102,14 @@ export default function BuyerHome() {
             label: 'Saved properties',
             value: d.savedListings,
             subtitle: 'In your shortlist',
+            Icon: Heart,
             onPress: () => router.push('/(app)/buyer-saved'),
           },
           {
             label: 'Upcoming viewings',
             value: d.upcomingViewings,
             subtitle: 'Scheduled tours',
+            Icon: CalendarClock,
             onPress: () => router.push('/(app)/buyer-viewings'),
           },
         ]}
@@ -114,24 +121,28 @@ export default function BuyerHome() {
             label: 'Active offers',
             value: d.activeOffers,
             subtitle: 'Awaiting a response',
+            Icon: FileSignature,
             onPress: () => router.push('/(app)/(buyer)/offers'),
           },
           {
             label: 'Active purchases',
             value: d.activeTransactions,
             subtitle: 'Protected transactions',
+            Icon: Wallet,
             onPress: () => router.push('/(app)/buyer-transactions'),
           },
           {
             label: 'Completed',
             value: d.completedPurchases,
             subtitle: 'Lifetime',
+            Icon: CheckCircle2,
             onPress: () => router.push('/(app)/buyer-transactions'),
           },
           {
             label: 'Documents',
             value: d.documentsUploaded,
             subtitle: 'Uploaded to your vault',
+            Icon: FileText,
             onPress: () => router.push('/(app)/buyer-documents'),
           },
         ]}
@@ -179,6 +190,8 @@ export default function BuyerHome() {
             Icon={Wallet}
             title={`${d.activeTransactions} ${d.activeTransactions === 1 ? 'purchase' : 'purchases'} in progress`}
             detail="See what’s paid and what happens next"
+            eyebrow="In progress"
+            actionLabel="Track your purchases"
             onPress={() => router.push('/(app)/buyer-transactions')}
           />
         ) : null}
@@ -196,11 +209,22 @@ export default function BuyerHome() {
           />
 
           {!dashboard.data?.recommendations?.length ? (
-            <EmptyState
-              icon={<HomeIcon size={30} color={colors.mutedForeground} />}
-              title="Your recommendations are warming up"
-              description="Browse and save a few properties so we can tailor this space to you."
-            />
+            <Card padding="none">
+              <EmptyState
+                size="compact"
+                icon={<IconTile Icon={HomeIcon} size="xl" />}
+                title="Your recommendations are warming up"
+                description="Browse and save a few properties so we can tailor this space to you."
+                action={
+                  <Button
+                    label="Find a property"
+                    size="sm"
+                    fullWidth={false}
+                    onPress={() => router.push('/(app)/(buyer)/discover')}
+                  />
+                }
+              />
+            </Card>
           ) : (
             dashboard.data.recommendations.map((r) => (
               <Pressable
@@ -210,24 +234,30 @@ export default function BuyerHome() {
                 accessibilityLabel={`${r.title}, ${r.city}, ${Math.round(r.price).toLocaleString('en-NG')} naira`}
                 accessibilityHint="Opens property details"
               >
-                <Card elevated>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text variant="bodyStrong" numberOfLines={1}>
-                        {r.title}
-                      </Text>
-                      <Text variant="caption" color="mutedForeground">
+                <Card
+                  elevated
+                  padding={spacing.lg}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
+                >
+                  <IconTile Icon={HomeIcon} size="lg" />
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Text variant="bodyStrong" numberOfLines={1}>
+                      {r.title}
+                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <MapPin size={12} color={colors.mutedForeground} />
+                      <Text variant="caption" color="mutedForeground" numberOfLines={1}>
                         {r.city}
                       </Text>
                     </View>
-                    <Price amount={r.price} variant="bodyStrong" />
+                    <Price
+                      amount={r.price}
+                      variant="bodyStrong"
+                      color="primary"
+                      style={{ fontWeight: '700' }}
+                    />
                   </View>
+                  <ChevronRight size={18} color={colors.mutedForeground} />
                 </Card>
               </Pressable>
             ))

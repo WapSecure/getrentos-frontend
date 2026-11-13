@@ -1,21 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
-import { Image } from 'expo-image';
-import { HardHat, Heart, ImageOff, Search } from '@sureground/icons/native';
+import { HardHat, Search } from '@sureground/icons/native';
 import {
   Button,
-  Card,
   Chip,
+  IconTile,
   ListSkeleton,
-  Price,
+  PropertyCard,
   QueryState,
   Skeleton,
   Text,
   TextField,
   useTheme,
+  type PropertyCardData,
 } from '@sureground/ui-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { qk } from '@/lib/query/keys';
@@ -40,6 +40,22 @@ const PROPERTY_TYPES = [
   { value: 'LAND', label: 'Land' },
   { value: 'SHARED_APARTMENT', label: 'Shared apartment' },
 ] as const;
+
+// The shared listing card, as on the renter's Discover. The badge speaks to the owner, the only
+// verification a sale listing carries here.
+function toCard(item: BuyerListing): PropertyCardData {
+  return {
+    id: item.id,
+    title: item.title,
+    location: [item.address, item.city].filter(Boolean).join(', '),
+    price: item.askingPrice,
+    bedrooms: item.bedrooms,
+    bathrooms: item.bathrooms,
+    size: item.propertySize,
+    image: item.image ?? item.images?.[0] ?? null,
+    trustLabel: item.ownerVerified ? { label: 'Owner verified', tone: 'verified' } : undefined,
+  };
+}
 
 export default function BuyerDiscover() {
   const { colors, spacing } = useTheme();
@@ -79,91 +95,20 @@ export default function BuyerDiscover() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const renderItem = useCallback(
-    ({ item, index }: { item: BuyerListing; index: number }) => {
-      const saved = savedIds.has(item.id);
-      return (
-        <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-          <Pressable
-            onPress={() => {
-              cards.click(item.id, index);
-              router.push(`/(app)/buyer-listing/${item.id}`);
-            }}
-            accessibilityRole="button"
-            accessibilityLabel={`${[item.title, item.address, item.city].filter(Boolean).join(', ')}, ${Math.round(item.askingPrice).toLocaleString('en-NG')} naira`}
-            accessibilityHint="Opens property details"
-          >
-            <Card elevated padding="none" style={{ overflow: 'hidden' }}>
-              {item.image ? (
-                <Image
-                  source={{ uri: item.image }}
-                  contentFit="cover"
-                  cachePolicy="memory-disk"
-                  recyclingKey={item.id}
-                  transition={200}
-                  accessible={false}
-                  style={{ width: '100%', height: 160 }}
-                />
-              ) : (
-                <View
-                  style={{
-                    width: '100%',
-                    height: 160,
-                    backgroundColor: colors.secondary,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <ImageOff size={22} color={colors.mutedForeground} />
-                </View>
-              )}
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'flex-start',
-                  justifyContent: 'space-between',
-                  gap: spacing.sm,
-                  padding: spacing.lg,
-                }}
-              >
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text variant="bodyStrong" numberOfLines={1}>
-                    {item.title}
-                  </Text>
-                  <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                    {[item.address, item.city].filter(Boolean).join(', ')}
-                  </Text>
-                  <Price amount={item.askingPrice} variant="bodyStrong" style={{ marginTop: 4 }} />
-                </View>
-                <Pressable
-                  onPress={(event) => {
-                    event.stopPropagation();
-                    toggle(item.id);
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    saved ? `Remove ${item.title} from saved` : `Save ${item.title}`
-                  }
-                  accessibilityState={{ selected: saved }}
-                  style={{
-                    width: 44,
-                    height: 44,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Heart
-                    size={20}
-                    color={saved ? colors.destructive : colors.mutedForeground}
-                    fill={saved ? colors.destructive : 'transparent'}
-                  />
-                </Pressable>
-              </View>
-            </Card>
-          </Pressable>
-        </View>
-      );
-    },
-    [cards, colors.destructive, colors.mutedForeground, colors.secondary, savedIds, spacing, toggle]
+    ({ item, index }: { item: BuyerListing; index: number }) => (
+      <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+        <PropertyCard
+          property={toCard(item)}
+          saved={savedIds.has(item.id)}
+          onToggleSave={toggle}
+          onPress={(id) => {
+            cards.click(id, index);
+            router.push(`/(app)/buyer-listing/${id}`);
+          }}
+        />
+      </View>
+    ),
+    [cards, savedIds, spacing, toggle]
   );
 
   return (
@@ -247,13 +192,13 @@ export default function BuyerDiscover() {
         skeleton={
           <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
             {[0, 1, 2].map((i) => (
-              <Skeleton key={i} height={140} radius={16} />
+              <Skeleton key={i} height={220} radius={4} />
             ))}
           </View>
         }
         isEmpty={items.length === 0}
         empty={{
-          icon: <Search size={34} color={colors.mutedForeground} />,
+          icon: <IconTile Icon={Search} size="xl" />,
           title: 'No listings match',
           description: 'Try a different search.',
         }}
@@ -268,15 +213,19 @@ export default function BuyerDiscover() {
           onEndReachedThreshold={0.6}
           ListHeaderComponent={
             <Text
-              variant="caption"
+              variant="callout"
               color="mutedForeground"
+              accessibilityLiveRegion="polite"
               style={{
                 paddingHorizontal: spacing.xl,
-                paddingTop: spacing.sm,
+                paddingTop: spacing.md,
                 paddingBottom: spacing.md,
               }}
             >
-              {total} {total === 1 ? 'listing' : 'listings'}
+              <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
+                {total.toLocaleString('en-NG')}
+              </Text>{' '}
+              {total === 1 ? 'listing' : 'listings'}
             </Text>
           }
           ListFooterComponent={
@@ -284,7 +233,7 @@ export default function BuyerDiscover() {
               <ListSkeleton
                 variant="card"
                 rows={1}
-                height={140}
+                height={220}
                 style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.xl }}
               />
             ) : (

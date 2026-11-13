@@ -5,22 +5,28 @@ import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-quer
 import {
   Banknote,
   Bell,
+  CalendarClock,
   CheckSquare,
   ChevronRight,
+  FileCheck2,
   FileSignature,
   Heart,
   MapPin,
+  MessageCircle,
   MessageCircleQuestion,
   Search,
   ShieldCheck,
   Clock,
   Wrench,
+  type SgIcon,
 } from '@sureground/icons/native';
 import {
   Button,
   Card,
   describeProperty,
+  EmptyState,
   IconButton,
+  IconTile,
   ListingPlaceholder,
   Price,
   Progress,
@@ -55,6 +61,7 @@ interface Metric {
   key: keyof RenterDashboardStats;
   label: string;
   subtitle: string;
+  Icon: SgIcon;
   onPress: () => void;
 }
 
@@ -65,7 +72,8 @@ const ON_SCRIM = {
   text: '#ffffff',
   glass: 'rgba(10,14,22,0.74)',
   glassEdge: 'rgba(255,255,255,0.16)',
-  verified: '#0b7a3e',
+  // The Sureground Verified blue, fixed rather than themed for the same reason.
+  verified: '#0057d9',
   partial: '#4ade80',
   pending: '#ffb454',
   button: 'rgba(10,14,22,0.6)',
@@ -151,24 +159,28 @@ export default function RenterHome() {
       key: 'savedPropertiesCount',
       label: 'Saved properties',
       subtitle: 'In your shortlist',
+      Icon: Heart,
       onPress: () => router.push('/(app)/saved'),
     },
     {
       key: 'activeApplicationsCount',
       label: 'Active applications',
       subtitle: 'In your pipeline',
+      Icon: FileCheck2,
       onPress: () => router.push('/(app)/(renter)/applications'),
     },
     {
       key: 'upcomingViewingsCount',
       label: 'Upcoming viewings',
       subtitle: 'Scheduled tours',
+      Icon: CalendarClock,
       onPress: () => router.push('/(app)/viewings'),
     },
     {
       key: 'unreadMessagesCount',
       label: 'Unread messages',
       subtitle: 'Across conversations',
+      Icon: MessageCircle,
       onPress: () => router.push('/(app)/(renter)/messages'),
     },
   ];
@@ -233,14 +245,14 @@ export default function RenterHome() {
         >
           <Card elevated>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-              <CheckSquare size={20} color={colors.primary} />
+              <IconTile Icon={CheckSquare} />
               <View style={{ flex: 1, gap: 2 }}>
                 <Text variant="bodyStrong">Move-in checklist</Text>
                 <Text variant="caption" color="mutedForeground">
                   {moveInDone} of {moveInItems.length} done
                 </Text>
               </View>
-              <ChevronRight size={18} color={colors.mutedForeground} />
+              <ChevronRight size={18} color={colors.primary} />
             </View>
             <View style={{ marginTop: spacing.md }}>
               <Progress
@@ -288,12 +300,14 @@ export default function RenterHome() {
               label: 'Current lease',
               value: leaseStatus,
               subtitle: leaseEndLabel,
+              Icon: FileSignature,
               onPress: () => router.push('/(app)/lease'),
             },
             {
               label: 'Total rent paid',
               value: formatNaira(totalRentPaid, { compact: true }),
               subtitle: 'Lifetime',
+              Icon: Banknote,
               onPress: () => router.push('/(app)/payments'),
             },
           ]}
@@ -343,10 +357,21 @@ export default function RenterHome() {
         ) : hero ? (
           <HeroCard property={hero} saved={savedIds.has(hero.id)} onToggleSave={toggle} />
         ) : (
-          <Card elevated>
-            <Text variant="callout" color="mutedForeground">
-              No listings available right now: check back soon.
-            </Text>
+          <Card padding="none">
+            <EmptyState
+              size="compact"
+              icon={<IconTile Icon={Search} size="xl" />}
+              title="No homes to suggest yet"
+              description="No listings available right now: check back soon."
+              action={
+                <Button
+                  label="Browse homes"
+                  size="sm"
+                  fullWidth={false}
+                  onPress={() => router.push('/(app)/(renter)/discover')}
+                />
+              }
+            />
           </Card>
         )}
 
@@ -481,7 +506,7 @@ function HeroCard({
           <Price
             amount={property.price}
             period={property.period}
-            variant="callout"
+            variant="subheading"
             style={{ color: ON_SCRIM.text, fontWeight: '700' }}
             periodColor="rgba(255,255,255,0.75)"
           />

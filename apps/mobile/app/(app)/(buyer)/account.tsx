@@ -24,7 +24,7 @@ import { useTrustItems } from '@/components/account/useTrustItems';
 import { useInvestItems } from '@/components/account/useInvestItems';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
-import { AccountFooter, AccountHeader, AppearanceFooter } from '@/components/account/AccountParts';
+import { AccountFooter, AppearanceFooter, ProfileCard } from '@/components/account/AccountParts';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -181,7 +181,7 @@ export default function BuyerAccount() {
 
   return (
     <Screen>
-      <AccountHeader role="Buyer" fallbackName="Sureground buyer" />
+      <ProfileCard role="Buyer" fallbackName="Sureground buyer" />
       <WorkspaceSwitcher />
       <SettingsGroup title="Buying" items={buying} />
       <SettingsGroup title="Explore" items={explore} />

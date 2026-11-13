@@ -23,7 +23,7 @@ import { useTrustItems } from '@/components/account/useTrustItems';
 import { useProSettings } from '@/hooks/useProSettings';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
-import { AccountFooter, AccountHeader, AppearanceFooter } from '@/components/account/AccountParts';
+import { AccountFooter, AppearanceFooter, ProfileCard } from '@/components/account/AccountParts';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -154,7 +154,7 @@ export default function AgentAccount() {
 
   return (
     <Screen>
-      <AccountHeader
+      <ProfileCard
         role="Field agent"
         fallbackName="Sureground agent"
         note={

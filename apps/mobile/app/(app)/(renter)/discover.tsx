@@ -19,12 +19,14 @@ import {
   Chip,
   EmptyState,
   IconButton,
+  IconTile,
   PropertyCard,
   QueryState,
   Skeleton,
   Text,
   TextField,
   useTheme,
+  withAlpha,
 } from '@sureground/ui-native';
 import { PropertyFilterSheet } from '@/components/property/PropertyFilterSheet';
 import { SaveSearchSheet } from '@/components/property/SaveSearchSheet';
@@ -276,16 +278,13 @@ export default function Discover() {
                   paddingVertical: 6,
                   paddingHorizontal: 11,
                   borderRadius: radius.sm,
-                  backgroundColor: colors.accent,
+                  backgroundColor: withAlpha(colors.primary, 0.12),
                 }}
               >
-                <Text
-                  variant="caption"
-                  style={{ color: colors.accentForeground, fontWeight: '600' }}
-                >
+                <Text variant="caption" style={{ color: colors.primary, fontWeight: '600' }}>
                   {c.label}
                 </Text>
-                <X size={12} color={colors.accentForeground} />
+                <X size={12} color={colors.primary} />
               </Pressable>
             ))}
             <Pressable
@@ -297,15 +296,16 @@ export default function Discover() {
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: 5,
+                minHeight: 32,
                 paddingVertical: 6,
                 paddingHorizontal: 11,
                 borderRadius: radius.sm,
                 borderWidth: 1,
-                borderColor: colors.border,
+                borderColor: colors.primary,
               }}
             >
-              <BookmarkPlus size={12} color={colors.foreground} />
-              <Text variant="caption" style={{ fontWeight: '600' }}>
+              <BookmarkPlus size={12} color={colors.primary} />
+              <Text variant="caption" style={{ fontWeight: '600', color: colors.primary }}>
                 Save search
               </Text>
             </Pressable>
@@ -325,7 +325,7 @@ export default function Discover() {
         >
           {mapMarkers.length === 0 ? (
             <EmptyState
-              icon={<MapIcon size={34} color={colors.mutedForeground} />}
+              icon={<IconTile Icon={MapIcon} size="xl" />}
               title="Nothing to show on the map"
               description="These listings don't have map coordinates yet, or none match your filters."
             />
@@ -349,7 +349,7 @@ export default function Discover() {
           skeleton={<LoadingList />}
           isEmpty={items.length === 0}
           empty={{
-            icon: <Search size={34} color={colors.mutedForeground} />,
+            icon: <IconTile Icon={Search} size="xl" />,
             title: 'No listings match',
             description: 'Try widening your price range or clearing a filter.',
             action:
@@ -377,15 +377,19 @@ export default function Discover() {
             keyboardShouldPersistTaps="handled"
             ListHeaderComponent={
               <Text
-                variant="caption"
+                variant="callout"
                 color="mutedForeground"
+                accessibilityLiveRegion="polite"
                 style={{
                   paddingHorizontal: spacing.xl,
-                  paddingTop: spacing.sm,
+                  paddingTop: spacing.md,
                   paddingBottom: spacing.md,
                 }}
               >
-                {total} {total === 1 ? 'home' : 'homes'} found
+                <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
+                  {total.toLocaleString('en-NG')}
+                </Text>{' '}
+                {total === 1 ? 'home' : 'homes'} found
               </Text>
             }
             ListFooterComponent={
@@ -439,7 +443,7 @@ function FilterButton({ count, onPress }: { count: number; onPress: () => void }
         borderRadius: radius.md,
         borderWidth: 1,
         borderColor: count ? colors.primary : colors.border,
-        backgroundColor: count ? colors.accent : colors.card,
+        backgroundColor: count ? withAlpha(colors.primary, 0.1) : colors.card,
         alignItems: 'center',
         justifyContent: 'center',
       }}
@@ -480,7 +484,7 @@ function LoadingList({ count = 4 }: { count?: number }) {
     <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.md, gap: spacing.lg }}>
       {Array.from({ length: count }, (_, i) => (
         <View key={i} style={{ gap: spacing.sm }}>
-          <Skeleton height={176} radius={radius.md} />
+          <Skeleton height={220} radius={radius.xl} />
           <Skeleton height={16} width="45%" />
           <Skeleton height={13} width="70%" />
         </View>

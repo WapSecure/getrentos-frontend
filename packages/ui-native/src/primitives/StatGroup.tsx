@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
 import { Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
-import { ChevronRight } from '@sureground/icons/native';
+import { ChevronRight, type SgIcon } from '@sureground/icons/native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 import { Card } from './Card';
-import { Skeleton } from './misc';
+import { IconTile, Skeleton } from './misc';
 
 export interface StatGroupItem {
   label: string;
@@ -18,6 +18,8 @@ export interface StatGroupItem {
   attention?: boolean;
   /** Extra content under the subtitle, such as an indicative foreign-currency amount. */
   supplement?: ReactNode;
+  /** A glyph on a soft blue tile beside the label; it turns red when the figure needs attention. */
+  Icon?: SgIcon;
 }
 
 export interface StatGroupProps {
@@ -58,7 +60,14 @@ function Figure({ item, index, count }: { item: StatGroupItem; index: number; co
   const body = (
     <>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-        {item.attention ? (
+        {item.Icon ? (
+          <IconTile
+            Icon={item.Icon}
+            size="sm"
+            tone={item.attention ? 'danger' : 'primary'}
+            style={{ marginRight: 2 }}
+          />
+        ) : item.attention ? (
           <View
             style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.destructive }}
           />

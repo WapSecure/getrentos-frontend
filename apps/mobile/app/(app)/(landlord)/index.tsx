@@ -5,12 +5,15 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Banknote,
   Bell,
+  Building2,
   DoorOpen,
+  Hourglass,
   FileText,
   MessageCircle,
   MessageCircleQuestion,
   Plus,
   TriangleAlert,
+  UserCheck,
   Wrench,
   type SgIcon,
 } from '@sureground/icons/native';
@@ -116,12 +119,14 @@ export default function LandlordOverview() {
             label: 'Properties',
             value: s.totalProperties,
             subtitle: `${units} ${units === 1 ? 'unit' : 'units'} in total`,
+            Icon: Building2,
             onPress: () => router.push('/(app)/(landlord)/properties'),
           },
           {
             label: 'Occupied',
             value: s.occupiedUnits,
             subtitle: `${occupancy}% of units`,
+            Icon: UserCheck,
             onPress: () => router.push('/(app)/(landlord)/tenants'),
           },
           // Only while a unit is actually held: a permanent "Reserved 0" was the one tile you couldn't tap.
@@ -131,6 +136,7 @@ export default function LandlordOverview() {
                   label: 'Reserved',
                   value: s.reservedUnits,
                   subtitle: 'Awaiting signature or payment',
+                  Icon: Hourglass,
                 },
               ]
             : []),
@@ -138,6 +144,7 @@ export default function LandlordOverview() {
             label: 'Vacant',
             value: s.vacantUnits,
             subtitle: 'Available now',
+            Icon: DoorOpen,
             onPress: () => router.push('/(app)/landlord-units'),
           },
         ]}
@@ -194,6 +201,7 @@ export default function LandlordOverview() {
               label="Annual rent roll"
               amount={0}
               hint="A year of rent from your signed leases"
+              Icon={Banknote}
               loading
               visible={showMoney}
               onToggle={toggleMoney}
@@ -218,6 +226,8 @@ export default function LandlordOverview() {
               </Text>
             }
             accessibilityLabel={`${s.outstandingPayments} rent ${s.outstandingPayments === 1 ? 'payment is' : 'payments are'} outstanding. Open payments`}
+            eyebrow="Rent to collect"
+            actionLabel="See rent payments"
             onPress={() => router.push('/(app)/landlord-payments')}
           />
         ) : null}
@@ -227,6 +237,9 @@ export default function LandlordOverview() {
             tone="warning"
             title={`${s.activeMaintenanceRequests} open maintenance ${s.activeMaintenanceRequests === 1 ? 'request' : 'requests'}`}
             detail="Assign a vendor or mark them resolved"
+            // The lead card only when no rent is outstanding: one blue button per screen.
+            eyebrow={s.outstandingPayments > 0 ? undefined : 'Repairs'}
+            actionLabel={s.outstandingPayments > 0 ? undefined : 'See maintenance'}
             onPress={() => router.push('/(app)/landlord-maintenance')}
           />
         ) : null}
@@ -235,6 +248,7 @@ export default function LandlordOverview() {
           label="Annual rent roll"
           amount={s?.annualRentRoll ?? 0}
           hint="A year of rent from your signed leases"
+          Icon={Banknote}
           loading={false}
           visible={showMoney}
           onToggle={toggleMoney}

@@ -35,18 +35,10 @@ import {
   Wrench,
   MessageCircle,
 } from '@sureground/icons/native';
-import {
-  Avatar,
-  Button,
-  Divider,
-  Screen,
-  Text,
-  ThemeToggle,
-  useTheme,
-} from '@sureground/ui-native';
+import { Button, Divider, Screen, Text, ThemeToggle, useTheme } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { useTrustItems } from '@/components/account/useTrustItems';
+import { ProfileCard } from '@/components/account/AccountParts';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { managementItems } from '@/components/account/managementItems';
@@ -54,9 +46,8 @@ import { managementItems } from '@/components/account/managementItems';
 const go = (href: Href) => () => router.push(href);
 
 export default function LandlordAccount() {
-  const { profile, signOut } = useAuth();
+  const { signOut } = useAuth();
   const { colors, spacing } = useTheme();
-  const { verified } = useIdentityVerification();
   const trustItems = useTrustItems('landlord', {
     audience: 'tenants',
     identityHint: 'Required to publish listings',
@@ -294,33 +285,7 @@ export default function LandlordAccount() {
 
   return (
     <Screen>
-      <View
-        accessible
-        accessibilityRole="header"
-        accessibilityLabel={[
-          profile?.legalName ?? 'Sureground landlord',
-          profile?.email,
-          verified ? 'verified' : 'not verified',
-        ]
-          .filter(Boolean)
-          .join(', ')}
-        style={{ alignItems: 'center', gap: spacing.xs, marginTop: spacing.lg }}
-      >
-        <Avatar name={profile?.legalName} size={76} />
-        <Text variant="heading" style={{ marginTop: spacing.sm }}>
-          {profile?.legalName ?? 'Sureground landlord'}
-        </Text>
-        <Text variant="callout" color="mutedForeground">
-          {profile?.email ?? profile?.phone ?? ''}
-        </Text>
-        <Text
-          variant="caption"
-          color="primary"
-          style={{ fontWeight: '700', marginTop: spacing.xs }}
-        >
-          Landlord
-        </Text>
-      </View>
+      <ProfileCard role="Landlord" fallbackName="Sureground landlord" />
 
       <WorkspaceSwitcher />
 

@@ -153,7 +153,8 @@ function PropertyCardBase({
     <View
       style={{
         width: row ? 116 : '100%',
-        height: row ? 116 : property.image ? 196 : 96,
+        // A photo keeps a 3:2 frame at any card width; without one, a short branded band.
+        ...(row ? { height: 116 } : property.image ? { aspectRatio: 3 / 2 } : { height: 96 }),
         backgroundColor: colors.secondary,
       }}
     >
@@ -253,6 +254,8 @@ function PropertyCardBase({
                 amount={property.price}
                 period={property.period ?? undefined}
                 variant="subheading"
+                color="primary"
+                style={{ fontWeight: '700' }}
               />
               <Text variant="bodyStrong" numberOfLines={2}>
                 {property.title}
@@ -340,7 +343,8 @@ const OVERLAY = {
   text: '#ffffff',
   glass: 'rgba(10,14,22,0.74)',
   glassEdge: 'rgba(255,255,255,0.16)',
-  verified: '#0b7a3e',
+  // The Sureground Verified blue, fixed: the theme's dark-mode blue is too light under white text.
+  verified: '#0057d9',
   partial: '#4ade80',
   pending: '#ffb454',
 } as const;
