@@ -108,11 +108,11 @@ export default function OwnerDashboardPage() {
           />
 
           <div className="grid gap-6 xl:grid-cols-12">
-            <div className="space-y-6 xl:col-span-8">
+            <div className="min-w-0 space-y-6 xl:col-span-8">
               <OwnerPortfolioChart />
               <OwnerActivityFeed activity={dashboard?.recentActivity ?? []} />
             </div>
-            <aside className="xl:col-span-4" aria-label="Quick actions">
+            <aside className="min-w-0 xl:col-span-4" aria-label="Quick actions">
               <OwnerQuickActions />
             </aside>
           </div>

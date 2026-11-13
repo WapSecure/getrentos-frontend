@@ -61,11 +61,11 @@ export default function AgentDashboardPage() {
       )}
 
       <div className="grid gap-6 xl:grid-cols-12">
-        <div className="space-y-6 xl:col-span-8">
+        <div className="min-w-0 space-y-6 xl:col-span-8">
           <TodaysRoute />
           <AgentTaskList tasks={(dashboard?.upcomingTasks ?? []).map(mapAgentTask)} />
         </div>
-        <aside className="xl:col-span-4">
+        <aside className="min-w-0 xl:col-span-4">
           <AgentQuickActions />
         </aside>
       </div>
