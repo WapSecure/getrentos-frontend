@@ -35,8 +35,25 @@ import { FactGrid, IconTile } from '@/components/admin/ops/OpsParts';
 const sumOf = (rows: { amount: number }[] | undefined) =>
   (rows ?? []).reduce((total, row) => total + row.amount, 0);
 
-const countFigure = (rows: { amount: number }[] | undefined, loaded: boolean) =>
-  loaded ? (rows?.length ?? 0) : '–';
+// The API lists only the newest 100 per rail in each group (TAKE in admin-payout-issues.service), so
+// these figures cover the lists below, not every payout. A rail at the cap means there may be more.
+const LISTED_PER_RAIL = 100;
+
+const atCap = (rows: { rail?: string; kind?: string }[] | undefined) => {
+  const perRail = new Map<string, number>();
+  for (const row of rows ?? []) {
+    const rail = row.rail ?? row.kind ?? '';
+    perRail.set(rail, (perRail.get(rail) ?? 0) + 1);
+  }
+  return [...perRail.values()].some((count) => count >= LISTED_PER_RAIL);
+};
+
+const countFigure = (rows: { amount: number }[] | undefined, loaded: boolean, capped: boolean) =>
+  loaded ? `${rows?.length ?? 0}${capped ? '+' : ''}` : '–';
+
+/** "₦X refused by the bank", or "At least ₦X …" when a rail hit the cap. */
+const moneyLine = (rows: { amount: number }[], capped: boolean, rest: string) =>
+  `${capped ? 'At least ' : ''}${formatCurrency(sumOf(rows))} ${rest}${capped ? '; only the newest 100 per rail are listed' : ''}`;
 
 type View = 'failed' | 'stuck' | 'waiting';
 
@@ -123,6 +140,12 @@ export default function PayoutIssuesPage() {
   const isApproved = (p: PayoutIssue) =>
     p.held?.approved === true || Boolean(p.transferRef && approvedRefs.has(p.transferRef));
 
+  const capped = {
+    failed: atCap(query.data?.failed),
+    stuck: atCap(query.data?.stuck),
+    waiting: atCap(query.data?.waiting),
+  };
+
   const items =
     (view === 'failed' ? query.data?.failed : view === 'stuck' ? query.data?.stuck : []) ?? [];
 
@@ -135,32 +158,32 @@ export default function PayoutIssuesPage() {
       />
 
       <StatGroup
-        title="Across every rail"
+        title="In the lists below"
         className="mb-6"
         items={[
           {
             label: 'Failed',
-            value: countFigure(query.data?.failed, !!query.data),
+            value: countFigure(query.data?.failed, !!query.data, capped.failed),
             subtitle: query.data
-              ? `${formatCurrency(sumOf(query.data.failed))} refused by the bank`
+              ? moneyLine(query.data.failed, capped.failed, 'refused by the bank')
               : 'Refused by the bank',
             icon: XCircle,
             attention: (query.data?.failed.length ?? 0) > 0,
           },
           {
             label: 'Stuck before sending',
-            value: countFigure(query.data?.stuck, !!query.data),
+            value: countFigure(query.data?.stuck, !!query.data, capped.stuck),
             subtitle: query.data
-              ? `${formatCurrency(sumOf(query.data.stuck))} not sent`
+              ? moneyLine(query.data.stuck, capped.stuck, 'not sent')
               : 'Stopped before any money was sent',
             icon: PauseCircle,
             attention: (query.data?.stuck.length ?? 0) > 0,
           },
           {
             label: 'Waiting on the bank',
-            value: countFigure(query.data?.waiting, !!query.data),
+            value: countFigure(query.data?.waiting, !!query.data, capped.waiting),
             subtitle: query.data
-              ? `${formatCurrency(sumOf(query.data.waiting))} held over a day`
+              ? moneyLine(query.data.waiting, capped.waiting, 'held over a day')
               : 'Held for over a day',
             icon: Clock,
           },

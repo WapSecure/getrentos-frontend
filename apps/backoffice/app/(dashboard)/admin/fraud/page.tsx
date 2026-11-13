@@ -225,11 +225,8 @@ export default function AdminFraudPage() {
       <PageHeader
         eyebrow="Risk"
         title="Fraud and risk review"
-        description={
-          countsUnavailable
-            ? 'Open-alert count temporarily unavailable'
-            : `${openCount} open alert${openCount === 1 ? '' : 's'}: ${flaggedCount} awaiting triage, ${investigatingCount} under investigation`
-        }
+        // The open-alert counts live in the strip below; the header only says what the page is for.
+        description="Triage new alerts, investigate them and record a decision."
         actions={
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" href="/admin/fraud/risk" icon={<Activity />}>

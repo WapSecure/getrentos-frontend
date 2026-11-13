@@ -285,6 +285,7 @@ export default function PayoutRunsPage() {
     },
   ];
 
+  // The API returns the 24 most recent runs (payout-run.service), so these cover the list below only.
   const waitingRuns = runs.data?.filter((s) => s.status === 'DRAFTED').length ?? 0;
   const failedPayouts = runs.data?.reduce((sum, s) => sum + s.failed, 0) ?? 0;
   const latestRun = runs.data?.[0];
@@ -299,20 +300,20 @@ export default function PayoutRunsPage() {
 
       {runs.data && runs.data.length > 0 && (
         <StatGroup
-          title="Runs"
+          title="Recent runs, as listed below"
           className="mb-6"
           items={[
             {
               label: 'Waiting to be issued',
               value: waitingRuns,
-              subtitle: 'Drafted, not yet paid',
+              subtitle: 'Drafted runs in the list, not yet paid',
               icon: Clock,
               attention: waitingRuns > 0,
             },
             {
               label: 'Failed payouts',
               value: failedPayouts,
-              subtitle: 'Across issued runs',
+              subtitle: 'Across the issued runs listed below',
               icon: AlertTriangle,
               attention: failedPayouts > 0,
             },
