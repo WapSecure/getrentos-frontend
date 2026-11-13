@@ -72,7 +72,7 @@ export const PhoneSignup = ({ onSubmit, isLoading }: PhoneSignupProps) => {
           {...register('fullName')}
           leadingIcon={<User className="w-4 h-4" />}
           inputClassName="py-3"
-          placeholder="John Doe"
+          placeholder="Chinedu Okafor"
         />
       </Field>
 
