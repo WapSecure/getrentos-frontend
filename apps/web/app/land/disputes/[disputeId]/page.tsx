@@ -1,24 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, FileText, PauseCircle, Upload } from '@sureground/icons';
+import { FileText, PauseCircle, Upload } from '@sureground/icons';
 import {
   Badge,
   Button,
-  CardSkeleton,
   Input,
   Textarea,
   DocumentUpload,
   EmptyState,
   type PendingUpload,
   PageHeader,
-  Skeleton,
 } from '@sureground/ui';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
+import { browserTimeZone } from '@/components/shared/forms/TimeZoneSelect';
+import {
+  DisputeLoading,
+  DisputeMissing,
+  DisputeRespondBy,
+  DisputeSection,
+  LAND_DISPUTE_STATUS,
+} from '@/components/shared/disputes/DisputeParts';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { landDisputeKeys, landDisputeService } from '@/services/landDisputeService';
@@ -35,6 +40,7 @@ export default function LandDisputePage() {
   const [fileNote, setFileNote] = useState('');
   const [appeal, setAppeal] = useState('');
   const [message, setMessage] = useState<{ text: string; error?: boolean } | null>(null);
+  const [viewerTimeZone] = useState(() => browserTimeZone());
 
   const key = landDisputeKeys.detail(disputeId);
   const query = useQuery({
@@ -71,25 +77,9 @@ export default function LandDisputePage() {
       <Navigation />
       <main className="mx-auto max-w-3xl space-y-6 px-4 pb-16 pt-24">
         {query.isLoading ? (
-          <>
-            <div className="space-y-2.5">
-              <Skeleton className="h-7 w-48" />
-              <Skeleton className="h-4 w-80 max-w-[90%]" />
-            </div>
-            <CardSkeleton lines={3} />
-          </>
+          <DisputeLoading />
         ) : !d ? (
-          <>
-            <Link
-              href="/land/disputes"
-              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4" /> Land disputes
-            </Link>
-            <p className="text-sm text-destructive">
-              {query.error instanceof Error ? query.error.message : 'Case not found.'}
-            </p>
-          </>
+          <DisputeMissing error={query.error} backHref="/land/disputes" backLabel="Land disputes" />
         ) : (
           <>
             <PageHeader
@@ -108,7 +98,7 @@ export default function LandDisputePage() {
               }
               meta={
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="info">{words(d.status)}</Badge>
+                  <Badge variant="info">{LAND_DISPUTE_STATUS[d.status] ?? words(d.status)}</Badge>
                   {d.holdActive && (
                     <Badge variant="warning" icon={<PauseCircle className="h-3.5 w-3.5" />}>
                       Land on hold
@@ -127,44 +117,42 @@ export default function LandDisputePage() {
               </p>
             )}
 
-            <section className="rounded-2xl border border-border bg-card p-5">
-              <h2 className="text-sm font-semibold text-foreground">The complaint</h2>
+            <DisputeRespondBy respondBy={d.respondBy} viewerTimeZone={viewerTimeZone} />
+
+            <DisputeSection title="The complaint">
               <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">{d.description}</p>
               {d.holdActive && d.holdReason && (
                 <p className="mt-3 text-sm text-muted-foreground">
                   The land is off the market while this is investigated: {d.holdReason}
                 </p>
               )}
-            </section>
+            </DisputeSection>
 
             {(d.outcome || d.appealReason) && (
-              <section className="rounded-2xl border border-border bg-card p-5 text-sm">
-                <h2 className="font-semibold text-foreground">Decision</h2>
+              <DisputeSection title="Decision">
                 {d.outcome && (
-                  <p className="mt-2 text-foreground">
+                  <p className="mt-2 text-sm text-foreground">
                     {d.outcome === 'UPHELD' ? 'Upheld' : 'Dismissed'}
                     {d.decidedAt && ` on ${formatDate(d.decidedAt)}`}: {d.decision}
                   </p>
                 )}
                 {d.appealReason && (
-                  <p className="mt-2 text-muted-foreground">Appealed: {d.appealReason}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">Appealed: {d.appealReason}</p>
                 )}
                 {d.appealOutcome && (
-                  <p className="mt-2 text-foreground">
+                  <p className="mt-2 text-sm text-foreground">
                     Appeal {d.appealOutcome === 'UPHELD' ? 'upheld' : 'dismissed'}:{' '}
                     {d.appealDecision}
                   </p>
                 )}
-              </section>
+              </DisputeSection>
             )}
 
             {d.canAppeal && (
-              <section className="rounded-2xl border border-border bg-card p-5">
-                <h2 className="text-sm font-semibold text-foreground">Appeal this decision</h2>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Once only{d.appealDeadline ? `, by ${formatDate(d.appealDeadline)}` : ''}. A
-                  different member of our team reviews it.
-                </p>
+              <DisputeSection
+                title="Appeal this decision"
+                description={`Once only${d.appealDeadline ? `, by ${formatDate(d.appealDeadline)}` : ''}. A different member of our team reviews it.`}
+              >
                 <Textarea
                   className="mt-3"
                   value={appeal}
@@ -183,16 +171,14 @@ export default function LandDisputePage() {
                     Send appeal
                   </Button>
                 </div>
-              </section>
+              </DisputeSection>
             )}
 
-            <section className="rounded-2xl border border-border bg-card p-5">
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <FileText className="h-4 w-4" /> Evidence
-              </h2>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Your own files and our team&apos;s. Files cannot be removed once added.
-              </p>
+            <DisputeSection
+              title="Evidence"
+              icon={FileText}
+              description="Your own files and our team's. Files cannot be removed once added."
+            >
               {d.evidence.length === 0 ? (
                 <EmptyState
                   icon={FileText}
@@ -250,10 +236,9 @@ export default function LandDisputePage() {
                   </Button>
                 </div>
               )}
-            </section>
+            </DisputeSection>
 
-            <section className="rounded-2xl border border-border bg-card p-5">
-              <h2 className="text-sm font-semibold text-foreground">What has happened</h2>
+            <DisputeSection title="What has happened">
               <ol className="mt-3 space-y-2 text-sm">
                 {d.events.map((event) => (
                   <li key={event.id}>
@@ -265,7 +250,7 @@ export default function LandDisputePage() {
                   </li>
                 ))}
               </ol>
-            </section>
+            </DisputeSection>
           </>
         )}
       </main>

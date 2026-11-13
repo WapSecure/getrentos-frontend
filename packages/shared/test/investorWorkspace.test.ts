@@ -85,6 +85,79 @@ test('approvals and representative purchases link to the right workspace', () =>
   assert.equal(items[1].link.path, '/representing/transactions/tx2');
 });
 
+test('an open dispute shows with Sureground’s reply deadline and links to the dispute', () => {
+  const items = buildAttentionQueue({
+    purchases: [
+      purchase({
+        dispute: {
+          id: 'd1',
+          kind: 'DEPOSIT',
+          status: 'OPEN',
+          respondBy: '2026-11-11T22:59:59.999Z',
+          respondByParty: 'SUREGROUND',
+        },
+      }),
+      purchase({
+        transactionId: 'tx2',
+        title: 'Plot 4, Epe',
+        dispute: {
+          id: 'ld1',
+          kind: 'LAND',
+          status: 'UNDER_INVESTIGATION',
+          respondBy: null,
+          respondByParty: null,
+        },
+      }),
+    ],
+    links: {
+      ...links,
+      dispute: ({ id, kind }) =>
+        kind === 'DEPOSIT' ? `/buyer/disputes/${id}` : `/land/disputes/${id}`,
+    },
+  });
+  assert.equal(items.length, 2);
+  // Information, not a task: the model records no turn for the buyer.
+  assert.deepEqual(
+    items.map((i) => [i.kind, i.severity, i.title, i.link.path, i.dueAt, i.dueLabel]),
+    [
+      [
+        'dispute',
+        'info',
+        'Open dispute on Three-bedroom flat, Lekki',
+        '/buyer/disputes/d1',
+        '2026-11-11T22:59:59.999Z',
+        'Sureground replies by',
+      ],
+      [
+        'dispute',
+        'info',
+        'Open dispute on Plot 4, Epe',
+        '/land/disputes/ld1',
+        undefined,
+        undefined,
+      ],
+    ]
+  );
+});
+
+test('without a dispute route, a dispute opens its purchase', () => {
+  const items = buildAttentionQueue({
+    purchases: [
+      purchase({
+        dispute: {
+          id: 'd1',
+          kind: 'DEPOSIT',
+          status: 'OPEN',
+          respondBy: null,
+          respondByParty: null,
+        },
+      }),
+    ],
+    links,
+  });
+  assert.equal(items[0].link.path, '/buyer/transactions/tx1');
+});
+
 test('a tour with times offered is due at its earliest slot; other tours are not listed', () => {
   const items = buildAttentionQueue({
     tours: [

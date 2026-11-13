@@ -5,6 +5,7 @@ import type {
   ForeignIdentityStatus,
   InvestorOverview,
   InvestorStatusCounts,
+  PurchaseDispute,
   PurchaseSummary,
 } from './types';
 
@@ -19,7 +20,8 @@ export type InvestorAttentionKind =
   | 'purchase'
   | 'tour'
   | 'spending'
-  | 'identity';
+  | 'identity'
+  | 'dispute';
 
 export interface InvestorAttentionItem extends AttentionItem {
   kind: InvestorAttentionKind;
@@ -60,6 +62,8 @@ export interface AttentionLinks {
   tours?: string;
   approvals?: string;
   identity: string;
+  /** Where a dispute opens; without it, the purchase's own workspace. */
+  dispute?: (dispute: Pick<PurchaseDispute, 'id' | 'kind'>) => string;
 }
 
 export interface AttentionInput {
@@ -231,6 +235,24 @@ export const buildAttentionQueue = (input: AttentionInput): InvestorAttentionIte
         title: purchase.nextAction ?? 'Your purchase needs you',
         detail: `${purchase.title}${forWhom}`,
         link: { path, label: 'Open' },
+      });
+    }
+    const dispute = purchase.dispute;
+    if (dispute) {
+      // The model records no turn for the buyer, only Sureground's response deadline, so this is
+      // information with that deadline rather than a task.
+      items.push({
+        key: `dispute-${dispute.id}`,
+        kind: 'dispute',
+        severity: 'info',
+        title: `Open dispute on ${purchase.title}`,
+        detail:
+          dispute.kind === 'DEPOSIT'
+            ? 'The deposit stays held until Sureground decides.'
+            : 'A land case Sureground is looking into.',
+        dueAt: dispute.respondBy ?? undefined,
+        dueLabel: dispute.respondBy ? 'Sureground replies by' : undefined,
+        link: { path: links.dispute ? links.dispute(dispute) : path, label: 'View' },
       });
     }
   }
