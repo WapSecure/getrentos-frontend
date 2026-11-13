@@ -18,7 +18,7 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
-import { tourNextStep } from '@sureground/shared';
+import { tourNextStep, formatLocation } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import {
   BUYER_TOUR_STATUS,
@@ -141,7 +141,7 @@ function TourCard({ tour: t }: { tour: BuyerTour }) {
         <View style={{ flex: 1, gap: 2 }}>
           <Text variant="bodyStrong">{t.land}</Text>
           <Text variant="caption" color="mutedForeground">
-            {t.city}, {t.state} · host {t.hostName}
+            {formatLocation(t.city, t.state)} · host {t.hostName}
             {t.attendeeName ? ` · with ${t.attendeeName}` : ''}
           </Text>
         </View>

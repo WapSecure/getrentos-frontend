@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
@@ -215,7 +216,7 @@ export default function RealtorListings() {
 function ListingCard({ l, onPress }: { l: RealtorListing; onPress: () => void }) {
   const { colors, spacing } = useTheme();
   const s = LISTING_STATUS[l.status];
-  const where = [l.property.city, l.property.state].filter(Boolean).join(', ');
+  const where = formatLocation(l.property.city, l.property.state);
   return (
     <Pressable
       onPress={() => {

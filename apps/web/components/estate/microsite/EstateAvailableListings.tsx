@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Home } from '@sureground/icons';
@@ -38,7 +39,7 @@ const EstateListingCard = ({
   <ListingCard
     href={marketHref(listing, slug)}
     title={listing.title}
-    location={[listing.address, listing.city].filter(Boolean).join(', ')}
+    location={formatLocation(listing.address, listing.city)}
     price={listing.price}
     priceUnit={listing.listingType === 'SHORTLET' ? 'night' : undefined}
     image={listing.coverImageUrl}

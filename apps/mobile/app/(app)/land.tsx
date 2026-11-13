@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useEffect, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
@@ -152,7 +153,7 @@ export default function LandMarketplace() {
                       {item.title}
                     </Text>
                     <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                      {[item.address, item.city].filter(Boolean).join(', ')}
+                      {formatLocation(item.address, item.city)}
                     </Text>
                     <Price amount={item.price} variant="bodyStrong" style={{ marginTop: 2 }} />
                     <Text variant="caption" color="mutedForeground">

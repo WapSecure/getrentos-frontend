@@ -93,13 +93,32 @@ export function addressPrecisionLabel(p: VerifiedAddress['precision']): string {
         : 'City';
 }
 
-/** "Lagos, Lagos" → "Lagos": seed and imported listings often repeat the city as the state. */
-export function tidyPlace(place: string): string {
-  const parts = place
-    .split(',')
+// "Lagos State" and "Lagos" name the same place when comparing parts.
+const placeKey = (part: string) =>
+  part
+    .toLowerCase()
+    .replace(/\s+state$/, '')
+    .replace(/\s+/g, ' ');
+
+/**
+ * One display line for a place, smallest part first: formatLocation('Surulere', 'Lagos', 'Lagos')
+ * gives "Surulere, Lagos". Parts may themselves hold commas ("12 Admiralty Way, Lekki"). Blank parts
+ * go, and a part that repeats another (ignoring case and a trailing "State") is shown once, at its
+ * last place, since the broader parts come last: "Lagos, Ikeja, Lagos" reads "Ikeja, Lagos".
+ */
+export function formatLocation(...parts: (string | null | undefined)[]): string {
+  const all = parts
+    .flatMap((p) => (p ?? '').split(','))
     .map((p) => p.trim())
     .filter(Boolean);
-  return parts
-    .filter((p, i) => i === 0 || p.toLowerCase() !== parts[i - 1]!.toLowerCase())
+  // Each place keeps its first spelling ("Abuja", not a later "abuja") at its last position.
+  return all
+    .filter((p, i) => !all.slice(i + 1).some((later) => placeKey(later) === placeKey(p)))
+    .map((p) => all.find((first) => placeKey(first) === placeKey(p)) ?? p)
     .join(', ');
+}
+
+/** @deprecated Use formatLocation, which also takes the parts separately. */
+export function tidyPlace(place: string): string {
+  return formatLocation(place);
 }

@@ -55,7 +55,7 @@ import {
   LAND_TITLE_TYPE_LABELS,
   type PublicLandListing,
 } from '@/types/land';
-import { boundaryCorners, imagePreviewOf, srcSetOf } from '@sureground/shared';
+import { boundaryCorners, imagePreviewOf, srcSetOf, formatLocation } from '@sureground/shared';
 import { ParcelBoundaryMap } from '@/components/maps/ParcelBoundaryMap';
 import { useAddRole } from '@/hooks/useAddRole';
 import Link from 'next/link';
@@ -335,7 +335,7 @@ export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBro
           setActiveListing(listing);
         }}
         title={listing.title}
-        location={`${listing.city}, ${listing.state}`}
+        location={formatLocation(listing.city, listing.state)}
         price={listing.askingPrice}
         priceCompact
         image={listing.coverImageUrl}
@@ -627,9 +627,11 @@ export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBro
                       </DialogTitle>
                       <DialogDescription className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4" />
-                        {[activeListing.address, activeListing.city, activeListing.state]
-                          .filter(Boolean)
-                          .join(', ')}
+                        {formatLocation(
+                          activeListing.address,
+                          activeListing.city,
+                          activeListing.state
+                        )}
                       </DialogDescription>
                       {activeListing.addressHidden && (
                         <p className="mt-1 text-xs text-muted-foreground">

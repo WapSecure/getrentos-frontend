@@ -4,7 +4,8 @@ import type { Paginated } from './properties';
 import type { ShortletAvailability, ShortletListing } from './shortlets';
 import { formatLandArea, LAND_TITLE_TYPE_LABEL, type LandListing } from './land';
 import {
-  tidyPlace,
+  formatLocation,
+  isListingVerified,
   trustChainLabel,
   type TrustChainLike,
   type TrustLabelTone,
@@ -202,7 +203,7 @@ const money = (v: unknown) => {
   return Number.isFinite(n) ? n : 0;
 };
 // "Lagos, Lagos" reads as "Lagos", as on the web.
-const place = (...parts: (string | undefined)[]) => tidyPlace(parts.filter(Boolean).join(', '));
+const place = formatLocation;
 // Falsy, not nullish: listings without bedroom data come back as 0, and "0 bed"
 // reads as a claim about the property rather than a missing field.
 const positive = (n?: number) => (n && n > 0 ? n : undefined);
@@ -221,14 +222,14 @@ const rentToCard = (r: RentalDto): MarketCard => ({
   id: r.id,
   kind: 'rent',
   title: r.title,
-  location: tidyPlace(r.location),
+  location: formatLocation(r.location),
   price: money(r.price),
   period: r.period,
   bedrooms: positive(r.bedrooms),
   bathrooms: positive(r.bathrooms),
   size: positive(r.size),
   image: r.image || undefined,
-  verified: !!r.verified,
+  verified: isListingVerified(r),
   trustLabel: labelFor(r.trustChain),
 });
 
@@ -241,7 +242,7 @@ const saleToCard = (s: SaleDto): MarketCard => ({
   bedrooms: positive(s.bedrooms),
   bathrooms: positive(s.bathrooms),
   image: s.coverImageUrl || s.images?.[0] || undefined,
-  verified: !!s.isVerified,
+  verified: isListingVerified(s),
   trustLabel: labelFor(s.trustChain),
   highlight: humanise(s.propertyType),
 });
@@ -369,7 +370,7 @@ const storefrontToCard = (l: StorefrontListingDto): MarketCard => ({
   id: l.listingId,
   kind: STOREFRONT_KIND[l.listingType],
   title: l.title,
-  location: l.address ? `${l.address}, ${l.city}` : place(l.city, l.state),
+  location: l.address ? formatLocation(l.address, l.city) : place(l.city, l.state),
   price: money(l.price),
   period: l.listingType === 'SHORTLET' ? 'night' : undefined,
   bedrooms: positive(l.bedrooms ?? undefined),

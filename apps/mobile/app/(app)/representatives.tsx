@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 
@@ -263,7 +264,7 @@ function AssignProperties({ kind, rep }: { kind: RepKind; rep: Representative })
                 {p.title}
               </Text>
               <Text variant="caption" color="mutedForeground">
-                {p.city}, {p.state}
+                {formatLocation(p.city, p.state)}
               </Text>
             </View>
             <Button

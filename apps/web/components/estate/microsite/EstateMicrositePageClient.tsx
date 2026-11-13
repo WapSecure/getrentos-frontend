@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Building2, MapPin } from '@sureground/icons';
 import { EmptyState, Skeleton } from '@sureground/ui';
@@ -76,7 +77,7 @@ export const EstateMicrositePageClient = ({
         <h1 className="text-xl font-bold text-foreground">{profile.name}</h1>
         <p className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
           <MapPin className="w-3.5 h-3.5 shrink-0" />
-          {profile.address}, {profile.city}, {profile.state}
+          {formatLocation(profile.address, profile.city, profile.state)}
         </p>
         {profile.bio && (
           <p className="text-sm text-muted-foreground mt-6 max-w-2xl">{profile.bio}</p>

@@ -25,6 +25,7 @@ import {
   LAND_INSPECTION_STATUS_LABELS,
   photoLocationSummary,
   type LandInspectionStatus,
+  formatLocation,
 } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
@@ -133,7 +134,7 @@ const InspectionRow = ({
                 </CardTitle>
                 <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-sm text-muted-foreground">
                   <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  {inspection.city}, {inspection.state}
+                  {formatLocation(inspection.city, inspection.state)}
                   {inspection.reinspectionOfId ? ' · reinspection' : ''}
                   <span aria-hidden="true">·</span>
                   <span className="font-mono text-xs">{inspection.reference}</span>

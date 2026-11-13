@@ -23,7 +23,7 @@ import type { Property } from '@/types/renter';
 import { renterService } from '@/services/renterService';
 import { kycService } from '@/services/kycService';
 import { unwrap, unwrapOptional, ApiError } from '@/lib/apiHelpers';
-import { applyLastApplication } from '@sureground/shared';
+import { applyLastApplication, formatLocation } from '@sureground/shared';
 import { renterKeys } from '@/lib/queryKeys';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 
@@ -208,7 +208,7 @@ export default function PropertyApplyPage() {
         title="Apply to rent"
         description={
           <>
-            {property.title} · {property.location}
+            {property.title} · {formatLocation(property.location)}
           </>
         }
       />

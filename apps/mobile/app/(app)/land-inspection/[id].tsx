@@ -32,6 +32,7 @@ import {
   landPoint,
   type LandBoundaryCondition,
   describeDistance,
+  formatLocation,
 } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
@@ -147,7 +148,7 @@ export default function LandInspectionJob() {
                 <View style={{ flexDirection: 'row', gap: spacing.xs, alignItems: 'center' }}>
                   <MapPin size={16} color={colors.mutedForeground} />
                   <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-                    {job.land.address}, {job.land.city}, {job.land.state}
+                    {formatLocation(job.land.address, job.land.city, job.land.state)}
                   </Text>
                 </View>
                 {job.instructions ? <Text variant="callout">“{job.instructions}”</Text> : null}

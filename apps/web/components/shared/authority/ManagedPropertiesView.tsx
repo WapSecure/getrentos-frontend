@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -112,7 +113,7 @@ const ManagedPropertyCard = ({
           <h3 className="font-semibold text-foreground">{property.title}</h3>
           <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
             <MapPin className="w-3.5 h-3.5" />
-            {property.address}, {property.city}
+            {formatLocation(property.address, property.city)}
           </p>
           {property.referenceCode && (
             <div className="mt-2">

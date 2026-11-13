@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -762,7 +763,7 @@ function EstatesDirectory({
                     {item.name}
                   </Text>
                   <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                    {[item.city, item.state].filter(Boolean).join(', ')}
+                    {formatLocation(item.city, item.state)}
                   </Text>
                 </View>
               </View>

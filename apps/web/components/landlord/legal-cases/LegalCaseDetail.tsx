@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import {
   AlertTriangle,
@@ -284,7 +285,7 @@ export function LegalCaseDetail({
               {legalCase.kindLabel}
             </DialogTitle>
             <p className="mt-1 truncate text-sm text-muted-foreground">
-              {legalCase.property.address}, {legalCase.property.city}
+              {formatLocation(legalCase.property.address, legalCase.property.city)}
               {legalCase.unitName && ` · ${legalCase.unitName}`}
               {legalCase.tenantName && ` · ${legalCase.tenantName}`}
             </p>

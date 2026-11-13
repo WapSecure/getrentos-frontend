@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useMemo } from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
@@ -141,7 +142,7 @@ function DevelopmentCard({ development: d }: { development: ShowroomDevelopmentS
   ]
     .filter(Boolean)
     .join(' · ');
-  const location = `${d.city}, ${d.state}`;
+  const location = formatLocation(d.city, d.state);
   const cover = d.cover ? variantAtLeast(d.cover.url, d.cover.variants, 640) : undefined;
   const blur = placeholderOf(d.cover?.placeholder);
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { motion } from 'framer-motion';
 import {
   MapPin,
@@ -139,7 +140,7 @@ export const OwnerPropertyCard = ({
         </div>
         <p className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
           <MapPin className="w-3 h-3" />
-          {property.city}, {property.state}
+          {formatLocation(property.city, property.state)}
         </p>
         {property.referenceCode && (
           <div className="relative z-10 mt-2 w-fit">

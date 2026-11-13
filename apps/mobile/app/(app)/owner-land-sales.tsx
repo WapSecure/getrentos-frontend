@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -222,7 +223,7 @@ function EstateSummary({ layout: l }: { layout: EstateLayoutSummary }) {
         {l.access === 'MANDATE' ? <Badge label="Selling under mandate" tone="info" /> : null}
       </View>
       <Text variant="caption" color="mutedForeground">
-        {l.propertyTitle} · {l.city}, {l.state} · {l.plots.total} plots
+        {l.propertyTitle} · {formatLocation(l.city, l.state)} · {l.plots.total} plots
       </Text>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         {figures.map(([label, value]) => (

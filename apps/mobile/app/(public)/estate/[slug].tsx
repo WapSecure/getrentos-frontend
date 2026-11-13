@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
@@ -127,7 +128,7 @@ function Header({
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
         <MapPin size={14} color={colors.mutedForeground} />
         <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-          {[e.address, e.city, e.state].filter(Boolean).join(', ')}
+          {formatLocation(e.address, e.city, e.state)}
         </Text>
       </View>
       {e.bio ? (

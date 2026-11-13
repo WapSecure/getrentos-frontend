@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import {
   MapPin,
   Megaphone,
@@ -64,7 +65,7 @@ export const RealtorListingCard = ({ listing, onClick }: RealtorListingCardProps
         </h3>
         <p className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
           <MapPin className="w-3 h-3" />
-          {listing.city}, {listing.state}
+          {formatLocation(listing.city, listing.state)}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">Client: {listing.clientName}</p>
 

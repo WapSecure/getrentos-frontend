@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { BadgeCheck } from '@sureground/icons';
+import { isListingVerified } from '@sureground/shared';
 import { ListingCard } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -47,7 +48,7 @@ export const DiscoverRecommendations = () => {
               priceCompact
               image={rec.image}
               imageAlt=""
-              verified={rec.verified}
+              verified={isListingVerified(rec)}
               facts={{ beds: rec.bedrooms, baths: rec.bathrooms }}
             />
           ))}

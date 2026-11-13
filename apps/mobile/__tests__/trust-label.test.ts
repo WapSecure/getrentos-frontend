@@ -22,16 +22,24 @@ describe('trust chain label', () => {
     expect(trustChainLabel(chain({ authority: true, property: true })).label).toBe(
       'Verified · owner ID pending'
     );
-    expect(trustChainLabel(chain({ owner: true, authority: true })).label).toBe(
-      'Verified · property check pending'
-    );
+  });
+
+  it('never says verified while the property check is outstanding', () => {
+    expect(trustChainLabel(chain({ owner: true, authority: true }))).toEqual({
+      label: 'Verification in progress',
+      tone: 'pending',
+    });
+  });
+
+  it('keeps a verified property in progress while owner ID and ownership are both open', () => {
+    expect(trustChainLabel(chain({ property: true })).tone).toBe('pending');
   });
 
   it('does not count payment protection, which always holds', () => {
     expect(trustChainLabel(chain({ owner: true })).tone).toBe('pending');
   });
 
-  it('says verification is in progress when more than one check is left', () => {
+  it('says verification is in progress while the property is unchecked', () => {
     expect(trustChainLabel(chain({ owner: true })).label).toBe('Verification in progress');
     expect(trustChainLabel(chain({})).label).toBe('Verification in progress');
   });

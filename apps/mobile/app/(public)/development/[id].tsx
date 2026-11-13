@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useRef, useState } from 'react';
 import {
   Pressable,
@@ -97,7 +98,7 @@ export default function PublicDevelopment() {
   const share = async () => {
     if (!d) return;
     await Share.share({
-      message: `${d.name} · ${d.city}, ${d.state}\n${env.webUrl}/developments/${encodeURIComponent(d.id)}`,
+      message: `${d.name} · ${formatLocation(d.city, d.state)}\n${env.webUrl}/developments/${encodeURIComponent(d.id)}`,
     }).catch(() => undefined);
   };
 

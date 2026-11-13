@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { Heart, ShieldCheck } from '@sureground/icons';
 import { Badge, ListingCard, ListingCardAction } from '@sureground/ui';
 import type { BuyerPropertyListing } from '@/types/buyer';
@@ -22,7 +23,7 @@ export const PropertyListingCard = ({
   <ListingCard
     onOpen={onViewDetails}
     title={listing.title}
-    location={`${listing.city}, ${listing.state}`}
+    location={formatLocation(listing.city, listing.state)}
     price={listing.askingPrice}
     priceCompact
     image={listing.image}

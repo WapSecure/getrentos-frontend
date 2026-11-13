@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -179,7 +180,7 @@ export function DevelopmentsListView() {
                     </Link>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {[
-                        `${d.city}, ${d.state}`,
+                        formatLocation(d.city, d.state),
                         DEVELOPMENT_STAGE_LABEL[d.stage],
                         `${d.checksPassed} of 4 checks passed`,
                         `updated ${formatDate(d.updatedAt)}`,

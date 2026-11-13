@@ -55,7 +55,7 @@ import { useSavedListings } from '@/hooks/useSavedListings';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { APP_TIME_ZONE, firstName, formatNaira } from '@/lib/format';
 import { withTrustLabel } from '@/lib/trustLabel';
-import { trustChainLabel } from '@sureground/shared';
+import { trustChainLabel, formatLocation } from '@sureground/shared';
 
 interface Metric {
   key: keyof RenterDashboardStats;
@@ -500,7 +500,7 @@ function HeroCard({
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <MapPin size={11} color="rgba(255,255,255,0.85)" />
             <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }} numberOfLines={1}>
-              {property.location}
+              {formatLocation(property.location)}
             </Text>
           </View>
           <Price

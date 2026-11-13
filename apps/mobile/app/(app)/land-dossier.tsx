@@ -2,7 +2,7 @@ import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { boundarySignOffText } from '@sureground/shared';
+import { boundarySignOffText, formatLocation } from '@sureground/shared';
 import {
   Badge,
   Card,
@@ -62,7 +62,7 @@ export default function LandDossierScreen() {
         title={d?.subject.title ?? 'Land'}
         subtitle={
           d
-            ? `${d.subject.city}, ${d.subject.state} · ${formatNaira(d.subject.price)}${d.subject.planName ? ` · ${d.subject.planName}` : ''}`
+            ? `${formatLocation(d.subject.city, d.subject.state)} · ${formatNaira(d.subject.price)}${d.subject.planName ? ` · ${d.subject.planName}` : ''}`
             : undefined
         }
         onBack={() => goBack()}

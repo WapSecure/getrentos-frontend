@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { trackShowroom } from '@/lib/showroomAnalytics';
 import { useState } from 'react';
@@ -281,7 +282,7 @@ export default function StayDetail() {
                   <Text variant="bodyStrong">Address</Text>
                 </View>
                 <Text variant="body" selectable>
-                  {[b.address, b.city].filter(Boolean).join(', ')}
+                  {formatLocation(b.address, b.city)}
                 </Text>
                 {b.latitude != null && b.longitude != null ? (
                   <>

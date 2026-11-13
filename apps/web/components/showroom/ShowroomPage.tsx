@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { BadgeCheck, Bath, BedDouble, Check, MapPin, Ruler } from '@sureground/icons';
-import { trustChainLabel } from '@sureground/shared';
+import { trustChainLabel, formatLocation } from '@sureground/shared';
 import { floorPlanLevels } from '@sureground/shared/showroom';
 import { Badge } from '@sureground/ui/Badge';
 import { DescriptionList } from '@sureground/ui/DescriptionList';
@@ -143,9 +143,7 @@ export async function ShowroomPage({
                 </div>
                 <p className="flex items-start gap-1.5 text-muted-foreground">
                   <MapPin className="mt-1 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-                  <span>
-                    {listing.address ? `${listing.address}, ${listing.location}` : listing.location}
-                  </span>
+                  <span>{formatLocation(listing.address, listing.location)}</span>
                 </p>
                 {/* Phones see the price here; the full breakdown sits further down. */}
                 <p className="font-display data-value text-[2rem] leading-tight font-normal tracking-[-0.015em] text-foreground lg:hidden">

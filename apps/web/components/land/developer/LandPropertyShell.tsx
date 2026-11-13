@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { PageErrorState, PageHeader, Skeleton } from '@sureground/ui';
@@ -57,7 +58,7 @@ export const LandPropertyShell = ({ propertyId, section, children }: LandPropert
           description={
             <span className="flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-              {[data.property.city, data.property.state].filter(Boolean).join(', ')}
+              {formatLocation(data.property.city, data.property.state)}
             </span>
           }
           actions={<LandDiligenceBadge status={data.diligence?.status} />}

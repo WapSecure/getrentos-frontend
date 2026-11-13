@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -68,7 +69,7 @@ export default function LandEstate() {
       <DetailScreenHeader
         eyebrow="Estate"
         title={e?.name ?? 'Estate'}
-        subtitle={e ? `${e.city}, ${e.state}` : undefined}
+        subtitle={e ? formatLocation(e.city, e.state) : undefined}
         onBack={() => goBack()}
       />
       <QueryState

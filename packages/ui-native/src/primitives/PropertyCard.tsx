@@ -11,6 +11,7 @@ import {
   Columns3,
   Clock,
 } from '@sureground/icons/native';
+import { formatLocation } from '@sureground/shared/address';
 import { useTheme, withAlpha } from '../theme';
 import { Text } from './Text';
 import { Price } from './Price';
@@ -52,7 +53,7 @@ export function describeProperty(p: PropertyCardData): string {
   const price = `${Math.round(p.price).toLocaleString('en-NG')} naira${p.period ? ` ${SPOKEN_PERIOD[p.period]}` : ''}`;
   return [
     p.title,
-    p.location,
+    formatLocation(p.location),
     price,
     p.bedrooms ? `${p.bedrooms} bedroom${p.bedrooms === 1 ? '' : 's'}` : null,
     p.bathrooms ? `${p.bathrooms} bathroom${p.bathrooms === 1 ? '' : 's'}` : null,
@@ -266,7 +267,7 @@ function PropertyCardBase({
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <MapPin size={12} color={colors.mutedForeground} />
             <Text variant="caption" color="mutedForeground" numberOfLines={1} style={{ flex: 1 }}>
-              {property.location}
+              {formatLocation(property.location)}
             </Text>
           </View>
           <Specs property={property} />

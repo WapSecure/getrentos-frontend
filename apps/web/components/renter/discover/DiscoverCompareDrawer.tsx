@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { X, Bed, Bath, Square, MapPin, Star, ShieldCheck, GitCompare } from '@sureground/icons';
 import { Property } from '@/types/renter';
 import { ShortlistComparison } from './ShortlistComparison';
@@ -96,7 +97,7 @@ export const DiscoverCompareDrawer = ({
                       <td key={property.id} className="py-3 px-4">
                         <div className="flex items-center gap-1 text-sm">
                           <MapPin className="w-3 h-3 text-muted-foreground" />
-                          {property.location}
+                          {formatLocation(property.location)}
                         </div>
                       </td>
                     ))}

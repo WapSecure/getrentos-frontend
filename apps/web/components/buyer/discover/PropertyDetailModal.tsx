@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import {
   X,
@@ -108,7 +109,7 @@ export const PropertyDetailModal = ({
             </DialogTitle>
             <p className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              {[listing.address, listing.city, listing.state].filter(Boolean).join(', ')}
+              {formatLocation(listing.address, listing.city, listing.state)}
             </p>
             {listing.addressHidden && (
               <p className="mt-1 text-xs text-muted-foreground">

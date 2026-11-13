@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Users } from '@sureground/icons';
@@ -212,7 +213,7 @@ export function ClientRealtorAccess({ showHeader = true }: { showHeader?: boolea
                         className="flex items-center justify-between gap-3 py-2 text-sm"
                       >
                         <span className="min-w-0">
-                          {property.title} · {property.city}, {property.state}
+                          {property.title} · {formatLocation(property.city, property.state)}
                         </span>
                         {property.assigned ? (
                           <span className="flex items-center gap-2">

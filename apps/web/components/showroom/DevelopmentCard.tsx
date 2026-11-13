@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import {
   DEVELOPMENT_STAGE_LABEL,
   completionLabel,
@@ -19,7 +20,7 @@ export function DevelopmentCard({
     <ListingCard
       title={d.name}
       href={developmentPath(d.id)}
-      location={`${d.city}, ${d.state}`}
+      location={formatLocation(d.city, d.state)}
       price={d.priceFromNaira ?? null}
       priceNote={d.priceFromNaira ? 'From, as the developer states it' : undefined}
       image={d.cover?.url ?? null}

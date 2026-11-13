@@ -63,7 +63,7 @@ import { ListingCheckCard } from '@/components/property/ListingCheckCard';
 import { AffordabilityCard } from '@/components/property/AffordabilityCard';
 import { VideoTourSheet } from '@/components/video/VideoTourSheet';
 import { FilmedOnSite } from '@/components/video/FilmedOnSite';
-import { tidyPlace, trustChainLabel } from '@sureground/shared';
+import { formatLocation, trustChainLabel } from '@sureground/shared';
 
 export default function PropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -206,7 +206,7 @@ export default function PropertyDetail() {
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                     <MapPin size={13} color={colors.mutedForeground} />
                     <Text variant="callout" color="mutedForeground">
-                      {tidyPlace(p.address ? `${p.address}, ${p.location}` : p.location)}
+                      {formatLocation(p.address, p.location)}
                     </Text>
                   </View>
                   {p.addressHidden ? (
@@ -486,7 +486,7 @@ export default function PropertyDetail() {
               onPress={() => {
                 trackShowroom({ name: 'property_share', listingId: p.id, market: 'rent' });
                 Share.share({
-                  message: `${p.title} · ${p.location}\n${env.webUrl}${marketWebPath('rent', p.id)}`,
+                  message: `${p.title} · ${formatLocation(p.location)}\n${env.webUrl}${marketWebPath('rent', p.id)}`,
                 }).catch(() => undefined);
               }}
               accessibilityLabel="Share this home"

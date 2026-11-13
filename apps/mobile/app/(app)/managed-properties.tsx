@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, View } from 'react-native';
 
@@ -160,7 +161,7 @@ function ManagedCard({ p }: { p: ManagedProperty }) {
         <View style={{ flex: 1, gap: 2 }}>
           <Text variant="bodyStrong">{p.title}</Text>
           <Text variant="caption" color="mutedForeground">
-            {p.address}, {p.city}
+            {formatLocation(p.address, p.city)}
           </Text>
         </View>
         <Badge label={p.status.toLowerCase()} tone={TONE[p.status]} />

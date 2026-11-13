@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { KeyRound, Megaphone, Package, ReceiptText, TriangleAlert } from '@sureground/icons';
+import { formatLocation } from '@sureground/shared';
 import Link from 'next/link';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -89,7 +90,7 @@ export default function ResidentDashboardPage() {
         title={household?.unitLabel ?? 'My household'}
         description={
           household
-            ? `${household.estate.name} · ${household.estate.address}, ${household.estate.city}`
+            ? `${household.estate.name} · ${formatLocation(household.estate.address, household.estate.city)}`
             : 'Your household and estate services'
         }
       />

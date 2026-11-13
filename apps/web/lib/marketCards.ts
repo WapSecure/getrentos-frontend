@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import type { PropertyTrustChain } from '@/types/renter';
 // Pure: maps each market's public card from the API into one shape for ListingCard. Server-safe.
 import type { ListingPriceUnit } from '@sureground/ui/ListingCard';
@@ -96,7 +97,7 @@ export const fromPublicCard = (c: PublicListingCard): MarketCard => ({
 export const fromLandCard = (l: LandCardApi): MarketCard => ({
   id: l.id,
   title: l.title,
-  location: `${l.city}, ${l.state}`,
+  location: formatLocation(l.city, l.state),
   price: Number(l.price),
   image: l.coverImageUrl,
   imageSrcSet: srcSetOf(l.imageVariants),
@@ -111,7 +112,7 @@ export const fromLandCard = (l: LandCardApi): MarketCard => ({
 export const fromShortletCard = (s: ShortletCardApi): MarketCard => ({
   id: s.id,
   title: s.title,
-  location: `${s.city}, ${s.state}`,
+  location: formatLocation(s.city, s.state),
   price: s.nightlyRate,
   priceUnit: s.pricingMode === 'PER_NIGHT' ? 'night' : undefined,
   image: s.coverImageUrl,

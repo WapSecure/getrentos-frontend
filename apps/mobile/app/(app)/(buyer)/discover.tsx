@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
@@ -47,7 +48,7 @@ function toCard(item: BuyerListing): PropertyCardData {
   return {
     id: item.id,
     title: item.title,
-    location: [item.address, item.city].filter(Boolean).join(', '),
+    location: formatLocation(item.address, item.city),
     price: item.askingPrice,
     bedrooms: item.bedrooms,
     bathrooms: item.bathrooms,
