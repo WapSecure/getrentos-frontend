@@ -10,13 +10,14 @@ import {
 import { Badge, Card, EmptyState, type BadgeVariant } from '@sureground/ui';
 
 export const RENTER_COLLECTION: Record<
-  RenterServiceChargeCollection,
+  RenterServiceChargeCollection | 'WAIVED',
   { label: string; variant: BadgeVariant }
 > = {
   PAID: { label: 'Paid', variant: 'success' },
   PART_PAID: { label: 'Part paid', variant: 'warning' },
   UNPAID: { label: 'To pay', variant: 'neutral' },
   REMOVED: { label: 'Removed', variant: 'neutral' },
+  WAIVED: { label: 'Waived', variant: 'neutral' },
 };
 
 /** A `YYYY-MM-DD` day as "1 Jan 2027", read at midday so no time zone moves it. */
@@ -29,7 +30,17 @@ export function formatDay(day: string): string {
 }
 
 /** The tenant's service charges, each opening its statement. */
-export function ServiceChargesTab({ charges }: { charges: RenterServiceCharge[] }) {
+export function ServiceChargesTab({
+  charges,
+  hrefFor = (id) => `/renter/payments/service-charges/${id}`,
+  intro = "Your share of the building's shared costs. You pay them with your rent under Payments. Open one to see how it was worked out or to raise a query.",
+}: {
+  charges: (Omit<RenterServiceCharge, 'collection' | 'rentPaymentId'> & {
+    collection: RenterServiceChargeCollection | 'WAIVED';
+  })[];
+  hrefFor?: (id: string) => string;
+  intro?: string;
+}) {
   if (charges.length === 0) {
     return (
       <EmptyState
@@ -45,10 +56,7 @@ export function ServiceChargesTab({ charges }: { charges: RenterServiceCharge[] 
         <h2 id="service-charges-heading" className="text-lg font-semibold text-foreground">
           Service charges
         </h2>
-        <p className="text-sm text-muted-foreground">
-          Your share of the building&apos;s shared costs. You pay them with your rent under
-          Payments. Open one to see how it was worked out or to raise a query.
-        </p>
+        <p className="text-sm text-muted-foreground">{intro}</p>
       </div>
       <ul className="space-y-3">
         {charges.map((charge) => {
@@ -56,7 +64,7 @@ export function ServiceChargesTab({ charges }: { charges: RenterServiceCharge[] 
           return (
             <li key={charge.id}>
               <Link
-                href={`/renter/payments/service-charges/${charge.id}`}
+                href={hrefFor(charge.id)}
                 className="block rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
                 <Card className="flex items-center gap-4 rounded-2xl p-4 transition-colors hover:bg-secondary/60">

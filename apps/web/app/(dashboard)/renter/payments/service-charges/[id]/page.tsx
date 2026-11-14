@@ -16,7 +16,8 @@ export default function RenterServiceChargeStatementPage() {
         queryKey: renterKeys.serviceCharge(id),
         listKey: renterKeys.serviceCharges,
         get: (statementId) => unwrap(renterServiceChargesService.get(statementId)),
-        raiseQuery: (statementId, input) => unwrap(renterServiceChargesService.raiseQuery(statementId, input)),
+        raiseQuery: (statementId, input) =>
+          unwrap(renterServiceChargesService.raiseQuery(statementId, input)),
         withdrawQuery: (queryId) => unwrap(renterServiceChargesService.withdrawQuery(queryId)),
         back: { label: 'Payments', href: '/renter/payments?tab=service-charges' },
         pay: { href: '/renter/payments', label: 'Payments', how: 'with your rent' },

@@ -87,12 +87,19 @@ export function ServiceChargeReconciliation({
             />
             <Figure label="Billed to tenants" value={formatCurrency(data.totals.billed)} />
             <Figure
-              label="Collected"
+              label="Collected in cash"
               value={formatCurrency(data.totals.collected)}
               hint={
-                data.totals.outstanding > 0
-                  ? `${formatCurrency(data.totals.outstanding)} still to pay`
-                  : undefined
+                [
+                  data.totals.credited > 0
+                    ? `${formatCurrency(data.totals.credited)} settled by credits`
+                    : '',
+                  data.totals.outstanding > 0
+                    ? `${formatCurrency(data.totals.outstanding)} still to pay`
+                    : '',
+                ]
+                  .filter(Boolean)
+                  .join(', ') || undefined
               }
             />
             <Figure label="Owner bears (vacant)" value={formatCurrency(data.totals.ownerBears)} />

@@ -44,6 +44,7 @@ import {
   useToast,
   type BadgeVariant,
 } from '@sureground/ui';
+import { ServiceChargeQueriesInbox } from '@/components/home-management/utilities/ServiceChargeQueriesInbox';
 import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { unwrap } from '@/lib/apiHelpers';
@@ -96,6 +97,25 @@ export default function EstateServiceChargesPage() {
           </Button>
         }
       />
+      <div className="mb-6">
+        <ServiceChargeQueriesInbox
+          source={{
+            queryKey: [...estateKeys.serviceCharges(estate.id), 'queries'],
+            invalidateKey: estateKeys.serviceCharges(estate.id),
+            list: () => unwrap(estateServiceChargesService.queries(estate.id)),
+            respond: (id, response) =>
+              unwrap(estateServiceChargesService.respondToQuery(estate.id, id, response)),
+            reject: (id, note) =>
+              unwrap(estateServiceChargesService.rejectQuery(estate.id, id, note)),
+            uphold: (id, note, credit) =>
+              unwrap(estateServiceChargesService.upholdQuery(estate.id, id, note, credit)),
+            who: 'residents',
+            creditEffect:
+              'lowers what the household still owes on that due; a due already paid can only be upheld without one',
+            creditLabel: 'Take off the due',
+          }}
+        />
+      </div>
       {budgets.isLoading ? (
         <Skeleton className="h-40 w-full rounded-2xl" />
       ) : items.length === 0 ? (

@@ -487,6 +487,8 @@ export const estateKeys = {
 };
 
 export const estateResidentKeys = {
+  serviceCharges: ['estate', 'resident', 'service-charges'] as const,
+  serviceCharge: (id: string) => ['estate', 'resident', 'service-charges', id] as const,
   myHousehold: ['estate', 'resident', 'household'] as const,
   dues: (status?: string) => ['estate', 'resident', 'dues', status ?? 'all'] as const,
   announcements: ['estate', 'resident', 'announcements'] as const,

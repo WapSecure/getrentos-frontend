@@ -30,17 +30,23 @@ import {
   Textarea,
   useToast,
 } from '@sureground/ui';
-import { unwrap } from '@/lib/apiHelpers';
 import { RENTER_COLLECTION, formatDay } from '@/components/renter/payments/ServiceChargesTab';
 
 /** A statement from either a tenancy (rent account) or an estate household (dues). */
-export type ServiceChargeStatementData = Omit<RenterServiceChargeStatement, 'collection' | 'partOfInstalment' | 'budget' | 'lines'> & {
+export type ServiceChargeStatementData = Omit<
+  RenterServiceChargeStatement,
+  'collection' | 'partOfInstalment' | 'budget' | 'lines'
+> & {
   collection: RenterServiceChargeStatement['collection'] | 'WAIVED';
   partOfInstalment?: number | null;
   /** For a household due an upheld query lowered. */
   amountDue?: number | null;
-  lines: (Omit<RenterServiceChargeStatement['lines'][number], 'spentSoFar'> & { spentSoFar?: number | null })[];
-  budget: Omit<RenterServiceChargeStatement['budget'], 'openBook' | 'spentSoFar'> & { spentSoFar?: number | null };
+  lines: (Omit<RenterServiceChargeStatement['lines'][number], 'spentSoFar'> & {
+    spentSoFar?: number | null;
+  })[];
+  budget: Omit<RenterServiceChargeStatement['budget'], 'openBook' | 'spentSoFar'> & {
+    spentSoFar?: number | null;
+  };
 };
 
 export interface ServiceChargeStatementConfig {
@@ -58,10 +64,19 @@ export interface ServiceChargeStatementConfig {
   holder: string;
 }
 
-const COLLECTION = { ...RENTER_COLLECTION, WAIVED: { label: 'Waived', variant: 'neutral' as const } };
+const COLLECTION = {
+  ...RENTER_COLLECTION,
+  WAIVED: { label: 'Waived', variant: 'neutral' as const },
+};
 
 /** One service charge as a statement: what you owe, the budget it comes from, and how your share was worked out. */
-export function ServiceChargeStatementView({ id, config }: { id: string; config: ServiceChargeStatementConfig }) {
+export function ServiceChargeStatementView({
+  id,
+  config,
+}: {
+  id: string;
+  config: ServiceChargeStatementConfig;
+}) {
   const statement = useQuery({
     queryKey: config.queryKey,
     queryFn: () => config.get(id),
@@ -69,10 +84,7 @@ export function ServiceChargeStatementView({ id, config }: { id: string; config:
   const [querying, setQuerying] = useState(false);
   const data = statement.data;
 
-  const breadcrumbs = [
-    config.back,
-    { label: data?.title ?? 'Service charge' },
-  ];
+  const breadcrumbs = [config.back, { label: data?.title ?? 'Service charge' }];
 
   if (statement.isLoading) {
     return (
@@ -155,7 +167,9 @@ export function ServiceChargeStatementView({ id, config }: { id: string; config:
           </p>
         ) : null}
         {data.collection === 'WAIVED' && (
-          <p className="text-sm text-muted-foreground sm:col-span-3">This charge was waived. You do not owe it.</p>
+          <p className="text-sm text-muted-foreground sm:col-span-3">
+            This charge was waived. You do not owe it.
+          </p>
         )}
         {data.collection === 'REMOVED' && (
           <p className="text-sm text-muted-foreground sm:col-span-3">
@@ -235,7 +249,8 @@ export function ServiceChargeStatementView({ id, config }: { id: string; config:
         </h2>
         {data.queries.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            If something looks wrong, raise a query within 90 days of the charge. {config.replier} replies here.
+            If something looks wrong, raise a query within 90 days of the charge. {config.replier}{' '}
+            replies here.
           </p>
         ) : (
           <ul className="space-y-3">
@@ -379,7 +394,8 @@ function RaiseQueryForm({
         Raise a query
       </DialogTitle>
       <DialogDescription className="mt-1 text-sm text-muted-foreground">
-        {config.replier} replies, then decides. If they agree, they can credit your {config.holder}, which goes towards what you owe.
+        {config.replier} replies, then decides. If they agree, they can credit your {config.holder},
+        which goes towards what you owe.
       </DialogDescription>
       <div className="mt-6 space-y-4">
         <Field label="About" required>

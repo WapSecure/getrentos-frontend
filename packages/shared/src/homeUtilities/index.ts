@@ -924,7 +924,12 @@ export type ServiceChargeQuery = {
 };
 
 /** "Your share: weight 2 of 7" for a weighted budget, "1 of 6 units, equal shares" otherwise. */
-export function statementShareBasis(budget: RenterServiceChargeStatement['budget']): string {
+export function statementShareBasis(
+  budget: Pick<
+    RenterServiceChargeStatement['budget'],
+    'method' | 'weight' | 'totalWeight' | 'unitsSharing'
+  >
+): string {
   if (budget.method === 'WEIGHTED' && budget.weight !== null && budget.totalWeight) {
     const fmt = (n: number) => Number(n.toFixed(4)).toString();
     return `Your unit's weight is ${fmt(budget.weight)} of ${fmt(budget.totalWeight)} across ${budget.unitsSharing} units`;
@@ -976,7 +981,10 @@ export type ServiceChargeReconciliation = {
     actual: number;
     variance: number;
     billed: number;
+    /** Cash received from tenants. */
     collected: number;
+    /** Settled by credits from upheld queries, not cash. */
+    credited: number;
     outstanding: number;
     ownerBears: number;
   };

@@ -30,23 +30,55 @@ import { formatDay } from './ServiceChargePanel';
 type Action = { kind: 'reply' | 'reject' | 'uphold'; query: ServiceChargeQuery } | null;
 
 /** Tenants' open queries on service charges, newest first. Only shown when there is something to answer. */
-export function ServiceChargeQueriesInbox({ propertyId }: { propertyId?: string }) {
+/** Where the queries come from: a property's tenants (default) or an estate's residents. */
+export interface QueriesSource {
+  queryKey: readonly unknown[];
+  invalidateKey: readonly unknown[];
+  list: () => Promise<ServiceChargeQuery[]>;
+  respond: (id: string, response: string) => Promise<unknown>;
+  reject: (id: string, note: string) => Promise<unknown>;
+  uphold: (id: string, note: string, credit: number) => Promise<unknown>;
+  /** "tenants" or "residents". */
+  who: string;
+  /** What a credit does, e.g. "lands on the tenancy and pays towards their charges". */
+  creditEffect: string;
+  creditLabel: string;
+}
+
+const propertySource = (propertyId?: string): QueriesSource => ({
+  queryKey: homeManagementKeys.utilities.serviceChargeQueries(propertyId),
+  invalidateKey: homeManagementKeys.utilities.all,
+  list: async () => (await unwrap(serviceChargesService.queries({ propertyId }))).items,
+  respond: (id, response) => unwrap(serviceChargesService.respondToQuery(id, response)),
+  reject: (id, note) => unwrap(serviceChargesService.rejectQuery(id, note)),
+  uphold: (id, note, credit) => unwrap(serviceChargesService.upholdQuery(id, note, credit)),
+  who: 'tenants',
+  creditEffect: 'lands on the tenancy and pays towards their charges; it is never paid out as cash',
+  creditLabel: 'Credit to the tenancy',
+});
+
+export function ServiceChargeQueriesInbox({
+  propertyId,
+  source,
+}: {
+  propertyId?: string;
+  source?: QueriesSource;
+}) {
+  const api = source ?? propertySource(propertyId);
   const queryClient = useQueryClient();
   const [action, setAction] = useState<Action>(null);
   const queries = useQuery({
-    queryKey: homeManagementKeys.utilities.serviceChargeQueries(propertyId),
-    queryFn: () => unwrap(serviceChargesService.queries({ propertyId })),
+    queryKey: api.queryKey,
+    queryFn: () => api.list(),
   });
-  const live = (queries.data?.items ?? []).filter(
-    (q) => q.status === 'OPEN' || q.status === 'ANSWERED'
-  );
+  const live = (queries.data ?? []).filter((q) => q.status === 'OPEN' || q.status === 'ANSWERED');
   const done = () => {
     setAction(null);
-    void queryClient.invalidateQueries({ queryKey: homeManagementKeys.utilities.all });
+    void queryClient.invalidateQueries({ queryKey: api.invalidateKey });
+    void queryClient.invalidateQueries({ queryKey: api.queryKey });
   };
   const reject = useMutation({
-    mutationFn: ({ id, note }: { id: string; note: string }) =>
-      unwrap(serviceChargesService.rejectQuery(id, note)),
+    mutationFn: ({ id, note }: { id: string; note: string }) => api.reject(id, note),
     onSuccess: done,
   });
 
@@ -55,11 +87,10 @@ export function ServiceChargeQueriesInbox({ propertyId }: { propertyId?: string 
     <section aria-labelledby="sc-queries-heading" className="space-y-3">
       <div>
         <h3 id="sc-queries-heading" className="font-semibold text-foreground">
-          Queries from tenants ({live.length})
+          Queries from {api.who} ({live.length})
         </h3>
         <p className="text-sm text-muted-foreground">
-          Reply, then decide. Upholding can credit the tenancy; the credit goes towards their
-          charges and is never paid out as cash.
+          Reply, then decide. Upholding can give a credit, which {api.creditEffect}.
         </p>
       </div>
       <ul className="space-y-3">
@@ -71,7 +102,8 @@ export function ServiceChargeQueriesInbox({ propertyId }: { propertyId?: string 
                   {SERVICE_CHARGE_QUERY_STATUS_LABELS[query.status]}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
-                  {query.invoice.tenant ?? 'Tenant'}, {query.invoice.unit}
+                  {query.invoice.tenant ?? query.invoice.unit}
+                  {query.invoice.tenant ? `, ${query.invoice.unit}` : ''}
                   {query.budget.property ? ` at ${query.budget.property.title}` : ''} ·{' '}
                   {query.budget.title} ·{' '}
                   {query.line
@@ -122,15 +154,15 @@ export function ServiceChargeQueriesInbox({ propertyId }: { propertyId?: string 
         onOpenChange={(open) => !open && setAction(null)}
       >
         <DialogContent size="lg">
-          {action?.kind === 'reply' && <ReplyForm query={action.query} onDone={done} />}
-          {action?.kind === 'uphold' && <UpholdForm query={action.query} onDone={done} />}
+          {action?.kind === 'reply' && <ReplyForm query={action.query} api={api} onDone={done} />}
+          {action?.kind === 'uphold' && <UpholdForm query={action.query} api={api} onDone={done} />}
         </DialogContent>
       </Dialog>
       <ReasonDialog
         open={action?.kind === 'reject'}
         onOpenChange={(open) => !open && setAction(null)}
         title="Not upheld"
-        description="Explain why. The tenant sees this, and the charge stays as billed."
+        description="Explain why. They see this, and the charge stays as billed."
         reasonLabel="Why is it not upheld?"
         reasonPlaceholder="e.g. Diesel use matches the generator log for the quarter"
         minLength={3}
@@ -143,13 +175,21 @@ export function ServiceChargeQueriesInbox({ propertyId }: { propertyId?: string 
   );
 }
 
-function ReplyForm({ query, onDone }: { query: ServiceChargeQuery; onDone: () => void }) {
+function ReplyForm({
+  query,
+  api,
+  onDone,
+}: {
+  query: ServiceChargeQuery;
+  api: QueriesSource;
+  onDone: () => void;
+}) {
   const toast = useToast();
   const [text, setText] = useState('');
   const reply = useMutation({
-    mutationFn: () => unwrap(serviceChargesService.respondToQuery(query.id, text.trim())),
+    mutationFn: () => api.respond(query.id, text.trim()),
     onSuccess: () => {
-      toast.success('Reply sent to the tenant.');
+      toast.success('Reply sent.');
       onDone();
     },
   });
@@ -188,7 +228,15 @@ function ReplyForm({ query, onDone }: { query: ServiceChargeQuery; onDone: () =>
   );
 }
 
-function UpholdForm({ query, onDone }: { query: ServiceChargeQuery; onDone: () => void }) {
+function UpholdForm({
+  query,
+  api,
+  onDone,
+}: {
+  query: ServiceChargeQuery;
+  api: QueriesSource;
+  onDone: () => void;
+}) {
   const toast = useToast();
   const cap = query.line?.amount ?? query.invoice.amount;
   const [note, setNote] = useState('');
@@ -197,9 +245,9 @@ function UpholdForm({ query, onDone }: { query: ServiceChargeQuery; onDone: () =
     mutationFn: () =>
       withStepUpSummary(
         credit > 0
-          ? `Credit ${formatCurrency(credit)} to ${query.invoice.tenant ?? 'the tenant'}'s tenancy`
+          ? `Credit ${formatCurrency(credit)} to ${query.invoice.tenant ?? query.invoice.unit}`
           : `Uphold a service charge query`,
-        () => unwrap(serviceChargesService.upholdQuery(query.id, note.trim(), credit))
+        () => api.uphold(query.id, note.trim(), credit)
       ),
     onSuccess: () => {
       toast.success(
@@ -220,11 +268,11 @@ function UpholdForm({ query, onDone }: { query: ServiceChargeQuery; onDone: () =
         Uphold this query
       </DialogTitle>
       <DialogDescription className="mt-1 text-sm text-muted-foreground">
-        The charge itself is not changed. A credit lands on the tenancy and pays towards their
-        charges; it is never paid out as cash. You will be asked to confirm it is you.
+        The charge itself is not changed. A credit {api.creditEffect}. You will be asked to confirm
+        it is you.
       </DialogDescription>
       <div className="mt-6 space-y-4">
-        <Field label="What the tenant is told" required>
+        <Field label="What they are told" required>
           <Textarea
             value={note}
             onChange={(event) => setNote(event.target.value)}
@@ -232,7 +280,7 @@ function UpholdForm({ query, onDone }: { query: ServiceChargeQuery; onDone: () =
             maxLength={1000}
           />
         </Field>
-        <Field label="Credit to the tenancy" hint={`Optional, at most ${formatCurrency(cap)}`}>
+        <Field label={api.creditLabel} hint={`Optional, at most ${formatCurrency(cap)}`}>
           <CurrencyInput value={credit || ''} onValueChange={setCredit} placeholder="0" />
         </Field>
       </div>
