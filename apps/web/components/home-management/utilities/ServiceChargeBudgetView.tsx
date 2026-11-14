@@ -837,6 +837,20 @@ function AmendForm({
 }) {
   const toast = useToast();
   const [reason, setReason] = useState('');
+  const [units, setUnits] = useState(
+    budget.participants
+      .filter((p) => p.unitId)
+      .map((p) => ({
+        unitId: p.unitId!,
+        label: p.label,
+        weight: String(p.weight),
+        included: p.included,
+      }))
+  );
+  const unitsChanged = units.some((u) => {
+    const was = budget.participants.find((p) => p.unitId === u.unitId);
+    return !was || was.included !== u.included || String(was.weight) !== u.weight;
+  });
   const [lines, setLines] = useState<(LineDraft & { id?: string })[]>(
     budget.lines.map((line) => ({
       key: line.id,
@@ -860,17 +874,28 @@ function AmendForm({
                 label: label.trim(),
                 amount,
               })),
+            ...(unitsChanged
+              ? {
+                  participants: units.map((u) => ({
+                    unitId: u.unitId,
+                    weight: Number(u.weight) >= 0 ? Number(u.weight) : 1,
+                    included: u.included,
+                  })),
+                }
+              : {}),
           })
         )
       ),
     onSuccess: (next) => {
-      toast.success('Amended. Instalments not yet billed use the new amounts.');
+      toast.success('Amended. Instalments not yet billed use the new amounts and shares.');
       onDone(next);
     },
   });
   const total = lines.reduce((sum, line) => sum + (line.amount || 0), 0);
   const valid =
-    reason.trim().length >= 3 && lines.some((line) => line.label.trim() && line.amount > 0);
+    reason.trim().length >= 3 &&
+    lines.some((line) => line.label.trim() && line.amount > 0) &&
+    units.some((unit) => unit.included);
   return (
     <form
       onSubmit={(event) => {
@@ -948,6 +973,42 @@ function AmendForm({
         <p className="text-sm text-muted-foreground">
           New total {formatCurrency(total)}, was {formatCurrency(budget.total)}.
         </p>
+      </div>
+      <div className="mt-6 space-y-2">
+        <h3 className="text-sm font-semibold text-foreground">Units sharing it</h3>
+        <ul className="max-h-60 divide-y divide-border overflow-y-auto">
+          {units.map((unit) => (
+            <li key={unit.unitId} className="flex flex-wrap items-center gap-3 py-2">
+              <p className="min-w-0 flex-1 text-sm font-medium text-foreground">{unit.label}</p>
+              {budget.method === 'WEIGHTED' && (
+                <Input
+                  aria-label={`Weight for ${unit.label}`}
+                  className="w-24"
+                  inputMode="decimal"
+                  value={unit.weight}
+                  disabled={!unit.included}
+                  onChange={(event) =>
+                    setUnits((all) =>
+                      all.map((u) =>
+                        u.unitId === unit.unitId ? { ...u, weight: event.target.value } : u
+                      )
+                    )
+                  }
+                />
+              )}
+              <Switch
+                aria-label={`${unit.label} shares the service charge`}
+                checked={unit.included}
+                onCheckedChange={(included) =>
+                  setUnits((all) =>
+                    all.map((u) => (u.unitId === unit.unitId ? { ...u, included } : u))
+                  )
+                }
+                label="Shares it"
+              />
+            </li>
+          ))}
+        </ul>
       </div>
       <Field label="Why is it changing?" required className="mt-4">
         <Input value={reason} onChange={(event) => setReason(event.target.value)} maxLength={500} />

@@ -114,6 +114,7 @@ export const serviceChargesService = {
     input: {
       reason: string;
       lines: { id?: string; category: ServiceChargeCategory; label: string; amount: number }[];
+      participants?: { unitId: string; weight: number; included: boolean }[];
     }
   ) => send<ServiceChargeBudget>(`${BASE}/${id}/amend`, 'POST', input),
   reopen: (id: string, reason: string) =>

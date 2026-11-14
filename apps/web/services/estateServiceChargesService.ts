@@ -1,4 +1,5 @@
 import type {
+  ServiceChargeQuery,
   ServiceChargeBillingCycle,
   ServiceChargeBudgetStatus,
   ServiceChargeCategory,
@@ -120,4 +121,16 @@ export const estateServiceChargesService = {
     send<{ id: string; duesWaived: number }>(`${base(estateId)}/${id}/void`, 'POST', { reason }),
   invoices: (estateId: string, id: string) =>
     safeCall(() => authFetch<EstateServiceChargeInvoice[]>(`${base(estateId)}/${id}/invoices`)),
+  queries: (estateId: string) =>
+    safeCall(() => authFetch<ServiceChargeQuery[]>(`/estate/${estateId}/service-charge-queries`)),
+  respondToQuery: (estateId: string, id: string, response: string) =>
+    send(`/estate/${estateId}/service-charge-queries/${id}/respond`, 'POST', { response }),
+  rejectQuery: (estateId: string, id: string, outcomeNote: string) =>
+    send(`/estate/${estateId}/service-charge-queries/${id}/reject`, 'POST', { outcomeNote }),
+  /** Behind step-up: a credit lowers the household's unpaid due. */
+  upholdQuery: (estateId: string, id: string, outcomeNote: string, adjustmentAmount: number) =>
+    send(`/estate/${estateId}/service-charge-queries/${id}/uphold`, 'POST', {
+      outcomeNote,
+      adjustmentAmount,
+    }),
 };
