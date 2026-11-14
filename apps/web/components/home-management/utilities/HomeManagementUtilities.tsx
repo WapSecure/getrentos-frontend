@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { BarChart3, Droplets, Zap } from '@sureground/icons';
+import { BarChart3, Droplets, ReceiptText, Zap } from '@sureground/icons';
 import type { UtilityPurchaseKind } from '@sureground/shared';
 import { SegmentedControl, Select } from '@sureground/ui';
 import { useCreateRequest } from '@/components/home-management/HomeManagementSectionHeading';
@@ -15,6 +15,7 @@ import {
 } from '@/lib/homeManagementTabs';
 import type { HomeManagementProperty } from '@/services/homeManagementService';
 import { PowerPanel } from './PowerPanel';
+import { ServiceChargePanel } from './ServiceChargePanel';
 import { UtilitySpendPanel } from './UtilitySpendPanel';
 import { WaterPanel, type WaterWorkOrderSeed } from './WaterPanel';
 import { propertyName } from './utilityForm';
@@ -74,6 +75,16 @@ export function HomeManagementUtilities({
           segments={[
             { value: 'power', label: 'Power', icon: <Zap className="h-4 w-4" /> },
             { value: 'water', label: 'Water', icon: <Droplets className="h-4 w-4" /> },
+            // Budgets bill tenants, so field agents (record only) never see them.
+            ...(recordOnly
+              ? []
+              : [
+                  {
+                    value: 'service-charge' as const,
+                    label: 'Service charge',
+                    icon: <ReceiptText className="h-4 w-4" />,
+                  },
+                ]),
             { value: 'spend', label: 'Spend', icon: <BarChart3 className="h-4 w-4" /> },
           ]}
         />
@@ -94,11 +105,13 @@ export function HomeManagementUtilities({
         )}
       </div>
 
-      {view === 'spend' ? (
+      {view === 'service-charge' && !recordOnly ? (
+        <ServiceChargePanel propertyId={propertyId} properties={properties} />
+      ) : view === 'spend' ? (
         <UtilitySpendPanel
           propertyId={propertyId ?? (properties.length === 1 ? properties[0].id : undefined)}
         />
-      ) : view === 'power' ? (
+      ) : view === 'power' || view === 'service-charge' ? (
         <PowerPanel
           propertyId={propertyId}
           properties={properties}

@@ -192,8 +192,14 @@ test('a generator that is nearly due is never summarised as 0', () => {
 });
 
 test('cost per unit is shown for one property only, and says why when missing', () => {
-  assert.equal(costPerUnitFigure({ costPerUnit: 5000, unitsCount: 4 }, false).value, 'One property at a time');
-  assert.equal(costPerUnitFigure({ costPerUnit: null, unitsCount: 0 }, true).hint, 'Add units to the property to see this');
+  assert.equal(
+    costPerUnitFigure({ costPerUnit: 5000, unitsCount: 4 }, false).value,
+    'One property at a time'
+  );
+  assert.equal(
+    costPerUnitFigure({ costPerUnit: null, unitsCount: 0 }, true).hint,
+    'Add units to the property to see this'
+  );
   const one = costPerUnitFigure({ costPerUnit: 5000, unitsCount: 1 }, true);
   assert.match(one.value, /5,000/);
   assert.equal(one.hint, 'Across 1 unit');
@@ -207,5 +213,20 @@ test('a month breakdown lists recorded categories, largest first, and skips gaps
     repairs: { amount: 45000, quantity: null, entries: 1 },
   });
   assert.match(text, /^Fuel .*120,000, Utility repairs .*45,000, Electricity .*20,000$/);
-  assert.equal(monthSpendBreakdown({ fuel: null, electricity: null, water: null, repairs: null }), '');
+  assert.equal(
+    monthSpendBreakdown({ fuel: null, electricity: null, water: null, repairs: null }),
+    ''
+  );
+});
+
+test('service charge helpers', async () => {
+  const { dayAfter, bedroomWeight, shareSummary, SERVICE_CHARGE_CATEGORY_LABELS } =
+    await import('../src/homeUtilities/index.ts');
+  assert.equal(dayAfter('2027-12-31'), '2028-01-01');
+  assert.equal(dayAfter('2028-02-28'), '2028-02-29');
+  assert.equal(bedroomWeight(null), 1);
+  assert.equal(bedroomWeight(3), 3);
+  assert.equal(shareSummary('EQUAL', 12), 'Shared equally across 12 units');
+  assert.equal(shareSummary('WEIGHTED', 1), 'Shared by weight across 1 unit');
+  assert.equal(SERVICE_CHARGE_CATEGORY_LABELS.WASTE_PSP, 'Waste (PSP)');
 });
