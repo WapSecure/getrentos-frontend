@@ -4,7 +4,11 @@
  * portal's equivalent page. Mirrors OWNER_LANDLORD_LINKS in apps/mobile/lib/notificationRoutes.ts.
  */
 const PORTAL_LINKS: Record<string, [from: string, to: string][]> = {
-  owner: [['/landlord/viewing-requests', '/owner/viewings?tab=renters']],
+  owner: [
+    ['/landlord/viewing-requests', '/owner/viewings?tab=renters'],
+    ['/landlord/applications', '/owner/applications'],
+    ['/landlord/leases', '/owner/leases'],
+  ],
 };
 
 /** Rewrites an in-app link for the portal the user is in; any query string is kept. */
