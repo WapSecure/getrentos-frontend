@@ -27,6 +27,7 @@ import { useSessionExpiryDraft } from '@sureground/ui';
 import { EMPLOYMENT_STATUSES, type AddressValue } from '@sureground/shared';
 import type { Property, Document as ApplicationDocument } from '@/types/renter';
 import { nameOnly } from '@/lib/validations/input';
+import { savedDocumentFits } from '@/lib/applicationDocuments';
 import { renterService, type RenterDocument } from '@/services/renterService';
 import { renterKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
@@ -187,6 +188,11 @@ export const ApplicationWizard = ({
     .filter((doc) => !doc.uploaded)
     .map((doc) => ({ doc, file: libraryDocs.find((d) => sameName(d.name, doc.name)) }))
     .filter((m): m is { doc: ApplicationDocument; file: RenterDocument } => !!m.file);
+  // Only files of the right kind, and not one already attached to another document, so one ID card cannot
+  // stand in for proof of income and a bank statement too.
+  const usedIds = new Set(data.documents.flatMap((d) => (d.documentId ? [d.documentId] : [])));
+  const fittingDocs = (slotName: string) =>
+    libraryDocs.filter((file) => !usedIds.has(file.id) && savedDocumentFits(slotName, file));
   const attachSavedMatches = () =>
     savedMatches.forEach(({ doc, file }) => attachLibraryDoc(doc.name, file));
 
@@ -624,7 +630,7 @@ export const ApplicationWizard = ({
                       </>
                     ) : (
                       <>
-                        {libraryDocs.length > 0 && (
+                        {fittingDocs(doc.name).length > 0 && (
                           <Select
                             ariaLabel={`Use a saved document for ${doc.name}`}
                             value=""
@@ -636,7 +642,7 @@ export const ApplicationWizard = ({
                               const file = libraryDocs.find((d) => d.id === id);
                               if (file) attachLibraryDoc(doc.name, file);
                             }}
-                            options={[...libraryDocs]
+                            options={fittingDocs(doc.name)
                               .sort(
                                 (a, b) =>
                                   Number(sameName(b.name, doc.name)) -
