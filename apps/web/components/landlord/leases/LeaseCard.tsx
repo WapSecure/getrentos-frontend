@@ -91,6 +91,7 @@ export const LeaseCard = ({
           {
             label: 'Lease period',
             value: `${formatDate(lease.leaseStart)} – ${formatDate(lease.leaseEnd)}`,
+            wrap: true,
           },
           {
             label: leaseRentLabel(lease.rentPeriod, lease.leaseStart, lease.leaseEnd),
