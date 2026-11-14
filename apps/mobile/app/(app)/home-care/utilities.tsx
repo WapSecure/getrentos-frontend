@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  BarChart3,
   ChevronRight,
   ClipboardCheck,
   Droplets,
@@ -154,6 +155,16 @@ export default function Utilities() {
             Icon={ClipboardCheck}
             label="Water test"
             onPress={() => router.push('/(app)/home-care/water')}
+          />
+          <Action
+            Icon={BarChart3}
+            label="Spend by month"
+            onPress={() =>
+              router.push({
+                pathname: '/(app)/home-care/spend',
+                params: propertyId ? { propertyId } : {},
+              })
+            }
           />
         </View>
       </View>
