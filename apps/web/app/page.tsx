@@ -19,7 +19,7 @@ import { SITE_NAME, SITE_OG_IMAGES, SITE_URL } from '@/lib/site';
 export const metadata: Metadata = {
   title: 'Homes to Rent and Buy, Short Stays and Land in Nigeria',
   description:
-    'Search homes to rent or buy, short stays and land across Lagos, Abuja and beyond. See what has been checked on each listing, and pay through Sureground Payment Protection.',
+    'Homes to rent or buy, short stays and land across Nigeria. See what has been checked on each listing and pay through Sureground Payment Protection.',
   alternates: { canonical: '/' },
   openGraph: {
     images: SITE_OG_IMAGES,

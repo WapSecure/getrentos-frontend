@@ -1,5 +1,6 @@
 import { formatLocation } from '@sureground/shared';
 import type { Metadata } from 'next';
+import { listingPageTitle, metaDescription } from '@/lib/seoText';
 import { permanentRedirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { Footer } from '@/components/layout/Footer';
@@ -39,16 +40,19 @@ export async function generateMetadata({ params }: ShortletDetailPageProps): Pro
     return { title: 'Shortlet not found', robots: { index: false, follow: false } };
   }
 
-  const description =
+  const location = formatLocation(listing.city, listing.state);
+  const description = metaDescription(
     listing.description ||
-    `Book ${listing.title} in ${formatLocation(listing.city, listing.state)} on Sureground. Verified host, payments protected by Sureground.`;
+      `Book ${listing.title} in ${location} on Sureground. You see the full price before you pay, and payment goes through Sureground.`
+  );
+  const title = listingPageTitle(listing.title, location);
 
   return {
-    title: `${listing.title}: ${formatLocation(listing.city, listing.state)}`,
+    title,
     description,
     alternates: { canonical: listingPath('shortlet', listing.id, listing.title) },
     openGraph: {
-      title: `${listing.title}: ${formatLocation(listing.city, listing.state)}`,
+      title,
       description,
       url: `${SITE_URL}${listingPath('shortlet', listing.id, listing.title)}`,
       type: 'website',

@@ -18,7 +18,7 @@ import { SITE_OG_IMAGES } from '@/lib/site';
 export const metadata: Metadata = {
   title: 'Sell Your Property in Nigeria',
   description:
-    'List a home or land for sale on Sureground. Verify ownership once, handle viewings and offers in one place, and receive the buyer’s deposit through Sureground Payment Protection.',
+    'Sell a home or land on Sureground. Verify ownership once, manage viewings and offers in one place, and receive the deposit through Payment Protection.',
   alternates: { canonical: '/sell' },
   openGraph: {
     images: SITE_OG_IMAGES,

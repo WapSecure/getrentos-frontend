@@ -9,7 +9,7 @@ import { SITE_OG_IMAGES } from '@/lib/site';
 export const metadata: Metadata = {
   title: 'Buy and manage property in Nigeria from abroad',
   description:
-    'Sureground Diaspora Invest: find, buy, own and manage property in Nigeria from abroad, with checks by named professionals, Sureground Payment Protection and one workspace for everything.',
+    'Find, buy and manage property in Nigeria from abroad, with checks by named professionals, Sureground Payment Protection and one workspace.',
   alternates: { canonical: '/diaspora' },
   openGraph: {
     images: SITE_OG_IMAGES,
