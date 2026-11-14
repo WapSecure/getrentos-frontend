@@ -9,6 +9,7 @@ import {
   type UtilityPurchaseKind,
   type WaterQualityTest,
   type WaterTestResult,
+  formatWaterParameters,
 } from '@sureground/shared';
 import {
   Badge,
@@ -48,7 +49,16 @@ interface WaterPanelProps {
   onOpenPurchaseChange: (value: { kinds: UtilityPurchaseKind[] } | null) => void;
   waterTestOpen: boolean;
   onWaterTestChange: (open: boolean) => void;
-  onRaiseWorkOrder?: () => void;
+  /** Opens a work order for the failed test's property and water source. */
+  onRaiseWorkOrder?: (from: WaterWorkOrderSeed) => void;
+}
+
+/** What a work order raised from a failed water test starts with. */
+export interface WaterWorkOrderSeed {
+  propertyId: string;
+  assetId?: string;
+  sourceName?: string;
+  labName: string;
 }
 
 export function WaterPanel({
@@ -79,7 +89,8 @@ export function WaterPanel({
       toast.success('Test voided. It stays on the record with your reason.');
     },
   });
-  const latestFail = (tests.data?.items ?? []).find((test) => !test.voidedAt)?.result === 'FAIL';
+  const latestTest = (tests.data?.items ?? []).find((test) => !test.voidedAt);
+  const latestFail = latestTest?.result === 'FAIL';
 
   const columns: Column<WaterQualityTest>[] = [
     {
@@ -115,11 +126,7 @@ export function WaterPanel({
             {WATER_TEST_RESULT_LABELS[row.result]}
           </Badge>
           {row.parameters && (
-            <p className="text-xs text-muted-foreground">
-              {Object.entries(row.parameters)
-                .map(([key, value]) => `${key} ${value}`)
-                .join(', ')}
-            </p>
+            <p className="text-xs text-muted-foreground">{formatWaterParameters(row.parameters)}</p>
           )}
         </div>
       ),
@@ -185,7 +192,19 @@ export function WaterPanel({
             <p className="text-sm text-foreground">
               The latest test failed. Raise a work order to treat the water, then book a retest.
             </p>
-            <Button size="sm" rounded="md" onClick={onRaiseWorkOrder}>
+            <Button
+              size="sm"
+              rounded="md"
+              onClick={() =>
+                latestTest &&
+                onRaiseWorkOrder({
+                  propertyId: latestTest.property.id,
+                  assetId: latestTest.asset?.id,
+                  sourceName: latestTest.asset?.name,
+                  labName: latestTest.labName,
+                })
+              }
+            >
               Create work order
             </Button>
           </div>

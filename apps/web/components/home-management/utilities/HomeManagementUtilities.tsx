@@ -16,7 +16,7 @@ import {
 import type { HomeManagementProperty } from '@/services/homeManagementService';
 import { PowerPanel } from './PowerPanel';
 import { UtilitySpendPanel } from './UtilitySpendPanel';
-import { WaterPanel } from './WaterPanel';
+import { WaterPanel, type WaterWorkOrderSeed } from './WaterPanel';
 import { propertyName } from './utilityForm';
 
 interface HomeManagementUtilitiesProps {
@@ -27,7 +27,7 @@ interface HomeManagementUtilitiesProps {
   recordOnly?: boolean;
   createRequest?: { kind: UtilitiesCreateKind; id: number };
   onCreateRequestHandled?: () => void;
-  onRaiseWorkOrder?: () => void;
+  onRaiseWorkOrder?: (from: WaterWorkOrderSeed) => void;
 }
 
 /** Power and water records for the homes in view. */
@@ -95,7 +95,9 @@ export function HomeManagementUtilities({
       </div>
 
       {view === 'spend' ? (
-        <UtilitySpendPanel propertyId={propertyId} />
+        <UtilitySpendPanel
+          propertyId={propertyId ?? (properties.length === 1 ? properties[0].id : undefined)}
+        />
       ) : view === 'power' ? (
         <PowerPanel
           propertyId={propertyId}

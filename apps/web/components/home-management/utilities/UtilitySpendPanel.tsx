@@ -156,13 +156,17 @@ export function UtilitySpendPanel({ propertyId }: { propertyId?: string }) {
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Figure label="Total recorded" value={formatSpendOrNoData(data!.totals.total)} />
+            {/* Only for one property: across a portfolio, a house with no units would be shared
+                over another building's flats. */}
             <Figure
               label="Per unit"
-              value={formatSpendOrNoData(data!.costPerUnit)}
+              value={propertyId ? formatSpendOrNoData(data!.costPerUnit) : 'One property at a time'}
               hint={
-                data!.costPerUnit === null
-                  ? 'Add units to the property to see this'
-                  : `Across ${data!.unitsCount} ${data!.unitsCount === 1 ? 'unit' : 'units'}`
+                !propertyId
+                  ? 'Choose a property above to see its cost per unit'
+                  : data!.costPerUnit === null
+                    ? 'Add units to the property to see this'
+                    : `Across ${data!.unitsCount} ${data!.unitsCount === 1 ? 'unit' : 'units'}`
               }
             />
             <Figure

@@ -30,6 +30,8 @@ export function homeManagementTabHref(
   const params = new URLSearchParams(search);
   if (tab === DEFAULT_HOME_MANAGEMENT_TAB) params.delete(param);
   else params.set(param, tab);
+  // The Utilities sub-view (power, water, spend) means nothing on another tab.
+  if (tab !== 'utilities') params.delete(UTILITIES_VIEW_PARAM);
   const query = params.toString();
   return query ? `${pathname}?${query}` : pathname;
 }

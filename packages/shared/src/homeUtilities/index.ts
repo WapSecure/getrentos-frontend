@@ -581,3 +581,32 @@ export function monthsBackFrom(count: number, now: Date = new Date()): string {
   const [year, month] = lagosMonthKey(now).split('-').map(Number);
   return new Date(Date.UTC(year, month - 1 - (count - 1), 1)).toISOString().slice(0, 7);
 }
+
+/** How each lab reading is named and measured, so results read as "Iron 1.2 mg/L", not "ironMgL 1.2". */
+export const WATER_PARAMETERS: Record<string, { label: string; unit?: string }> = {
+  pH: { label: 'pH' },
+  tdsMgL: { label: 'Dissolved solids', unit: 'mg/L' },
+  ironMgL: { label: 'Iron', unit: 'mg/L' },
+  coliforms: { label: 'Coliforms' },
+};
+
+/** A test's readings in plain words; a reading Sureground does not know keeps its own key. */
+export function formatWaterParameters(
+  parameters: Record<string, string | number | boolean | null> | null | undefined
+): string {
+  return Object.entries(parameters ?? {})
+    .filter(([, value]) => value !== null && value !== '')
+    .map(([key, value]) => {
+      const known = WATER_PARAMETERS[key];
+      if (!known) return `${key} ${value}`;
+      return `${known.label} ${value}${known.unit ? ` ${known.unit}` : ''}`;
+    })
+    .join(', ');
+}
+
+/** "1 due", "1 due soon" or "1 due, 2 soon": a set that is nearly due is never shown as 0. */
+export function generatorServiceSummary(due: number, dueSoon: number): string {
+  if (due > 0 && dueSoon > 0) return `${due} due, ${dueSoon} soon`;
+  if (dueSoon > 0) return `${dueSoon} due soon`;
+  return `${due}`;
+}

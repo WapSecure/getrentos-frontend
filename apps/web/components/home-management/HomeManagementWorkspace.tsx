@@ -60,8 +60,13 @@ import {
 } from '@/services/homeManagementService';
 import { ownerService } from '@/services/ownerService';
 import { utilitiesService } from '@/services/utilitiesService';
-import { formatSpendOrNoData, shouldShowUtilityTiles } from '@sureground/shared';
+import {
+  formatSpendOrNoData,
+  shouldShowUtilityTiles,
+  generatorServiceSummary,
+} from '@sureground/shared';
 import { propertyAuthorityService } from '@/services/propertyAuthorityService';
+import type { WorkOrderForm } from '@/components/home-management/HomeManagementWorkOrderQueue';
 
 const sectionFallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
 const HomeManagementSlaPolicies = dynamic(
@@ -175,7 +180,10 @@ export function HomeManagementWorkspace({
   const clearCreateRequest = useCallback(() => setCreateRequest(null), []);
   // Never reused, so a section that stays mounted still sees the next click as a new request.
   const requestSequence = useRef(0);
-  const requestCreate = (kind: CreateKind) => {
+  // A failed water test opens the work order already on its property, as a water job.
+  const [workOrderPrefill, setWorkOrderPrefill] = useState<Partial<WorkOrderForm> | undefined>();
+  const requestCreate = (kind: CreateKind, prefill?: Partial<WorkOrderForm>) => {
+    setWorkOrderPrefill(kind === 'work-order' ? prefill : undefined);
     if (isUtilitiesKind(kind)) {
       // One navigation for the tab and its sub-view, so the right form's panel is mounted.
       const tabUrl = new URL(tabHref('utilities'), 'http://local');
@@ -366,7 +374,7 @@ export function HomeManagementWorkspace({
           },
           {
             label: 'Generators due a service',
-            value: utilities!.generatorsDue,
+            value: generatorServiceSummary(utilities!.generatorsDue, utilities!.generatorsDueSoon),
             icon: Wrench,
             href: tabHref('utilities'),
             attention: utilities!.generatorsDue > 0,
@@ -573,6 +581,7 @@ export function HomeManagementWorkspace({
             viewerRole={role}
             showCreateAction={false}
             createRequest={requestFor('work-order')}
+            createPrefill={workOrderPrefill}
             onCreateRequestHandled={clearCreateRequest}
           />
         </TabsContent>
@@ -620,7 +629,17 @@ export function HomeManagementWorkspace({
             recordOnly={recordOnly}
             createRequest={utilitiesRequest}
             onCreateRequestHandled={clearCreateRequest}
-            onRaiseWorkOrder={() => requestCreate('work-order')}
+            onRaiseWorkOrder={(from) =>
+              requestCreate('work-order', {
+                propertyId: from.propertyId,
+                assetId: from.assetId ?? '',
+                category: 'WATER_BOREHOLE',
+                issueTitle: from.sourceName
+                  ? `Treat the water from ${from.sourceName}`
+                  : 'Treat the water after a failed water test',
+                description: `The latest water test (${from.labName}) failed. Treat the water, then book a retest.`,
+              })
+            }
           />
         </TabsContent>
 
