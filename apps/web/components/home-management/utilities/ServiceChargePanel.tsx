@@ -69,7 +69,13 @@ export function ServiceChargePanel({ propertyId, properties }: ServiceChargePane
   });
 
   if (openId) {
-    return <ServiceChargeBudgetView budgetId={openId} onBack={() => setOpenId(null)} />;
+    return (
+      <ServiceChargeBudgetView
+        budgetId={openId}
+        onBack={() => setOpenId(null)}
+        onOpenBudget={setOpenId}
+      />
+    );
   }
 
   const items = budgets.data?.items ?? [];

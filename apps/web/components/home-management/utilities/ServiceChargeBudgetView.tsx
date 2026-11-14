@@ -27,6 +27,11 @@ import {
   ConfirmDialog,
   CurrencyInput,
   DataTable,
+  Field,
+  DialogTitle,
+  DialogDescription,
+  DialogContent,
+  Dialog,
   EmptyState,
   IconButton,
   Input,
@@ -44,6 +49,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import { serviceChargesService } from '@/services/serviceChargesService';
 import { STATUS_BADGE, formatDay } from './ServiceChargePanel';
+import { ServiceChargeReconciliation } from './ServiceChargeReconciliation';
 
 const COLLECTION_BADGE: Record<ServiceChargeCollection, BadgeVariant> = {
   PAID: 'success',
@@ -85,9 +91,12 @@ const toUnitDrafts = (budget: ServiceChargeBudget): UnitDraft[] =>
 export function ServiceChargeBudgetView({
   budgetId,
   onBack,
+  onOpenBudget,
 }: {
   budgetId: string;
   onBack: () => void;
+  /** Opens another budget, such as the next period's draft. */
+  onOpenBudget: (id: string) => void;
 }) {
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -116,6 +125,9 @@ export function ServiceChargeBudgetView({
   const [units, setUnits] = useState<UnitDraft[]>([]);
   const [confirming, setConfirming] = useState<'publish' | 'close' | null>(null);
   const [voiding, setVoiding] = useState(false);
+  const [amending, setAmending] = useState(false);
+  const [reopening, setReopening] = useState(false);
+  const [nextTitle, setNextTitle] = useState<string | null>(null);
   // Drafts reset whenever the saved budget changes (React's "adjust state on prop change" pattern).
   const [syncedWith, setSyncedWith] = useState<ServiceChargeBudget | undefined>(undefined);
   if (data && data !== syncedWith) {
@@ -201,6 +213,26 @@ export function ServiceChargeBudgetView({
     },
     onError: (error: Error) => toast.error(error.message),
   });
+  const reopen = useMutation({
+    mutationFn: (reason: string) =>
+      withStepUpSummary(`Reopen ${data!.title}`, () =>
+        unwrap(serviceChargesService.reopen(budgetId, reason))
+      ),
+    onSuccess: (next) => {
+      refresh(next);
+      toast.success('Reopened. Spend can be counted and purchases in its period changed again.');
+    },
+  });
+  const carryForward = useMutation({
+    mutationFn: (title: string) => unwrap(serviceChargesService.carryForward(budgetId, title)),
+    onSuccess: (next) => {
+      setNextTitle(null);
+      refresh();
+      toast.success('Draft started for the next period, with the same lines and units.');
+      onOpenBudget(next.id);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
   const voidBudget = useMutation({
     mutationFn: (reason: string) =>
       withStepUpSummary(`Void ${data!.title}`, () =>
@@ -265,8 +297,23 @@ export function ServiceChargeBudgetView({
         </div>
         <div className="flex flex-wrap gap-2">
           {data.status === 'PUBLISHED' && (
+            <Button variant="outline" onClick={() => setAmending(true)}>
+              Amend
+            </Button>
+          )}
+          {(data.status === 'PUBLISHED' || data.status === 'CLOSED') && (
+            <Button variant="outline" onClick={() => setNextTitle(nextPeriodTitle(data.title))}>
+              Start next period
+            </Button>
+          )}
+          {data.status === 'PUBLISHED' && (
             <Button variant="outline" onClick={() => setConfirming('close')}>
               Close budget
+            </Button>
+          )}
+          {data.status === 'CLOSED' && (
+            <Button variant="outline" onClick={() => setReopening(true)}>
+              Reopen
             </Button>
           )}
           {data.status !== 'VOIDED' && (
@@ -591,6 +638,9 @@ export function ServiceChargeBudgetView({
         </Card>
       )}
 
+      {!isDraft && data.status !== 'VOIDED' && (
+        <ServiceChargeReconciliation budgetId={budgetId} editable={data.status === 'PUBLISHED'} />
+      )}
       {!isDraft && <ChargesTable budgetId={budgetId} />}
 
       <ConfirmDialog
@@ -633,6 +683,66 @@ export function ServiceChargeBudgetView({
         error={voidBudget.error?.message}
         onSubmit={({ reason }) => voidBudget.mutateAsync(reason).then(() => setVoiding(false))}
       />
+      <ReasonDialog
+        open={reopening}
+        onOpenChange={setReopening}
+        title="Reopen this budget"
+        description="Only the owner can reopen a closed budget. Purchases in its period and its counted spend can be changed again. You will be asked to confirm it is you."
+        reasonLabel="Why is it being reopened?"
+        reasonPlaceholder="e.g. A diesel receipt for December was missed"
+        minLength={3}
+        maxLength={500}
+        confirmLabel="Reopen budget"
+        error={reopen.error?.message}
+        onSubmit={({ reason }) => reopen.mutateAsync(reason).then(() => setReopening(false))}
+      />
+      <Dialog open={nextTitle !== null} onOpenChange={(open) => !open && setNextTitle(null)}>
+        <DialogContent size="md">
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (nextTitle && nextTitle.trim().length >= 3) carryForward.mutate(nextTitle.trim());
+            }}
+          >
+            <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
+              Start the next period
+            </DialogTitle>
+            <DialogDescription className="mt-1 text-sm text-muted-foreground">
+              A draft for the period after this one, the same length, with these lines and units.
+              Change anything before you publish it.
+            </DialogDescription>
+            <Field label="Name" required className="mt-6">
+              <Input
+                value={nextTitle ?? ''}
+                onChange={(event) => setNextTitle(event.target.value)}
+                maxLength={120}
+              />
+            </Field>
+            <div className="mt-6 flex justify-end">
+              <Button
+                type="submit"
+                isLoading={carryForward.isPending}
+                disabled={(nextTitle ?? '').trim().length < 3}
+              >
+                Start draft
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={amending} onOpenChange={setAmending}>
+        <DialogContent size="xl">
+          {amending && (
+            <AmendForm
+              budget={data}
+              onDone={(next) => {
+                setAmending(false);
+                refresh(next);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
@@ -706,5 +816,152 @@ function ChargesTable({ budgetId }: { budgetId: string }) {
         </>
       )}
     </Card>
+  );
+}
+
+/** "Service charge 2027" becomes "Service charge 2028"; otherwise "(next period)" is added. */
+function nextPeriodTitle(title: string): string {
+  const match = title.match(/(19|20)\d{2}(?!.*(19|20)\d{2})/);
+  if (match && match.index !== undefined) {
+    return `${title.slice(0, match.index)}${Number(match[0]) + 1}${title.slice(match.index + 4)}`;
+  }
+  return `${title} (next period)`;
+}
+
+function AmendForm({
+  budget,
+  onDone,
+}: {
+  budget: ServiceChargeBudget;
+  onDone: (next: ServiceChargeBudget) => void;
+}) {
+  const toast = useToast();
+  const [reason, setReason] = useState('');
+  const [lines, setLines] = useState<(LineDraft & { id?: string })[]>(
+    budget.lines.map((line) => ({
+      key: line.id,
+      id: line.id,
+      category: line.category,
+      label: line.label,
+      amount: line.amount,
+    }))
+  );
+  const amend = useMutation({
+    mutationFn: () =>
+      withStepUpSummary(`Amend ${budget.title}`, () =>
+        unwrap(
+          serviceChargesService.amend(budget.id, {
+            reason: reason.trim(),
+            lines: lines
+              .filter((line) => line.label.trim() && line.amount > 0)
+              .map(({ id, category, label, amount }) => ({
+                ...(id ? { id } : {}),
+                category,
+                label: label.trim(),
+                amount,
+              })),
+          })
+        )
+      ),
+    onSuccess: (next) => {
+      toast.success('Amended. Instalments not yet billed use the new amounts.');
+      onDone(next);
+    },
+  });
+  const total = lines.reduce((sum, line) => sum + (line.amount || 0), 0);
+  const valid =
+    reason.trim().length >= 3 && lines.some((line) => line.label.trim() && line.amount > 0);
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (valid) amend.mutate();
+      }}
+    >
+      <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
+        Amend this budget
+      </DialogTitle>
+      <DialogDescription className="mt-1 text-sm text-muted-foreground">
+        Charges already billed stay as they are. Instalments not yet billed use the new amounts. A
+        line you remove stops being billed. You will be asked to confirm it is you.
+      </DialogDescription>
+      <div className="mt-6 space-y-2">
+        {lines.map((line, index) => (
+          <div
+            key={line.key}
+            className="grid gap-2 sm:grid-cols-[12rem_1fr_11rem_auto] sm:items-center"
+          >
+            <Select
+              ariaLabel={`Line ${index + 1} category`}
+              value={line.category}
+              onValueChange={(category) =>
+                setLines((all) =>
+                  all.map((l) =>
+                    l.key === line.key ? { ...l, category: category as ServiceChargeCategory } : l
+                  )
+                )
+              }
+              options={SERVICE_CHARGE_CATEGORIES.map((value) => ({
+                value,
+                label: SERVICE_CHARGE_CATEGORY_LABELS[value],
+              }))}
+            />
+            <Input
+              aria-label={`Line ${index + 1} description`}
+              value={line.label}
+              maxLength={120}
+              onChange={(event) =>
+                setLines((all) =>
+                  all.map((l) => (l.key === line.key ? { ...l, label: event.target.value } : l))
+                )
+              }
+            />
+            <CurrencyInput
+              aria-label={`Line ${index + 1} amount`}
+              value={line.amount || ''}
+              onValueChange={(amount) =>
+                setLines((all) => all.map((l) => (l.key === line.key ? { ...l, amount } : l)))
+              }
+              placeholder="0"
+            />
+            <IconButton
+              label={`Remove line ${index + 1}`}
+              icon={<Trash2 className="h-4 w-4" />}
+              onClick={() => setLines((all) => all.filter((l) => l.key !== line.key))}
+            />
+          </div>
+        ))}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          icon={<Plus className="h-4 w-4" />}
+          onClick={() =>
+            setLines((all) => [
+              ...all,
+              { key: `new-${(lineKey += 1)}`, category: 'OTHER', label: '', amount: 0 },
+            ])
+          }
+        >
+          Add line
+        </Button>
+        <p className="text-sm text-muted-foreground">
+          New total {formatCurrency(total)}, was {formatCurrency(budget.total)}.
+        </p>
+      </div>
+      <Field label="Why is it changing?" required className="mt-4">
+        <Input value={reason} onChange={(event) => setReason(event.target.value)} maxLength={500} />
+      </Field>
+      {amend.error && (
+        <p role="alert" className="mt-3 text-sm text-destructive">
+          {amend.error.message}
+        </p>
+      )}
+      <div className="mt-6 flex justify-end">
+        <Button type="submit" disabled={!valid} isLoading={amend.isPending}>
+          Amend budget
+        </Button>
+      </div>
+    </form>
   );
 }
