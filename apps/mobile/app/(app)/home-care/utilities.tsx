@@ -10,6 +10,7 @@ import {
   Droplets,
   Gauge,
   Power,
+  ReceiptText,
   Zap,
   type SgIcon,
 } from '@sureground/icons/native';
@@ -162,6 +163,16 @@ export default function Utilities() {
             onPress={() =>
               router.push({
                 pathname: '/(app)/home-care/spend',
+                params: propertyId ? { propertyId } : {},
+              })
+            }
+          />
+          <Action
+            Icon={ReceiptText}
+            label="Service charge"
+            onPress={() =>
+              router.push({
+                pathname: '/(app)/home-care/service-charges',
                 params: propertyId ? { propertyId } : {},
               })
             }
