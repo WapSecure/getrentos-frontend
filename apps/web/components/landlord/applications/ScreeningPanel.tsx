@@ -399,8 +399,8 @@ export const ScreeningPanel = ({
           ))}
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Links expire after 15 minutes. Files are the applicant&apos;s own; nothing here has been
-          checked against a credit bureau.
+          Links expire after 5 minutes; reopen this to get fresh ones. Files are the
+          applicant&apos;s own; nothing here has been checked against a credit bureau.
         </p>
       </div>
     </div>
