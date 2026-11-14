@@ -50,6 +50,8 @@ export const LeaseCard = ({
   const status = leaseStatusBadges[lease.status];
   const remainingDays = daysUntil(lease.leaseEnd);
   const isExpiringSoon = lease.status === 'signed' && remainingDays > 0 && remainingDays <= 60;
+  // A signed lease past its end date is not ended: the tenant holds over until a renewal or a notice.
+  const isHoldingOver = lease.status === 'signed' && remainingDays < 0;
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
@@ -101,6 +103,13 @@ export const LeaseCard = ({
       {isExpiringSoon && (
         <p className="text-xs text-warning mt-3 rounded-xl bg-warning-subtle px-2.5 py-1.5">
           Expires in {remainingDays} day{remainingDays === 1 ? '' : 's'}
+        </p>
+      )}
+
+      {isHoldingOver && (
+        <p className="text-xs text-warning mt-3 rounded-xl bg-warning-subtle px-2.5 py-1.5">
+          The term ended on {formatDate(lease.leaseEnd)}. The tenant is holding over until you renew
+          or serve notice.
         </p>
       )}
 
