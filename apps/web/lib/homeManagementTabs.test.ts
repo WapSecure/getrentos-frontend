@@ -62,8 +62,9 @@ test('utilities sits between assets and service standards', () => {
 test('the utilities view defaults to power and ignores unknown values', () => {
   assert.equal(parseUtilitiesView('water'), 'water');
   assert.equal(parseUtilitiesView('spend'), 'spend');
+  assert.equal(parseUtilitiesView('service-charge'), 'service-charge');
   assert.equal(parseUtilitiesView(null), 'power');
-  assert.equal(parseUtilitiesView('service-charge'), 'power');
+  assert.equal(parseUtilitiesView('not-a-view'), 'power');
   assert.equal(
     utilitiesViewHref('/owner/home-management', 'tab=utilities', 'water'),
     '/owner/home-management?tab=utilities&view=water'

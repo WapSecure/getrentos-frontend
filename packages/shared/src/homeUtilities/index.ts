@@ -647,3 +647,185 @@ export function generatorServiceSummary(due: number, dueSoon: number): string {
   if (dueSoon > 0) return `${dueSoon} due soon`;
   return `${due}`;
 }
+
+// Service charges (Phase B PR3).
+
+export const SERVICE_CHARGE_CATEGORIES = [
+  'DIESEL',
+  'SECURITY',
+  'CLEANING',
+  'WASTE_PSP',
+  'WATER',
+  'REPAIRS',
+  'MANAGEMENT',
+  'COMMON_ELECTRICITY',
+  'INSURANCE',
+  'OTHER',
+] as const;
+export type ServiceChargeCategory = (typeof SERVICE_CHARGE_CATEGORIES)[number];
+
+export const SERVICE_CHARGE_CATEGORY_LABELS: Record<ServiceChargeCategory, string> = {
+  DIESEL: 'Diesel',
+  SECURITY: 'Security',
+  CLEANING: 'Cleaning',
+  WASTE_PSP: 'Waste (PSP)',
+  WATER: 'Water',
+  REPAIRS: 'Repairs',
+  MANAGEMENT: 'Management',
+  COMMON_ELECTRICITY: 'Common-area electricity',
+  INSURANCE: 'Insurance',
+  OTHER: 'Other',
+};
+
+export type ServiceChargeBudgetStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED' | 'VOIDED';
+export type ServiceChargeBillingCycle = 'MONTHLY' | 'QUARTERLY' | 'ANNUAL';
+export type ServiceChargeMethod = 'EQUAL' | 'WEIGHTED';
+
+export const SERVICE_CHARGE_STATUS_LABELS: Record<ServiceChargeBudgetStatus, string> = {
+  DRAFT: 'Draft',
+  PUBLISHED: 'Published',
+  CLOSED: 'Closed',
+  VOIDED: 'Voided',
+};
+
+export const SERVICE_CHARGE_CYCLE_LABELS: Record<ServiceChargeBillingCycle, string> = {
+  MONTHLY: 'Monthly',
+  QUARTERLY: 'Quarterly',
+  ANNUAL: 'Once a year',
+};
+
+export type ServiceChargeCollection =
+  | 'PAID'
+  | 'PART_PAID'
+  | 'UNPAID'
+  | 'REMOVED'
+  | 'NOT_BILLED'
+  | 'VOIDED';
+
+export const SERVICE_CHARGE_COLLECTION_LABELS: Record<ServiceChargeCollection, string> = {
+  PAID: 'Paid',
+  PART_PAID: 'Part paid',
+  UNPAID: 'Not paid yet',
+  REMOVED: 'Removed when the tenancy lapsed',
+  NOT_BILLED: 'Owner bears it',
+  VOIDED: 'Voided',
+};
+
+export type ServiceChargeLine = {
+  id: string;
+  category: ServiceChargeCategory;
+  label: string;
+  amount: number;
+};
+
+export type ServiceChargeParticipant = {
+  id: string;
+  unitId: string | null;
+  label: string;
+  bedrooms: number | null;
+  weight: number;
+  included: boolean;
+  exclusionReason: string | null;
+};
+
+export type ServiceChargeBudgetSummary = {
+  id: string;
+  title: string;
+  property: { id: string; title: string };
+  status: ServiceChargeBudgetStatus;
+  periodStart: string;
+  periodEnd: string;
+  billingCycle: ServiceChargeBillingCycle;
+  method: ServiceChargeMethod;
+  total: number;
+  unitsSharing: number;
+  invoicesCount: number;
+};
+
+export type ServiceChargeBudget = {
+  id: string;
+  title: string;
+  property: { id: string; title: string };
+  status: ServiceChargeBudgetStatus;
+  periodStart: string;
+  /** The day after the last day covered; `lastDay` is the one to show. */
+  periodEnd: string;
+  lastDay: string;
+  firstDueDate: string;
+  method: ServiceChargeMethod;
+  billingCycle: ServiceChargeBillingCycle;
+  leadDays: number;
+  openBook: boolean;
+  notes: string | null;
+  version: number;
+  total: number;
+  lines: ServiceChargeLine[];
+  participants: ServiceChargeParticipant[];
+  publishedAt: string | null;
+  closedAt: string | null;
+  voidedAt: string | null;
+  voidReason: string | null;
+  invoicesCount: number;
+};
+
+export type ServiceChargePreview = {
+  budgetId: string;
+  status: ServiceChargeBudgetStatus;
+  total: number;
+  apportioned: number;
+  unitsSharing: number;
+  method: ServiceChargeMethod;
+  instalments: {
+    number: number;
+    periodStart: string;
+    periodEnd: string;
+    dueDate: string;
+    issueDate: string;
+    alreadyDue: boolean;
+  }[];
+  participants: (ServiceChargeParticipant & {
+    total: number;
+    byLine: { lineId: string; amount: number }[];
+    instalments: number[];
+    tenancies: { tenant: string | null; from: string; to: string }[];
+    notes: string[];
+  })[];
+  warnings: string[];
+  blockers: string[];
+  previewHash: string;
+};
+
+export type ServiceChargeInvoice = {
+  id: string;
+  instalment: number;
+  unit: string;
+  tenant: string | null;
+  periodStart: string;
+  periodEnd: string;
+  dueDate: string;
+  amount: number;
+  prorated: boolean;
+  status: 'ISSUED' | 'SKIPPED' | 'VOIDED';
+  skipReason: string | null;
+  collection: ServiceChargeCollection;
+  amountPaid: number;
+  lines: { category: ServiceChargeCategory; label: string; amount: number }[];
+};
+
+/** The server stores a period's end as the day after its last day. */
+export function dayAfter(day: string): string {
+  const date = new Date(`${day}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().slice(0, 10);
+}
+
+/** A unit's weight suggested from its bedrooms (studio or unknown counts as 1). */
+export function bedroomWeight(bedrooms: number | null | undefined): number {
+  return bedrooms && bedrooms > 0 ? bedrooms : 1;
+}
+
+/** "Shared equally across 12 flats" / "Shared by weight across 3 units". */
+export function shareSummary(method: ServiceChargeMethod, unitsSharing: number): string {
+  const units = `${unitsSharing} ${unitsSharing === 1 ? 'unit' : 'units'}`;
+  return method === 'EQUAL' ? `Shared equally across ${units}` : `Shared by weight across ${units}`;
+}
