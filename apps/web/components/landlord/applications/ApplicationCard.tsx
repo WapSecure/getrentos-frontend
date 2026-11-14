@@ -47,7 +47,7 @@ export const ApplicationCard = ({
           <RecordAvatar name={application.applicantName} />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-foreground truncate">
+              <h3 className="font-semibold text-foreground break-words">
                 {application.applicantName}
               </h3>
               {isVerified ? (
@@ -59,7 +59,7 @@ export const ApplicationCard = ({
                 />
               )}
             </div>
-            <p className="text-xs text-muted-foreground truncate">
+            <p className="text-xs text-muted-foreground line-clamp-2 break-words">
               {application.propertyName} · {application.unitName}
             </p>
           </div>
