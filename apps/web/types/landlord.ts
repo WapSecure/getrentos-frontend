@@ -292,6 +292,8 @@ export interface RentalApplication {
   applicantPhone: string;
   /** False when the applicant has no Sureground account: they can only be reached by phone or email. */
   canMessage?: boolean;
+  /** Only on an approval response: whether a draft lease was created. */
+  leaseDrafted?: boolean;
   propertyId: string;
   propertyName: string;
   unitId: string;
