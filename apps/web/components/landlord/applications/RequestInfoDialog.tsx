@@ -73,7 +73,7 @@ export function RequestInfoDialog({
                   <li>
                     <a
                       className="font-medium text-primary hover:underline"
-                      href={`tel:${application.applicantPhone}`}
+                      href={`tel:${application.applicantPhone.replace(/\s+/g, '')}`}
                     >
                       {application.applicantPhone}
                     </a>
