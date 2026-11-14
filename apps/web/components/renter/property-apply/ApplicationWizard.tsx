@@ -697,10 +697,7 @@ export const ApplicationWizard = ({
                   label: 'Move-in / Term',
                   value: `${data.moveInDate ? formatDate(data.moveInDate) : '—'} · ${data.leaseTerm}`,
                 },
-                {
-                  label: 'Documents ready',
-                  value: `${data.documents.filter((d) => d.uploaded).length}/${data.documents.length}`,
-                },
+                { label: 'Documents', value: documentsSummary(data.documents) },
               ]}
             />
             <p className="text-xs text-muted-foreground">
@@ -770,3 +767,14 @@ const UploadButton = ({
     </>
   );
 };
+
+/** "All 3 required documents, plus 1 optional", never a bare 3/5 that reads as incomplete when only optional ones are missing. */
+export function documentsSummary(documents: ApplicationDocument[]): string {
+  const required = documents.filter((d) => d.required);
+  const missing = required.filter((d) => !d.uploaded).map((d) => d.name);
+  const optional = documents.filter((d) => !d.required && d.uploaded).length;
+  const extra = optional ? `, plus ${optional} optional` : '';
+  if (missing.length) return `Missing ${missing.join(', ')}${extra}`;
+  const noun = required.length === 1 ? 'document' : 'documents';
+  return `All ${required.length} required ${noun}${extra}`;
+}
