@@ -230,3 +230,46 @@ test('service charge helpers', async () => {
   assert.equal(shareSummary('WEIGHTED', 1), 'Shared by weight across 1 unit');
   assert.equal(SERVICE_CHARGE_CATEGORY_LABELS.WASTE_PSP, 'Waste (PSP)');
 });
+
+test('statement share basis and live queries', async () => {
+  const { statementShareBasis, hasLiveQuery } = await import('../src/homeUtilities/index.ts');
+  const base = {
+    periodStart: '2027-01-01',
+    lastDay: '2027-12-31',
+    billingCycle: 'ANNUAL',
+    total: 1,
+    openBook: true,
+  } as const;
+  assert.equal(
+    statementShareBasis({
+      ...base,
+      method: 'EQUAL',
+      unitsSharing: 6,
+      weight: null,
+      totalWeight: null,
+    }),
+    'Shared equally across 6 units'
+  );
+  assert.equal(
+    statementShareBasis({
+      ...base,
+      method: 'WEIGHTED',
+      unitsSharing: 5,
+      weight: 2,
+      totalWeight: 6,
+    }),
+    "Your unit's weight is 2 of 6 across 5 units"
+  );
+  const q = {
+    id: 'q',
+    reason: 'r',
+    response: null,
+    outcomeNote: null,
+    adjustmentAmount: null,
+    createdAt: '',
+    resolvedAt: null,
+  };
+  assert.equal(hasLiveQuery([{ ...q, lineId: 'l1', status: 'OPEN' }], 'l1'), true);
+  assert.equal(hasLiveQuery([{ ...q, lineId: 'l1', status: 'REJECTED' }], 'l1'), false);
+  assert.equal(hasLiveQuery([{ ...q, lineId: 'l1', status: 'OPEN' }], null), false);
+});

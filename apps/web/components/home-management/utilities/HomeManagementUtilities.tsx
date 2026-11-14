@@ -70,6 +70,7 @@ export function HomeManagementUtilities({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <SegmentedControl
           aria-label="Utilities"
+          className="[&_button]:whitespace-nowrap"
           value={view}
           onValueChange={setView}
           segments={[

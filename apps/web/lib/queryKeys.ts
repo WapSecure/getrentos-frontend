@@ -88,6 +88,8 @@ export const publicMarketKeys = {
 };
 
 export const renterKeys = {
+  serviceCharges: ['renter', 'service-charges'] as const,
+  serviceCharge: (id: string) => ['renter', 'service-charges', id] as const,
   lastApplicationDetails: ['renter', 'applications', 'last-details'] as const,
   deposits: ['renter', 'deposits'] as const,
   // Under deposits, so a dispute refreshes the plan too.
@@ -265,6 +267,8 @@ export const homeManagementKeys = {
     serviceCharges: (propertyId?: string) =>
       ['home-management', 'utilities', 'service-charges', propertyId ?? 'all'] as const,
     serviceCharge: (id: string) => ['home-management', 'utilities', 'service-charge', id] as const,
+    serviceChargeQueries: (propertyId?: string) =>
+      ['home-management', 'utilities', 'service-charge-queries', propertyId ?? 'all'] as const,
     summary: (propertyId?: string) =>
       ['home-management', 'utilities', 'summary', propertyId ?? 'all'] as const,
     waterTests: (propertyId?: string, page = 1) =>

@@ -35,6 +35,7 @@ import { homeManagementKeys } from '@/lib/queryKeys';
 import type { HomeManagementProperty } from '@/services/homeManagementService';
 import { serviceChargesService } from '@/services/serviceChargesService';
 import { ServiceChargeBudgetView } from './ServiceChargeBudgetView';
+import { ServiceChargeQueriesInbox } from './ServiceChargeQueriesInbox';
 import { propertyName } from './utilityForm';
 
 export const STATUS_BADGE: Record<ServiceChargeBudgetStatus, BadgeVariant> = {
@@ -84,6 +85,8 @@ export function ServiceChargePanel({ propertyId, properties }: ServiceChargePane
           </Button>
         }
       />
+
+      <ServiceChargeQueriesInbox propertyId={propertyId} />
 
       {budgets.isLoading ? (
         <Skeleton className="h-40 w-full rounded-2xl" />

@@ -829,3 +829,109 @@ export function shareSummary(method: ServiceChargeMethod, unitsSharing: number):
   const units = `${unitsSharing} ${unitsSharing === 1 ? 'unit' : 'units'}`;
   return method === 'EQUAL' ? `Shared equally across ${units}` : `Shared by weight across ${units}`;
 }
+
+// Tenant statements and queries (Phase B PR4a).
+
+export type ServiceChargeQueryStatus = 'OPEN' | 'ANSWERED' | 'UPHELD' | 'REJECTED' | 'WITHDRAWN';
+
+export const SERVICE_CHARGE_QUERY_STATUS_LABELS: Record<ServiceChargeQueryStatus, string> = {
+  OPEN: 'Waiting for a reply',
+  ANSWERED: 'Replied',
+  UPHELD: 'Upheld',
+  REJECTED: 'Not upheld',
+  WITHDRAWN: 'Withdrawn',
+};
+
+/** A tenant's charge collection status; a lapsed tenancy's unpaid charge is removed. */
+export type RenterServiceChargeCollection = 'PAID' | 'PART_PAID' | 'UNPAID' | 'REMOVED';
+
+export type RenterServiceCharge = {
+  id: string;
+  title: string;
+  property: string | null;
+  unit: string;
+  instalment: number;
+  periodStart: string;
+  /** The last day covered. */
+  periodEnd: string;
+  dueDate: string;
+  amount: number;
+  amountPaid: number;
+  collection: RenterServiceChargeCollection;
+  rentPaymentId: string | null;
+  openQueries: number;
+};
+
+export type RenterServiceChargeQuery = {
+  id: string;
+  lineId: string | null;
+  reason: string;
+  status: ServiceChargeQueryStatus;
+  response: string | null;
+  outcomeNote: string | null;
+  adjustmentAmount: number | null;
+  createdAt: string;
+  resolvedAt: string | null;
+};
+
+export type RenterServiceChargeStatement = Omit<RenterServiceCharge, 'openQueries'> & {
+  /** Percent of the instalment billed when the tenancy covered only part of it. */
+  partOfInstalment: number | null;
+  lines: {
+    id: string;
+    category: ServiceChargeCategory;
+    label: string;
+    amount: number;
+    budgetTotal: number | null;
+  }[];
+  budget: {
+    periodStart: string;
+    lastDay: string;
+    billingCycle: ServiceChargeBillingCycle;
+    method: ServiceChargeMethod;
+    total: number;
+    unitsSharing: number;
+    weight: number | null;
+    totalWeight: number | null;
+    openBook: boolean;
+  };
+  queries: RenterServiceChargeQuery[];
+};
+
+export type ServiceChargeQuery = {
+  id: string;
+  status: ServiceChargeQueryStatus;
+  reason: string;
+  response: string | null;
+  respondedAt: string | null;
+  outcomeNote: string | null;
+  adjustmentAmount: number | null;
+  resolvedAt: string | null;
+  createdAt: string;
+  line: { id: string; label: string; amount: number } | null;
+  invoice: {
+    id: string;
+    amount: number;
+    instalment: number;
+    dueDate: string;
+    unit: string;
+    tenant: string | null;
+  };
+  budget: { id: string; title: string; property: { id: string; title: string } | null };
+};
+
+/** "Your share: weight 2 of 7" for a weighted budget, "1 of 6 units, equal shares" otherwise. */
+export function statementShareBasis(budget: RenterServiceChargeStatement['budget']): string {
+  if (budget.method === 'WEIGHTED' && budget.weight !== null && budget.totalWeight) {
+    const fmt = (n: number) => Number(n.toFixed(4)).toString();
+    return `Your unit's weight is ${fmt(budget.weight)} of ${fmt(budget.totalWeight)} across ${budget.unitsSharing} units`;
+  }
+  return `Shared equally across ${budget.unitsSharing} ${budget.unitsSharing === 1 ? 'unit' : 'units'}`;
+}
+
+/** A query can still be raised on a live charge if nothing about the same line is open. */
+export function hasLiveQuery(queries: RenterServiceChargeQuery[], lineId: string | null): boolean {
+  return queries.some(
+    (q) => (q.status === 'OPEN' || q.status === 'ANSWERED') && q.lineId === lineId
+  );
+}
