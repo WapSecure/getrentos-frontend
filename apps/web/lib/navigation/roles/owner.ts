@@ -194,6 +194,7 @@ export const ownerNavigation = defineRoleNavigation({
       label: 'Selling',
       items: ['listings', 'leads', 'viewings', 'tours', 'offers', 'transactions', 'realtors'],
     },
+    { label: 'Letting', items: ['applications', 'leases'] },
     { label: 'Land', items: ['land', 'landSales'] },
     { label: 'Short stays', items: ['shortlets'] },
     { label: 'Property care', items: ['homeManagement', 'vendors', 'inspections', 'deposits'] },
