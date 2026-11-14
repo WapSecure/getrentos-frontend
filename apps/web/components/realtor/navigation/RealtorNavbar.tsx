@@ -44,7 +44,7 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
           markAllRead={() => unwrap(realtorService.markAllNotificationsRead())}
           refetchAfterMarking
           realtime={false}
-          viewAllHref={ROUTES.REALTOR_DASHBOARD}
+          viewAllHref="/realtor/notifications"
         />
       }
       profileMenu={<RealtorProfileDropdown user={user} />}

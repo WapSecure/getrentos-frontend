@@ -40,7 +40,7 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
           markRead={(id) => unwrap(ownerService.markNotificationRead(id))}
           markAllRead={() => unwrap(ownerService.markAllNotificationsRead())}
           refetchAfterMarking
-          viewAllHref={ROUTES.OWNER_DASHBOARD}
+          viewAllHref="/owner/notifications"
         />
       }
       profileMenu={<OwnerProfileDropdown user={user} />}

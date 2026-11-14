@@ -131,11 +131,12 @@ export function RentalViewingRequests({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Show viewings">
         {FILTERS.map((f) => (
           <Button
             key={f.value}
             variant={status === f.value ? 'primary' : 'outline'}
+            aria-pressed={status === f.value}
             onClick={() => {
               setStatus(f.value);
               setPage(1);
