@@ -34,3 +34,12 @@ test('owner viewing tab defaults to buyers and accepts renters', () => {
   assert.equal(ownerViewingTab(null), 'buyers');
   assert.equal(ownerViewingTab('nonsense'), 'buyers');
 });
+
+test('an owner opening an application or lease notice stays in the owner portal', () => {
+  assert.equal(
+    portalLink('owner', '/landlord/applications?application=app-1'),
+    '/owner/applications?application=app-1'
+  );
+  assert.equal(portalLink('owner', '/landlord/leases?status=draft'), '/owner/leases?status=draft');
+  assert.equal(portalLink('landlord', '/landlord/applications'), '/landlord/applications');
+});

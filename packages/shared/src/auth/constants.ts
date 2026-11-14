@@ -331,6 +331,8 @@ export const ROUTES = {
   OWNER_LEADS: '/owner/leads',
   OWNER_OFFERS: '/owner/offers',
   OWNER_VIEWINGS: '/owner/viewings',
+  OWNER_APPLICATIONS: '/owner/applications',
+  OWNER_LEASES: '/owner/leases',
   OWNER_TRANSACTIONS: '/owner/transactions',
   OWNER_ANALYTICS: '/owner/analytics',
   OWNER_DOCUMENTS: '/owner/documents',
