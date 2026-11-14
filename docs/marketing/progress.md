@@ -55,6 +55,13 @@ Status of the marketing redesign and launch-readiness brief, by milestone. PR nu
 - One crawl rule for all four markets, private screens out of the index, honest share text (#274, decision D12).
 - Open: after-screenshots predate the brand-blue restore (#233) and the premium facelift, so they need retaking; location pages beyond Lagos depend on live inventory (D6); diaspora guides for UK, US and Canada readers need legal review before publishing.
 
+## Brief re-check (14 Nov 2026)
+
+- After-screenshots retaken after the brand-blue restore and facelift: 32 pages, desktop and phone (#277).
+- og:image on every public page, titles at 60 characters or fewer, Article JSON-LD on guides (#279).
+- Keyboard pass of the homepage: a skip-to-content link now comes first on every public page (#281). The More menu reports its open state correctly and returns focus on Escape.
+- UK, US and Canada diaspora guide briefs drafted (`diaspora-guide-briefs.md`). Not for publishing: each needs written answers from counsel first, and merges into the general guide if the answers don't differ by country.
+
 ## Follow-ups from the live demo (12 Nov 2026)
 
 - Public pages no longer force a sign-in when a session expires; only signed-in areas redirect (#211).

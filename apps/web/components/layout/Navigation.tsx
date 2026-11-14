@@ -12,6 +12,7 @@ import {
 import { cn } from '@sureground/shared';
 import { ChevronDown, Search, X } from '@sureground/icons';
 import { ThemeSwitch } from '@/components/layout/ThemeSwitch';
+import { SkipToMainLink } from '@/components/shared/navigation/SkipToMainLink';
 import { Logo } from '@/components/ui/Logo';
 import { CtaLink } from '@/components/marketing/CtaLink';
 import { ROUTES, getDashboardRoute, getUserRole } from '@/lib/constants/auth';
@@ -153,6 +154,7 @@ export const Navigation = () => {
 
   return (
     <>
+      <SkipToMainLink />
       <nav
         aria-label="Main"
         className={cn(
