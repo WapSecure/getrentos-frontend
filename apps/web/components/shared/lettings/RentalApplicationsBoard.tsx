@@ -104,7 +104,7 @@ export function RentalApplicationsBoard({ leasesHref, nav }: RentalApplicationsB
       setSelectedApplication((prev) => (prev && prev.id === updated.id ? updated : prev));
       if (updated.status === 'approved' && updated.leaseDrafted === false) {
         toast.success(
-          `${updated.applicantName}'s application approved. This unit has no advertised rent, so no lease was drafted: create it and set the rent.`,
+          `${updated.applicantName}'s application approved. We couldn't draft their lease automatically: create it and set the rent.`,
           {
             duration: 12_000,
             action: { label: 'Create lease', onClick: () => router.push(`${leasesHref}?create=1`) },
