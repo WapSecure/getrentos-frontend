@@ -37,13 +37,15 @@ const statusFilters: { value: 'all' | LeaseStatus; label: string }[] = [
 const PAGE_SIZE = 10;
 
 function LandlordLeasesPageContent() {
-  const statusParam = useSearchParams().get('status');
+  const searchParams = useSearchParams();
+  const statusParam = searchParams.get('status');
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<'all' | LeaseStatus>(
     statusParam === 'draft' ? 'draft' : 'all'
   );
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // ?create=1 opens the form straight away, e.g. after approving an applicant for a unit with no advertised rent.
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(searchParams.get('create') === '1');
   const [renewingLease, setRenewingLease] = useState<Lease | null>(null);
   const [signingLease, setSigningLease] = useState<Lease | null>(null);
   const [billingLease, setBillingLease] = useState<Lease | null>(null);

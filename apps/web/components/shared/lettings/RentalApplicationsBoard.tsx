@@ -102,7 +102,15 @@ export function RentalApplicationsBoard({ leasesHref, nav }: RentalApplicationsB
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ['landlord', 'applications'] });
       setSelectedApplication((prev) => (prev && prev.id === updated.id ? updated : prev));
-      if (updated.status === 'approved') {
+      if (updated.status === 'approved' && updated.leaseDrafted === false) {
+        toast.success(
+          `${updated.applicantName}'s application approved. We couldn't draft their lease automatically: create it and set the rent.`,
+          {
+            duration: 12_000,
+            action: { label: 'Create lease', onClick: () => router.push(`${leasesHref}?create=1`) },
+          }
+        );
+      } else if (updated.status === 'approved') {
         toast.success(
           `${updated.applicantName}'s application approved. We've drafted their lease: review and send it.`,
           { duration: 12_000, action: { label: 'Review lease', onClick: openDraftLeases } }

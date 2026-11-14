@@ -75,6 +75,8 @@ export interface RecordFact {
   value: ReactNode;
   /** `brand` sets the value in Sureground blue, for the one figure that matters most. */
   tone?: 'default' | 'brand';
+  /** Wrap instead of cutting the value off with an ellipsis: for values that must be read whole, like a date range. */
+  wrap?: boolean;
 }
 
 /** A small inset grid of label and value pairs. */
@@ -100,7 +102,8 @@ export function RecordFacts({
           <dt className="text-xs text-muted-foreground">{fact.label}</dt>
           <dd
             className={cn(
-              'mt-0.5 truncate text-sm tabular-nums',
+              'mt-0.5 text-sm tabular-nums',
+              fact.wrap ? 'break-words' : 'truncate',
               fact.tone === 'brand' ? 'font-semibold text-primary' : 'font-medium text-foreground'
             )}
           >
