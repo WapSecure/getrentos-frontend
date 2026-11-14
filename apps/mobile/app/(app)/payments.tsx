@@ -41,6 +41,7 @@ import { PayAmountSheet } from '@/components/payments/PayAmountSheet';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { ServiceChargesEntry } from '@/components/service-charge/ServiceChargesEntry';
 import { goBack } from '@/lib/goBack';
 
 const PAGE_SIZE = 20;
@@ -189,6 +190,9 @@ export default function Payments() {
           </View>
         }
       />
+      <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+        <ServiceChargesEntry kind="renter" />
+      </View>
 
       <QueryState
         query={query}

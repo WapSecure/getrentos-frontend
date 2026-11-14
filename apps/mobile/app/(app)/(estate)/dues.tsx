@@ -9,7 +9,7 @@ import {
 } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Plus, SlidersHorizontal, WalletCards } from '@sureground/icons/native';
+import { ReceiptText, Plus, SlidersHorizontal, WalletCards } from '@sureground/icons/native';
 import {
   Button,
   Chip,
@@ -119,6 +119,12 @@ export default function EstateDues() {
             disabled={!estate}
             icon={<SlidersHorizontal size={19} color={colors.foreground} />}
             onPress={() => setSettingsOpen(true)}
+          />
+          <IconButton
+            accessibilityLabel="Service charge budgets"
+            disabled={!estateId}
+            icon={<ReceiptText size={19} color={colors.foreground} />}
+            onPress={() => router.push('/(app)/estate-service-charges')}
           />
           <IconButton
             accessibilityLabel="Charge dues"
