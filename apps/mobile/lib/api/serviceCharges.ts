@@ -3,6 +3,8 @@ import type {
   ServiceChargeBudgetSummary,
   ServiceChargeInvoice,
   ServiceChargePreview,
+  ServiceChargeActualCandidate,
+  ServiceChargeReconciliation,
 } from '@sureground/shared';
 import { apiFetch } from './client';
 import { toQuery } from './query';
@@ -34,4 +36,19 @@ export const serviceChargesApi = {
       method: 'POST',
       body: { reason },
     }),
+  reconciliation: (id: string) =>
+    apiFetch<ServiceChargeReconciliation>(`${BASE}/${id}/reconciliation`),
+  actualCandidates: (id: string) =>
+    apiFetch<ServiceChargeActualCandidate[]>(`${BASE}/${id}/actual-candidates`),
+  linkActual: (
+    id: string,
+    body: {
+      budgetLineId: string;
+      utilityPurchaseId?: string;
+      expenseId?: string;
+      vendorInvoiceId?: string;
+    }
+  ) => apiFetch<{ id: string }>(`${BASE}/${id}/actuals`, { method: 'POST', body }),
+  unlinkActual: (id: string, linkId: string) =>
+    apiFetch<{ id: string }>(`${BASE}/${id}/actuals/${linkId}`, { method: 'DELETE' }),
 };

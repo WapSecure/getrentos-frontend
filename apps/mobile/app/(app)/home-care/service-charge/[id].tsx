@@ -29,6 +29,7 @@ import { serviceChargesApi } from '@/lib/api/serviceCharges';
 import { withStepUpSummary } from '@/lib/stepUp';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { ReconciliationSection } from '@/components/service-charge/ReconciliationSection';
 import { COLLECTION_TONE, STATUS_TONE, formatDay } from '@/lib/serviceCharge';
 
 /** One budget: its lines and every unit's share; publish, close or void with Face ID or the PIN. */
@@ -246,63 +247,68 @@ export default function ServiceChargeDetail() {
                 />
               </View>
             ) : (
-              <View style={{ gap: spacing.sm }}>
-                <Text variant="heading" headingLevel={2}>
-                  What was billed
-                </Text>
-                <QueryState
-                  query={invoices}
-                  skeleton={<ListSkeleton rows={4} />}
-                  isEmpty={!invoices.data?.items.length}
-                  empty={{
-                    title: 'Nothing billed yet',
-                    description:
-                      'Each instalment is billed to tenants when it reaches its billing date.',
-                  }}
-                >
-                  <Card style={{ gap: spacing.md }}>
-                    {(invoices.data?.items ?? []).map((row) => (
-                      <View key={row.id} style={{ gap: 4 }}>
-                        <View style={{ flexDirection: 'row', gap: spacing.md }}>
-                          <Text variant="callout" style={{ flex: 1, fontWeight: '600' }}>
-                            {row.unit} · Instalment {row.instalment}
-                          </Text>
-                          <Text variant="callout">{formatCurrency(row.amount)}</Text>
-                        </View>
-                        <View
-                          style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
-                        >
-                          <Badge
-                            label={SERVICE_CHARGE_COLLECTION_LABELS[row.collection]}
-                            tone={COLLECTION_TONE[row.collection]}
-                          />
-                          <Text
-                            variant="caption"
-                            color="mutedForeground"
-                            style={{ flex: 1 }}
-                            numberOfLines={1}
-                          >
-                            {row.tenant ?? (row.skipReason === 'VACANT' ? 'Vacant' : 'No tenant')} ·
-                            due {formatDay(row.dueDate)}
-                          </Text>
-                        </View>
-                      </View>
-                    ))}
-                  </Card>
-                </QueryState>
-                {data.status === 'PUBLISHED' ? (
-                  <Button
-                    label="Close budget"
-                    variant="secondary"
-                    loading={close.isPending}
-                    onPress={() =>
-                      Alert.alert('Close this budget?', 'Nothing more will be billed from it.', [
-                        { text: 'Cancel', style: 'cancel' },
-                        { text: 'Close budget', onPress: () => close.mutate() },
-                      ])
-                    }
-                  />
+              <View style={{ gap: spacing.xl }}>
+                {data.status !== 'VOIDED' ? (
+                  <ReconciliationSection budgetId={id} editable={data.status === 'PUBLISHED'} />
                 ) : null}
+                <View style={{ gap: spacing.sm }}>
+                  <Text variant="heading" headingLevel={2}>
+                    What was billed
+                  </Text>
+                  <QueryState
+                    query={invoices}
+                    skeleton={<ListSkeleton rows={4} />}
+                    isEmpty={!invoices.data?.items.length}
+                    empty={{
+                      title: 'Nothing billed yet',
+                      description:
+                        'Each instalment is billed to tenants when it reaches its billing date.',
+                    }}
+                  >
+                    <Card style={{ gap: spacing.md }}>
+                      {(invoices.data?.items ?? []).map((row) => (
+                        <View key={row.id} style={{ gap: 4 }}>
+                          <View style={{ flexDirection: 'row', gap: spacing.md }}>
+                            <Text variant="callout" style={{ flex: 1, fontWeight: '600' }}>
+                              {row.unit} · Instalment {row.instalment}
+                            </Text>
+                            <Text variant="callout">{formatCurrency(row.amount)}</Text>
+                          </View>
+                          <View
+                            style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+                          >
+                            <Badge
+                              label={SERVICE_CHARGE_COLLECTION_LABELS[row.collection]}
+                              tone={COLLECTION_TONE[row.collection]}
+                            />
+                            <Text
+                              variant="caption"
+                              color="mutedForeground"
+                              style={{ flex: 1 }}
+                              numberOfLines={1}
+                            >
+                              {row.tenant ?? (row.skipReason === 'VACANT' ? 'Vacant' : 'No tenant')}{' '}
+                              · due {formatDay(row.dueDate)}
+                            </Text>
+                          </View>
+                        </View>
+                      ))}
+                    </Card>
+                  </QueryState>
+                  {data.status === 'PUBLISHED' ? (
+                    <Button
+                      label="Close budget"
+                      variant="secondary"
+                      loading={close.isPending}
+                      onPress={() =>
+                        Alert.alert('Close this budget?', 'Nothing more will be billed from it.', [
+                          { text: 'Cancel', style: 'cancel' },
+                          { text: 'Close budget', onPress: () => close.mutate() },
+                        ])
+                      }
+                    />
+                  ) : null}
+                </View>
               </View>
             )}
 

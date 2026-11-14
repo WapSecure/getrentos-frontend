@@ -1,4 +1,12 @@
 export const qk = {
+  statements: {
+    list: (kind: string) => ['service-charge-statements', kind] as const,
+    one: (kind: string, id: string) => ['service-charge-statements', kind, id] as const,
+  },
+  estateServiceCharges: {
+    list: (estateId: string) => ['estate', estateId, 'service-charges'] as const,
+    one: (estateId: string, id: string) => ['estate', estateId, 'service-charges', id] as const,
+  },
   auth: {
     me: ['auth', 'me'] as const,
   },
