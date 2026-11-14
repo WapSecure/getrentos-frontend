@@ -8,13 +8,15 @@ import { PaymentsSummary } from '@/components/renter/payments/PaymentsSummary';
 import { PaymentsList, type PaymentStatusFilter } from '@/components/renter/payments/PaymentsList';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { PaymentMethods } from '@/components/renter/payments/PaymentMethods';
+import { ServiceChargesTab } from '@/components/renter/payments/ServiceChargesTab';
+import { renterServiceChargesService } from '@/services/renterServiceChargesService';
 import { PayAmountDialog } from '@/components/renter/payments/PayAmountDialog';
 import { RentAccountCard } from '@/components/renter/payments/RentAccountCard';
 import { PaymentReceiptsGallery } from '@/components/renter/payments/PaymentReceiptsGallery';
 import { PaymentExport } from '@/components/renter/payments/PaymentExport';
 import { DisputePaymentDialog } from '@/components/renter/payments/DisputePaymentDialog';
 import { leftToPay } from '@/components/renter/payments/PaymentCard';
-import { CreditCard, FileText, Wallet, Zap } from '@sureground/icons';
+import { CreditCard, FileText, ReceiptText, Wallet, Zap } from '@sureground/icons';
 import { renterService, type Payment } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -34,6 +36,7 @@ import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/
 
 const TABS: HubTab[] = [
   { id: 'payments', label: 'Payments', icon: CreditCard },
+  { id: 'service-charges', label: 'Service charges', icon: ReceiptText },
   { id: 'receipts', label: 'Receipts', icon: FileText },
   { id: 'account', label: 'Rent account', icon: Wallet },
   { id: 'financing', label: 'Flex financing', icon: Zap },
@@ -70,6 +73,12 @@ export default function PaymentsPage() {
     TABS.map((tab) => tab.id)
   );
   const toast = useToast();
+  // Only tenants who have been billed a service charge see its tab.
+  const serviceChargesQuery = useQuery({
+    queryKey: renterKeys.serviceCharges,
+    queryFn: () => unwrap(renterServiceChargesService.list()),
+  });
+  const hasServiceCharges = (serviceChargesQuery.data?.length ?? 0) > 0;
   const [showExportModal, setShowExportModal] = useState(false);
   const [disputingPaymentId, setDisputingPaymentId] = useState<string | null>(null);
   const [confirmingMoveInId, setConfirmingMoveInId] = useState<string | null>(null);
@@ -305,7 +314,21 @@ export default function PaymentsPage() {
     await removePaymentMethodMutation.mutateAsync(id);
   };
 
-  const tabNav = <HubTabs tabs={TABS} activeTab={activeTab} onChange={setTab} />;
+  const visibleTabs = hasServiceCharges ? TABS : TABS.filter((tab) => tab.id !== 'service-charges');
+  const tabNav = <HubTabs tabs={visibleTabs} activeTab={activeTab} onChange={setTab} />;
+
+  if (activeTab === 'service-charges') {
+    return (
+      <>
+        {tabNav}
+        {serviceChargesQuery.isLoading ? (
+          <PageLoadingState />
+        ) : (
+          <ServiceChargesTab charges={serviceChargesQuery.data ?? []} />
+        )}
+      </>
+    );
+  }
 
   if (activeTab === 'financing') {
     return (

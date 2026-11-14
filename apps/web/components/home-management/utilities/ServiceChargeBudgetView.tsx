@@ -304,60 +304,80 @@ export function ServiceChargeBudgetView({
             No lines yet. Add diesel, security, cleaning and so on.
           </p>
         )}
-        <div className="space-y-2">
-          {lines.map((line, index) => (
-            <div
-              key={line.key}
-              className="grid gap-2 sm:grid-cols-[12rem_1fr_11rem_auto] sm:items-center"
-            >
-              <Select
-                ariaLabel={`Line ${index + 1} category`}
-                value={line.category}
-                disabled={!isDraft}
-                onValueChange={(category) =>
-                  setLines((all) =>
-                    all.map((l) =>
-                      l.key === line.key ? { ...l, category: category as ServiceChargeCategory } : l
+        {!isDraft ? (
+          <ul className="divide-y divide-border">
+            {data.lines.map((line) => (
+              <li key={line.id} className="flex items-center gap-3 py-2.5">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-foreground">{line.label}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {SERVICE_CHARGE_CATEGORY_LABELS[line.category]}
+                  </p>
+                </div>
+                <p className="font-medium tabular-nums text-foreground">
+                  {formatCurrency(line.amount)}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="space-y-2">
+            {lines.map((line, index) => (
+              <div
+                key={line.key}
+                className="grid gap-2 sm:grid-cols-[12rem_1fr_11rem_auto] sm:items-center"
+              >
+                <Select
+                  ariaLabel={`Line ${index + 1} category`}
+                  value={line.category}
+                  disabled={!isDraft}
+                  onValueChange={(category) =>
+                    setLines((all) =>
+                      all.map((l) =>
+                        l.key === line.key
+                          ? { ...l, category: category as ServiceChargeCategory }
+                          : l
+                      )
                     )
-                  )
-                }
-                options={SERVICE_CHARGE_CATEGORIES.map((value) => ({
-                  value,
-                  label: SERVICE_CHARGE_CATEGORY_LABELS[value],
-                }))}
-              />
-              <Input
-                aria-label={`Line ${index + 1} description`}
-                value={line.label}
-                disabled={!isDraft}
-                maxLength={120}
-                onChange={(event) =>
-                  setLines((all) =>
-                    all.map((l) => (l.key === line.key ? { ...l, label: event.target.value } : l))
-                  )
-                }
-              />
-              <CurrencyInput
-                aria-label={`Line ${index + 1} amount`}
-                value={line.amount || ''}
-                disabled={!isDraft}
-                onValueChange={(amount) =>
-                  setLines((all) => all.map((l) => (l.key === line.key ? { ...l, amount } : l)))
-                }
-                placeholder="0"
-              />
-              {isDraft ? (
-                <IconButton
-                  label={`Remove line ${index + 1}`}
-                  icon={<Trash2 className="h-4 w-4" />}
-                  onClick={() => setLines((all) => all.filter((l) => l.key !== line.key))}
+                  }
+                  options={SERVICE_CHARGE_CATEGORIES.map((value) => ({
+                    value,
+                    label: SERVICE_CHARGE_CATEGORY_LABELS[value],
+                  }))}
                 />
-              ) : (
-                <span />
-              )}
-            </div>
-          ))}
-        </div>
+                <Input
+                  aria-label={`Line ${index + 1} description`}
+                  value={line.label}
+                  disabled={!isDraft}
+                  maxLength={120}
+                  onChange={(event) =>
+                    setLines((all) =>
+                      all.map((l) => (l.key === line.key ? { ...l, label: event.target.value } : l))
+                    )
+                  }
+                />
+                <CurrencyInput
+                  aria-label={`Line ${index + 1} amount`}
+                  value={line.amount || ''}
+                  disabled={!isDraft}
+                  onValueChange={(amount) =>
+                    setLines((all) => all.map((l) => (l.key === line.key ? { ...l, amount } : l)))
+                  }
+                  placeholder="0"
+                />
+                {isDraft ? (
+                  <IconButton
+                    label={`Remove line ${index + 1}`}
+                    icon={<Trash2 className="h-4 w-4" />}
+                    onClick={() => setLines((all) => all.filter((l) => l.key !== line.key))}
+                  />
+                ) : (
+                  <span />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         {isDraft && (
           <div className="flex flex-wrap justify-between gap-2">
             <Button
@@ -506,7 +526,8 @@ export function ServiceChargeBudgetView({
                 {p.instalments.length === 1
                   ? `One payment, due ${formatDay(p.instalments[0].dueDate)}.`
                   : `${p.instalments.length} instalments, the first due ${formatDay(p.instalments[0].dueDate)}.`}{' '}
-                Each is billed {data.leadDays} days before it is due.
+                {p.instalments.length === 1 ? 'It is' : 'Each is'} billed {data.leadDays} days
+                before it is due.
               </p>
               <DataTable
                 caption="Each unit's share"

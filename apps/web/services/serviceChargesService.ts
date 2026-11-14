@@ -7,6 +7,8 @@ import type {
   ServiceChargeInvoice,
   ServiceChargeMethod,
   ServiceChargePreview,
+  ServiceChargeQuery,
+  ServiceChargeQueryStatus,
 } from '@sureground/shared';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 
@@ -67,4 +69,26 @@ export const serviceChargesService = {
         `${BASE}/${id}/invoices${toQuery({ page, pageSize: 25 })}`
       )
     ),
+  queries: (
+    params: { propertyId?: string; status?: ServiceChargeQueryStatus; page?: number } = {}
+  ) =>
+    safeCall(() =>
+      authFetch<Paginated<ServiceChargeQuery>>(
+        `/home-management/service-charge-queries${toQuery({ ...params, pageSize: 20 })}`
+      )
+    ),
+  respondToQuery: (id: string, response: string) =>
+    send<ServiceChargeQuery>(`/home-management/service-charge-queries/${id}/respond`, 'POST', {
+      response,
+    }),
+  rejectQuery: (id: string, outcomeNote: string) =>
+    send<ServiceChargeQuery>(`/home-management/service-charge-queries/${id}/reject`, 'POST', {
+      outcomeNote,
+    }),
+  /** Behind step-up: a credit lands on the tenant's lease. */
+  upholdQuery: (id: string, outcomeNote: string, adjustmentAmount: number) =>
+    send<ServiceChargeQuery>(`/home-management/service-charge-queries/${id}/uphold`, 'POST', {
+      outcomeNote,
+      adjustmentAmount,
+    }),
 };
