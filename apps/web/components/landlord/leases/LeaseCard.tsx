@@ -90,7 +90,13 @@ export const LeaseCard = ({
         facts={[
           {
             label: 'Lease period',
-            value: `${formatDate(lease.leaseStart)} – ${formatDate(lease.leaseEnd)}`,
+            // Each date stays whole; a narrow card breaks the line between them, never inside one.
+            value: (
+              <>
+                <span className="whitespace-nowrap">{formatDate(lease.leaseStart)} –</span>{' '}
+                <span className="whitespace-nowrap">{formatDate(lease.leaseEnd)}</span>
+              </>
+            ),
             wrap: true,
           },
           {
