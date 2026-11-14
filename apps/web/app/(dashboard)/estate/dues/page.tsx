@@ -2,6 +2,7 @@
 
 import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReceiptText, Plus, Settings } from '@sureground/icons';
 import {
@@ -37,6 +38,7 @@ const HOUSEHOLD_OPTIONS_PAGE_SIZE = 20;
 
 export default function EstateDuesPage() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<DueStatus | 'all'>('all');
@@ -150,6 +152,14 @@ export default function EstateDuesPage() {
         }
         actions={
           <>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => router.push('/estate/service-charges')}
+            >
+              <ReceiptText className="w-4 h-4" />
+              Service charge budgets
+            </Button>
             <Button variant="outline" className="gap-2" onClick={() => setIsSettingsOpen(true)}>
               <Settings className="w-4 h-4" />
               Due settings
