@@ -10,7 +10,7 @@ import { SITE_OG_IMAGES } from '@/lib/site';
 export const metadata: Metadata = {
   title: 'Diaspora Invest transparency centre',
   description:
-    'How Sureground Diaspora Invest works: Sureground’s role, who else is responsible, fees, what a check covers, your money, refunds, complaints, privacy, conflicts of interest and what is not yet decided.',
+    'How Diaspora Invest works: our role, who else is responsible, fees, what a check covers, your money, refunds, complaints and what is not yet decided.',
   alternates: { canonical: DIASPORA_ROUTES.TRANSPARENCY },
   openGraph: {
     images: SITE_OG_IMAGES,

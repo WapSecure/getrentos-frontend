@@ -16,7 +16,7 @@ import { SITE_OG_IMAGES } from '@/lib/site';
 export const metadata: Metadata = {
   title: 'Detty December short stays across Nigeria',
   description:
-    'Short stays for Detty December. You pay Sureground, not the host, and the host is paid no sooner than 24 hours after your check-in time. Report a problem within 24 hours of check-in and we can refund you.',
+    'Detty December short stays. You pay Sureground, not the host, who is paid no sooner than 24 hours after check-in. Report a problem within 24 hours.',
   alternates: { canonical: '/detty-december' },
   openGraph: {
     images: SITE_OG_IMAGES,

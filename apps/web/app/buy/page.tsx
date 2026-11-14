@@ -10,7 +10,7 @@ import { SITE_OG_IMAGES } from '@/lib/site';
 const baseMetadata: Metadata = {
   title: 'Properties for Sale in Nigeria',
   description:
-    'Browse homes for sale across Nigeria. Verified properties are marked, deposits go through Sureground Payment Protection, and you can scope results to a single estate.',
+    'Homes for sale across Nigeria. Verified properties are marked, deposits go through Sureground Payment Protection, and you can search a single estate.',
   alternates: { canonical: '/buy' },
   openGraph: {
     images: SITE_OG_IMAGES,

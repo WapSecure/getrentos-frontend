@@ -20,7 +20,7 @@ import { SITE_OG_IMAGES } from '@/lib/site';
 export const metadata: Metadata = {
   title: 'For Renters: Find and Rent a Home in Nigeria',
   description:
-    'Search homes to rent, see which listings and landlords are verified, apply online and pay rent through Sureground Payment Protection. Report repairs from your account after you move in.',
+    'Find a home to rent, see which listings and landlords are verified, apply online and pay rent through Sureground Payment Protection. Report repairs too.',
   alternates: { canonical: '/renters' },
   openGraph: {
     images: SITE_OG_IMAGES,
