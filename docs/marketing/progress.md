@@ -71,3 +71,4 @@ Status of the marketing redesign and launch-readiness brief, by milestone. PR nu
 - Mobile onboarding claims aligned with what the marketplace shows (#175).
 - Short-stay payout wording matches the payout rules across web and app (#207); owner sales count no longer calls every sale protected (#203).
 - Mobile search no longer sends typed text to Sentry (#191); back-office top bar no longer covers the menu button on phones (#195).
+- Launch check of all 33 sitemap URLs; description, title and honest-fallback fixes (#283). Final report: `final-report.md`.
