@@ -136,7 +136,7 @@ export const LeaseCard = ({
         </p>
       )}
 
-      <RecordActions className="flex-nowrap">
+      <RecordActions>
         {lease.status === 'draft' && (
           <Button
             variant="primary"
@@ -179,7 +179,8 @@ export const LeaseCard = ({
           </p>
         )}
         {lease.status === 'signed' && (
-          <>
+          // A grid, not one row: three buttons ("Replace offer" is long) overflowed a narrow card.
+          <div className="grid w-full grid-cols-2 gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -207,13 +208,13 @@ export const LeaseCard = ({
               variant="outline"
               size="sm"
               fullWidth
-              className="gap-1.5"
+              className={onOpenSchedule ? 'col-span-2 gap-1.5' : 'gap-1.5'}
               onClick={() => onRequestRenewal(lease)}
             >
               <RefreshCcw className="w-3.5 h-3.5" />
               {lease.pendingRenewalOffer ? 'Replace offer' : 'Renew'}
             </Button>
-          </>
+          </div>
         )}
         {lease.status === 'expired' && (
           <Button
