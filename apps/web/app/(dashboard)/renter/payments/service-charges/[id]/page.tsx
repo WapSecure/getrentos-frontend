@@ -156,6 +156,11 @@ export default function ServiceChargeStatementPage() {
                 <th scope="col" className="py-2 text-right font-medium">
                   Whole budget
                 </th>
+                {data.budget.spentSoFar !== null && (
+                  <th scope="col" className="py-2 text-right font-medium">
+                    Spent so far
+                  </th>
+                )}
                 <th scope="col" className="py-2 text-right font-medium">
                   Your share
                 </th>
@@ -173,6 +178,11 @@ export default function ServiceChargeStatementPage() {
                   <td className="py-2.5 text-right tabular-nums text-muted-foreground">
                     {line.budgetTotal === null ? '' : formatCurrency(line.budgetTotal)}
                   </td>
+                  {data.budget.spentSoFar !== null && (
+                    <td className="py-2.5 text-right tabular-nums text-muted-foreground">
+                      {formatCurrency(line.spentSoFar ?? 0)}
+                    </td>
+                  )}
                   <td className="py-2.5 text-right font-medium tabular-nums">
                     {formatCurrency(line.amount)}
                   </td>
@@ -183,6 +193,8 @@ export default function ServiceChargeStatementPage() {
         </div>
         <p className="text-xs text-muted-foreground">
           Shares are worked out to the naira; any spare naira from rounding is spread between units.
+          {data.budget.spentSoFar !== null &&
+            ` This budget is open book: ${formatCurrency(data.budget.spentSoFar)} has been spent so far, counted from the purchases and invoices your landlord has recorded.`}
         </p>
       </Card>
 

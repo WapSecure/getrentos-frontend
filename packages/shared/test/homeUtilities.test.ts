@@ -273,3 +273,18 @@ test('statement share basis and live queries', async () => {
   assert.equal(hasLiveQuery([{ ...q, lineId: 'l1', status: 'REJECTED' }], 'l1'), false);
   assert.equal(hasLiveQuery([{ ...q, lineId: 'l1', status: 'OPEN' }], null), false);
 });
+
+test('reconciliation helpers', async () => {
+  const { varianceLabel, actualLinkBody } = await import('../src/homeUtilities/index.ts');
+  assert.equal(varianceLabel(0), 'On budget');
+  assert.match(varianceLabel(200000), /200,000 under budget$/);
+  assert.match(varianceLabel(-50000), /50,000 over budget$/);
+  assert.deepEqual(actualLinkBody('l1', { source: 'EXPENSE', id: 'e1' }), {
+    budgetLineId: 'l1',
+    expenseId: 'e1',
+  });
+  assert.deepEqual(actualLinkBody('l1', { source: 'UTILITY_PURCHASE', id: 'u1' }), {
+    budgetLineId: 'l1',
+    utilityPurchaseId: 'u1',
+  });
+});

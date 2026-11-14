@@ -883,6 +883,8 @@ export type RenterServiceChargeStatement = Omit<RenterServiceCharge, 'openQuerie
     label: string;
     amount: number;
     budgetTotal: number | null;
+    /** Spent so far on this line, when the budget is open book; null otherwise. */
+    spentSoFar: number | null;
   }[];
   budget: {
     periodStart: string;
@@ -894,6 +896,7 @@ export type RenterServiceChargeStatement = Omit<RenterServiceCharge, 'openQuerie
     weight: number | null;
     totalWeight: number | null;
     openBook: boolean;
+    spentSoFar: number | null;
   };
   queries: RenterServiceChargeQuery[];
 };
@@ -934,4 +937,73 @@ export function hasLiveQuery(queries: RenterServiceChargeQuery[], lineId: string
   return queries.some(
     (q) => (q.status === 'OPEN' || q.status === 'ANSWERED') && q.lineId === lineId
   );
+}
+
+// Actual spend, amendments and the next period (Phase B PR4b).
+
+export type ServiceChargeActualSource = 'UTILITY_PURCHASE' | 'EXPENSE' | 'VENDOR_INVOICE';
+
+export const SERVICE_CHARGE_ACTUAL_SOURCE_LABELS: Record<ServiceChargeActualSource, string> = {
+  UTILITY_PURCHASE: 'Utility purchase',
+  EXPENSE: 'Expense',
+  VENDOR_INVOICE: 'Vendor invoice',
+};
+
+export type ServiceChargeActualCandidate = {
+  source: ServiceChargeActualSource;
+  id: string;
+  date: string;
+  amount: number;
+  description: string;
+};
+
+export type ServiceChargeReconciliation = {
+  budgetId: string;
+  status: ServiceChargeBudgetStatus;
+  lines: {
+    id: string;
+    category: ServiceChargeCategory;
+    label: string;
+    retired: boolean;
+    budget: number;
+    actual: number;
+    /** Positive when less has been spent than budgeted. */
+    variance: number;
+    items: { id: string; description: string; date: string; amount: number }[];
+  }[];
+  totals: {
+    budget: number;
+    actual: number;
+    variance: number;
+    billed: number;
+    collected: number;
+    outstanding: number;
+    ownerBears: number;
+  };
+};
+
+/** "₦200,000 under budget" / "₦50,000 over budget" / "On budget". */
+export function varianceLabel(variance: number): string {
+  if (variance === 0) return 'On budget';
+  const amount = formatSpendOrNoData(Math.abs(variance));
+  return variance > 0 ? `${amount} under budget` : `${amount} over budget`;
+}
+
+/** The request body for counting one piece of spend against a line. */
+export function actualLinkBody(
+  budgetLineId: string,
+  candidate: Pick<ServiceChargeActualCandidate, 'source' | 'id'>
+): {
+  budgetLineId: string;
+  utilityPurchaseId?: string;
+  expenseId?: string;
+  vendorInvoiceId?: string;
+} {
+  const key =
+    candidate.source === 'UTILITY_PURCHASE'
+      ? 'utilityPurchaseId'
+      : candidate.source === 'EXPENSE'
+        ? 'expenseId'
+        : 'vendorInvoiceId';
+  return { budgetLineId, [key]: candidate.id };
 }

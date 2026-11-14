@@ -9,6 +9,8 @@ import type {
   ServiceChargePreview,
   ServiceChargeQuery,
   ServiceChargeQueryStatus,
+  ServiceChargeActualCandidate,
+  ServiceChargeReconciliation,
 } from '@sureground/shared';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 
@@ -91,4 +93,31 @@ export const serviceChargesService = {
       outcomeNote,
       adjustmentAmount,
     }),
+  reconciliation: (id: string) =>
+    safeCall(() => authFetch<ServiceChargeReconciliation>(`${BASE}/${id}/reconciliation`)),
+  actualCandidates: (id: string) =>
+    safeCall(() => authFetch<ServiceChargeActualCandidate[]>(`${BASE}/${id}/actual-candidates`)),
+  linkActual: (
+    id: string,
+    body: {
+      budgetLineId: string;
+      utilityPurchaseId?: string;
+      expenseId?: string;
+      vendorInvoiceId?: string;
+    }
+  ) => send<{ id: string }>(`${BASE}/${id}/actuals`, 'POST', body),
+  unlinkActual: (id: string, linkId: string) =>
+    send<{ id: string }>(`${BASE}/${id}/actuals/${linkId}`, 'DELETE'),
+  /** Behind step-up: changes what tenants are billed from the next instalment. */
+  amend: (
+    id: string,
+    input: {
+      reason: string;
+      lines: { id?: string; category: ServiceChargeCategory; label: string; amount: number }[];
+    }
+  ) => send<ServiceChargeBudget>(`${BASE}/${id}/amend`, 'POST', input),
+  reopen: (id: string, reason: string) =>
+    send<ServiceChargeBudget>(`${BASE}/${id}/reopen`, 'POST', { reason }),
+  carryForward: (id: string, title: string) =>
+    send<ServiceChargeBudget>(`${BASE}/${id}/carry-forward`, 'POST', { title }),
 };
