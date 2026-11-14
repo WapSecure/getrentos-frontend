@@ -59,44 +59,83 @@ export function RequestInfoDialog({
       {application && (
         <DialogContent size="md">
           <DialogTitle className="text-base font-semibold text-foreground">
-            Ask {application.applicantName} for more information
+            {application.canMessage === false ? 'Contact' : 'Ask'} {application.applicantName}{' '}
+            {application.canMessage === false ? 'directly' : 'for more information'}
           </DialogTitle>
-          <DialogDescription className="mt-1 text-sm text-muted-foreground">
-            They get this as a message on Sureground and can reply there. A pending application
-            moves to under review.
-          </DialogDescription>
-          <div className="mt-4 space-y-3">
-            <Field label="Your message" required>
-              <Textarea
-                rows={8}
-                maxLength={2000}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
-            </Field>
-            {send.isError && (
-              <Alert variant="danger">
-                {send.error instanceof Error ? send.error.message : 'The message was not sent.'}
-              </Alert>
-            )}
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={onClose} disabled={send.isPending}>
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                className="gap-1.5"
-                onClick={() => send.mutate()}
-                isLoading={send.isPending}
-                loadingText="Sending…"
-                disabled={message.trim().length < 5}
-              >
-                <Send className="h-3.5 w-3.5" aria-hidden="true" />
-                Send request
-              </Button>
-            </div>
-          </div>
+          {application.canMessage === false ? (
+            <>
+              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+                {application.applicantName} applied without a Sureground account, so they cannot get
+                a message here. Contact them directly:
+              </DialogDescription>
+              <ul className="mt-4 space-y-2 text-sm">
+                {application.applicantPhone && (
+                  <li>
+                    <a
+                      className="font-medium text-primary hover:underline"
+                      href={`tel:${application.applicantPhone}`}
+                    >
+                      {application.applicantPhone}
+                    </a>
+                  </li>
+                )}
+                {application.applicantEmail && (
+                  <li>
+                    <a
+                      className="font-medium text-primary hover:underline"
+                      href={`mailto:${application.applicantEmail}`}
+                    >
+                      {application.applicantEmail}
+                    </a>
+                  </li>
+                )}
+              </ul>
+              <div className="mt-4 flex justify-end">
+                <Button variant="outline" size="sm" onClick={onClose}>
+                  Close
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+                They get this as a message on Sureground and can reply there. A pending application
+                moves to under review.
+              </DialogDescription>
+              <div className="mt-4 space-y-3">
+                <Field label="Your message" required>
+                  <Textarea
+                    rows={8}
+                    maxLength={2000}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                  />
+                </Field>
+                {send.isError && (
+                  <Alert variant="danger">
+                    {send.error instanceof Error ? send.error.message : 'The message was not sent.'}
+                  </Alert>
+                )}
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" size="sm" onClick={onClose} disabled={send.isPending}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => send.mutate()}
+                    isLoading={send.isPending}
+                    loadingText="Sending…"
+                    disabled={message.trim().length < 5}
+                  >
+                    <Send className="h-3.5 w-3.5" aria-hidden="true" />
+                    Send request
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </DialogContent>
       )}
     </Dialog>

@@ -290,6 +290,8 @@ export interface RentalApplication {
   applicantName: string;
   applicantEmail: string;
   applicantPhone: string;
+  /** False when the applicant has no Sureground account: they can only be reached by phone or email. */
+  canMessage?: boolean;
   propertyId: string;
   propertyName: string;
   unitId: string;

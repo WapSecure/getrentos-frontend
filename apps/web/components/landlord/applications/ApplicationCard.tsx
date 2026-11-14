@@ -83,28 +83,45 @@ export const ApplicationCard = ({
         ]}
       />
 
-      <RecordActions className="flex-nowrap">
-        <Button variant="outline" size="sm" fullWidth className="gap-1.5" onClick={onViewDetails}>
-          <Eye className="w-3.5 h-3.5" />
-          Details
-        </Button>
-        {!isDecided && (
-          <>
+      {/* Two even rows so the buttons always fit inside the card, whatever its width. */}
+      <RecordActions className="flex-col items-stretch">
+        <div className="flex w-full items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            fullWidth
+            className="min-w-0 flex-1 gap-1.5"
+            onClick={onViewDetails}
+          >
+            <Eye className="w-3.5 h-3.5" />
+            Details
+          </Button>
+          {!isDecided && (
             <IconButton
               label="Request more info"
               size="sm"
               icon={<MessageSquareText />}
               onClick={onRequestInfo}
             />
-            <Button variant="danger-ghost" size="sm" className="gap-1.5" onClick={onReject}>
+          )}
+        </div>
+        {!isDecided && (
+          <div className="grid w-full grid-cols-2 gap-2">
+            <Button
+              variant="danger-ghost"
+              size="sm"
+              fullWidth
+              className="gap-1.5"
+              onClick={onReject}
+            >
               <X className="w-3.5 h-3.5" />
               Reject
             </Button>
-            <Button variant="primary" size="sm" className="gap-1.5" onClick={onApprove}>
+            <Button variant="primary" size="sm" fullWidth className="gap-1.5" onClick={onApprove}>
               <Check className="w-3.5 h-3.5" />
               Approve
             </Button>
-          </>
+          </div>
         )}
       </RecordActions>
     </motion.div>
