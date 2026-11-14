@@ -106,7 +106,7 @@ const priorityOptions: Array<{ value: HomeManagementWorkOrder['priority']; label
   { value: 'URGENT', label: 'Urgent' },
 ];
 
-type WorkOrderForm = {
+export type WorkOrderForm = {
   propertyId: string;
   unitId: string;
   assetId: string;
@@ -233,6 +233,8 @@ interface HomeManagementWorkOrderQueueProps {
   showCreateAction?: boolean;
   /** Set by the page header's "Create work order"; see useCreateRequest. */
   createRequest?: number;
+  /** Fields a create request starts with, such as a failed water test's property and category. */
+  createPrefill?: Partial<WorkOrderForm>;
   onCreateRequestHandled?: () => void;
 }
 
@@ -252,6 +254,7 @@ export function HomeManagementWorkOrderQueue({
   readOnly = false,
   showCreateAction = true,
   createRequest,
+  createPrefill,
   onCreateRequestHandled,
 }: HomeManagementWorkOrderQueueProps) {
   const queryClient = useQueryClient();
@@ -445,14 +448,18 @@ export function HomeManagementWorkOrderQueue({
         ? cancelWorkOrder.isPending
         : false;
 
-  const openCreateDialog = () => {
-    setForm(initialWorkOrderForm);
+  const openCreateDialog = (prefill?: Partial<WorkOrderForm>) => {
+    setForm({ ...initialWorkOrderForm, ...prefill });
     setUnitForm(initialUnitForm);
     setIsCreateUnitOpen(false);
     setIsCreateOpen(true);
   };
 
-  useCreateRequest(readOnly ? undefined : createRequest, openCreateDialog, onCreateRequestHandled);
+  useCreateRequest(
+    readOnly ? undefined : createRequest,
+    () => openCreateDialog(createPrefill),
+    onCreateRequestHandled
+  );
 
   const closeCreateDialog = () => {
     if (!createWorkOrder.isPending && !createUnit.isPending) {
@@ -567,7 +574,7 @@ export function HomeManagementWorkOrderQueue({
             ? 'Add a property and unit before creating a work order'
             : undefined
       }
-      onClick={openCreateDialog}
+      onClick={() => openCreateDialog()}
     >
       Create work order
     </Button>
@@ -609,7 +616,7 @@ export function HomeManagementWorkOrderQueue({
             }
             action={
               !readOnly && properties.length > 0 ? (
-                <Button size="sm" rounded="md" onClick={openCreateDialog}>
+                <Button size="sm" rounded="md" onClick={() => openCreateDialog()}>
                   Create the first work order
                 </Button>
               ) : undefined

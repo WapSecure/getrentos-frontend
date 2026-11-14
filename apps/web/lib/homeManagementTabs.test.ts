@@ -73,3 +73,14 @@ test('the utilities view defaults to power and ignores unknown values', () => {
     '/owner/home-management?tab=utilities'
   );
 });
+
+test('leaving Utilities drops its sub-view; staying keeps it', () => {
+  assert.equal(
+    homeManagementTabHref('/owner/home-management', 'tab=utilities&view=water', 'work-orders'),
+    '/owner/home-management?tab=work-orders'
+  );
+  assert.equal(
+    homeManagementTabHref('/owner/home-management', 'tab=assets&view=spend', 'utilities'),
+    '/owner/home-management?tab=utilities&view=spend'
+  );
+});

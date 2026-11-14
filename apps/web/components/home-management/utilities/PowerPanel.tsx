@@ -77,7 +77,9 @@ export function PowerPanel({
   const [serviceFor, setServiceFor] = useState<UtilityGenerator | null>(null);
   const [supplyFor, setSupplyFor] = useState<ElectricityMeter | null>(null);
   const [retiring, setRetiring] = useState<ElectricityMeter | null>(null);
+  // Opened from a generator or meter, the form starts on that property and that equipment.
   const [purchaseDefaults, setPurchaseDefaults] = useState<{
+    propertyId?: string;
     generatorId?: string;
     meterId?: string;
   }>({});
@@ -148,7 +150,12 @@ export function PowerPanel({
                   generator={generator}
                   canOperate={generator.canOperate && !recordOnly}
                   onLogHours={() => setHoursFor(generator)}
-                  onLogFuel={() => startPurchase(['FUEL'], { generatorId: generator.id })}
+                  onLogFuel={() =>
+                    startPurchase(['FUEL'], {
+                      propertyId: generator.property.id,
+                      generatorId: generator.id,
+                    })
+                  }
                   onEditProfile={() => setProfileFor(generator)}
                   onRecordService={() => setServiceFor(generator)}
                 />
@@ -216,7 +223,7 @@ export function PowerPanel({
                   onBuy={() =>
                     startPurchase(
                       meter.meterType === 'PREPAID' ? ['ELECTRICITY_TOKEN'] : ['ELECTRICITY_BILL'],
-                      { meterId: meter.id }
+                      { propertyId: meter.propertyId, meterId: meter.id }
                     )
                   }
                   onRetire={() => setRetiring(meter)}
@@ -246,7 +253,7 @@ export function PowerPanel({
         open={!!openPurchase}
         onOpenChange={(open) => !open && onOpenPurchaseChange(null)}
         properties={properties}
-        defaultPropertyId={propertyId}
+        defaultPropertyId={purchaseDefaults.propertyId ?? propertyId}
         kinds={openPurchase?.kinds ?? ['FUEL']}
         defaultGeneratorId={purchaseDefaults.generatorId}
         defaultMeterId={purchaseDefaults.meterId}

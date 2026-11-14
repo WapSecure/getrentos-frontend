@@ -10,6 +10,8 @@ import {
   bandCheck,
   discoLabel,
   formatKwh,
+  formatWaterParameters,
+  generatorServiceSummary,
   formatLitres,
   generatorServiceLabel,
   isPlausibleMeterNumber,
@@ -169,4 +171,20 @@ test('months are Lagos months and windows count back from this month', async () 
   assert.equal(lagosMonthKey(new Date('2026-10-31T23:30:00Z')), '2026-11');
   assert.equal(monthsBackFrom(12, new Date('2026-11-13T12:00:00Z')), '2025-12');
   assert.equal(monthsBackFrom(1, new Date('2026-11-13T12:00:00Z')), '2026-11');
+});
+
+test('water readings read as names and units, never field keys', () => {
+  assert.equal(
+    formatWaterParameters({ pH: 5.9, tdsMgL: 620, ironMgL: 1.2, coliforms: 'Present' }),
+    'pH 5.9, Dissolved solids 620 mg/L, Iron 1.2 mg/L, Coliforms Present'
+  );
+  assert.equal(formatWaterParameters({ nitrateMgL: 4, iron: null }), 'nitrateMgL 4');
+  assert.equal(formatWaterParameters(null), '');
+});
+
+test('a generator that is nearly due is never summarised as 0', () => {
+  assert.equal(generatorServiceSummary(0, 0), '0');
+  assert.equal(generatorServiceSummary(0, 1), '1 due soon');
+  assert.equal(generatorServiceSummary(2, 0), '2');
+  assert.equal(generatorServiceSummary(1, 2), '1 due, 2 soon');
 });

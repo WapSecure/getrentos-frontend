@@ -20,6 +20,7 @@ import {
   formatSpendOrNoData,
   shouldShowUtilityTiles,
   type UtilitiesSummary,
+  generatorServiceSummary,
 } from '@sureground/shared';
 import { HomeManagementTimeline } from '@/components/home-management/HomeManagementTimeline';
 import { formatCurrency } from '@/lib/format';
@@ -298,7 +299,12 @@ export function HomeManagementOverview({
                 <div className="flex items-baseline justify-between gap-3">
                   <dt className="text-muted-foreground">Generators due a service</dt>
                   <dd className="font-semibold tabular-nums text-foreground">
-                    {utilities.generatorsTotal === 0 ? 'None recorded' : utilities.generatorsDue}
+                    {utilities.generatorsTotal === 0
+                      ? 'None recorded'
+                      : generatorServiceSummary(
+                          utilities.generatorsDue,
+                          utilities.generatorsDueSoon
+                        )}
                   </dd>
                 </div>
               </dl>
