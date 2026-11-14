@@ -391,6 +391,9 @@ export const buyerKeys = {
 };
 
 export const estateKeys = {
+  serviceCharges: (estateId: string) => ['estate', estateId, 'service-charges'] as const,
+  serviceCharge: (estateId: string, id: string) =>
+    ['estate', estateId, 'service-charges', id] as const,
   reportDigest: (estateId: string) => ['estate', estateId, 'report-digest'] as const,
   collectionPlan: (estateId: string, language: string) =>
     ['estate', estateId, 'collection-plan', language] as const,
