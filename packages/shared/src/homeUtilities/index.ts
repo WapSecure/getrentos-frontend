@@ -571,6 +571,43 @@ export function formatSpendOrNoData(
   }).format(value);
 }
 
+/**
+ * The "per unit" figure. Only for one property: across a portfolio, a house with no units
+ * would be shared over another building's flats.
+ */
+export function costPerUnitFigure(
+  analytics: Pick<UtilitiesAnalytics, 'costPerUnit' | 'unitsCount'>,
+  scopedToProperty: boolean
+): { value: string; hint: string } {
+  if (!scopedToProperty) {
+    return {
+      value: 'One property at a time',
+      hint: 'Choose a property above to see its cost per unit',
+    };
+  }
+  if (analytics.costPerUnit === null) {
+    return { value: 'No data yet', hint: 'Add units to the property to see this' };
+  }
+  const units = analytics.unitsCount;
+  return {
+    value: formatSpendOrNoData(analytics.costPerUnit),
+    hint: `Across ${units} ${units === 1 ? 'unit' : 'units'}`,
+  };
+}
+
+/** Recorded categories for a month, largest first, as "Fuel ₦120,000, Electricity ₦20,000". */
+export function monthSpendBreakdown(
+  month: Record<UtilitySpendCategory, UtilitySpendBucket>
+): string {
+  return UTILITY_SPEND_CATEGORIES.filter((category) => month[category] !== null)
+    .sort((a, b) => (month[b]?.amount ?? 0) - (month[a]?.amount ?? 0))
+    .map(
+      (category) =>
+        `${UTILITY_SPEND_CATEGORY_LABELS[category]} ${formatSpendOrNoData(month[category]!.amount)}`
+    )
+    .join(', ');
+}
+
 /** `YYYY-MM` of the Lagos month an instant falls in. */
 export function lagosMonthKey(value: Date = new Date()): string {
   return new Date(value.getTime() + 60 * 60_000).toISOString().slice(0, 7);

@@ -10,9 +10,11 @@ import type {
   UtilityGenerator,
   UtilityPurchase,
   UtilityPurchaseKind,
+  UtilitiesAnalytics,
   UtilitiesSummary,
   WaterQualityTest,
 } from '@sureground/shared';
+import { monthsBackFrom } from '@sureground/shared';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import { toQuery } from './query';
@@ -36,6 +38,11 @@ export const homeUtilitiesApi = {
   /** This month's recorded spend and generators due; `hasUtilityData` is false until something is logged. */
   summary: (propertyId?: string) =>
     apiFetch<UtilitiesSummary>(`${BASE}/summary${toQuery({ propertyId })}`),
+  /** Recorded spend by Lagos month, at most 24 months back. Months with nothing logged come back as null. */
+  analytics: (propertyId: string | undefined, months: number) =>
+    apiFetch<UtilitiesAnalytics>(
+      `${BASE}/analytics${toQuery({ propertyId, from: monthsBackFrom(Math.min(Math.max(months, 1), 24)) })}`
+    ),
   generators: (propertyId?: string) =>
     apiFetch<UtilityGenerator[]>(`${BASE}/generators${toQuery({ propertyId })}`),
   readings: (assetId: string) =>

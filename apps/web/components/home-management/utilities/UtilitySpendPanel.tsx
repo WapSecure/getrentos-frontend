@@ -16,6 +16,7 @@ import { BarChart3 } from '@sureground/icons';
 import {
   UTILITY_SPEND_CATEGORIES,
   UTILITY_SPEND_CATEGORY_LABELS,
+  costPerUnitFigure,
   formatCurrency,
   formatLitres,
   formatSpendOrNoData,
@@ -156,19 +157,7 @@ export function UtilitySpendPanel({ propertyId }: { propertyId?: string }) {
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Figure label="Total recorded" value={formatSpendOrNoData(data!.totals.total)} />
-            {/* Only for one property: across a portfolio, a house with no units would be shared
-                over another building's flats. */}
-            <Figure
-              label="Per unit"
-              value={propertyId ? formatSpendOrNoData(data!.costPerUnit) : 'One property at a time'}
-              hint={
-                !propertyId
-                  ? 'Choose a property above to see its cost per unit'
-                  : data!.costPerUnit === null
-                    ? 'Add units to the property to see this'
-                    : `Across ${data!.unitsCount} ${data!.unitsCount === 1 ? 'unit' : 'units'}`
-              }
-            />
+            <Figure label="Per unit" {...costPerUnitFigure(data!, Boolean(propertyId))} />
             <Figure
               label="Diesel bought"
               value={

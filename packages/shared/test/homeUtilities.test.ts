@@ -2,6 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   DISCO_LABELS,
+  costPerUnitFigure,
+  monthSpendBreakdown,
   FUEL_TYPE_LABELS,
   PURCHASE_KIND_LABELS,
   TARIFF_BAND_LABELS,
@@ -187,4 +189,23 @@ test('a generator that is nearly due is never summarised as 0', () => {
   assert.equal(generatorServiceSummary(0, 1), '1 due soon');
   assert.equal(generatorServiceSummary(2, 0), '2');
   assert.equal(generatorServiceSummary(1, 2), '1 due, 2 soon');
+});
+
+test('cost per unit is shown for one property only, and says why when missing', () => {
+  assert.equal(costPerUnitFigure({ costPerUnit: 5000, unitsCount: 4 }, false).value, 'One property at a time');
+  assert.equal(costPerUnitFigure({ costPerUnit: null, unitsCount: 0 }, true).hint, 'Add units to the property to see this');
+  const one = costPerUnitFigure({ costPerUnit: 5000, unitsCount: 1 }, true);
+  assert.match(one.value, /5,000/);
+  assert.equal(one.hint, 'Across 1 unit');
+});
+
+test('a month breakdown lists recorded categories, largest first, and skips gaps', () => {
+  const text = monthSpendBreakdown({
+    fuel: { amount: 120000, quantity: 100, entries: 1 },
+    electricity: { amount: 20000, quantity: null, entries: 1 },
+    water: null,
+    repairs: { amount: 45000, quantity: null, entries: 1 },
+  });
+  assert.match(text, /^Fuel .*120,000, Utility repairs .*45,000, Electricity .*20,000$/);
+  assert.equal(monthSpendBreakdown({ fuel: null, electricity: null, water: null, repairs: null }), '');
 });
