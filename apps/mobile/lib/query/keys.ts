@@ -189,6 +189,9 @@ export const qk = {
       ['home-care', 'utilities', 'purchases', propertyId, kind] as const,
     utilitiesAnalytics: (propertyId: string, months: number) =>
       ['home-care', 'utilities', 'analytics', propertyId, months] as const,
+    serviceCharges: (propertyId: string) =>
+      ['home-care', 'utilities', 'service-charges', propertyId] as const,
+    serviceCharge: (id: string) => ['home-care', 'utilities', 'service-charge', id] as const,
     utilitiesSummary: (propertyId: string) =>
       ['home-care', 'utilities', 'summary', propertyId] as const,
     waterTests: (propertyId: string) =>

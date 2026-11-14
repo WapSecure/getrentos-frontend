@@ -1,3 +1,4 @@
+import { COLLECTION_TONE, formatDay } from '@/lib/serviceCharge';
 import { dayToInstant, lagosToday } from '@/lib/api/homeUtilities';
 import { bandCheck, maskMeterNumber, tokenLast4, utilityKindForCategory } from '@sureground/shared';
 
@@ -24,5 +25,15 @@ describe('power and water capture', () => {
 
   it('tags a generator picked from the common kinds', () => {
     expect(utilityKindForCategory('Generator')).toBe('GENERATOR');
+  });
+});
+
+describe('service charge display', () => {
+  it('shows a day as written, whatever the time zone', () => {
+    expect(formatDay('2027-01-01')).toBe('1 Jan 2027');
+  });
+  it('marks the vacant share as the owner’s, not an unpaid debt', () => {
+    expect(COLLECTION_TONE.NOT_BILLED).toBe('info');
+    expect(COLLECTION_TONE.UNPAID).toBe('neutral');
   });
 });
