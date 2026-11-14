@@ -50,6 +50,7 @@ import {
   utilitiesViewHref,
   type HomeManagementTab,
   type UtilitiesCreateKind,
+  type UtilitiesView,
 } from '@/lib/homeManagementTabs';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
@@ -174,6 +175,14 @@ export function HomeManagementWorkspace({
       homeManagementTabHref(pathname, searchParams.toString(), tab, tabParam),
     [pathname, searchParams, tabParam]
   );
+  // Each utility tile opens the sub-view it summarises, whatever sub-view is open now.
+  const utilitiesHref = useCallback(
+    (view: UtilitiesView) => {
+      const tabUrl = new URL(tabHref('utilities'), 'http://local');
+      return utilitiesViewHref(tabUrl.pathname, tabUrl.search.slice(1), view);
+    },
+    [tabHref]
+  );
   // A push, not a replace, so the back button returns to the previous tab.
   const setTab = (tab: HomeManagementTab) => router.push(tabHref(tab), { scroll: false });
   const [createRequest, setCreateRequest] = useState<{ kind: CreateKind; id: number } | null>(null);
@@ -186,11 +195,7 @@ export function HomeManagementWorkspace({
     setWorkOrderPrefill(kind === 'work-order' ? prefill : undefined);
     if (isUtilitiesKind(kind)) {
       // One navigation for the tab and its sub-view, so the right form's panel is mounted.
-      const tabUrl = new URL(tabHref('utilities'), 'http://local');
-      router.push(
-        utilitiesViewHref(tabUrl.pathname, tabUrl.search.slice(1), UTILITIES_VIEW_FOR[kind]),
-        { scroll: false }
-      );
+      router.push(utilitiesHref(UTILITIES_VIEW_FOR[kind]), { scroll: false });
     } else if (activeTab !== CREATE_TAB[kind]) setTab(CREATE_TAB[kind]);
     requestSequence.current += 1;
     setCreateRequest({ kind, id: requestSequence.current });
@@ -370,13 +375,13 @@ export function HomeManagementWorkspace({
             label: `Utility spend (${utilities!.monthLabel.split(' ')[0]})`,
             value: formatSpendOrNoData(utilities!.spendThisMonth),
             icon: Zap,
-            href: tabHref('utilities'),
+            href: utilitiesHref('spend'),
           },
           {
             label: 'Generators due a service',
             value: generatorServiceSummary(utilities!.generatorsDue, utilities!.generatorsDueSoon),
             icon: Wrench,
-            href: tabHref('utilities'),
+            href: utilitiesHref('power'),
             attention: utilities!.generatorsDue > 0,
           },
         ]
