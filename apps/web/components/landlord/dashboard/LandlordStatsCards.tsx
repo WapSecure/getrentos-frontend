@@ -46,7 +46,7 @@ export const LandlordStatsCards = ({
             href: ROUTES.LANDLORD_FINANCIALS,
           },
           {
-            label: 'Outstanding rent',
+            label: 'Outstanding',
             icon: Wallet,
             value: moneyVisible ? formatCurrency(outstandingAmount, { compact: true }) : HIDDEN,
             subtitle:
