@@ -362,6 +362,8 @@ export interface LandlordPayment {
   unitId?: string;
   unitName?: string;
   amount: number;
+  /** 'rent', 'service_charge', 'deposit', 'levy', ... */
+  category?: string;
   dueDate: string;
   paidDate?: string;
   status: LandlordPaymentStatus;
