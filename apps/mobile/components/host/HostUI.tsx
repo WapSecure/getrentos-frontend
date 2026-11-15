@@ -36,6 +36,21 @@ export const BOOKING_STATUS: Record<ShortletBookingStatus, { label: string; tone
   COMPLETED: { label: 'Completed', tone: 'info' },
 };
 
+/**
+ * A confirmed request is not a secured stay until the guest pays: say so, or a host reads "Confirmed" and holds the
+ * dates for someone who may never pay.
+ */
+export function bookingStatus(b: {
+  status: ShortletBookingStatus;
+  paymentStatus?: string;
+  paymentRequired?: boolean;
+}): { label: string; tone: Tone } {
+  if (b.status === 'CONFIRMED' && b.paymentRequired && b.paymentStatus !== 'PAID') {
+    return { label: 'Awaiting payment', tone: 'warning' };
+  }
+  return BOOKING_STATUS[b.status];
+}
+
 export function listingStatus(status: string): { label: string; tone: Tone } {
   switch (status) {
     case 'PUBLISHED':
@@ -117,7 +132,7 @@ export function Thumb({ uri, size = 64 }: { uri?: string; size?: number }) {
 
 export function StayCard({ b, compact }: { b: HostBooking; compact?: boolean }) {
   const { colors, spacing } = useTheme();
-  const s = BOOKING_STATUS[b.status];
+  const s = bookingStatus(b);
   const g = b.guestSummary;
   const when = b.status === 'CONFIRMED' || b.status === 'REQUESTED' ? relativeDay(b.checkIn) : null;
   const earns = b.hostNet ?? b.total;
