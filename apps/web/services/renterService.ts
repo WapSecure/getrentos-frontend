@@ -228,6 +228,8 @@ export interface Payment {
   totalChargedNaira?: number;
   /** 0 once released. */
   heldAmountNaira?: number;
+  /** The first rent on a new lease: paid in full, never in part. */
+  fullPaymentOnly?: boolean;
   /** The tenant has the keys: held rent is then released early, not "on move-in". */
   moveInConfirmed?: boolean;
   /** Reopenable until `expiresAt`. */

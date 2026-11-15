@@ -42,6 +42,8 @@ export interface Payment {
   /** While the money is held, when it releases to the landlord automatically. */
   releaseDate?: string;
   outstanding?: number;
+  /** The first rent on a new lease: paid in full, never in part. */
+  fullPaymentOnly?: boolean;
   /** Naira paid against this charge so far (part-payments and credit). */
   amountPaid?: number;
   /** Card or bank fee the payer covered on top of the charge, when the API knows it. */

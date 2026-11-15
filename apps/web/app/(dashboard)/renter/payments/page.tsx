@@ -502,6 +502,7 @@ export default function PaymentsPage() {
                 owed: owedOn(payingPayment),
                 dueDate: payingPayment.dueDate ?? null,
                 overdue: payingPayment.status === 'overdue',
+                fullPaymentOnly: payingPayment.fullPaymentOnly,
               }
             : null
         }
