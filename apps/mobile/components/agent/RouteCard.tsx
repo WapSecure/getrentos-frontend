@@ -62,7 +62,7 @@ export function RouteCard() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
           <Route size={18} color={colors.primary} />
           <Text variant="bodyStrong" headingLevel={2}>
-            Today&apos;s route
+            {routeTitle(d.date)}
           </Text>
         </View>
         {d.stops.length ? (
@@ -130,4 +130,13 @@ export function RouteCard() {
       </View>
     </Card>
   );
+}
+
+/** The API plans tomorrow once the working day is over, so the title follows the day it returns. */
+function routeTitle(date: string): string {
+  // Lagos is UTC+1 all year.
+  const today = new Date(Date.now() + 3_600_000).toISOString().slice(0, 10);
+  if (date === today) return "Today's route";
+  const tomorrow = new Date(Date.now() + 3_600_000 + 86_400_000).toISOString().slice(0, 10);
+  return date === tomorrow ? "Tomorrow's route" : 'Your route';
 }

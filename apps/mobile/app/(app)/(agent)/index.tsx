@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   AlertTriangle,
   BadgeCheck,
+  Bell,
   Building2,
   CalendarClock,
   CheckCircle2,
@@ -55,6 +56,11 @@ export default function AgentHome() {
   const { colors, spacing } = useTheme();
 
   const dashboard = useQuery({ queryKey: qk.agent.dashboard, queryFn: agentApi.dashboard });
+  const notifications = useQuery({
+    queryKey: qk.agent.notifications,
+    queryFn: agentApi.notifications,
+  });
+  const unread = (notifications.data ?? []).filter((n) => !n.read).length;
 
   const toTasks = () => router.push('/(app)/(agent)/tasks');
 
@@ -65,11 +71,20 @@ export default function AgentHome() {
       roleBadge="AG"
       subtitle="Your tasks, clients and field work"
       accessory={
-        <IconButton
-          onPress={() => router.push({ pathname: '/(app)/ask', params: { persona: 'agent' } })}
-          accessibilityLabel="Ask Sureground"
-          icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
-        />
+        <View style={{ flexDirection: 'row', gap: 4 }}>
+          <IconButton
+            onPress={() => router.push({ pathname: '/(app)/ask', params: { persona: 'agent' } })}
+            accessibilityLabel="Ask Sureground"
+            icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
+          />
+          <IconButton
+            onPress={() => router.push('/(app)/agent-notifications')}
+            // IconButton already appends ", N unread" from the badge.
+            accessibilityLabel="Notifications"
+            badge={unread}
+            icon={<Bell size={21} color={colors.foreground} />}
+          />
+        </View>
       }
     />
   );
@@ -99,7 +114,8 @@ export default function AgentHome() {
           {
             label: 'Overdue',
             value: d.overdueTasks,
-            subtitle: 'Needs attention',
+            // Not "Needs attention": the attention flag already reads that out, so it was said twice.
+            subtitle: 'Past their due date',
             attention: d.overdueTasks > 0,
             Icon: Clock,
             onPress: toTasks,
@@ -209,8 +225,13 @@ export default function AgentHome() {
               <EmptyState
                 size="compact"
                 icon={<IconTile Icon={ClipboardCheck} size="xl" />}
-                title="You're all caught up"
-                description="New field assignments will appear here when they are scheduled."
+                // "All caught up" only when nothing is open: with overdue work it was simply untrue.
+                title={openTasks ? 'Nothing else scheduled' : "You're all caught up"}
+                description={
+                  openTasks
+                    ? `Your ${openTasks} open ${openTasks === 1 ? 'task is' : 'tasks are'} in My tasks.`
+                    : 'New field assignments will appear here when they are scheduled.'
+                }
               />
             </Card>
           ) : (
