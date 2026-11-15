@@ -12,6 +12,7 @@ import {
 } from '@sureground/icons';
 import { ActivityFeedCard } from '@/components/shared/dashboard/ActivityFeedCard';
 import { ROUTES } from '@/lib/constants/auth';
+import { notificationHref } from '@/lib/notificationHref';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -46,7 +47,12 @@ export const RenterRecentActivity = () => {
     icon: iconByType[n.type as ActivityType] ?? Bell,
     title: n.title,
     at: n.createdAt,
-    href: activityRoutes[n.type as ActivityType] ?? ROUTES.RENTER_NOTIFICATIONS,
+    // The row's own link first, as on the notifications page; the category only as a fallback, since an estate
+    // announcement or gate update is categorised "message" but belongs on the resident board.
+    href:
+      notificationHref('renter', n) ??
+      activityRoutes[n.type as ActivityType] ??
+      ROUTES.RENTER_NOTIFICATIONS,
   }));
 
   if (!isPending && items.length === 0) return null;
