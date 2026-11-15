@@ -7,7 +7,8 @@ import { formatDateTime } from '@/lib/format';
 export type VisitorTone = 'active' | 'waiting' | 'finished';
 
 export function visitorInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
+  // Skips words like "(demo)" or "&" so the initials stay letters.
+  const parts = name.trim().split(/\s+/).filter((w) => /^\p{L}/u.test(w));
   const letters = parts.length > 1 ? [parts[0][0], parts[parts.length - 1][0]] : [parts[0]?.[0]];
   return letters.filter(Boolean).join('').toUpperCase() || '?';
 }
