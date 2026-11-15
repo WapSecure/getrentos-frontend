@@ -25,7 +25,12 @@ export default function ResidentAnnouncementsPage() {
     <>
       <PageHeader
         title="Announcements"
-        description={<>{data?.total ?? 0} announcements from your estate</>}
+        description={
+          <>
+            {data?.total ?? 0} {(data?.total ?? 0) === 1 ? 'announcement' : 'announcements'} from
+            your estate
+          </>
+        }
       />
 
       {isLoading ? (
