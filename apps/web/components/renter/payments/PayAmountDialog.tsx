@@ -16,6 +16,8 @@ interface PayAmountDialogProps {
     owed: number;
     dueDate?: string | null;
     overdue?: boolean;
+    /** The first rent: the API refuses part-payment, so none is offered. */
+    fullPaymentOnly?: boolean;
   } | null;
   onClose: () => void;
   onPay: (amount: number | undefined) => void;
@@ -87,17 +89,23 @@ export const PayAmountDialog = ({
       onPay={() => onPay(mode === 'part' ? part : undefined)}
       amountStep={
         <>
-          <RadioGroup
-            aria-label="How much to pay"
-            variant="card"
-            columns={2}
-            value={mode}
-            onValueChange={setMode}
-            options={[
-              { value: 'full', label: 'Pay in full', description: formatCurrency(owed) },
-              { value: 'part', label: 'Pay part', description: 'Choose an amount' },
-            ]}
-          />
+          {payment?.fullPaymentOnly ? (
+            <p className="text-sm text-muted-foreground">
+              This is your first rent, so it is paid in full: your keys follow once it is held.
+            </p>
+          ) : (
+            <RadioGroup
+              aria-label="How much to pay"
+              variant="card"
+              columns={2}
+              value={mode}
+              onValueChange={setMode}
+              options={[
+                { value: 'full', label: 'Pay in full', description: formatCurrency(owed) },
+                { value: 'part', label: 'Pay part', description: 'Choose an amount' },
+              ]}
+            />
+          )}
           {mode === 'part' && (
             <Field
               label="Amount"

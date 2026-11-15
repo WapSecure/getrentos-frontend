@@ -51,13 +51,24 @@ const PORTAL_PRIORITY: Portal[] = [
   'gateman',
 ];
 
+// Consumer workspaces follow the account's own order (the API lists the sign-up role first), so someone who
+// signed up to rent and later added buying still opens their renting app, as on the web.
+const CONSUMER_PORTALS: readonly Portal[] = ['buyer', 'renter', 'resident'];
+
 export function portalsForRoles(roles: BackendRole[]): Portal[] {
   const set = new Set<Portal>();
+  const consumerOrder: Portal[] = [];
   for (const r of roles) {
     const p = BACKEND_ROLE_TO_PORTAL[r];
-    if (p) set.add(p);
+    if (!p) continue;
+    set.add(p);
+    if (CONSUMER_PORTALS.includes(p) && !consumerOrder.includes(p)) consumerOrder.push(p);
   }
-  return PORTAL_PRIORITY.filter((p) => set.has(p));
+  const ranked = PORTAL_PRIORITY.filter((p) => set.has(p));
+  const firstConsumer = ranked.findIndex((p) => CONSUMER_PORTALS.includes(p));
+  if (firstConsumer === -1) return ranked;
+  const others = ranked.filter((p) => !CONSUMER_PORTALS.includes(p));
+  return [...others.slice(0, firstConsumer), ...consumerOrder, ...others.slice(firstConsumer)];
 }
 
 export function primaryPortal(roles: BackendRole[]): Portal {
