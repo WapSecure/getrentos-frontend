@@ -1,4 +1,4 @@
-import { ROUTES } from '@/lib/constants/auth';
+import { ROUTES } from './constants/auth';
 import { portalLink } from './portalLinks';
 
 export type NotificationPortal =
@@ -51,6 +51,13 @@ const BY_TYPE: Partial<Record<NotificationPortal, [prefix: string, route: string
 
 const SHORTLET_INBOX = '/shortlets/messages';
 
+// A guest's stay notifications open their trips. Mirrors GUEST_PORTALS and HOST_ONLY_TYPES on mobile.
+const GUEST_BOOKINGS: Partial<Record<NotificationPortal, string>> = {
+  renter: '/renter/bookings',
+  buyer: '/buyer/bookings',
+};
+const HOST_ONLY_TYPES = new Set(['shortlet_booking_request', 'shortlet_review_received']);
+
 // Mobile has the same rules for its own routes (apps/mobile/lib/notificationRoutes.ts).
 export function notificationHref(
   portal: NotificationPortal,
@@ -73,6 +80,8 @@ export function notificationHref(
   }
   if (url && url.startsWith('/') && !url.startsWith('//')) return portalLink(portal, url);
   const type = n.type.toLowerCase();
+  const trips = GUEST_BOOKINGS[portal];
+  if (trips && type.startsWith('shortlet_') && !HOST_ONLY_TYPES.has(type)) return trips;
   const byType = (BY_TYPE[portal] ?? [])
     .filter(([prefix]) => type.startsWith(prefix))
     .sort((a, b) => b[0].length - a[0].length)[0];
