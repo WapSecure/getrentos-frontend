@@ -92,7 +92,14 @@ export default function ResidentDuesPage() {
 
   return (
     <>
-      <PageHeader title="Dues" description={<>{data?.total ?? 0} dues on your household</>} />
+      <PageHeader
+        title="Dues"
+        description={
+          <>
+            {data?.total ?? 0} {(data?.total ?? 0) === 1 ? 'due' : 'dues'} on your household
+          </>
+        }
+      />
 
       {(serviceCharges.data?.length ?? 0) > 0 && (
         <div className="mb-8">
