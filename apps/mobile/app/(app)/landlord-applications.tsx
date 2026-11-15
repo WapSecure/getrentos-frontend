@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert, RefreshControl, View } from 'react-native';
 
+import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -57,13 +58,19 @@ export default function LandlordApplications() {
       landlordApi.setApplicationStatus(id, status),
     onMutate: ({ id }) => setBusyId(id),
     onSettled: () => setBusyId(null),
-    onSuccess: (_d, { status }) => {
+    onSuccess: (result, { status }) => {
       qc.invalidateQueries({ queryKey: ['landlord', 'applications'] });
       qc.invalidateQueries({ queryKey: qk.landlord.dashboardStats });
-      toast.show(
-        status === 'approved' ? 'Application approved.' : 'Application rejected.',
-        'success'
-      );
+      qc.invalidateQueries({ queryKey: ['landlord', 'leases'] });
+      if (status !== 'approved') {
+        toast.show('Application rejected.', 'success');
+      } else if (result?.leaseDrafted === false) {
+        // The unit has no advertised rent, so no lease could be drafted for it.
+        toast.show('Approved. No lease was drafted: create one from Leases.', 'info');
+        router.push('/(app)/landlord-leases');
+      } else {
+        toast.show('Approved. A draft lease is ready in Leases.', 'success');
+      }
     },
     onError: (e) => toast.show(errorMessage(e, 'Could not update that application.'), 'error'),
   });

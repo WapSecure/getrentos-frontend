@@ -174,6 +174,8 @@ export type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejec
 
 export interface LandlordApplication {
   id: string;
+  /** Only on an approval: whether a draft lease was created (false when the unit has no advertised rent). */
+  leaseDrafted?: boolean;
   applicantName: string;
   applicantEmail: string;
   applicantPhone: string;
