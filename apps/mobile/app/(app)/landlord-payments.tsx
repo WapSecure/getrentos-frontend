@@ -217,6 +217,7 @@ function PaymentRow({ payment: p }: { payment: LandlordPayment }) {
         </View>
 
         <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+          {chargeLabel(p.category) ? `${chargeLabel(p.category)} · ` : ''}
           {p.propertyName}
           {p.unitName ? ` · ${p.unitName}` : ''}
         </Text>
@@ -242,4 +243,11 @@ function PaymentRow({ payment: p }: { payment: LandlordPayment }) {
       </View>
     </Card>
   );
+}
+
+/** Rent is the default, so only other charges are named on the row. */
+function chargeLabel(category?: string): string | null {
+  if (!category || category === 'rent') return null;
+  const words = category.replace(/_/g, ' ').toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
 }
