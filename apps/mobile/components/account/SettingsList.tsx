@@ -82,7 +82,12 @@ function SettingsRow({ item, first }: { item: SettingsItem; first: boolean }) {
         ) : null}
       </View>
       {item.value ? (
-        <Text variant="caption" style={{ color: toneColor, fontWeight: '700' }}>
+        // One line and at most ~40% of the row, so a long value (an estate's name) never squeezes the label.
+        <Text
+          variant="caption"
+          numberOfLines={1}
+          style={{ color: toneColor, fontWeight: '700', flexShrink: 1, maxWidth: '40%' }}
+        >
           {item.value}
         </Text>
       ) : null}

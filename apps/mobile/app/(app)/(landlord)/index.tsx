@@ -218,16 +218,17 @@ export default function LandlordOverview() {
           <AttentionCard
             Icon={TriangleAlert}
             tone="danger"
-            title={`${s.outstandingPayments} rent ${s.outstandingPayments === 1 ? 'payment' : 'payments'} outstanding`}
+            // Outstanding covers every unpaid charge (service charge, levies), not rent alone.
+            title={`${s.outstandingPayments} unpaid ${s.outstandingPayments === 1 ? 'charge' : 'charges'}`}
             detail={
               <Text variant="caption" color="mutedForeground">
                 {showMoney ? <Price amount={s.outstandingAmount} variant="caption" /> : '••••••'}{' '}
                 still to collect
               </Text>
             }
-            accessibilityLabel={`${s.outstandingPayments} rent ${s.outstandingPayments === 1 ? 'payment is' : 'payments are'} outstanding. Open payments`}
-            eyebrow="Rent to collect"
-            actionLabel="See rent payments"
+            accessibilityLabel={`${s.outstandingPayments} unpaid ${s.outstandingPayments === 1 ? 'charge' : 'charges'}. Open payments`}
+            eyebrow="To collect"
+            actionLabel="See payments"
             onPress={() => router.push('/(app)/landlord-payments')}
           />
         ) : null}
