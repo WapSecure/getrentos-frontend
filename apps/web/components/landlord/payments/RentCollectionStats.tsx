@@ -29,7 +29,7 @@ export const RentCollectionStats = ({
       icon: AlertTriangle,
       label: 'Outstanding balance',
       value: formatCurrency(outstandingBalance, { compact: true }),
-      subtitle: 'Unpaid rent',
+      subtitle: 'Unpaid rent and charges',
       accent: 'red',
     },
     {

@@ -33,7 +33,9 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
       render: (payment) => (
         <>
           <span className="block text-foreground">{payment.propertyName}</span>
-          <span className="block text-xs text-muted-foreground">{payment.unitName}</span>
+          <span className="block text-xs text-muted-foreground">
+            {[payment.unitName, chargeLabel(payment.category)].filter(Boolean).join(' · ')}
+          </span>
         </>
       ),
     },
@@ -136,3 +138,10 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
     />
   );
 };
+
+/** Rent is the default, so only other charges are named: a service charge otherwise reads as rent. */
+function chargeLabel(category?: string): string | null {
+  if (!category || category === 'rent') return null;
+  const words = category.replace(/_/g, ' ').toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
