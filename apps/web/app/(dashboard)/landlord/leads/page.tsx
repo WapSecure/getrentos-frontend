@@ -171,9 +171,13 @@ export default function LandlordLeadsPage() {
         eyebrow="Lettings"
         title="Leads"
         description={
-          <>
-            {total} lead{total === 1 ? '' : 's'} across your properties
-          </>
+          leadsQuery.isLoading ? (
+            'Loading your leads…'
+          ) : (
+            <>
+              {total} lead{total === 1 ? '' : 's'} across your properties
+            </>
+          )
         }
       />
       <LandlordLettingsNav />
