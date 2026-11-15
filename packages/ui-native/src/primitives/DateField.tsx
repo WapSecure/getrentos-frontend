@@ -66,7 +66,7 @@ function isSameDay(a: Date, b: Date): boolean {
 }
 
 function formatDisplay(d: Date): string {
-  return `${SHORT_MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  return `${d.getDate()} ${SHORT_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 // Keep the value contract in step with the web DatePicker.
