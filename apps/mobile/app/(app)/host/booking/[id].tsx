@@ -49,7 +49,7 @@ import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
-import { BOOKING_STATUS, StatusPill, Thumb } from '@/components/host/HostUI';
+import { bookingStatus, StatusPill, Thumb } from '@/components/host/HostUI';
 import { goBack } from '@/lib/goBack';
 
 type Panel = 'cancel' | 'claim' | 'dispute' | 'review' | null;
@@ -221,7 +221,7 @@ export default function HostBookingDetail() {
 
 function StayHero({ b }: { b: HostBooking }) {
   const { colors, spacing } = useTheme();
-  const s = BOOKING_STATUS[b.status];
+  const s = bookingStatus(b);
   const day = (iso: string) =>
     new Date(`${iso.slice(0, 10)}T12:00:00`).toLocaleDateString('en-NG', {
       weekday: 'short',

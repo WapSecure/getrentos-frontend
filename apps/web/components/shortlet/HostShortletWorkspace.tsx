@@ -411,9 +411,14 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                   {b.notes && <p className="mt-1 text-sm text-muted-foreground">“{b.notes}”</p>}
                 </div>
                 <div className="shrink-0 text-right">
-                  <Badge variant={STATUS_VARIANT[b.status]}>
-                    {SHORTLET_BOOKING_STATUS_LABEL[b.status]}
-                  </Badge>
+                  {/* Confirmed but unpaid is not a secured stay: a host must not hold dates on it. */}
+                  {b.status === 'CONFIRMED' && b.paymentRequired && b.paymentStatus !== 'PAID' ? (
+                    <Badge variant="warning">Awaiting payment</Badge>
+                  ) : (
+                    <Badge variant={STATUS_VARIANT[b.status]}>
+                      {SHORTLET_BOOKING_STATUS_LABEL[b.status]}
+                    </Badge>
+                  )}
                   <p className="mt-1 font-semibold">{formatCurrency(b.total)}</p>
                   {b.platformFee != null && b.platformFee > 0 && (
                     <p className="mt-0.5 text-xs text-muted-foreground">
