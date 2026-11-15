@@ -27,6 +27,7 @@ import type { SupportMessage, SupportThread } from '@/types/support';
 import type { RenewalOffer } from '@/types/lease';
 import type {
   CreateMaintenanceRequestInput,
+  MaintenanceHome,
   MaintenanceRequest,
   MaintenanceSummary,
 } from '@/types/maintenance';
@@ -1367,6 +1368,11 @@ export const renterService = {
     return safeCall(() =>
       authFetch<Paginated<MaintenanceRequest>>(`/renter/maintenance${toQuery(params)}`)
     );
+  },
+
+  /** Homes the renter can report a problem in, one per signed lease. */
+  async listMaintenanceHomes(): Promise<ApiResponse<MaintenanceHome[]>> {
+    return safeCall(() => authFetch('/renter/maintenance/homes'));
   },
 
   async createMaintenanceRequest(

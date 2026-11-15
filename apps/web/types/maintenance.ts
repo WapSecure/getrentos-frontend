@@ -52,6 +52,13 @@ export interface CreateMaintenanceRequestInput {
   description: string;
   /** Emergency requests are routed by the API as urgent work orders. */
   isEmergency?: boolean;
+  /** Required by the API when the renter rents more than one home. */
+  unitId?: string;
+}
+
+export interface MaintenanceHome {
+  unitId: string;
+  label: string;
 }
 
 export interface MaintenanceRequest {
