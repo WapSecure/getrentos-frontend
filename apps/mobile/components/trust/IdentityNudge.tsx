@@ -3,7 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { ShieldAlert } from '@sureground/icons/native';
 import { kycApi } from '@/lib/api/kyc';
 import { AttentionCard } from '@/components/dashboard/DashboardParts';
-import { identityNudgeCopy } from '@/lib/identityNudge';
+import { identityNudgeCopy, type NudgeState } from '@/lib/identityNudge';
+import type { KycStatus } from '@/lib/api/kyc';
 
 /** `null` until the answer is in, so screens don't nudge someone already verified while the request is in flight. */
 export function useIdentityVerified(): boolean | null {
@@ -19,6 +20,12 @@ export function useLicenceVerified(): boolean | null {
   return kyc.data.license?.status === 'APPROVED';
 }
 
+function stateOf(status: KycStatus | undefined): NudgeState {
+  if (status === 'PENDING_REVIEW') return 'pending';
+  if (status === 'REJECTED' || status === 'NEEDS_CLARIFICATION') return 'rejected';
+  return 'missing';
+}
+
 export function IdentityNudge({
   unlocks,
   force = false,
@@ -30,13 +37,17 @@ export function IdentityNudge({
 }) {
   const identity = useIdentityVerified();
   const licence = useLicenceVerified();
+  const kyc = useQuery({ queryKey: ['kyc-status'], queryFn: kycApi.getStatus });
   const verified = requirement === 'licence' ? licence : identity;
   if (!force && verified !== false) return null;
-  const copy = identityNudgeCopy({ unlocks, requirement });
+  const state = stateOf(
+    requirement === 'licence' ? kyc.data?.license?.status : kyc.data?.identity?.status
+  );
+  const copy = identityNudgeCopy({ unlocks, requirement, state });
   return (
     <AttentionCard
       Icon={ShieldAlert}
-      tone="warning"
+      tone={state === 'pending' ? 'info' : 'warning'}
       title={copy.title}
       detail={copy.detail}
       accessibilityLabel={copy.accessibilityLabel}

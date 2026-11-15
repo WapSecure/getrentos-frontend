@@ -153,7 +153,7 @@ export default function RealtorHome() {
           {
             label: 'Live listings',
             value: d.publishedListings,
-            subtitle: 'Published on your behalf',
+            subtitle: 'Published for your clients',
             Icon: Megaphone,
             onPress: () => router.push('/(app)/(realtor)/listings'),
           },
@@ -282,6 +282,9 @@ export default function RealtorHome() {
         )}
       </View>
 
+      <IdentityNudge unlocks="client invites and publishing listings" />
+      <IdentityNudge requirement="licence" unlocks="listings and clients" />
+
       <Earnings
         loading={earnings.isPending}
         locked={proLocked}
@@ -291,8 +294,6 @@ export default function RealtorHome() {
         onToggle={toggleMoney}
       />
 
-      <IdentityNudge unlocks="client invites and publishing listings" />
-      <IdentityNudge requirement="licence" unlocks="listings and clients" />
 
       <QueryState
         query={dashboard}
