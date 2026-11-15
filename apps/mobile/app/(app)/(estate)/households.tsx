@@ -72,7 +72,7 @@ export default function EstateHouseholds() {
           gap: spacing.md,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <View style={{ flex: 1 }}>
             <Text variant="title" accessibilityRole="header">
               Households
