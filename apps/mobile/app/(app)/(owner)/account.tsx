@@ -47,6 +47,24 @@ export default function OwnerAccount() {
   const trustItems = useTrustItems('owner', { audience: 'buyers' });
   const investItems = useInvestItems();
 
+  // Owners who let a property review applicants and leases on the same screens as landlords.
+  const letting: SettingsItem[] = [
+    {
+      key: 'applications',
+      label: 'Applications',
+      description: 'Review and decide on people who want to rent',
+      icon: ClipboardList,
+      onPress: go('/(app)/landlord-applications'),
+    },
+    {
+      key: 'leases',
+      label: 'Leases',
+      description: 'Drafts, signatures and renewals',
+      icon: FileSignature,
+      onPress: go('/(app)/landlord-leases'),
+    },
+  ];
+
   const selling: SettingsItem[] = [
     ...investItems,
     {
@@ -248,6 +266,7 @@ export default function OwnerAccount() {
       <RepresentingGroup />
 
       <SettingsGroup title="Selling" items={selling} />
+      <SettingsGroup title="Letting" items={letting} />
       <SettingsGroup title="Tenancy & oversight" items={managementItems()} />
       <SettingsGroup title="Trust & reputation" items={trust} />
       <SettingsGroup

@@ -78,8 +78,10 @@ export default function LandlordLeases() {
 
   const items = query.data?.items ?? [];
   // Drafts haven't gone out and lapsed or ended leases won't be signed, so neither is "awaiting".
+  // A lease waiting on the first rent is counted on its own: nobody can sign it until the money is held.
+  const awaitingPayment = items.filter((l) => l.status === 'awaiting_payment').length;
   const awaitingSignature = items.filter((l) => {
-    if (!AWAITING_STATUSES.has(l.status)) return false;
+    if (!AWAITING_STATUSES.has(l.status) || l.status === 'awaiting_payment') return false;
     const signed = leaseSignatures(l);
     return !signed.tenant || !signed.landlord;
   }).length;
@@ -98,7 +100,7 @@ export default function LandlordLeases() {
           title="Leases"
           subtitle={
             query.data
-              ? `${query.data.total} lease${query.data.total === 1 ? '' : 's'}${awaitingSignature > 0 ? ` · ${awaitingSignature} awaiting signature` : ''}`
+              ? `${query.data.total} lease${query.data.total === 1 ? '' : 's'}${awaitingSignature > 0 ? ` · ${awaitingSignature} awaiting signature` : ''}${awaitingPayment > 0 ? ` · ${awaitingPayment} awaiting first rent` : ''}`
               : 'Create, sign and renew agreements'
           }
           onBack={() => goBack()}
