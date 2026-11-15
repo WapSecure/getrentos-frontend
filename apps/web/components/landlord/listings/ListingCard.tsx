@@ -13,6 +13,7 @@ import {
   Zap,
   Banknote,
   Building2,
+  KeyRound,
 } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
 import { listingStatusBadges } from '@/lib/statusBadge';
@@ -40,6 +41,8 @@ export const ListingCard = ({
   isUpdating = false,
 }: ListingCardProps) => {
   const status = statusConfig[listing.status];
+  // A published advert for a unit a lease now holds: renters no longer see it, so say so rather than "Published".
+  const isLet = Boolean(listing.isLet) && listing.status === 'published';
   // Signed URLs expire, so fall back to the placeholder.
   const [coverFailed, setCoverFailed] = useState(false);
   const showCover = Boolean(listing.coverImage) && !coverFailed;
@@ -68,12 +71,18 @@ export const ListingCard = ({
           </span>
         )}
         <span className="absolute top-3 left-3">
-          <Badge
-            variant={status.variant}
-            icon={status.icon ? <status.icon className="w-3 h-3" /> : undefined}
-          >
-            {status.label}
-          </Badge>
+          {isLet ? (
+            <Badge variant="neutral" icon={<KeyRound className="w-3 h-3" />}>
+              Let
+            </Badge>
+          ) : (
+            <Badge
+              variant={status.variant}
+              icon={status.icon ? <status.icon className="w-3 h-3" /> : undefined}
+            >
+              {status.label}
+            </Badge>
+          )}
         </span>
       </div>
 
@@ -81,7 +90,9 @@ export const ListingCard = ({
         <h3 className="font-semibold text-foreground truncate">{listing.listingTitle}</h3>
         <p className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
           <MapPin className="w-3 h-3" />
-          {listing.propertyName} • {listing.unitName}
+          {listing.unitName
+            ? `${listing.propertyName} • ${listing.unitName}`
+            : listing.propertyName}
         </p>
 
         <p className="text-lg font-bold text-primary mt-3">
@@ -112,7 +123,9 @@ export const ListingCard = ({
 
         <p className="flex items-center gap-1 text-xs text-muted-foreground mt-3">
           <CalendarClock className="w-3 h-3" />
-          Available {formatDate(listing.availabilityDate)}
+          {isLet
+            ? 'Let: hidden from search while the tenancy runs'
+            : `Available ${formatDate(listing.availabilityDate)}`}
         </p>
 
         <div className="flex gap-2 mt-4 pt-4 border-t border-border">

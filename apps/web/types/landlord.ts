@@ -168,6 +168,8 @@ export interface Listing {
   galleryImages?: string[];
   videoTourUrl?: string;
   status: ListingStatus;
+  /** A lease holds the unit: renters no longer see this advert. */
+  isLet?: boolean;
   createdAt: string;
 }
 
