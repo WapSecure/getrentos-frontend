@@ -214,6 +214,13 @@ function LeaseCard({
           <SignatureChip label="Tenant" signed={signatures.tenant} />
         </View>
 
+        {isHoldingOver(l) ? (
+          <Text variant="caption" color="warning">
+            The term ended on {formatDate(l.leaseEnd, 'short')}. The tenant is holding over until you
+            renew or serve notice.
+          </Text>
+        ) : null}
+
         {LEASE_STATUS_NOTE[l.status] ? (
           <Text variant="caption" color="mutedForeground">
             {l.status === 'awaiting_payment' && l.paymentDueAt
@@ -328,4 +335,9 @@ function SignatureChip({ label, signed }: { label: string; signed: boolean }) {
       tone={signed ? 'success' : 'neutral'}
     />
   );
+}
+
+/** A signed lease past its end date: the tenant is still in the unit until renewal or notice. */
+function isHoldingOver(l: { status: string; leaseEnd: string }): boolean {
+  return l.status === 'signed' && new Date(l.leaseEnd).getTime() < Date.now();
 }
