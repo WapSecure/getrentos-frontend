@@ -57,7 +57,7 @@ const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] =
   },
 ];
 
-type Filter = 'all' | 'active' | 'released' | 'attention';
+type Filter = 'all' | 'active' | 'released' | 'refunded' | 'attention';
 const FILTERS: { value: Filter; label: string; match: (s: BuyerEscrowStatus) => boolean }[] = [
   { value: 'all', label: 'All', match: () => true },
   {
@@ -70,8 +70,18 @@ const FILTERS: { value: Filter; label: string; match: (s: BuyerEscrowStatus) => 
     label: 'Frozen (dispute)',
     match: (s) => s === 'frozen',
   },
-  { value: 'released', label: 'Completed', match: (s) => s === 'released' || s === 'refunded' },
+  { value: 'released', label: 'Completed', match: (s) => s === 'released' },
+  { value: 'refunded', label: 'Refunded', match: (s) => s === 'refunded' },
 ];
+
+// Purchases that still need something from the buyer come first, then the finished ones.
+const STATUS_ORDER: Record<string, number> = {
+  frozen: 0,
+  funds_held: 1,
+  deposit_pending: 2,
+  released: 3,
+  refunded: 4,
+};
 
 const ACTOR_LABEL: Record<string, string> = {
   buyer: 'You',
@@ -93,7 +103,13 @@ export default function BuyerTransactions() {
   });
   const all = useMemo(() => query.data?.items ?? [], [query.data]);
   const matcher = FILTERS.find((f) => f.value === filter)!.match;
-  const items = useMemo(() => all.filter((t) => matcher(t.escrowStatus)), [all, matcher]);
+  const items = useMemo(
+    () =>
+      all
+        .filter((t) => matcher(t.escrowStatus))
+        .sort((a, b) => (STATUS_ORDER[a.escrowStatus] ?? 5) - (STATUS_ORDER[b.escrowStatus] ?? 5)),
+    [all, matcher]
+  );
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['buyer', 'transactions'] });
   const fail = (fallback: string) => (err: unknown) =>
