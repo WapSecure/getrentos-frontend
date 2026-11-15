@@ -28,7 +28,7 @@ const categoryLabels: Record<RealtorDocument['category'], string> = {
   agency_agreement: 'Agency agreement',
   listing_contract: 'Listing contract',
   closing_document: 'Closing document',
-  license: 'Realtor license',
+  license: 'Realtor licence',
   other: 'Other',
 };
 
@@ -117,7 +117,7 @@ export default function RealtorDocumentsPage() {
         title="Documents"
         description={
           <>
-            Agency agreements, contracts, and license, {total} file{total === 1 ? '' : 's'}
+            Agency agreements, contracts and licence, {total} file{total === 1 ? '' : 's'}
           </>
         }
         actions={

@@ -8,7 +8,7 @@ import type { VisitorPass } from '@/types/estate';
 import { formatStay } from '@/lib/visitorStay';
 
 const formatTime = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
+  new Intl.DateTimeFormat('en-NG', { hour: '2-digit', minute: '2-digit' }).format(new Date(value));
 
 const initials = (name: string) =>
   name

@@ -106,6 +106,7 @@ export default function ResidentDashboardPage() {
             icon={ReceiptText}
             label="Outstanding dues"
             value={moneyVisible ? formatCurrency(pendingTotal) : '••••••'}
+            subtitle={pendingTotal > 0 ? 'To pay' : 'Nothing owed'}
             accent={pendingTotal > 0 ? 'orange' : 'emerald'}
             compact
           />

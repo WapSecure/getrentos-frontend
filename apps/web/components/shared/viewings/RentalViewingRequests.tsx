@@ -27,6 +27,7 @@ import type { ViewingRequestStatus } from '@/types/landlord';
 import { DateTimeField, isCompleteDateTime } from '@/components/shared/forms/DateTimeField';
 import { preferredSlotValue } from '@/lib/viewingPrefill';
 import { viewingCancelCopy, type ViewingCancelTarget } from '@/lib/viewingCancel';
+import { VIEWING_MAX_HOUR, VIEWING_MIN_HOUR } from '@/lib/viewingSlots';
 
 const FILTERS = [
   { value: 'all', label: 'All' },
@@ -291,6 +292,8 @@ export function RentalViewingRequests({
               value={scheduledAt}
               onChange={setScheduledAt}
               requireFuture
+              minHour={VIEWING_MIN_HOUR}
+              maxHour={VIEWING_MAX_HOUR}
             />
 
             {confirmMutation.isError && (

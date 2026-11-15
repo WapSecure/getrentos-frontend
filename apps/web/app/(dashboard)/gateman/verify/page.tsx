@@ -69,7 +69,7 @@ async function decodeQrFromFile(file: File): Promise<string | null> {
 const INSIDE_PAGE_SIZE = 20;
 
 const formatTime = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
+  new Intl.DateTimeFormat('en-NG', { hour: '2-digit', minute: '2-digit' }).format(new Date(value));
 
 type BlockedWrite = { kind: 'check-in'; code: string } | { kind: 'admit'; pass: VisitorPass };
 

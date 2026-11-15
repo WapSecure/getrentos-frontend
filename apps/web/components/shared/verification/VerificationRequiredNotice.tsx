@@ -20,7 +20,7 @@ const BASE_COPY: Record<
   },
   LICENSE_REQUIRED: {
     message: 'Verify your realtor/agent licence to do this.',
-    cta: 'Verify license',
+    cta: 'Verify licence',
   },
   OWNERSHIP_PROOF_REQUIRED: {
     message: 'This property needs an approved ownership document before it can be listed.',

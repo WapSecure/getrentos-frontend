@@ -212,10 +212,15 @@ function LandlordUnitsPageContent() {
         eyebrow="Portfolio"
         title="Units"
         description={
-          <>
-            {pluralize(totalUnits, 'unit')} across{' '}
-            {pluralize(totalProperties, 'property', 'properties')}
-          </>
+          // Nothing until the counts load: "0 units across 0 properties" read as an empty portfolio.
+          isLoadingUnits ? (
+            'Loading your units…'
+          ) : (
+            <>
+              {pluralize(totalUnits, 'unit')} across{' '}
+              {pluralize(totalProperties, 'property', 'properties')}
+            </>
+          )
         }
         actions={
           <>

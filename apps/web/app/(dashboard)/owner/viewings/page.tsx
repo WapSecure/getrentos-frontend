@@ -32,6 +32,7 @@ import { viewingRequestStatusBadges } from '@/lib/statusBadge';
 import { DateTimeField, isCompleteDateTime } from '@/components/shared/forms/DateTimeField';
 import { VideoCallButton } from '@/components/shared/VideoCallButton';
 import { OwnerSellingNav } from '@/components/shared/navigation/WorkflowNavs';
+import { VIEWING_MAX_HOUR, VIEWING_MIN_HOUR } from '@/lib/viewingSlots';
 
 const FILTERS = [
   { value: 'requested', label: 'To confirm' },
@@ -324,7 +325,14 @@ function BuyerViewings() {
                 choose.
               </p>
             )}
-            <DateTimeField label="New time" value={newTime} onChange={setNewTime} requireFuture />
+            <DateTimeField
+              label="New time"
+              value={newTime}
+              onChange={setNewTime}
+              requireFuture
+              minHour={VIEWING_MIN_HOUR}
+              maxHour={VIEWING_MAX_HOUR}
+            />
           </div>
           <div className="p-4 border-t border-border flex justify-end gap-2">
             <Button variant="ghost" onClick={() => setRescheduling(null)}>

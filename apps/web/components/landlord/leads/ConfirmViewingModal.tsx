@@ -14,6 +14,7 @@ import {
   TimePicker,
 } from '@sureground/ui';
 import type { LandlordLead } from '@/types/landlord';
+import { VIEWING_MAX_HOUR, VIEWING_MIN_HOUR, viewingMinDate } from '@/lib/viewingSlots';
 
 interface ConfirmViewingModalProps {
   lead: LandlordLead | null;
@@ -60,10 +61,15 @@ export const ConfirmViewingModal = ({
 
         <div className="p-4 space-y-4">
           <Field label="Date" required>
-            <DatePicker value={date} onChange={setDate} />
+            <DatePicker value={date} onChange={setDate} min={viewingMinDate()} />
           </Field>
           <Field label="Time" required>
-            <TimePicker value={time} onChange={setTime} />
+            <TimePicker
+              value={time}
+              onChange={setTime}
+              minHour={VIEWING_MIN_HOUR}
+              maxHour={VIEWING_MAX_HOUR}
+            />
           </Field>
           {isError && (
             <Alert variant="danger">Couldn&apos;t confirm the viewing. Please try again.</Alert>
