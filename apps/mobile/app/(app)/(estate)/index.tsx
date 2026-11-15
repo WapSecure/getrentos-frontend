@@ -4,6 +4,7 @@ import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
+  Bell,
   Building2,
   ChevronDown,
   ChevronRight,
@@ -65,6 +66,10 @@ export default function EstateHome() {
     queryFn: () => estateManagerApi.dues(estateId, { status: 'OVERDUE', pageSize: 1 }),
     enabled: !!estateId,
   });
+  const notifications = useQuery({
+    queryKey: qk.estateManager.notifications,
+    queryFn: estateManagerApi.notifications,
+  });
   // Safety is on every plan: the incident count in the Pro stats must not be the only place a panic alarm shows.
   const incidents = useQuery({
     queryKey: qk.estateManager.incidents(estateId),
@@ -91,6 +96,7 @@ export default function EstateHome() {
 
   const locked = free || isUpgradeError(stats.error);
   const late = overdue.data?.total ?? 0;
+  const unread = (notifications.data ?? []).filter((n) => !n.read).length;
   const urgentIncidents =
     incidents.data?.filter(
       (i) => isOpenItem(i.status) && (i.priority === 'critical' || i.priority === 'high')
@@ -99,6 +105,7 @@ export default function EstateHome() {
     void refetch();
     void overdue.refetch();
     void incidents.refetch();
+    void notifications.refetch();
     void stats.refetch();
     void trend.refetch();
     void announcements.refetch();
@@ -132,6 +139,13 @@ export default function EstateHome() {
               icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
             />
           ) : null}
+          <IconButton
+            onPress={() => router.push('/(app)/estate-notifications')}
+            // IconButton already appends ", N unread" from the badge.
+            accessibilityLabel="Notifications"
+            badge={unread}
+            icon={<Bell size={21} color={colors.foreground} />}
+          />
           {estates.length > 1 ? (
             <Pressable
               onPress={() => setSheet('switch')}

@@ -320,7 +320,23 @@ export interface PollDraft {
   options: string[];
 }
 
+/** The manager's own feed: keyed by the caller, not by an estate. */
+export interface EstateNotification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+  actionUrl?: string;
+}
+
 export const estateManagerApi = {
+  notifications: () => apiFetch<EstateNotification[]>('/estate/notifications'),
+  markNotificationRead: (id: string) =>
+    apiFetch<void>(`/estate/notifications/${id}/read`, { method: 'PATCH' }),
+  markAllNotificationsRead: () =>
+    apiFetch<void>('/estate/notifications/read-all', { method: 'POST' }),
   importHouseholds: (estateId: string, file: PickedFile) => {
     const form = new FormData();
     appendFile(form, 'file', file);
