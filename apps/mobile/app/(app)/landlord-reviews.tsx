@@ -69,14 +69,15 @@ export default function LandlordReviews() {
                       </View>
                     </View>
 
-                    {(s?.reviewCount ?? 0) > 0 ? (
+                    {/* Tenants rate you and the home separately; an unrated one is left out, not shown as 0. */}
+                    {s?.averageAsLandlord != null || s?.averagePropertyCondition != null ? (
                       <View style={{ gap: 6 }}>
-                        <Facet label="Communication" value={s?.averageCommunication ?? 0} />
-                        <Facet
-                          label="Property condition"
-                          value={s?.averagePropertyCondition ?? 0}
-                        />
-                        <Facet label="Responsiveness" value={s?.averageResponsiveness ?? 0} />
+                        {s?.averageAsLandlord != null ? (
+                          <Facet label="You as landlord" value={s.averageAsLandlord} />
+                        ) : null}
+                        {s?.averagePropertyCondition != null ? (
+                          <Facet label="Property condition" value={s.averagePropertyCondition} />
+                        ) : null}
                       </View>
                     ) : null}
                   </View>
@@ -151,7 +152,9 @@ function ReviewCard({ review: r }: { review: LandlordReview }) {
         </View>
 
         <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-          {r.tenantName} · {r.propertyName}
+          {[r.tenantName, r.propertyName, r.category === 'PROPERTY' ? 'Rated the home' : 'Rated you']
+            .filter(Boolean)
+            .join(' · ')}
         </Text>
 
         {r.comment ? (

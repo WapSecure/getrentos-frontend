@@ -263,9 +263,8 @@ export interface TenantReview {
   tenantName: string;
   propertyName: string;
   rating: number;
-  communication: number;
-  propertyCondition: number;
-  responsiveness: number;
+  /** LANDLORD: how the tenant rated you. PROPERTY: how they rated the home. */
+  category: string;
   comment: string;
   createdAt: string;
 }
@@ -273,9 +272,11 @@ export interface TenantReview {
 export interface LandlordReviewSummary {
   averageRating: number;
   reviewCount: number;
-  averageCommunication: number;
-  averagePropertyCondition: number;
-  averageResponsiveness: number;
+  /** Null until a tenant has rated that. */
+  averageAsLandlord: number | null;
+  averagePropertyCondition: number | null;
+  landlordReviewCount: number;
+  propertyReviewCount: number;
 }
 
 export interface LandlordMaintenanceSummary {
