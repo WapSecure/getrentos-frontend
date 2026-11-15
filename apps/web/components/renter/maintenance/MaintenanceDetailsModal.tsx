@@ -186,7 +186,7 @@ export const MaintenanceDetailsModal = ({
                       weekday: 'long',
                       day: 'numeric',
                       month: 'long',
-                      hour: 'numeric',
+                      hour: '2-digit',
                       minute: '2-digit',
                     })}
                   </span>

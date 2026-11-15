@@ -200,7 +200,7 @@ export const MaintenanceCard = ({
                       weekday: 'short',
                       day: 'numeric',
                       month: 'short',
-                      hour: 'numeric',
+                      hour: '2-digit',
                       minute: '2-digit',
                     })}
                   </span>

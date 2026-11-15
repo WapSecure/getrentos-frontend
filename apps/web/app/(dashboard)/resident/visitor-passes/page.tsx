@@ -51,7 +51,7 @@ const formatDate = (value: string) =>
   new Intl.DateTimeFormat('en-NG', {
     day: 'numeric',
     month: 'short',
-    hour: 'numeric',
+    hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(value));
 
