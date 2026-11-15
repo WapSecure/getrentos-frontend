@@ -247,20 +247,29 @@ export const PropertyDetailModal = ({
               >
                 Request viewing
               </Button>
-              <Button
-                variant="primary"
-                icon={<Handshake className="w-4 h-4" />}
-                onClick={() =>
-                  openOffer && onViewOffer ? onViewOffer(openOffer.id) : onMakeOffer()
-                }
-                disabled={!openOffer && listing?.acceptingOffers === false}
-              >
-                {openOffer
-                  ? 'View your offer'
-                  : listing?.acceptingOffers === false
-                    ? 'Under offer'
-                    : 'Make an offer'}
-              </Button>
+              {!openOffer && listing?.acceptingOffers === false ? (
+                // A greyed-out primary button read as clickable; say why there is no offer button instead.
+                <p
+                  role="status"
+                  className="flex items-start gap-2 rounded-lg bg-secondary px-3 py-2.5 text-sm text-muted-foreground"
+                >
+                  <Handshake className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span>
+                    The seller has accepted another offer. You can still message them or book a
+                    viewing in case it falls through.
+                  </span>
+                </p>
+              ) : (
+                <Button
+                  variant="primary"
+                  icon={<Handshake className="w-4 h-4" />}
+                  onClick={() =>
+                    openOffer && onViewOffer ? onViewOffer(openOffer.id) : onMakeOffer()
+                  }
+                >
+                  {openOffer ? 'View your offer' : 'Make an offer'}
+                </Button>
+              )}
             </div>
           </aside>
         </div>
