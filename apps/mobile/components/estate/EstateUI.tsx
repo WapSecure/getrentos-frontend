@@ -622,7 +622,9 @@ function AnnouncementForm({
           <Text variant="caption" color="mutedForeground">
             Residents with the app always get a notification. SMS and WhatsApp also go to every
             active household with a phone number on file
-            {households ? ` (${households.toLocaleString('en-NG')} households in all)` : ''}; a long
+            {households
+              ? ` (${households.toLocaleString('en-NG')} ${households === 1 ? 'household' : 'households'} in all)`
+              : ''}; a long
             notice is shortened for SMS.
           </Text>
         </View>

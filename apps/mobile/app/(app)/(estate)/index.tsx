@@ -10,6 +10,7 @@ import {
   CircleAlert,
   Megaphone,
   MessageCircleQuestion,
+  ShieldAlert,
   SlidersHorizontal,
   Sparkles,
   UserPlus,
@@ -45,7 +46,7 @@ import {
 } from '@/components/estate/EstateUI';
 import { useEstate } from '@/hooks/useEstate';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
-import { estateManagerApi, isFreeEstate } from '@/lib/api/estateManager';
+import { estateManagerApi, isFreeEstate, isOpenItem } from '@/lib/api/estateManager';
 import { qk } from '@/lib/query/keys';
 
 type SheetKind = 'switch' | 'household' | 'announce' | null;
@@ -62,6 +63,12 @@ export default function EstateHome() {
   const overdue = useQuery({
     queryKey: qk.estateManager.attention(estateId),
     queryFn: () => estateManagerApi.dues(estateId, { status: 'OVERDUE', pageSize: 1 }),
+    enabled: !!estateId,
+  });
+  // Safety is on every plan: the incident count in the Pro stats must not be the only place a panic alarm shows.
+  const incidents = useQuery({
+    queryKey: qk.estateManager.incidents(estateId),
+    queryFn: () => estateManagerApi.incidents(estateId),
     enabled: !!estateId,
   });
   // Money totals are Pro: don't ask for what the estate hasn't bought.
@@ -84,9 +91,14 @@ export default function EstateHome() {
 
   const locked = free || isUpgradeError(stats.error);
   const late = overdue.data?.total ?? 0;
+  const urgentIncidents =
+    incidents.data?.filter(
+      (i) => isOpenItem(i.status) && (i.priority === 'critical' || i.priority === 'high')
+    ).length ?? 0;
   const refresh = () => {
     void refetch();
     void overdue.refetch();
+    void incidents.refetch();
     void stats.refetch();
     void trend.refetch();
     void announcements.refetch();
@@ -169,8 +181,41 @@ export default function EstateHome() {
   }
 
   return (
-    <Screen refreshing={isRefetching || overdue.isRefetching} onRefresh={refresh}>
+    <Screen
+      refreshing={isRefetching || overdue.isRefetching || incidents.isRefetching}
+      onRefresh={refresh}
+    >
       {header}
+
+      {urgentIncidents ? (
+        <PressableScale
+          onPress={() => router.push('/(app)/estate-incidents')}
+          accessibilityRole="button"
+          accessibilityLabel={`${urgentIncidents} urgent ${urgentIncidents === 1 ? 'incident is' : 'incidents are'} open. Review`}
+        >
+          <Card
+            elevated
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing.md,
+              borderWidth: 1,
+              borderColor: colors.destructive,
+            }}
+          >
+            <ShieldAlert size={20} color={colors.destructive} />
+            <View style={{ flex: 1 }}>
+              <Text variant="bodyStrong">
+                {urgentIncidents} urgent {urgentIncidents === 1 ? 'incident' : 'incidents'} open
+              </Text>
+              <Text variant="caption" color="mutedForeground">
+                High or critical reports waiting on the office
+              </Text>
+            </View>
+            <ChevronRight size={18} color={colors.mutedForeground} />
+          </Card>
+        </PressableScale>
+      ) : null}
 
       {late ? (
         <PressableScale
