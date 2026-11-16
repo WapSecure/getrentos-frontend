@@ -9,6 +9,14 @@ import { formatClock } from '@sureground/shared';
 const formatDateTime = (value: string) =>
   formatClock(new Date(value), { day: 'numeric', month: 'short', minute: '2-digit' });
 
+// A booking that ends the same day reads "17 Nov, 6:00 PM – 7:00 PM", as on mobile.
+const formatRange = (startsAt: string, endsAt: string) => {
+  const start = new Date(startsAt);
+  const end = new Date(endsAt);
+  const sameDay = start.toDateString() === end.toDateString();
+  return `${formatDateTime(startsAt)} – ${sameDay ? formatClock(end) : formatDateTime(endsAt)}`;
+};
+
 interface AmenityBookingRowProps {
   booking: AmenityBooking;
   showHousehold?: boolean;
@@ -41,9 +49,7 @@ export const AmenityBookingRow = ({
               {booking.unitLabel} · {booking.residentName}
             </p>
           )}
-          <p className="tabular-nums">
-            {formatDateTime(booking.startsAt)} – {formatDateTime(booking.endsAt)}
-          </p>
+          <p className="tabular-nums">{formatRange(booking.startsAt, booking.endsAt)}</p>
         </>
       }
       actions={
