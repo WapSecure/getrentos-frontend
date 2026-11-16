@@ -102,19 +102,20 @@ export default function RoleSelectionPage() {
 
   return (
     <div className="relative flex h-dvh flex-col overflow-hidden bg-background">
-      {!social && (
-        <Button
-          variant="outline"
-          rounded="lg"
-          onClick={() => goToDetails(null)}
-          icon={<ArrowLeft className="h-4 w-4" aria-hidden="true" />}
-          className="fixed left-4 top-4 z-30 min-h-11 bg-card/90 px-3 font-medium text-muted-foreground backdrop-blur sm:left-6 sm:top-6"
-        >
-          Back
-        </Button>
-      )}
-
-      <div className="fixed right-4 top-4 z-30 sm:right-6 sm:top-6">
+      <div className="flex shrink-0 items-center justify-between gap-3 px-4 pt-4 sm:px-6 sm:pt-6">
+        {!social ? (
+          <Button
+            variant="outline"
+            rounded="lg"
+            onClick={() => goToDetails(null)}
+            icon={<ArrowLeft className="h-4 w-4" aria-hidden="true" />}
+            className="min-h-11 px-3 font-medium text-muted-foreground"
+          >
+            Back
+          </Button>
+        ) : (
+          <span />
+        )}
         <ThemeToggle />
       </div>
 

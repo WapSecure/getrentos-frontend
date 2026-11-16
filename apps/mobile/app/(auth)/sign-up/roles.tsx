@@ -20,6 +20,7 @@ import {
   LinkButton,
   PasswordField,
   PressableScale,
+  RadioGroup,
   Text,
   useReducedMotion,
   useTheme,
@@ -54,7 +55,7 @@ export default function SignUpRoles() {
     selectedRoles,
     multiRole,
     toggleRole,
-    setMultiRole,
+    setPrimaryRole,
     createAccount,
     reset,
     setIssue,
@@ -117,48 +118,12 @@ export default function SignUpRoles() {
     <AuthScaffold
       kicker={social ? 'Almost there' : 'Step 3 of 3'}
       title="How will you use Sureground?"
-      subtitle="Pick what fits today. You can add more later, with supporting documents."
+      subtitle="Pick all that apply. We ask for documents only when you list, pay or sign."
       progress={social ? undefined : 1}
       progressLabel="Sign-up step 3 of 3"
       onBack={social ? undefined : () => goBack()}
       footer={
         <>
-          <PressableScale
-            haptic
-            onPress={() => setMultiRole(!multiRole)}
-            accessibilityRole="switch"
-            accessibilityLabel="I’ll use it in more than one way"
-            accessibilityState={{ checked: multiRole }}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              minHeight: 44,
-            }}
-          >
-            <Text variant="callout" color="mutedForeground">
-              I’ll use it in more than one way
-            </Text>
-            <View
-              style={{
-                width: 46,
-                height: 28,
-                borderRadius: 14,
-                padding: 3,
-                backgroundColor: multiRole ? colors.primary : colors.border,
-                alignItems: multiRole ? 'flex-end' : 'flex-start',
-              }}
-            >
-              <View
-                style={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: 11,
-                  backgroundColor: colors.card,
-                }}
-              />
-            </View>
-          </PressableScale>
           <Button label={social ? 'Continue' : 'Create account'} loading={busy} onPress={submit} />
           <FormAlert message={error} />
         </>
@@ -285,6 +250,17 @@ export default function SignUpRoles() {
             </Animated.View>
           );
         })}
+        {selectedRoles.length > 1 ? (
+          <RadioGroup
+            label="Which do you want to start with?"
+            value={selectedRoles[0]}
+            onChange={(id) => setPrimaryRole(id)}
+            options={selectedRoles.map((id) => ({
+              value: id,
+              label: SIGNUP_ROLES.find((r) => r.id === id)?.name ?? id,
+            }))}
+          />
+        ) : null}
         <Text variant="caption" color="mutedForeground">
           {REALTOR_VS_AGENT}
         </Text>
