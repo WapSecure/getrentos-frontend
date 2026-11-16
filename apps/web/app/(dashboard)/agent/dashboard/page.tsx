@@ -10,6 +10,8 @@ import { useQuery } from '@tanstack/react-query';
 import { agentService, mapAgentTask } from '@/services/agentService';
 import { agentKeys } from '@/lib/queryKeys';
 import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
+import { GetStartedCard } from '@/components/shared/dashboard/GetStartedCard';
+import { ClipboardList, ShieldCheck } from '@sureground/icons';
 import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
@@ -27,7 +29,7 @@ export default function AgentDashboardPage() {
     queryFn: () => unwrap(agentService.getDashboard()),
   });
 
-  const firstName = user?.fullName?.split(' ')[0] || 'User';
+  const firstName = user?.fullName?.trim().split(/\s+/)[0] ?? '';
   const currentHour = new Date().getHours();
   let greeting = 'Good morning';
   if (currentHour >= 12 && currentHour < 18) greeting = 'Good afternoon';
@@ -40,6 +42,24 @@ export default function AgentDashboardPage() {
         verificationHref={ROUTES.AGENT_VERIFICATION}
         unlocks="run verification visits and receive payouts"
         className="mb-6"
+      />
+      <GetStartedCard
+        id="agent"
+        description="How work reaches you as an agent."
+        steps={[
+          {
+            title: 'Tasks come from owners',
+            body: 'A landlord or owner adds you as their agent and assigns visits, inspections or repairs. Each one appears in Tasks with the property and what to do.',
+            icon: ClipboardList,
+            href: ROUTES.AGENT_TASKS,
+          },
+          {
+            title: 'Verify your ID',
+            body: 'You need a checked ID to run verification visits and receive payouts.',
+            icon: ShieldCheck,
+            href: ROUTES.AGENT_VERIFICATION,
+          },
+        ]}
       />
       <AttentionFeed persona="agent" />
 

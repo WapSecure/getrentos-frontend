@@ -6,3 +6,4 @@ export * from './authService';
 export * from './stepUp';
 export * from './installId';
 export * from './sessionRoutes';
+export * from './authErrors';

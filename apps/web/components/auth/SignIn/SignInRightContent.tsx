@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Mail, Phone, Fingerprint } from '@sureground/icons';
 import { Logo } from '@/components/ui/Logo';
@@ -26,9 +26,6 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
   const router = useRouter();
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [loginAttempts, setLoginAttempts] = useState(0);
-  const [isLocked, setIsLocked] = useState(false);
-  const [lockoutTimer, setLockoutTimer] = useState<number | null>(null);
   // Post-login destination from `?next=`; only same-origin paths are accepted.
   // The server renders without the query string, so hydrate from an empty one and only then read the real URL.
   const search = useSyncExternalStore(
@@ -39,33 +36,8 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
   const nextPath = useMemo(() => safeNextPath(new URLSearchParams(search).get('next')), [search]);
   const fromInvite = new URLSearchParams(search).get('reason') === 'invite';
 
-  useEffect(() => {
-    if (isLocked && lockoutTimer && lockoutTimer > 0) {
-      const timer = setTimeout(() => {
-        setLockoutTimer(lockoutTimer - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else if (isLocked && lockoutTimer === 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setIsLocked(false);
-      setLoginAttempts(0);
-      setLockoutTimer(null);
-    }
-  }, [isLocked, lockoutTimer]);
-
   const showToast = (message: string, variant: ToastVariant) => {
     toast.show(message, variant);
-  };
-
-  const handleLoginAttempt = () => {
-    const newAttempts = loginAttempts + 1;
-    setLoginAttempts(newAttempts);
-
-    if (newAttempts >= 5) {
-      setIsLocked(true);
-      setLockoutTimer(15 * 60);
-      showToast('Too many failed attempts. Account locked for 15 minutes.', 'error');
-    }
   };
 
   const handleBack = () => {
@@ -80,9 +52,6 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
             isLoading={isLoading}
             setIsLoading={setIsLoading}
             showToast={showToast}
-            onLoginAttempt={handleLoginAttempt}
-            isLocked={isLocked}
-            lockoutTimer={lockoutTimer}
             nextPath={nextPath}
           />
         );
@@ -92,9 +61,6 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
             isLoading={isLoading}
             setIsLoading={setIsLoading}
             showToast={showToast}
-            onLoginAttempt={handleLoginAttempt}
-            isLocked={isLocked}
-            lockoutTimer={lockoutTimer}
             nextPath={nextPath}
           />
         );
@@ -151,15 +117,6 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
           </div>
         )}
 
-        {isLocked && lockoutTimer && (
-          <div className="mb-4 p-3 rounded-lg bg-warning-subtle border border-warning/20 text-warning text-sm flex items-center gap-2">
-            <span>
-              Account temporarily locked. Try again in {Math.floor(lockoutTimer / 60)}:
-              {(lockoutTimer % 60).toString().padStart(2, '0')}
-            </span>
-          </div>
-        )}
-
         <div className="mb-7">
           <AuthMethodTabs
             label="Choose a sign-in method"
@@ -176,7 +133,7 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
         {renderMethodComponent()}
 
         <div className="mt-5">
-          <OAuthSignIn />
+          <OAuthSignIn nextPath={nextPath} />
         </div>
 
         <div className="mt-6 text-center">

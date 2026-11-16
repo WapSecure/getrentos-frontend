@@ -9,6 +9,9 @@ import { saveAuthSession } from '@/lib/authStorage';
 import { ROUTES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';
 import { apiFetch } from '@/lib/apiClient';
 import { authService } from '@/services/authService';
+import { oauthErrorMessage } from '@sureground/shared';
+import { takeSignupNext } from '@/lib/nextPath';
+import { markSocialSignup } from '@/lib/socialSignup';
 
 interface MeResponse {
   id: string;
@@ -41,6 +44,7 @@ function OAuthCallbackContent() {
   const [error, setError] = useState<string | null>(null);
   const challenge = searchParams.get('challenge_token');
   const refusal = searchParams.get('error');
+  const isNewUser = searchParams.get('new_user') === '1';
   const [code, setCode] = useState('');
   const [verifying, setVerifying] = useState(false);
 
@@ -54,7 +58,13 @@ function OAuthCallbackContent() {
       },
       false
     );
-    router.replace(getDashboardRoute(primaryRoleId));
+    // A brand-new Google account still has to say how it will use Sureground.
+    if (isNewUser) {
+      markSocialSignup();
+      router.replace(ROUTES.ROLE_SELECTION);
+      return;
+    }
+    router.replace(takeSignupNext() ?? getDashboardRoute(primaryRoleId));
   };
 
   const verifyCode = async () => {
@@ -74,7 +84,7 @@ function OAuthCallbackContent() {
   useEffect(() => {
     if (refusal) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setError(refusal);
+      setError(oauthErrorMessage(refusal));
       return;
     }
     if (challenge) return;
@@ -83,7 +93,7 @@ function OAuthCallbackContent() {
     const accessToken = searchParams.get('access_token');
 
     if (!accessToken) {
-      setError('OAuth sign-in failed: missing token. Please try again.');
+      setError(oauthErrorMessage('OAUTH_FAILED'));
       return;
     }
 
@@ -94,7 +104,7 @@ function OAuthCallbackContent() {
         });
         openSession(accessToken, me);
       } catch {
-        setError('Could not complete OAuth sign-in. Please try again.');
+        setError(oauthErrorMessage('OAUTH_FAILED'));
       }
     };
 
@@ -140,7 +150,7 @@ function OAuthCallbackContent() {
             size="lg"
             rounded="lg"
           >
-            Verify & sign in
+            Verify and sign in
           </Button>
           <a
             href={ROUTES.LOGIN}

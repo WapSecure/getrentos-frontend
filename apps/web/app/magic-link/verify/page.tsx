@@ -1,7 +1,7 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Loader2, AlertCircle } from '@sureground/icons';
 import { saveAuthSession } from '@/lib/authStorage';
 import { ROUTES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';
@@ -11,12 +11,17 @@ import { Logo } from '@/components/ui/Logo';
 
 function MagicLinkVerifyContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
+  const started = useRef(false);
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    const redirectTo = searchParams.get('redirectTo');
+    // The token is single-use: read it once, then take it out of the address bar and history.
+    if (started.current) return;
+    started.current = true;
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const redirectTo = params.get('redirectTo');
+    if (window.location.search) window.history.replaceState(null, '', window.location.pathname);
 
     if (!token) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -54,7 +59,7 @@ function MagicLinkVerifyContent() {
     };
 
     void verify();
-  }, [router, searchParams]);
+  }, [router]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6">

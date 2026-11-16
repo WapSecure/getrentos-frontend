@@ -1,6 +1,6 @@
 export const AUTH_CONSTANTS = {
   OTP_LENGTH: 6,
-  OTP_EXPIRY_MINUTES: 5,
+  OTP_EXPIRY_MINUTES: 10,
   RESEND_OTP_DELAY_SECONDS: 30,
   // Matches the API's rule: 12 to 128, not in a known breach.
   PASSWORD_MIN_LENGTH: 12,

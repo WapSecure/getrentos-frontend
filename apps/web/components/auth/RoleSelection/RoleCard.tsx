@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
   Check,
   Home,
@@ -12,6 +11,7 @@ import {
   Shield,
   Briefcase,
 } from '@sureground/icons';
+import { cn } from '@sureground/shared';
 import { ROLES } from '@/lib/constants/auth';
 
 const iconMap = {
@@ -25,74 +25,78 @@ const iconMap = {
   Briefcase: Briefcase,
 };
 
+// What each role will be asked for later, not something already done.
+const REQUIREMENT_LABELS: Record<string, string> = {
+  identity: 'Needs ID check',
+  property: 'Needs property documents',
+  license: 'Needs licence',
+};
+
 interface RoleCardProps {
   role: (typeof ROLES)[keyof typeof ROLES];
   isSelected: boolean;
-  onSelect: () => void;
-  onDeselect: () => void;
-  disabled?: boolean;
+  onToggle: () => void;
 }
 
-export const RoleCard = ({ role, isSelected, onSelect, onDeselect, disabled }: RoleCardProps) => {
+export const RoleCard = ({ role, isSelected, onToggle }: RoleCardProps) => {
   const Icon = iconMap[role.icon as keyof typeof iconMap];
-
-  const handleClick = () => {
-    if (disabled) return;
-    if (isSelected) {
-      onDeselect();
-    } else {
-      onSelect();
-    }
-  };
+  const nameId = `role-${role.id}-name`;
+  const descriptionId = `role-${role.id}-description`;
 
   return (
-    <motion.button
-      onClick={handleClick}
-      whileHover={!disabled ? { scale: 1.02 } : {}}
-      whileTap={!disabled ? { scale: 0.98 } : {}}
-      className={`relative w-full p-6 rounded-2xl border-2 transition-all text-left ${
-        disabled ? 'opacity-50 cursor-not-allowed' : ''
-      } ${
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={isSelected}
+      aria-labelledby={nameId}
+      aria-describedby={descriptionId}
+      onClick={onToggle}
+      className={cn(
+        'relative h-full w-full rounded-2xl border p-6 text-left transition-[border-color,background-color,box-shadow] duration-150',
+        'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20',
         isSelected
-          ? 'border-primary bg-primary/5 shadow-lg'
+          ? 'border-primary bg-primary/[0.04] shadow-[inset_0_0_0_1px_var(--primary)]'
           : 'border-border bg-card hover:border-primary/50'
-      }`}
-    >
-      {isSelected && (
-        <div className="absolute top-4 right-4">
-          <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-            <Check className="w-3 h-3 text-background" />
-          </div>
-        </div>
       )}
-
-      <div
-        className={`w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-4 transition-colors ${
-          isSelected ? 'bg-primary/20' : ''
-        }`}
+    >
+      <span
+        aria-hidden="true"
+        className={cn(
+          'absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-md border transition-colors',
+          isSelected ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card'
+        )}
       >
-        <Icon className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
-      </div>
+        {isSelected && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
+      </span>
 
-      <h3
-        className={`text-lg font-semibold mb-1 ${isSelected ? 'text-primary' : 'text-foreground'}`}
+      <span
+        aria-hidden="true"
+        className={cn(
+          'mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-colors',
+          isSelected ? 'bg-primary/15' : 'bg-secondary'
+        )}
       >
+        <Icon className={cn('h-6 w-6', isSelected ? 'text-primary' : 'text-muted-foreground')} />
+      </span>
+
+      <span id={nameId} className="mb-1 block pr-8 text-lg font-semibold text-foreground">
         {role.name}
-      </h3>
-      <p className="text-sm text-muted-foreground">{role.description}</p>
-
-      <div className="mt-3 flex flex-wrap gap-1">
-        {role.requiresVerification.map((req) => (
-          <span
-            key={req}
-            className="text-xs px-2 py-0.5 bg-secondary rounded-full text-muted-foreground"
-          >
-            {req === 'identity' && 'ID verified'}
-            {req === 'property' && 'Property docs'}
-            {req === 'license' && 'Licence'}
+      </span>
+      <span id={descriptionId} className="block">
+        <span className="block text-sm text-muted-foreground">{role.description}</span>
+        {role.requiresVerification.length > 0 && (
+          <span className="mt-3 flex flex-wrap gap-1">
+            {role.requiresVerification.map((req) => (
+              <span
+                key={req}
+                className="rounded-md bg-secondary px-2 py-0.5 text-xs text-muted-foreground"
+              >
+                {REQUIREMENT_LABELS[req]}
+              </span>
+            ))}
           </span>
-        ))}
-      </div>
-    </motion.button>
+        )}
+      </span>
+    </button>
   );
 };

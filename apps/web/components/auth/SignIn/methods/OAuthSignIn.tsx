@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@sureground/ui';
 import { authService } from '@/services/authService';
+import { rememberSignupNext } from '@/lib/nextPath';
 
 function GoogleMark() {
   return (
@@ -32,8 +33,10 @@ function GoogleMark() {
   );
 }
 
-export const OAuthSignIn = () => {
+export const OAuthSignIn = ({ nextPath }: { nextPath?: string | null }) => {
   const handleGoogle = () => {
+    // The API's redirect cannot carry `next`, so the tab keeps it for the callback.
+    rememberSignupNext(nextPath);
     window.location.href = authService.oauthUrl('google');
   };
 

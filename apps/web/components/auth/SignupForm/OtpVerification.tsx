@@ -1,116 +1,129 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { Button } from '@sureground/ui';
-import { CheckCircle, RefreshCw, ArrowRight } from '@sureground/icons';
+import { RefreshCw, ArrowRight } from '@sureground/icons';
 import { AUTH_CONSTANTS } from '@/lib/constants/auth';
 import { OtpInput } from '@/components/auth/OtpInput';
 
 interface OtpVerificationProps {
-  identifier: string;
-  method: 'email' | 'phone' | 'whatsapp';
-  onSubmit: (otp: string) => Promise<void>;
-  onResend: () => Promise<void>;
+  channel: 'email' | 'phone' | 'whatsapp';
+  onSubmit: (otp: string) => Promise<boolean>;
+  /** Resolves true only when a new code went out. */
+  onResend: () => Promise<boolean>;
   isLoading: boolean;
+  isResending: boolean;
 }
 
+const emptyCode = () => Array<string>(AUTH_CONSTANTS.OTP_LENGTH).fill('');
+// After this many wrong codes the person can ask for a new one straight away.
+const FAILURES_BEFORE_RESEND = 5;
+
 export const OtpVerification = ({
-  identifier,
-  method,
+  channel,
   onSubmit,
   onResend,
   isLoading,
+  isResending,
 }: OtpVerificationProps) => {
-  const [otp, setOtp] = useState<string[]>(Array(AUTH_CONSTANTS.OTP_LENGTH).fill(''));
-  const [timeLeft, setTimeLeft] = useState(AUTH_CONSTANTS.OTP_EXPIRY_MINUTES * 60);
-  const [canResend, setCanResend] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const hintId = useId();
+  const [otp, setOtp] = useState<string[]>(emptyCode);
+  const [secondsLeft, setSecondsLeft] = useState<number>(AUTH_CONSTANTS.RESEND_OTP_DELAY_SECONDS);
+  const [failures, setFailures] = useState(0);
+  const [focusSignal, setFocusSignal] = useState(0);
+  const [invalid, setInvalid] = useState(false);
 
   useEffect(() => {
-    if (timeLeft > 0) {
-      timerRef.current = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => {
-        if (timerRef.current) clearTimeout(timerRef.current);
-      };
-    }
-  }, [timeLeft]);
+    if (secondsLeft <= 0) return;
+    const timer = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [secondsLeft]);
 
-  useEffect(() => {
-    if (timeLeft === 0) {
-      setCanResend(true);
-    }
-  }, [timeLeft]);
+  const canResend = secondsLeft <= 0 || failures >= FAILURES_BEFORE_RESEND;
 
-  const handleSubmit = () => {
-    const otpValue = otp.join('');
-    if (otpValue.length === AUTH_CONSTANTS.OTP_LENGTH) {
-      onSubmit(otpValue);
+  const verify = async (code: string) => {
+    if (code.length !== AUTH_CONSTANTS.OTP_LENGTH || isLoading) return;
+    setInvalid(false);
+    const ok = await onSubmit(code);
+    if (!ok) {
+      setFailures((n) => n + 1);
+      setInvalid(true);
+      setOtp(emptyCode());
+      setFocusSignal((n) => n + 1);
     }
   };
 
   const handleResend = async () => {
-    if (canResend) {
-      await onResend();
-      setTimeLeft(AUTH_CONSTANTS.OTP_EXPIRY_MINUTES * 60);
-      setCanResend(false);
-      setOtp(Array(AUTH_CONSTANTS.OTP_LENGTH).fill(''));
+    if (!canResend || isResending) return;
+    const sent = await onResend();
+    if (sent) {
+      setSecondsLeft(AUTH_CONSTANTS.RESEND_OTP_DELAY_SECONDS);
+      setFailures(0);
+      setInvalid(false);
+      setOtp(emptyCode());
+      setFocusSignal((n) => n + 1);
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
-          <CheckCircle className="w-6 h-6 text-primary" />
-        </div>
-        <h3 className="text-lg font-semibold text-foreground mb-1">
-          Verify your {method === 'whatsapp' ? 'WhatsApp' : method}
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          We sent a verification code to your{' '}
-          <span className="font-medium text-foreground">
-            {method === 'whatsapp' ? 'WhatsApp' : method}
-          </span>{' '}
-          at <span className="font-medium text-foreground">{identifier}</span>
-        </p>
-      </div>
+    <form
+      method="post"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void verify(otp.join(''));
+      }}
+      className="space-y-6"
+    >
+      <OtpInput
+        value={otp}
+        onChange={(next) => {
+          setOtp(next);
+          if (invalid) setInvalid(false);
+        }}
+        onComplete={(code) => void verify(code)}
+        disabled={isLoading}
+        autoFocus
+        invalid={invalid}
+        focusSignal={focusSignal}
+        label="Verification code, 6 digits"
+        describedBy={hintId}
+      />
 
-      <OtpInput value={otp} onChange={setOtp} disabled={isLoading} />
-
-      <div className="text-center">
-        {!canResend ? (
-          <p className="text-sm text-muted-foreground">Resend code in {formatTime(timeLeft)}</p>
-        ) : (
-          <Button
-            variant="link"
-            onClick={handleResend}
-            disabled={isLoading}
-            icon={<RefreshCw className="w-3 h-3" />}
-          >
-            Resend code
-          </Button>
-        )}
-      </div>
+      <p id={hintId} className="text-center text-sm text-muted-foreground">
+        The code expires in {AUTH_CONSTANTS.OTP_EXPIRY_MINUTES} minutes.
+        {channel === 'email' ? ' Not there? Check your spam folder.' : ''}
+      </p>
 
       <Button
-        onClick={handleSubmit}
-        disabled={otp.join('').length !== AUTH_CONSTANTS.OTP_LENGTH}
-        isLoading={isLoading}
+        type="submit"
+        isLoading={isLoading && !isResending}
         fullWidth
         size="lg"
         rounded="lg"
-        icon={<ArrowRight className="w-4 h-4" />}
+        icon={<ArrowRight className="h-4 w-4" aria-hidden="true" />}
         iconPosition="right"
       >
-        Verify & continue
+        Verify and continue
       </Button>
-    </div>
+
+      <div className="flex min-h-11 items-center justify-center">
+        {canResend ? (
+          <Button
+            type="button"
+            variant="ghost"
+            rounded="lg"
+            onClick={() => void handleResend()}
+            isLoading={isResending}
+            icon={<RefreshCw className="h-4 w-4" aria-hidden="true" />}
+          >
+            Send a new code
+          </Button>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            You can ask for a new code in {secondsLeft} seconds
+          </p>
+        )}
+      </div>
+    </form>
   );
 };

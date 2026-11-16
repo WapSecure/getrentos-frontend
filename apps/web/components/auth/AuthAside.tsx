@@ -33,9 +33,14 @@ const COPY = {
     lead: 'Your viewings, offers, payments and messages are where you left them.',
   },
   signup: {
-    eyebrow: 'Create an account',
+    eyebrow: 'Why Sureground',
     title: 'Property you can check before you commit',
     lead: 'One free account to search, book viewings, make offers and pay through Sureground Payment Protection.',
+  },
+  signupCode: {
+    eyebrow: 'Keeping your account yours',
+    title: 'A quick check that the address is yours',
+    lead: 'The code shows the email or phone belongs to you, so nobody else can use it to sign in.',
   },
   reset: {
     eyebrow: 'Account recovery',

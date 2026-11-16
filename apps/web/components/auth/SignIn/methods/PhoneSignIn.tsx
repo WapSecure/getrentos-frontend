@@ -45,21 +45,10 @@ interface PhoneSignInProps {
   isLoading: boolean;
   setIsLoading: (value: boolean) => void;
   showToast: (message: string, variant: ToastVariant) => void;
-  onLoginAttempt: () => void;
-  isLocked: boolean;
-  lockoutTimer: number | null;
   nextPath?: string | null;
 }
 
-export const PhoneSignIn = ({
-  isLoading,
-  setIsLoading,
-  showToast,
-  onLoginAttempt,
-  isLocked,
-  lockoutTimer,
-  nextPath,
-}: PhoneSignInProps) => {
+export const PhoneSignIn = ({ isLoading, setIsLoading, showToast, nextPath }: PhoneSignInProps) => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -143,11 +132,6 @@ export const PhoneSignIn = ({
   }, [setValue, showToast]);
 
   const onSubmit = async (data: PhoneFormData) => {
-    if (isLocked) {
-      showToast(`Too many failed attempts. Please try again in ${lockoutTimer} seconds.`, 'error');
-      return;
-    }
-
     setIsLoading(true);
     const response = await loginMutation.mutateAsync(data);
 
@@ -163,7 +147,6 @@ export const PhoneSignIn = ({
       finishLogin(response.data, data.identifier);
       showToast('Successfully signed in! Redirecting...', 'success');
     } else {
-      onLoginAttempt();
       showToast(response.message || 'Invalid phone number or password. Please try again.', 'error');
     }
 
@@ -272,7 +255,7 @@ export const PhoneSignIn = ({
             variant="primary"
             size="lg"
             fullWidth
-            disabled={!isValid || isLoading || loginMutation.isPending || isLocked}
+            disabled={!isValid || isLoading || loginMutation.isPending}
             isLoading={isLoading || loginMutation.isPending}
           >
             <LogIn className="w-4 h-4" />
