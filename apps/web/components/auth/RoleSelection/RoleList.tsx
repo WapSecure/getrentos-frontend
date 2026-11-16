@@ -57,16 +57,20 @@ function RoleRow({
       data-role-row=""
       onClick={onToggle}
       className={cn(
-        'flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-150 motion-reduce:transition-none',
+        'relative flex min-h-16 w-full items-center gap-3.5 px-4 py-3 text-left transition-colors duration-200 motion-reduce:transition-none',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40',
+        'before:absolute before:inset-y-3 before:left-0 before:w-[3px] before:rounded-r-full before:bg-primary before:transition-opacity before:duration-200 motion-reduce:before:transition-none',
         selected
-          ? 'bg-primary/[0.06] hover:bg-primary/[0.09] active:bg-primary/[0.12]'
-          : 'bg-card hover:bg-secondary/60 active:bg-secondary'
+          ? 'bg-primary/[0.035] before:opacity-100 hover:bg-primary/[0.06] active:bg-primary/[0.08]'
+          : 'bg-card before:opacity-0 hover:bg-secondary/40 active:bg-secondary/70'
       )}
     >
       <span
         aria-hidden="true"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary"
+        className={cn(
+          'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-200 motion-reduce:transition-none',
+          selected ? 'bg-primary/10 ring-1 ring-inset ring-primary/15' : 'bg-secondary/70'
+        )}
       >
         <RoleIcon
           role={role}
@@ -85,7 +89,9 @@ function RoleRow({
         aria-hidden="true"
         className={cn(
           'flex h-5 w-5 shrink-0 items-center justify-center rounded-[5px] border transition-colors duration-150 motion-reduce:transition-none',
-          selected ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card'
+          selected
+            ? 'border-primary bg-primary text-primary-foreground shadow-xs'
+            : 'border-border/80 bg-card'
         )}
       >
         <motion.span
@@ -140,7 +146,7 @@ export const RoleList = forwardRef<HTMLDivElement, RoleListProps>(function RoleL
             <h2 id={headingId} className="mb-2 px-1 text-sm font-semibold text-muted-foreground">
               {group.title}
             </h2>
-            <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
+            <div className="divide-y divide-border/60 overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm">
               {group.roles.map((id) => {
                 const role = roleById(id);
                 if (!role) return null;
@@ -175,7 +181,7 @@ export function RoleSummary({ selected, onPrimaryChange, className }: RoleSummar
   const lines = signupRequirementLines(selected);
 
   return (
-    <Card static className={cn('p-5', className)}>
+    <Card static className={cn('border-border/70 p-5 shadow-sm', className)}>
       <section aria-labelledby={headingId} className="space-y-4">
         <h2 id={headingId} className="text-base font-semibold text-foreground">
           Your picks

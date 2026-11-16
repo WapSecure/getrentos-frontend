@@ -106,10 +106,25 @@ function RoleRow({
         pointerEvents="none"
         style={[
           StyleSheet.absoluteFill,
-          { backgroundColor: withAlpha(colors.primary, 0.08) },
+          { backgroundColor: withAlpha(colors.primary, 0.05) },
           tintStyle,
         ]}
       />
+      {selected ? (
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: spacing.md,
+            bottom: spacing.md,
+            width: 3,
+            borderTopRightRadius: 3,
+            borderBottomRightRadius: 3,
+            backgroundColor: colors.primary,
+          }}
+        />
+      ) : null}
       <View
         style={{
           width: 36,
@@ -117,7 +132,9 @@ function RoleRow({
           borderRadius: radius.lg,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: colors.secondary,
+          backgroundColor: selected ? withAlpha(colors.primary, 0.1) : colors.secondary,
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: selected ? withAlpha(colors.primary, 0.25) : 'transparent',
         }}
       >
         <Icon size={18} color={selected ? colors.primary : colors.mutedForeground} />
@@ -197,7 +214,7 @@ function PickRequirements({ selected }: { selected: readonly SignupRoleId[] }) {
 }
 
 export default function SignUpRoles() {
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing, radius, shadows } = useTheme();
   const toast = useToast();
   const { initialRolesPending, chooseInitialRoles, skipInitialRoles } = useAuth();
   const {
@@ -321,43 +338,45 @@ export default function SignUpRoles() {
             >
               {group.title}
             </Text>
-            <View
-              style={{
-                borderRadius: radius.xl,
-                borderWidth: StyleSheet.hairlineWidth,
-                borderColor: colors.border,
-                backgroundColor: colors.card,
-                overflow: 'hidden',
-              }}
-            >
-              {group.roles.map((id, index) => {
-                const role = SIGNUP_ROLES.find((r) => r.id === id);
-                if (!role) return null;
-                return (
-                  <View
-                    key={id}
-                    style={
-                      index > 0
-                        ? {
-                            borderTopWidth: StyleSheet.hairlineWidth,
-                            borderTopColor: colors.border,
-                          }
-                        : undefined
-                    }
-                  >
-                    <RoleRow
-                      role={role}
-                      selected={selectedRoles.includes(role.id)}
-                      multiRole={multiRole}
-                      onPress={() => {
-                        void haptics.tap();
-                        toggleRole(role.id);
-                        if (error) setError(null);
-                      }}
-                    />
-                  </View>
-                );
-              })}
+            <View style={[{ borderRadius: radius.xl, backgroundColor: colors.card }, shadows.xs]}>
+              <View
+                style={{
+                  borderRadius: radius.xl,
+                  borderWidth: StyleSheet.hairlineWidth,
+                  borderColor: colors.border,
+                  backgroundColor: colors.card,
+                  overflow: 'hidden',
+                }}
+              >
+                {group.roles.map((id, index) => {
+                  const role = SIGNUP_ROLES.find((r) => r.id === id);
+                  if (!role) return null;
+                  return (
+                    <View
+                      key={id}
+                      style={
+                        index > 0
+                          ? {
+                              borderTopWidth: StyleSheet.hairlineWidth,
+                              borderTopColor: colors.border,
+                            }
+                          : undefined
+                      }
+                    >
+                      <RoleRow
+                        role={role}
+                        selected={selectedRoles.includes(role.id)}
+                        multiRole={multiRole}
+                        onPress={() => {
+                          void haptics.tap();
+                          toggleRole(role.id);
+                          if (error) setError(null);
+                        }}
+                      />
+                    </View>
+                  );
+                })}
+              </View>
             </View>
             {group.id === 'work' ? (
               <Text
