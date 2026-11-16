@@ -10,8 +10,8 @@ import { RecordIconTile } from '@/components/shared/records/RecordParts';
 import type { EscrowSaleTransaction, SaleEscrowStatus } from '@/types/owner';
 
 // Only the states the backend drives a sale through: deposit → held → released.
-const escrowSteps: { key: SaleEscrowStatus; label: string }[] = [
-  { key: 'deposit_pending', label: 'Deposit pending' },
+const escrowSteps: { key: SaleEscrowStatus; label: string; doneLabel?: string }[] = [
+  { key: 'deposit_pending', label: 'Deposit pending', doneLabel: 'Deposit paid' },
   { key: 'funds_held', label: 'Funds held' },
   { key: 'released', label: 'Released' },
 ];
@@ -20,7 +20,7 @@ const statusLabels: Record<SaleEscrowStatus, string> = {
   deposit_pending: 'Deposit pending',
   funds_held: 'Funds held',
   released: 'Released',
-  frozen: 'Frozen: Dispute',
+  frozen: 'Frozen for a dispute',
   refunded: 'Refunded',
 };
 
@@ -46,11 +46,12 @@ export const EscrowTransactionCard = ({
 
   return (
     <motion.div
+      className="h-full"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
     >
-      <Card interactive className="rounded-2xl p-4 hover:border-primary/30 sm:p-5">
+      <Card interactive className="h-full rounded-2xl p-4 hover:border-primary/30 sm:p-5">
         <button
           type="button"
           onClick={onClick}
@@ -103,7 +104,7 @@ export const EscrowTransactionCard = ({
             aria-label="Payment progress"
             items={escrowSteps.map((step, index) => ({
               id: step.key,
-              title: step.label,
+              title: states[index] === 'done' ? (step.doneLabel ?? step.label) : step.label,
               state: states[index],
             }))}
           />

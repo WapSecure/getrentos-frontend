@@ -57,11 +57,12 @@ export const BuyerEscrowTransactionCard = ({
 
   return (
     <motion.div
+      className="h-full"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
     >
-      <Card interactive className="group rounded-2xl p-4 hover:border-primary/30 sm:p-5">
+      <Card interactive className="group h-full rounded-2xl p-4 hover:border-primary/30 sm:p-5">
         <Link
           href={PURCHASE_ROUTES.buyerWorkspace(transaction.id)}
           aria-label={`Open ${transaction.propertyTitle}`}
