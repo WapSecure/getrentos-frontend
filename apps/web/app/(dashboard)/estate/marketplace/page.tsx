@@ -689,7 +689,14 @@ export default function EstateMarketplacePage() {
           </div>
 
           {showNewListing && (
-            <NewListingPanel estateId={estateId} agreements={agreementRows} onDone={refresh} />
+            <NewListingPanel
+              estateId={estateId}
+              agreements={agreementRows}
+              onDone={() => {
+                refresh();
+                setShowNewListing(false);
+              }}
+            />
           )}
 
           <div className="mt-5 space-y-2">
