@@ -82,7 +82,8 @@ export default function OwnerReviews() {
         empty={{
           icon: <Star size={34} color={colors.mutedForeground} />,
           title: 'No reviews yet',
-          description: 'Tenants can review you once they have moved out, and buyers after a completed sale.',
+          description:
+            'Tenants can review you once they have moved out, and buyers after a completed sale.',
         }}
       >
         {(reviews.data?.items ?? []).map((r) => (
