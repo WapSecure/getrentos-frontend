@@ -19,7 +19,6 @@ export interface TenantDeduction {
 export interface TenantDeposit {
   leaseId: string;
   leaseStatus: string;
-  /** Older API responses may leave it out. */
   leaseEnd?: string;
   propertyTitle: string;
   unitName: string;
@@ -34,7 +33,6 @@ export interface TenantDeposit {
     takenAt: string;
     returnedAt: string | null;
     returnedAmount: number | null;
-    /** Older API responses may leave it out. */
     endStage?: DepositEndStage;
     moveOutAt?: string | null;
     claimBy?: string | null;

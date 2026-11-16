@@ -100,12 +100,10 @@ export const MEDIA_ROOM_NAME: Record<MediaRoom, string> = {
   other: 'Other',
 };
 
-/** A line drawing, shown whole on a light background. */
 export const isFloorPlan = (m: MediaItem) => m.kind === 'image' && m.room === 'floor_plan';
 
 export interface FloorPlanLevel {
   index: number;
-  /** The lister's caption exactly as written ("Ground floor"), or a plain fallback. */
   label: string;
 }
 
@@ -150,7 +148,6 @@ const bool = (v: unknown) => (typeof v === 'boolean' ? v : undefined);
 const oneOf = <T extends string>(labels: Record<T, string>, v: unknown) =>
   typeof v === 'string' && Object.prototype.hasOwnProperty.call(labels, v) ? (v as T) : undefined;
 
-/** Anything malformed or out of range is dropped, so the page never shows a value the lister did not state. */
 export function commercialDetailsOf(value: unknown): CommercialDetails | undefined {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
   const v = value as Record<string, unknown>;
@@ -237,7 +234,6 @@ const TRUST_STEP_IDS: readonly ShowroomTrustStepId[] = [
   'payment',
 ];
 
-/** The API's trust chain, or undefined when it is missing or malformed (the page then falls back to `verified`). */
 export function trustChainOf(raw: unknown): ShowroomTrustChain | undefined {
   const steps = (raw as { steps?: unknown } | null | undefined)?.steps;
   if (!Array.isArray(steps)) return undefined;
@@ -276,10 +272,7 @@ const HELD_BY_SUMMARY: Partial<Record<ShowroomTrustStepId, string>> = {
   property: "The property has not cleared Sureground's verification checks yet.",
 };
 
-/**
- * The verification summary is the stricter record, so the ownership and property links hold only once it
- * says the evidence passed (as the API does): the badge never claims more than the verification panel.
- */
+/** Ownership and property links hold only once the verification summary says the evidence passed, as the API does. */
 export function saleTrustChain(
   chain: ShowroomTrustChain | undefined,
   summary: VerificationSummary | undefined

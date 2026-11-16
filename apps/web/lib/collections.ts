@@ -1,4 +1,3 @@
-// Server-safe types and pure helpers for showroom collections.
 import type { CardMarket } from '@/lib/marketCards';
 
 export type CollectionCuratorKind = 'sureground' | 'estate' | 'agency' | 'realtor';
@@ -6,7 +5,6 @@ export type CollectionCuratorKind = 'sureground' | 'estate' | 'agency' | 'realto
 export interface CollectionCurator {
   type: CollectionCuratorKind;
   name: string;
-  /** The estate's storefront slug, when it has a public storefront. */
   estateSlug: string | null;
 }
 
@@ -26,7 +24,6 @@ export interface PublicCollectionSummary {
   order?: CollectionOrder;
   curator: CollectionCurator;
   itemCount: number;
-  /** The market's raw public card for the cover listing. */
   cover: unknown | null;
   publishedAt: string | null;
 }
@@ -41,7 +38,6 @@ export interface ManagedCollectionItem {
   listingId: string;
   position: number;
   note: string | null;
-  /** False once the listing is paused, closed or no longer public; kept but not shown. */
   visible: boolean;
   card: unknown | null;
 }
@@ -84,13 +80,11 @@ export const collectionPath = (slug: string) => `/collections/${encodeURICompone
 const curatorName = (curator: CollectionCurator) =>
   curator.type === 'sureground' ? 'the Sureground team' : curator.name || 'the lister';
 
-/** "Picked by Palm Grove Estate": who chose these, never a claim about the homes themselves. */
 export const curatorLine = (curator: CollectionCurator, kind?: CollectionKind) =>
   kind === 'rule'
     ? `A saved search by ${curatorName(curator)}`
     : `Picked by ${curatorName(curator)}`;
 
-/** How the listings on a collection page are ordered, in words. */
 export function orderLine(c: Pick<PublicCollectionSummary, 'kind' | 'order'>): string {
   if (c.kind !== 'rule') return 'Listings appear in the order the curator chose.';
   if (c.order === 'price_asc')
@@ -100,7 +94,6 @@ export function orderLine(c: Pick<PublicCollectionSummary, 'kind' | 'order'>): s
   return 'Listings match a saved search and are shown newest first.';
 }
 
-/** A lister's view of the Sureground collections showing their listings. */
 export interface ListingCollectionFeature {
   collectionId: string;
   collectionTitle: string;

@@ -11,7 +11,6 @@ interface TourEmbedProps {
   onOpen?: () => void;
 }
 
-/** Loads the provider only on request: a 360 tour is heavy on mobile data. */
 export function TourEmbed({ url, title, className, onOpen }: TourEmbedProps) {
   const [open, setOpen] = useState(false);
   const tour = tourSource(url);

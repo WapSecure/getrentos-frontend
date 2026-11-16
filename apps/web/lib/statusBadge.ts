@@ -171,7 +171,6 @@ export const taskStatusBadges: Record<TaskStatus, StatusBadgeEntry> = {
   cancelled: { label: 'Cancelled', variant: 'neutral' },
 };
 
-/** A status map from @sureground/shared (shared with backoffice) plus web's icons. */
 const withIcons = <S extends string>(
   shared: Record<S, { label: string; tone: BadgeVariant }>,
   icons: Record<S, SgIcon>

@@ -19,7 +19,6 @@ interface DiscoverPropertyCardProps {
   onScheduleViewing: () => void;
   onApply: () => void;
   onOpenTour: () => void;
-  /** Once, when the card is half on screen. */
   onVisible?: () => void;
 }
 
@@ -64,7 +63,6 @@ export const DiscoverPropertyCard = ({
           <VirtualTourBadge hasTour={Boolean(property.videoTourUrl)} onOpenTour={onOpenTour} />
           <ListingCardAction
             onClick={onSave}
-            // Icon-only and repeated on every card, so the label names the property and the saved state.
             label={
               isSaved
                 ? `Remove ${property.title} from your shortlist`

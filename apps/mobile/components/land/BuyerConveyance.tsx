@@ -209,7 +209,6 @@ export function BuyerConditions({
   checklist?: ChecklistItem[];
   seller?: string;
   busyKey: string | null;
-  /** Without it the conditions are read only (a representative, or a built home). */
   onSettle?: (key: string, how: 'confirm' | 'waive') => void;
 }) {
   const { colors, spacing } = useTheme();

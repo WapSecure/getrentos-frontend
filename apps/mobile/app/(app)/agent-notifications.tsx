@@ -7,7 +7,6 @@ import { agentApi, type AgentNotification } from '@/lib/api/agent';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { NotificationsInbox } from '@/components/notifications/NotificationsInbox';
 
-/** `type` is an open string: match on what it mentions and fall back to a bell. */
 function iconFor(type: string) {
   if (type.includes('task') || type.includes('inspection')) return ClipboardList;
   if (type.includes('payout') || type.includes('commission') || type.includes('payment')) return Banknote;

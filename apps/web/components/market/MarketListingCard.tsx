@@ -46,8 +46,7 @@ export function MarketListingCard({
       imageAlt={listing.title}
       eager={eager}
       status={MARKET_STATUS[market]}
-      // One trust signal, the same as the browse grid: the chain pill says "Verified" only when
-      // every check is met, so a passed property check alone never reads as fully verified.
+      // The chain pill says "Verified" only when every check is met; a passed property check alone never does.
       badges={<TrustChainBadge chain={listing.trustChain} fallbackVerified={listing.verified} />}
       facts={{ beds: listing.beds, baths: listing.baths, size: listing.size, type: listing.type }}
       meta={meta}

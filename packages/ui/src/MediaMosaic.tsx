@@ -23,13 +23,11 @@ interface MediaMosaicProps {
   emptyLabel?: string;
   className?: string;
   onMediaEvent?: (event: MediaEvent) => void;
-  /** Lets a button elsewhere (the floor plans shortcut) open the viewer; null is closed. Without it the mosaic keeps its own state. */
   openIndex?: number | null;
   onOpenIndexChange?: (index: number | null) => void;
   floorPlans?: ShowroomFloorPlan[];
 }
 
-// Fills the 4×2 grid whatever the photo count, so no empty slot shows.
 const tileSpan = (index: number, count: number) => {
   if (count < 2) return '';
   if (index === 0) return 'sm:col-span-2 sm:row-span-2';
@@ -262,7 +260,6 @@ function Tile({
       onError={() => setBroken(true)}
       className={cn(
         'h-full w-full',
-        // A plan is shown whole on a light background, never cropped.
         isFloorPlan(item)
           ? 'bg-white object-contain'
           : 'object-cover transition-transform duration-500 group-hover:scale-[1.02] motion-reduce:transition-none'

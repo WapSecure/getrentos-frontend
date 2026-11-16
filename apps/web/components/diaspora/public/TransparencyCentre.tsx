@@ -45,8 +45,6 @@ const PointList = ({ points, tone }: { points: string[]; tone: 'yes' | 'no' | 'i
   );
 };
 
-// Server-rendered like the Diaspora Invest page: plain markup that reads without JavaScript.
-
 const linkClass = 'font-medium text-foreground underline underline-offset-4';
 
 const SectionCard = ({

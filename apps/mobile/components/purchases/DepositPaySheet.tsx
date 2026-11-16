@@ -18,7 +18,6 @@ export function DepositPaySheet({
   onClose,
   onSettled,
 }: {
-  /** Kept by the caller while the sheet slides away. */
   tx: BuyerTransaction | null;
   open: boolean;
   onClose: () => void;

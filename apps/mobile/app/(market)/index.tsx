@@ -177,7 +177,6 @@ export default function Marketplace() {
           />
         </View>
 
-        {/* Developments are few and have no search on the API yet. */}
         {tab === 'developments' ? null : (
           <TextField
             placeholder={intro.search}

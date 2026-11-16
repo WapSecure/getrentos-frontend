@@ -27,7 +27,6 @@ export function VideoTourField({
   videoUrl?: string | null;
   hasVideo: boolean;
   filmedOnSite?: boolean;
-  /** Uploads and attaches the video; reports whole-percent progress and stops when `signal` aborts. */
   onUpload: (
     file: PickedVideo,
     onSite: VideoOnSiteReport | null,

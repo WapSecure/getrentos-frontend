@@ -1,4 +1,3 @@
-// Empty when the requested slot has passed, so the landlord picks a fresh time instead of fixing a stale one.
 export function preferredSlotValue(
   preferredAt: string | undefined,
   now: number = Date.now()

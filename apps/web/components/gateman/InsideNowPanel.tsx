@@ -18,7 +18,6 @@ const initials = (name: string) =>
     .map((part) => part[0]!.toUpperCase())
     .join('');
 
-/** Re-renders once a minute so the "inside for" durations stay current without a refetch. */
 const useMinuteClock = () => {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -31,7 +30,6 @@ const useMinuteClock = () => {
 interface InsideNowPanelProps {
   visitors: VisitorPass[];
   total: number;
-  /** Server total before optimistic check-outs, used for paging. */
   pagedTotal: number;
   page: number;
   pageSize: number;

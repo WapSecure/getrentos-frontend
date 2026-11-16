@@ -84,7 +84,6 @@ export default function OwnerAnalyticsPage() {
     router.push(getDashboardRoute('landlord'));
   };
 
-  // The rows the table shows, as recorded; blank where nothing is on record.
   const exportCsv = () =>
     downloadCsv(
       `investment-analytics-${new Date().toISOString().slice(0, 10)}.csv`,
@@ -97,7 +96,6 @@ export default function OwnerAnalyticsPage() {
         'Report date',
         'Net yield, 12 months (%)',
       ],
-      // The valued figure only while the report is in date, as the table shows it.
       metrics.map((m) => [
         m.propertyName,
         m.purchasePrice,

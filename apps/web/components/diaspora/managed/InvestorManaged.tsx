@@ -40,7 +40,6 @@ import type { InvestorManagedProperty } from '@/types/managed';
 import { STATEMENT_PAYOUT_LABELS, humaniseStatus } from '@sureground/shared';
 
 const JOB_PAGE_SIZE = 10;
-/** Past this many properties a segmented control stops fitting a phone. */
 const SEGMENTED_MAX = 3;
 
 const isSet = (value: number | null | undefined): value is number =>
@@ -52,7 +51,6 @@ export function InvestorManaged() {
     queryFn: () => unwrap(investorService.getManaged()),
   });
   const properties = managed.data?.properties ?? [];
-  // From the workspace: open on the property whose latest statement was linked.
   const linkedStatement = useSearchParams().get('statement');
   const [chosenId, setChosenId] = useState<string | null>(null);
   const property =

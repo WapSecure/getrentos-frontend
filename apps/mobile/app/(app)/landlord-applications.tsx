@@ -65,7 +65,6 @@ export default function LandlordApplications() {
       if (status !== 'approved') {
         toast.show('Application rejected.', 'success');
       } else if (result?.leaseDrafted === false) {
-        // The unit has no advertised rent, so no lease could be drafted for it.
         toast.show('Approved. No lease was drafted: create one from Leases.', 'info');
         router.push('/(app)/landlord-leases');
       } else {
@@ -223,7 +222,6 @@ function ApplicationCard({
               <Text variant="caption">{trustScoreDisplay(a.trustScore)}</Text>
             </Detail>
           </View>
-          {/* Full width: in a third of the card, "Self-employed — Consultant" broke over three lines. */}
           <Detail label="Employment">
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Briefcase size={12} color={colors.mutedForeground} />
@@ -284,7 +282,6 @@ function Detail({ label, children }: { label: string; children: React.ReactNode 
 const EMPLOYMENT_ENUM =
   /^(EMPLOYED|SELF_EMPLOYED|UNEMPLOYED|FULL_TIME|PART_TIME|CONTRACT|STUDENT|RETIRED)\b/;
 
-/** The status part sometimes arrives as a raw enum ("EMPLOYED — Zenith Bank"); show it in sentence case. */
 function employmentLabel(value: string): string {
   return value.replace(EMPLOYMENT_ENUM, (word) => {
     const spaced = word.replace(/_/g, ' ').toLowerCase();

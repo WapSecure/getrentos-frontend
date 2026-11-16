@@ -7,8 +7,7 @@ const textQueueKey = 'sureground.agent.offline-queue';
 const session = { userId: 'agent-queue-test', refreshes: 0 };
 
 async function mockApi(target: Page | BrowserContext, handler: (route: Route) => unknown) {
-  // The realtime socket would otherwise hang in its handshake against the dev server; Chrome lets
-  // only one WebSocket per host connect at a time, so a second tab's HMR socket (and hydration) waits.
+  // Otherwise the realtime socket hangs: Chrome connects one WebSocket per host at a time, so HMR and hydration wait.
   await target.routeWebSocket(/\/socket\.io\//, (ws) => ws.close());
   await target.route('**/__qa_api/**', (route) => {
     if (isSessionRefresh(route)) {

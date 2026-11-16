@@ -581,7 +581,6 @@ export const adminFeeAmendmentService = {
     );
   },
 
-  /** Managed agreements only; the API asks for step-up and `authFetch` handles it. */
   propose(mandateId: string, input: ProposeFeeAmendmentInput): Promise<ApiResponse<FeeAmendment>> {
     return post<FeeAmendment>(`/admin/management-mandates/${mandateId}/fee-amendments`, input);
   },

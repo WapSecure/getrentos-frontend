@@ -40,8 +40,7 @@ export function HomeManagementSectionHeading({
   );
 }
 
-// The request is a counter so a second click reopens the dialog; onHandled clears it so the
-// dialog does not reopen when the tab is revisited.
+// A counter, so a second click reopens the dialog; onHandled clears it so revisiting the tab does not.
 export function useCreateRequest(
   request: number | undefined,
   open: () => void,

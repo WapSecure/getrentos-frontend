@@ -6,7 +6,6 @@ import { cn } from '@sureground/shared';
 interface EstateListSectionProps {
   id: string;
   title: string;
-  /** Hidden while undefined, so a loading list never shows 0. */
   count?: number;
   countLabel?: string;
   description?: ReactNode;

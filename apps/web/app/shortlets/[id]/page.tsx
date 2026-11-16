@@ -65,7 +65,6 @@ export default async function ShortletDetailPage({ params }: ShortletDetailPageP
   const { id: segment } = await params;
   const id = listingIdFromSegment(segment);
   const listing = await fetchListing(id);
-  // Not loaded on the server (missing or API down): the client view shows the right state and retries.
   if (!listing)
     return (
       <Shell>

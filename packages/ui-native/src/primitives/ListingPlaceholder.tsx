@@ -8,12 +8,9 @@ export type ListingPlaceholderSize = 'thumb' | 'card' | 'hero';
 
 export interface ListingPlaceholderProps {
   size?: ListingPlaceholderSize;
-  /** Area to name under the mark, e.g. "Ikoyi". Shown on card and hero sizes only; on cards it replaces the caption. */
   area?: string | null;
   caption?: string;
-  /** "onDark" draws a fixed deep slate in both themes, for cards with white text over the image; no caption. */
   tone?: 'theme' | 'onDark';
-  /** Leaves room at the top for badges that sit over the image area. */
   topInset?: number;
   style?: StyleProp<ViewStyle>;
 }
@@ -77,7 +74,6 @@ export function ListingPlaceholder({
                 {area}
               </Text>
             ) : null}
-            {/* Card images are short; the area alone fits, the caption is for the hero. */}
             {size === 'hero' || !area ? (
               <Text variant="caption" color="mutedForeground">
                 {caption}

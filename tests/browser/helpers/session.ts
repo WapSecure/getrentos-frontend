@@ -1,7 +1,6 @@
 import type { Route } from '@playwright/test';
 
-// The access token lives in memory only: each page load restores it with POST /auth/refresh and
-// the httpOnly cookie. Mocked APIs answer that call for the test user.
+// The access token is memory-only: each page load restores it via POST /auth/refresh, which the mocks answer.
 
 export function testAccessToken(sub: string): string {
   const payload = { sub, exp: Math.floor(Date.now() / 1000) + 3600 };

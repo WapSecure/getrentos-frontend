@@ -106,7 +106,6 @@ const CONDITION_STATUSES = new Set<LandClosingCondition['status']>([
   'FAILED',
 ]);
 
-// The panel shows the shared remedy once, so a condition repeats it only when its own differs.
 const toClosingCondition = (
   condition: WorkspaceCondition,
   _index: number,
@@ -310,7 +309,6 @@ export const TransactionWorkspaceView = ({
         result.release,
         data ? approvingRepresentativeName(data) : undefined
       );
-      // Waiting for the second approval: nothing moved, so the message stays on the page.
       setReleaseNotice(outcome.waiting ? outcome.message : null);
       refresh();
       toast.success(outcome.message);
@@ -373,7 +371,6 @@ export const TransactionWorkspaceView = ({
 
       <Card>
         <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-start sm:p-6">
-          {/* The workspace carries no property image, so the tile shows the kind of property. */}
           <div
             className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-accent text-primary"
             aria-hidden
@@ -664,7 +661,6 @@ export const TransactionWorkspaceView = ({
                       ...disputes.sale.map((d) => ({
                         id: `sale-${d.id}`,
                         title: d.title,
-                        // Its thread is in the buyer portal; the seller has no web workspace yet.
                         href: isBuyer ? PURCHASE_ROUTES.buyerDepositDispute(d.id) : undefined,
                         detail: d.respondBy
                           ? respondByText(d.respondBy, viewerTimeZone)

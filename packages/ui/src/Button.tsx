@@ -12,7 +12,6 @@ export interface ButtonProps extends Omit<
   /** With `href`; a new tab gets noopener by default. */
   target?: string;
   rel?: string;
-  /** `danger-ghost`: a quiet destructive action (Cancel, Remove) beside a primary one. */
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'danger-ghost' | 'link';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
@@ -79,7 +78,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const sizes = {
-      // Desktop is pointer-driven and denser; phones keep 44px touch targets.
       xs: 'min-h-8 px-2.5 py-1 text-xs sm:min-h-7',
       sm: 'min-h-9 px-3 py-1.5 text-sm sm:min-h-8',
       md: 'min-h-11 px-4 py-2 text-sm sm:min-h-10',

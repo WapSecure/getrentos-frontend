@@ -23,11 +23,8 @@ export interface ListingCardFacts {
 
 export interface ListingCardProps {
   title: string;
-  /** The whole card links here. Without it, `onOpen` makes the title a button. */
   href?: string;
-  /** Runs on open: alongside navigation when `href` is set, instead of it otherwise. */
   onOpen?: () => void;
-  /** Runs once, when half the card has been on screen (for impression counts). */
   onVisible?: () => void;
   location?: string | null;
   price?: number | null;
@@ -35,11 +32,9 @@ export interface ListingCardProps {
   priceCompact?: boolean;
   priceNote?: ReactNode;
   image?: string | null;
-  /** `srcset` of resized copies; the browser picks one for the card's width. */
   imageSrcSet?: string;
   imagePreview?: { width: number; height: number; placeholder?: string };
   imageAlt?: string;
-  /** For the first row above the fold. */
   eager?: boolean;
   status?: string;
   statusVariant?: BadgeVariant;
@@ -47,7 +42,6 @@ export interface ListingCardProps {
   /** Pass the backend's flag only; never infer it. */
   verified?: boolean;
   facts?: ListingCardFacts;
-  /** Save, compare or share buttons owned by the caller; they never trigger navigation. */
   actions?: ReactNode;
   meta?: ReactNode;
   footer?: ReactNode;
@@ -156,7 +150,6 @@ function useVisibleOnce(onVisible?: () => void) {
   });
   useEffect(() => {
     if (!element || !wanted || typeof IntersectionObserver === 'undefined') return;
-    // Counts only after the card stays at least half on screen for the shared minimum time.
     let timer: ReturnType<typeof setTimeout> | undefined;
     const observer = new IntersectionObserver(
       ([entry]) => {

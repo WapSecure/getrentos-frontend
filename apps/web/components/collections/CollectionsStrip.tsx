@@ -7,7 +7,6 @@ import type { CardMarket } from '@/lib/marketCards';
 import { collectionsService } from '@/services/collectionsService';
 import { CollectionTile } from './CollectionTile';
 
-/** Renders nothing when empty or if the request fails: the page works the same without it. */
 export function CollectionsStrip({
   market,
   estate,

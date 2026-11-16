@@ -13,7 +13,6 @@ export interface SaveButtonProps extends Omit<ButtonProps, 'label' | 'onPress' |
 const isPromise = (value: unknown): value is Promise<unknown> =>
   !!value && typeof (value as Promise<unknown>).then === 'function';
 
-/** Confirms a save on the button itself, where the user is looking, instead of a toast. */
 export function SaveButton({ label = 'Save changes', onPress, loading, ...rest }: SaveButtonProps) {
   const { colors } = useTheme();
   const [saving, setSaving] = useState(false);
@@ -33,7 +32,6 @@ export function SaveButton({ label = 'Save changes', onPress, loading, ...rest }
       clearTimeout(timer.current);
       timer.current = setTimeout(() => setSaved(false), 2000);
     } catch {
-      // The caller shows the error; the button just doesn't claim it saved.
     } finally {
       setSaving(false);
     }

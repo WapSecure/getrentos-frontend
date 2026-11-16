@@ -22,7 +22,6 @@ const SIGNED_IN: Record<PublicDetailMarket, string> = {
   land: 'Make an offer',
 };
 
-// A business viewing a commercial let wants to see the space first; the enquiry flow is the same.
 const COMMERCIAL_RENT = {
   signedOut: 'Sign in to request an inspection',
   signedIn: 'Request an inspection',

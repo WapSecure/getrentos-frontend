@@ -9,7 +9,6 @@ export interface Conversation {
   id: string;
   participantName: string;
   participantRole: 'Tenant' | 'Vendor' | 'Applicant';
-  /** The home the conversation is about; tells apart chats with one tenant about different homes. */
   propertyTitle?: string;
   lastMessage: string;
   lastMessageTime: string;
@@ -66,7 +65,6 @@ export const ConversationList = ({
                   >
                     {conversation.participantName}
                   </p>
-                  {/* A conversation just opened has no messages, so no time to show. */}
                   {conversation.lastMessageTime ? (
                     <span className="whitespace-nowrap text-xs tabular-nums text-muted-foreground">
                       {formatRelativeTime(conversation.lastMessageTime)}

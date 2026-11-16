@@ -63,7 +63,6 @@ export const TimePicker = ({
   const valueId = `${baseId}-value`;
   const listboxId = `${baseId}-listbox`;
   const hasSelected = options.some((option) => option.value === value);
-  // With nothing chosen, start at the working day (09:00) rather than midnight; the first option if 09:00 is out of range.
   const defaultIndex = Math.max(
     0,
     options.findIndex((option) => option.value >= '09:00')

@@ -332,7 +332,6 @@ export const GuestBookingsWorkspace = () => {
                   )}
                 </div>
                 <div className="text-right">
-                  {/* Approved but unpaid: the stay is not secured until the guest pays. */}
                   {b.status === 'CONFIRMED' && b.paymentRequired ? (
                     <Badge variant="warning">Awaiting payment</Badge>
                   ) : (

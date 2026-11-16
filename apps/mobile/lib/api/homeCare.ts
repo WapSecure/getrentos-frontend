@@ -137,7 +137,6 @@ export interface Asset {
   installedAt?: string | null;
   warrantyExpiresAt?: string | null;
   status: AssetStatus;
-  /** Set for generators, inverters, solar, boreholes, pumps and tanks. */
   utilityKind?: UtilityKind | null;
   property?: { title?: string | null; name?: string | null };
   unit?: { unitName?: string | null } | null;
@@ -149,7 +148,6 @@ export interface Plan {
   propertyId: string;
   title: string;
   category: Category;
-  /** Checklist copied into each work order the plan raises. */
   notes?: string | null;
   frequencyDays: number;
   nextDueAt: string;
@@ -330,7 +328,6 @@ export const homeCareApi = {
 
   evidence: (workOrderId: string) =>
     apiFetch<WorkOrderEvidence>(`/home-management/work-orders/${workOrderId}/evidence`),
-  /** Stamped with the time it is added; the stage says what the photo shows. */
   addPhoto: (workOrderId: string, file: PickedFile, stage: WorkOrderPhotoStage) => {
     const form = new FormData();
     appendFile(form, 'file', file);
@@ -352,7 +349,6 @@ export const homeCareApi = {
         : `invoices/${encodeURIComponent(target.invoiceId)}/documents`;
     return apiUpload<EvidenceDocument>(`/home-management/work-orders/${workOrderId}/${path}`, form);
   },
-  /** The owner's rating, once, after the job is RESOLVED. */
   feedback: (workOrderId: string, input: WorkOrderFeedbackInput) =>
     apiFetch<WorkOrderFeedback>(`/home-management/work-orders/${workOrderId}/feedback`, {
       method: 'POST',

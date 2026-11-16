@@ -47,7 +47,6 @@ export default function OwnerAccount() {
   const trustItems = useTrustItems('owner', { audience: 'buyers' });
   const investItems = useInvestItems();
 
-  // Owners who let a property review applicants and leases on the same screens as landlords.
   const letting: SettingsItem[] = [
     {
       key: 'applications',

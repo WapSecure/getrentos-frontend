@@ -139,7 +139,6 @@ export const estateMarketplaceService = {
    * Photos belong to the listing, not the property; the server takes what fits if the batch exceeds
    * the cap.
    */
-  /** With `upload` options it goes over XHR so it can report progress and be cancelled. */
   addListingMedia(
     estateId: string,
     listingId: string,

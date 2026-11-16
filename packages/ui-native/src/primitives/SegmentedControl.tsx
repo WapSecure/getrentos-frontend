@@ -7,7 +7,6 @@ export interface SegmentOption<T extends string> {
   label: string;
   icon?: React.ReactNode;
   count?: number;
-  /** `warning` when something in the segment needs the viewer. */
   countTone?: 'neutral' | 'warning';
 }
 
@@ -47,7 +46,6 @@ export function SegmentedControl<T extends string>({
             style={[
               styles.segment,
               { borderRadius: radius.md - 3 },
-              // A blue hairline on the selected segment, so the choice reads as Sureground blue and not only by its label.
               active && [
                 { backgroundColor: colors.card, borderColor: withAlpha(colors.primary, 0.3) },
                 shadows.xs,

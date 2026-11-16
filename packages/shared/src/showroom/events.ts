@@ -42,7 +42,6 @@ export interface ShowroomEventProps extends FunnelEventProps {
   source?: ListingAnswerSource;
 }
 
-/** What callers pass; the transport adds session, time, device and connection. */
 export interface ShowroomEventInput {
   name: ShowroomEventName;
   listingId?: string;

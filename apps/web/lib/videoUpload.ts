@@ -9,7 +9,6 @@ import {
   type StorageUploadSession,
 } from '@/lib/storageUpload';
 
-/** Files above this go up in resumable parts; smaller ones in one request. */
 const RESUMABLE_FROM_BYTES = 10 * 1024 * 1024;
 const PART_ATTEMPTS = 3;
 const SIGN_BATCH = 10;
@@ -19,10 +18,6 @@ export interface UploadedVideo {
   kind: 'video';
 }
 
-/**
- * Big files go up in resumable 8 MB parts, so a dropped connection or reload loses one part at most.
- * Falls back to older routes when the API does not offer the newer ones.
- */
 export async function uploadVideoDirect(
   basePath: string,
   file: File,
@@ -42,7 +37,6 @@ interface ResumeState {
   partCount: number;
 }
 
-/** Same file, same route: the browser remembers its unfinished upload. */
 const resumeId = (basePath: string, file: File) =>
   `sg.video-upload:${basePath}:${file.name}:${file.size}:${file.lastModified}`;
 
@@ -77,7 +71,6 @@ const wait = (ms: number, signal?: AbortSignal) =>
     );
   });
 
-/** Null when the API has no resumable uploads (the caller then uses the single-request upload). */
 async function uploadVideoInParts(
   basePath: string,
   file: File,
@@ -98,7 +91,6 @@ async function uploadVideoInParts(
       });
       uploaded = status.uploaded;
     } catch {
-      // Finished, expired or cleaned up: start again.
       state = null;
       writeResume(id, null);
     }
@@ -156,7 +148,6 @@ async function uploadVideoInParts(
         } catch (error) {
           if ((error as Error).name === 'AbortError') throw error;
           if (attempt >= PART_ATTEMPTS) {
-            // The parts already sent stay; picking the same file again resumes from here.
             if (error instanceof StorageUploadError)
               throw new ApiError(error.status, error.message);
             throw error;
@@ -173,7 +164,6 @@ async function uploadVideoInParts(
   return result;
 }
 
-/** One request: the API signs a link for its own key, the browser PUTs the file, then the API checks it. */
 async function uploadVideoSingle(
   basePath: string,
   file: File,
@@ -205,7 +195,6 @@ async function uploadVideoSingle(
   try {
     await putToStorage(session, file, upload);
   } catch (error) {
-    // Same error type as every other API failure, so callers show it the same way.
     if (error instanceof StorageUploadError) throw new ApiError(error.status, error.message);
     throw error;
   }

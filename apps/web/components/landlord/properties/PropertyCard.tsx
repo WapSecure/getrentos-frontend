@@ -36,7 +36,6 @@ const propertyTypeLabels: Record<Property['type'], string> = {
 
 const verificationConfig = verificationBadges;
 
-/** "₦3M/yr" once let; the asking rent while vacant; never "₦0/yr", which read as zero rent. */
 function rentText(rent: PropertyRentSummary): string {
   if (rent.kind === 'none') return rent.label;
   const figure = `${formatCurrency(rent.amount, { compact: true })}/${rent.period === 'month' ? 'mo' : 'yr'}`;

@@ -20,7 +20,6 @@ import { goBack } from '@/lib/goBack';
 
 const RANGES = [6, 12, 24] as const;
 
-/** Only what was logged is counted, and gaps are shown as gaps. */
 export default function UtilitySpend() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -33,7 +32,6 @@ export default function UtilitySpend() {
     queryFn: () => homeUtilitiesApi.analytics(propertyId || undefined, months),
   });
   const data = analytics.data;
-  // Newest month first: on a phone the latest figures matter most.
   const rows = [...(data?.months ?? [])].reverse();
   const peak = Math.max(1, ...rows.map((row) => row.total ?? 0));
   const perUnit = data ? costPerUnitFigure(data, Boolean(propertyId)) : null;

@@ -10,23 +10,19 @@ export interface StatGroupItem {
   /** A change against an earlier period; `tone` says whether it is good news, not its direction. */
   trend?: { label: string; tone: 'positive' | 'negative' | 'neutral' };
   href?: string;
-  /** A toggle filter on the same page, pressed while `selected`; use instead of `href`. */
   onSelect?: () => void;
   selected?: boolean;
-  /** Draws attention to a figure that needs action (overdue rent), without colouring the value. */
   attention?: boolean;
   icon?: SgIcon;
   supplement?: ReactNode;
 }
 
 interface StatGroupProps {
-  /** Shown above the figures; also names the group for screen readers. */
   title: string;
   items: StatGroupItem[];
   footer?: ReactNode;
   action?: ReactNode;
   className?: string;
-  /** For narrow columns, where five or six figures in a row would squeeze long amounts. */
   maxColumns?: 2 | 3;
 }
 
@@ -120,7 +116,6 @@ function Figure({ item }: { item: StatGroupItem }) {
   );
 }
 
-/** Related figures in one panel, divided by hairlines, instead of a box per number. */
 export function StatGroup({ title, items, footer, action, className, maxColumns }: StatGroupProps) {
   return (
     <section

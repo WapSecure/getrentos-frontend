@@ -82,7 +82,6 @@ interface WorkOrderEvidenceProps {
   viewerRole?: 'owner' | 'landlord' | 'manager';
 }
 
-// Loads when opened, so a long queue doesn't fetch every job's evidence up front.
 export function WorkOrderEvidence({ workOrder, viewerRole }: WorkOrderEvidenceProps) {
   const [open, setOpen] = useState(false);
 

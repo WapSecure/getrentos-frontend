@@ -82,7 +82,6 @@ function SettingsRow({ item, first }: { item: SettingsItem; first: boolean }) {
         ) : null}
       </View>
       {item.value ? (
-        // One line and at most ~40% of the row, so a long value (an estate's name) never squeezes the label.
         <Text
           variant="caption"
           numberOfLines={1}

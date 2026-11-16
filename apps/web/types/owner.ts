@@ -91,7 +91,6 @@ export interface SaleListing {
   bedrooms?: number;
   bathrooms?: number;
   features: string[];
-  /** Commercial properties only: what the seller stated. */
   commercial?: CommercialDetails;
   status: SaleListingStatus;
   createdAt: string;
@@ -192,19 +191,14 @@ export interface OwnershipTransferDocument {
 export interface InvestmentMetrics {
   propertyId: string;
   propertyName: string;
-  /** Purchase price on the property record; null when none was entered. */
   purchasePrice: number | null;
-  /** Asking price on the latest sale listing; null when not listed. */
   askingPrice?: number | null;
-  /** Net rent over the last 12 months as a share of purchase price; null without both. */
   rentalYield?: number | null;
   /** Whole naira from the latest accredited valuer report while under 12 months old; null otherwise. */
   currentValue: number | null;
-  /** The latest valuer report with valuer, method and date; outOfDate when over 12 months old. */
   valuation?: PropertyValuation | null;
   /** Percent between the two latest in-date valuer reports; null without two. Not annualised. */
   appreciationRate: number | null;
-  /** The two reports behind appreciationRate, with both dates. */
   valuationChange?: {
     fromAmount: number;
     fromDate: string;
@@ -212,6 +206,5 @@ export interface InvestmentMetrics {
     toDate: string;
     changePercent: number;
   } | null;
-  /** Always null: needs a valuation. */
   roiPercentage: number | null;
 }

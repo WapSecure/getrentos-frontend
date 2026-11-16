@@ -17,7 +17,6 @@ const TONE: Record<SegmentedBarSegment['tone'], string> = {
 
 interface SegmentedBarProps {
   segments: SegmentedBarSegment[];
-  /** What the whole bar measures, for screen readers ("Units by status"). */
   label: string;
   className?: string;
 }

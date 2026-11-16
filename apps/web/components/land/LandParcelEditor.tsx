@@ -157,8 +157,7 @@ export const LandParcelEditor = ({
     setParcel((current) => ({ ...current, [key]: value }));
   };
 
-  // An outline more than half off the declared area is usually drawn at the wrong zoom or with the
-  // wrong unit, so saving it takes an explicit confirmation.
+  // An outline more than half off the declared area is likely a wrong zoom or unit, so saving needs confirmation.
   const areaFarOff = areaMismatch !== null && Math.abs(areaMismatch.ratio - 1) > 0.5;
 
   const handleSave = async () => {
@@ -507,7 +506,6 @@ export const LandParcelEditor = ({
       <DocumentUploadDialog
         open={uploadOpen}
         onOpenChange={setUploadOpen}
-        // Same words as the documents section's upload, so the two read as one action.
         title="Upload a document"
         categoryLabel="Document type"
         categories={[

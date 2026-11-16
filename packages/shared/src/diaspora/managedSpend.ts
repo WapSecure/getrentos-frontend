@@ -25,7 +25,6 @@ export const SPEND_BAND_VARIANT: Record<SpendBand, StatusTone> = {
 export const needsExplicitAuthorisation = (band: SpendBand | null | undefined) =>
   band === 'EXPLICIT';
 
-/** Of the stages still waiting, only the earliest is current. */
 export function evidenceStates(statuses: readonly EvidenceStageStatus[]): EvidenceTimelineState[] {
   const current = statuses.indexOf('PENDING');
   return statuses.map((status, index) => {
@@ -36,7 +35,6 @@ export function evidenceStates(statuses: readonly EvidenceStageStatus[]): Eviden
   });
 }
 
-/** Spend the API parked for the owner instead of refusing. */
 export function isAwaitingOwnerApproval(value: unknown): value is AwaitingOwnerApproval {
   return (
     typeof value === 'object' &&
@@ -45,7 +43,6 @@ export function isAwaitingOwnerApproval(value: unknown): value is AwaitingOwnerA
   );
 }
 
-/** Nothing is approved until the manager retries. */
 export const AWAITING_OWNER_MESSAGE: Record<SpendBand, string> = {
   ROUTINE: 'Sent to the owner to approve. Approve it again here once they have.',
   OWNER:

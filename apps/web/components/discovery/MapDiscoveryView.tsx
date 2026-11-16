@@ -10,7 +10,6 @@ import { cn } from '@sureground/shared';
 import { hasMapPoint, type DiscoveryView, type MapArea, type MapPoint } from '@/lib/mapArea';
 import type { DiscoveryPin } from './DiscoveryMap';
 
-// Leaflet loads only when someone opens the map, never with the list.
 const DiscoveryMap = dynamic(() => import('./DiscoveryMap').then((m) => m.DiscoveryMap), {
   ssr: false,
   loading: () => (

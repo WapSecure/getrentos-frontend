@@ -15,7 +15,6 @@ export type MediaRoom =
   | 'neighbourhood'
   | 'other';
 
-/** A WebP copy at one width; only copies that exist are listed. */
 export interface ImageVariant {
   width: number;
   url: string;
@@ -35,7 +34,6 @@ export interface MediaItem {
   posterUrl?: string;
   width?: number;
   height?: number;
-  /** Images only: a tiny blurred `data:` URI shown while the photo loads. */
   placeholder?: string;
   variants?: ImageVariant[];
   durationSeconds?: number;
@@ -62,7 +60,6 @@ export interface CostLine {
 export interface ShowroomCosts {
   lines: CostLine[];
   total?: { label: string; amount: number };
-  /** Fees the listing does not state yet; shown so a partial total is never read as the full cost. */
   notStated: string[];
 }
 
@@ -120,7 +117,6 @@ export interface ShowroomListing {
   size?: number;
   verified: boolean;
   media: MediaItem[];
-  /** Image URLs in display order with floor plans last, for metadata, structured data and older callers. */
   images: string[];
   description?: string;
   amenities: string[];
@@ -128,17 +124,12 @@ export interface ShowroomListing {
   costs: ShowroomCosts;
   host?: ShowroomHost;
   underOffer?: boolean;
-  /** Rent only: the home is let or has an approved applicant, so it takes no new applications or enquiries. */
   notAcceptingApplications?: boolean;
   availableFrom?: string;
-  /** Sale and land detail routes only; undefined from an older API. */
   verificationSummary?: VerificationSummary;
-  /** Sale detail only: the latest accredited valuer report. */
   valuation?: PropertyValuation;
   floorPlans?: ShowroomFloorPlan[];
-  /** Rent and sale only; undefined where the API sends no chain. */
   trustChain?: ShowroomTrustChain;
-  /** Commercial properties only, and only what the lister stated. */
   commercial?: CommercialDetails;
 }
 

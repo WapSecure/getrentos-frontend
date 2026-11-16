@@ -25,7 +25,6 @@ export const agentClientsApi = {
       `/agent/clients${toQuery({ page, pageSize, status })}`
     ),
 
-  /** By the landlord's or owner's phone number or email; they see it in their app. */
   invite: (contact: string) =>
     apiFetch<AgentClientRelationship>('/agent/clients', {
       method: 'POST',

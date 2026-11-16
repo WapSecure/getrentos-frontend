@@ -43,8 +43,7 @@ export function Button({
   const reduceMotion = useReducedMotion();
   const isDisabled = disabled || loading;
 
-  // A disabled filled button gets a flat muted look in both themes. Fading the brand colour
-  // reads as broken on dark backgrounds and as still tappable on light ones.
+  // Fading the brand colour when disabled reads as broken on dark backgrounds and as still tappable on light ones.
   const flatDisabled = disabled && !loading && variant !== 'ghost' && variant !== 'outline';
 
   const palette = useMemo(() => {

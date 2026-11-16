@@ -433,7 +433,6 @@ export function apiUpload<T>(
     };
     xhr.onload = () => {
       done();
-      // A Response lets the shared body and error handling read it exactly as they read fetch results.
       const nullBody = xhr.status === 204 || xhr.status === 205;
       const response = new Response(nullBody ? null : xhr.responseText, {
         status: xhr.status,

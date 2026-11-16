@@ -41,7 +41,6 @@ import { SpendApprovalCard } from '@/components/management/SpendApprovalCard';
 import { WorkOrderCard } from '@/components/homecare/WorkOrderCard';
 import { OwnerStatementTotals } from '@/components/landlord/OwnerStatementTotals';
 
-/** Past this many properties a segmented control stops fitting a phone. */
 const SEGMENTED_MAX = 3;
 const JOB_PAGE_SIZE = 10;
 const STATEMENT_STATUS_LABELS: Record<string, string> = { DRAFT: 'Draft', ISSUED: 'Issued' };
@@ -49,7 +48,6 @@ const STATEMENT_STATUS_LABELS: Record<string, string> = { DRAFT: 'Draft', ISSUED
 const isSet = (value: number | null | undefined): value is number =>
   value !== null && value !== undefined;
 
-/** Changes to the agreement stay on the management screens; this one only links there. */
 export default function InvestManaged() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -370,7 +368,6 @@ function Approvals({ propertyId }: { propertyId: string }) {
   );
 }
 
-/** Read through the owner route, so it needs no Pro plan; each job opens read-only. */
 function Jobs({ propertyId }: { propertyId: string }) {
   const { colors, spacing } = useTheme();
   const jobs = useQuery({

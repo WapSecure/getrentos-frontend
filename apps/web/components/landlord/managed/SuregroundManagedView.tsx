@@ -229,7 +229,6 @@ export const SuregroundManagedView = ({
     onError: (err: Error) => setError(err.message || 'Could not appoint the firm.'),
   });
 
-  // The owner's signature on a firm's agreement; the API infers the side from who is calling.
   const signAgreement = useMutation({
     mutationFn: (id: string) => unwrap(signMandate(id)),
     onSuccess: () => {

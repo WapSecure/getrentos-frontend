@@ -82,10 +82,8 @@ const CTA_LABEL: Record<WorkspaceSection, string> = {
   steps: 'Review the steps',
 };
 
-/** History shown before "Show all": the workspace is a glance, the record is on request. */
 const HISTORY_INITIAL = 5;
 
-/** The list shows the shared remedy once below it, so a condition repeats it only when its own differs. */
 const toClosingCondition = (
   c: WorkspaceCondition,
   _index: number,
@@ -132,7 +130,6 @@ export default function PurchaseWorkspace() {
   });
   const data = workspace.data;
   const isBuyer = data?.viewer.role === 'BUYER';
-  // The deposit amount and seller come from the buyer's own transaction, not the workspace.
   const transactions = useQuery({
     queryKey: qk.buyer.transactions(1, 50),
     queryFn: () => buyerTransactionsApi.list(1, 50),
@@ -190,7 +187,6 @@ export default function PurchaseWorkspace() {
         data?.coApproval.representative?.name ??
           data?.representatives.find((r) => r.approvesPayments)?.name
       );
-      // Waiting for the second approval: nothing moved, so the message stays on the screen.
       setReleaseNotice(outcome.waiting ? outcome.message : null);
       refresh();
       toast.show(outcome.message, 'success');
@@ -237,7 +233,6 @@ export default function PurchaseWorkspace() {
   const progress = data ? workspaceProgress(data) : null;
   const target = data ? nextActionTarget(data) : null;
   const releasable = data ? canReleaseDeposit(data) : false;
-  // The deposit waits for the handover (built home) or every required land step and condition.
   const releaseBlockedReason = releasable && data ? releaseBlockedNote(data) : null;
   const releaseBlocked = releaseBlockedReason !== null;
 

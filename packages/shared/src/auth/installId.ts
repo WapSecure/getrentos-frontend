@@ -15,7 +15,6 @@ export function getInstallId(): string | undefined {
   }
 }
 
-// Sent on every request so the API can tell a new device from a known one at sign-in.
 export function installIdHeader(): Record<string, string> {
   const id = getInstallId();
   return id ? { 'x-device-id': id } : {};

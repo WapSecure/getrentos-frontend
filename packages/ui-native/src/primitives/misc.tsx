@@ -18,7 +18,6 @@ export type IconTileTone = 'primary' | 'success' | 'warning' | 'danger' | 'neutr
 
 const ICON_TILE_SIZE = { sm: 28, md: 36, lg: 44, xl: 56 } as const;
 
-/** Decorative, so hidden from screen readers; the row it sits in carries the name. */
 export function IconTile({
   Icon,
   tone = 'primary',
@@ -63,7 +62,6 @@ export function IconTile({
 
 export function Badge({ label, tone = 'neutral' }: { label: string; tone?: BadgeTone }) {
   const { colors, radius } = useTheme();
-  // An unmapped status gives an empty label; render nothing rather than a blank pill.
   if (!label) return null;
   const map: Record<BadgeTone, { bg: string; fg: string }> = {
     neutral: { bg: colors.secondary, fg: colors.secondaryForeground },
@@ -171,7 +169,6 @@ export function EmptyState({
   title: string;
   description?: string;
   action?: React.ReactNode;
-  /** `compact` sits inside a card or section; `default` fills a screen. */
   size?: 'default' | 'compact';
 }) {
   const { spacing } = useTheme();

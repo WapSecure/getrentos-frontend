@@ -9,7 +9,6 @@ import {
   videoContentType,
 } from './storageUpload';
 
-/** Just enough XMLHttpRequest to drive putToStorage: records the request and lets each test finish it. */
 class FakeXhr {
   static last: FakeXhr;
   method = '';

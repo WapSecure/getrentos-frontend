@@ -667,7 +667,6 @@ export function HomeManagementWorkOrderQueue({
                   !approvalPending &&
                   workOrder.approvedCost !== null &&
                   workOrder.approvedCost !== undefined;
-                // Until spend is approved, the estimate entered on creation is the figure to show.
                 const hasEstimateOnly =
                   !approvalPending &&
                   !hasApprovedCost &&

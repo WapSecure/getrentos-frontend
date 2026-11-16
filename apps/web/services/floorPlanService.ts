@@ -16,9 +16,7 @@ export interface FloorPlan {
   id: string;
   levelName: string;
   position: number;
-  /** A photo on the property tagged Floor plan. */
   imageKey: string;
-  /** ESTIMATED until Sureground staff check the sizes. */
   measurementStatus: 'ESTIMATED' | 'CHECKED';
   checkedAt?: string;
   rooms: FloorPlanRoom[];
@@ -32,7 +30,6 @@ export interface FloorPlanInput {
   rooms: Omit<FloorPlanRoom, 'id'>[];
 }
 
-// Landlords, owners and managers share this route; the API checks the caller can manage the property.
 const base = (propertyId: string) =>
   `/landlord/properties/${encodeURIComponent(propertyId)}/floor-plans`;
 

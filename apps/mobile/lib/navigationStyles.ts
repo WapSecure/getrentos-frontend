@@ -1,7 +1,6 @@
 import { Platform, StyleSheet } from 'react-native';
 import { shadows, type Palette } from '@sureground/tokens';
 
-/** Every tab icon draws at this size, whatever React Navigation suggests for the device. */
 export const TAB_ICON_SIZE = 22;
 /** The blue pill behind the active tab's icon. 52 wide still fits five tabs on a 320pt phone. */
 export const TAB_PILL = { width: 52, height: 28 } as const;
@@ -15,8 +14,7 @@ export function premiumTabBarOptions(colors: Palette, bottomInset: number) {
       backgroundColor: colors.card,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: colors.border,
-      // The pill (28), its gap and the label need 55pt with the item's own padding; 72 leaves room
-      // on phones without a bottom inset, and each tab stays well over 44pt tall.
+      // The pill (28), its gap and the label need 55pt with padding; 72 keeps each tab well over 44pt.
       height: 72 + bottomInset,
       paddingTop: 6,
       paddingBottom: Math.max(bottomInset, 8),

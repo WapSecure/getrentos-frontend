@@ -36,8 +36,6 @@ import {
 } from './content';
 import { Eyebrow } from '@/components/marketing/Eyebrow';
 
-// Server-rendered, like the landing page: plain markup that reads without JavaScript.
-
 const WORKSPACE_SIGN_IN = signInThen(DIASPORA_ROUTES.BUYER_WORKSPACE);
 
 const PROOF = [

@@ -10,7 +10,6 @@ export interface Rect extends Size {
   top: number;
 }
 
-/** The rect a `contain`-fitted image fills inside `box`, centred. Null until both sizes are known. */
 export function containedRect(box: Size | null, natural: Size | null): Rect | null {
   if (!box || !natural) return null;
   if (!(box.width > 0 && box.height > 0 && natural.width > 0 && natural.height > 0)) return null;
@@ -29,7 +28,6 @@ export function pointInRect(rect: Rect, xPercent: number, yPercent: number) {
   };
 }
 
-/** Numbered by list order, so a room without a place still uses up its number. */
 export function numberedMarkers<R extends { x?: number; y?: number }>(rooms: readonly R[]) {
   return rooms
     .map((room, i) => ({ room, number: i + 1 }))
@@ -39,6 +37,5 @@ export function numberedMarkers<R extends { x?: number; y?: number }>(rooms: rea
     );
 }
 
-/** The marker's screen-reader label, matching the room list's wording. */
 export const markerLabel = (number: number, name: string, hasPhoto: boolean) =>
   `${number}. ${name}${hasPhoto ? ', open its photo' : ''}`;

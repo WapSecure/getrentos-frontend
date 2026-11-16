@@ -13,7 +13,6 @@ export function IndicativeAmount({
 }: {
   /** Whole naira: a number, or a digit string for BIGINT amounts. */
   naira: number | string | bigint;
-  /** GBP, USD, EUR or CAD; NGN or anything else renders nothing. */
   currency: string;
   labelDisplay?: 'inline' | 'popover';
 }) {

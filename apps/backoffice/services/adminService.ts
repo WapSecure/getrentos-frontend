@@ -218,7 +218,6 @@ export const adminService = {
     );
   },
 
-  /** Locks their password, signs them out and emails them a link to choose a new one. */
   async resetStaffPassword(id: string): Promise<ApiResponse<{ message: string }>> {
     return safeCall(() =>
       authFetch(`/admin/access/staff/${id}/reset-password`, { method: 'POST' })
@@ -637,7 +636,6 @@ export const adminService = {
     return safeCall(() => authFetch('/admin/media/health'));
   },
 
-  /** Step-up is asked for by the API and handled by the StepUpDialog. */
   async setMediaHold(
     objectKey: string,
     held: boolean,

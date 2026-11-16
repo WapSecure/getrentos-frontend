@@ -127,7 +127,6 @@ const AREA_OPTIONS = [
 export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBrowserProps) => {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
-  // The first render reads the link; after that React owns the state and mirrors it back to the URL.
   const [search, setSearch] = useState(() => urlParam.text(searchParams, 'q'));
   const [debouncedSearch, setDebouncedSearch] = useState(() => urlParam.text(searchParams, 'q'));
   useEffect(() => {

@@ -7,13 +7,11 @@ import { formatDateTime } from '@/lib/format';
 export type VisitorTone = 'active' | 'waiting' | 'finished';
 
 export function visitorInitials(name: string): string {
-  // Skips words like "(demo)" or "&" so the initials stay letters.
   const parts = name.trim().split(/\s+/).filter((w) => /^\p{L}/u.test(w));
   const letters = parts.length > 1 ? [parts[0][0], parts[parts.length - 1][0]] : [parts[0]?.[0]];
   return letters.filter(Boolean).join('').toUpperCase() || '?';
 }
 
-/** Decorative: the visitor's name is always written beside it, so screen readers skip it. */
 export function VisitorInitials({
   name,
   tone = 'active',
@@ -120,7 +118,6 @@ export function PassTicket({
         borderWidth: 1,
         borderColor: colors.border,
         backgroundColor: colors.background,
-        // Clips the outer half of each notch so only the cut-out shows.
         overflow: 'hidden',
       }}
     >
@@ -205,7 +202,6 @@ export function PassTicket({
             <View
               key={i}
               style={{
-                // Shares the row so a long PIN still fits on one line on a small phone.
                 flex: 1,
                 maxWidth: 48,
                 paddingVertical: spacing.sm,

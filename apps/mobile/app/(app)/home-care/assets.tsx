@@ -300,7 +300,6 @@ function AddAsset({ defaultHome, onDone }: { defaultHome: string; onDone: () => 
         warrantyExpiresAt: warrantyTo
           ? new Date(`${warrantyTo}T12:00:00`).toISOString()
           : undefined,
-        // A generator, borehole or tank is tagged so it shows under Power and water.
         utilityKind: utilityKindForCategory(category) ?? undefined,
       }),
     onSuccess: () => {

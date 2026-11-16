@@ -183,7 +183,6 @@ export default function DiasporaOperationsPage() {
     );
   };
 
-  // A dash, never a guess, while the figures are unknown (first load, or an older server).
   const figure = (field: keyof DiasporaQueueSummary) => summary?.[field] ?? '–';
   const workload: StatGroupItem[] = [
     ...DUE_FIGURES.map((entry) => ({

@@ -21,7 +21,6 @@ interface ActivityFeedCardProps {
   isLoading?: boolean;
   emptyIcon: SgIcon;
   viewAllHref?: string;
-  /** Rows shown before "Show more"; the dashboard should stay a glance, not a log. */
   initialCount?: number;
 }
 

@@ -22,7 +22,6 @@ export interface SellerSalePayout {
   propertyTitle?: string;
   releasedAt?: string;
   /** Where it went (bank + last four digits), only when the API can prove it. */
-  /** Why the last transfer did not complete, while FAILED. */
   failureReason?: string | null;
   sentTo?: PayoutSentTo | null;
 }
@@ -47,7 +46,6 @@ export const sellerPayoutApi = {
 
 export type PayoutMethod = 'NG_ACCOUNT' | 'FOREIGN_ACCOUNT';
 
-/** Account numbers and IBANs come back masked. */
 export interface ForeignBankAccount {
   id: string;
   accountHolderName: string;
@@ -70,7 +68,6 @@ export interface PayoutPreference {
   fallbackToNgAccount: boolean;
   ngAccount: { bankName: string; accountNumber: string; accountName: string } | null;
   foreignAccount: ForeignBankAccount | null;
-  /** False until a licensed foreign payout partner is live. */
   foreignPayoutsAvailable: boolean;
   nextPayout: {
     state: 'NG_ACCOUNT' | 'FOREIGN_ACCOUNT' | 'FOREIGN_PAYOUT_PENDING_PARTNER';

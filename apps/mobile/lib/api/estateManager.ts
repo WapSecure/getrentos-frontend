@@ -320,7 +320,6 @@ export interface PollDraft {
   options: string[];
 }
 
-/** The manager's own feed: keyed by the caller, not by an estate. */
 export interface EstateNotification {
   id: string;
   type: string;

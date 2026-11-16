@@ -1,8 +1,7 @@
 import { createHmac } from 'crypto';
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 
-// Needs an API with RISK_ENFORCE_PAYOUT_RULES=true and (non-production) TRUST_TIER_GATE_DISABLED_CAPS=payouts;
-// skips otherwise. Seeded accounts only: each run sets their transaction PIN to a known test value.
+// Needs an API with RISK_ENFORCE_PAYOUT_RULES=true and TRUST_TIER_GATE_DISABLED_CAPS=payouts; sets seeded accounts' PINs to a test value.
 
 const api = process.env.E2E_API_URL;
 const web = process.env.E2E_WEB_URL;
@@ -130,7 +129,6 @@ async function staffSignIn(page: Page): Promise<void> {
   await expect(page).not.toHaveURL(/\/login/, { timeout: 20_000 });
 }
 
-/** Needs review lists the newest case first, so its controls are the first on the page. */
 function newestCase(page: Page) {
   return {
     note: page.locator('textarea').first(),
@@ -159,7 +157,6 @@ test.describe('payout holds: appeal and staff review', () => {
     await user.locator('input[type="password"]').fill(password!);
     await user.getByRole('button', { name: /^sign in$/i }).click();
     await expect(user).not.toHaveURL(/\/login/, { timeout: 20_000 });
-    // Sign-in lands on the person's own dashboard, which names their portal.
     const portal = new URL(user.url()).pathname.split('/')[1];
     await user.goto(`/${portal}/settings`);
     await user.getByRole('button', { name: 'Security' }).click();

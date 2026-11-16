@@ -84,7 +84,6 @@ export const trustService = {
     );
   },
 
-  /** Diaspora identity cases only (passport, address abroad, bank statement abroad). */
   async listForeignReviewCases(params: {
     status?: string;
     page: number;

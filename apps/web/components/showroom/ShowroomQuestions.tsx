@@ -32,7 +32,6 @@ const QUESTION_MAX = 200;
 interface Asked {
   key: number;
   question: string;
-  /** Empty when the question matched nothing the listing could answer. */
   answers: ListingAnswer[];
 }
 

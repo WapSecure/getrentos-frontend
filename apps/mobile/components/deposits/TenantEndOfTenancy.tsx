@@ -37,7 +37,6 @@ export function TenantEndOfTenancy({
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
-  // Read once: whether the tenancy has ended only decides if the move-out button shows.
   const [ended] = useState(() => leaseHasEnded(leaseStatus, leaseEnd));
   const [disputing, setDisputing] = useState(false);
   const [reason, setReason] = useState('');

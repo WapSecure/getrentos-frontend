@@ -13,10 +13,8 @@ export interface StatGroupItem {
   /** A change against an earlier period; `tone` says whether it is good news, not its direction. */
   trend?: { label: string; tone: 'positive' | 'negative' | 'neutral' };
   onPress?: () => void;
-  /** Draws attention to a figure that needs action (overdue rent), without colouring the value. */
   attention?: boolean;
   supplement?: ReactNode;
-  /** A glyph on a soft blue tile beside the label; it turns red when the figure needs attention. */
   Icon?: SgIcon;
 }
 
@@ -27,7 +25,6 @@ export interface StatGroupProps {
   style?: StyleProp<ViewStyle>;
 }
 
-// Two figures to a row on a phone; an odd last figure takes the full row.
 function cellFrame(index: number, count: number) {
   const fullRow = count % 2 === 1 && index === count - 1;
   return {
@@ -121,7 +118,6 @@ function Figure({ item, index, count }: { item: StatGroupItem; index: number; co
   );
 }
 
-/** Related figures in one panel, divided by hairlines, instead of a box per number. */
 export function StatGroup({ title, items, footer, style }: StatGroupProps) {
   const { colors, spacing } = useTheme();
   return (
@@ -159,7 +155,6 @@ export function StatGroup({ title, items, footer, style }: StatGroupProps) {
   );
 }
 
-/** Shaped like StatGroup panels; `groups` gives the number of figures in each panel. */
 export function StatGroupSkeleton({
   groups = [4],
   style,

@@ -239,7 +239,6 @@ export async function apiUpload<T>(path: string, form: FormData, _retry = false)
 }
 
 export interface UploadProgressOptions {
-  /** Whole percent of the body sent, 0 to 100. At 100 the server may still be working. */
   onProgress?: (percent: number) => void;
   signal?: AbortSignal;
 }
@@ -318,7 +317,6 @@ export function sendWithProgress(
   });
 }
 
-/** One refresh-and-retry on a 401 (progress restarts from 0); a cancel rejects with an `AbortError`. */
 export async function apiUploadWithProgress<T>(
   path: string,
   form: FormData,

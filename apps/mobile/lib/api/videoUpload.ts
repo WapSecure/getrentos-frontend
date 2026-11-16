@@ -84,7 +84,6 @@ const RESUMABLE_FROM_BYTES = 10 * 1024 * 1024;
 const PART_ATTEMPTS = 3;
 const SIGN_BATCH = 10;
 
-/** Wait before retry `attempt`: 1 s, 2 s, 4 s… capped at 8 s, so a weak network gets breathing room. */
 export const retryDelayMs = (attempt: number) => Math.min(8000, 1000 * 2 ** (attempt - 1));
 
 export function missingParts(count: number, uploaded: readonly number[]): number[] {
@@ -102,7 +101,6 @@ interface ResumeState {
 const resumeId = (basePath: string, file: PickedFile, size: number) =>
   `sg.video-upload:${basePath}:${file.uri}:${size}`;
 
-/** Read from disk one part at a time; a retry with the same file sends only the parts storage lacks. Null when the API has no resumable uploads. */
 async function uploadVideoInParts(
   basePath: string,
   file: PickedFile,
@@ -171,7 +169,6 @@ async function uploadVideoInParts(
             if (!res.ok) throw new Error(`Video upload failed (${res.status})`);
             break;
           } catch (error) {
-            // The parts already sent stay; trying the same file again resumes from here.
             stopIfCancelled(signal);
             if (attempt >= PART_ATTEMPTS) throw error;
             await new Promise((r) => setTimeout(r, retryDelayMs(attempt)));
@@ -192,7 +189,6 @@ async function uploadVideoInParts(
   return result;
 }
 
-/** 100 means sent while storage and the API may still be checking. Falls back to older routes when the API lacks them. */
 export async function uploadVideoDirect(
   basePath: string,
   file: PickedFile,

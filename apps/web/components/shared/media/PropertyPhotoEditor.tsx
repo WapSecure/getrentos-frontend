@@ -39,7 +39,6 @@ export const photosFromKeys = (
     caption: details?.[key]?.caption,
   }));
 
-/** `keys[i]` is the uploaded key of `photos[i]`. Returns null when nothing is tagged, which clears the map. */
 export const mediaDetailsFor = (
   photos: EditablePhoto[],
   keys: (string | undefined)[]
@@ -55,7 +54,6 @@ export const mediaDetailsFor = (
   return entries.length ? Object.fromEntries(entries) : null;
 };
 
-/** True while any new photo is still uploading or has failed: its key is not known yet. */
 export const photosPending = (photos: EditablePhoto[]) => photos.some((p) => p.file && !p.key);
 
 export function PhotoDetailFields({
@@ -94,7 +92,6 @@ interface PropertyPhotoEditorProps {
   onChange: (next: EditablePhoto[]) => void;
   max?: number;
   emptyHint?: string;
-  /** When given, new photos upload as soon as they are added; until done `photosPending` is true. */
   upload?: (file: File, options: UploadOptions) => Promise<string>;
 }
 

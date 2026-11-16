@@ -1,7 +1,6 @@
 import type { CommercialDetails, CommercialFitOutCondition, ShowroomMarket } from './types';
 import { COMMERCIAL_PERMITTED_USE_LABEL as PERMITTED_USE } from './map';
 
-/** Only what the lister stated ever becomes a row. */
 export interface CommercialRow {
   key: string;
   label: string;
@@ -15,7 +14,6 @@ export interface CommercialSections {
   running: CommercialRow[];
 }
 
-/** The id the VAT row carries, so a note by the costs can link to it. */
 export const COMMERCIAL_VAT_ANCHOR = 'commercial-vat';
 
 export const AS_STATED = 'As stated in the listing';

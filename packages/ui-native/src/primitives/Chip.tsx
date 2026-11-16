@@ -36,7 +36,6 @@ export function Chip({
         borderRadius: radius.full,
         borderWidth: 1,
         borderColor: selected ? colors.primary : colors.border,
-        // Selected is Sureground blue: a soft tint of the primary, never a neutral or ink fill.
         backgroundColor: selected
           ? withAlpha(colors.primary, scheme === 'dark' ? 0.2 : 0.1)
           : colors.card,

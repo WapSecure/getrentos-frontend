@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { TriangleAlert } from '@sureground/icons';
 
-/** How long the guard must hold the button. Long enough to rule out a stray tap, short enough for an emergency. */
 export const PANIC_HOLD_MS = 1000;
 
 interface PanicHoldButtonProps {

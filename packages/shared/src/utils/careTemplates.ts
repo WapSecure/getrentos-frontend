@@ -1,7 +1,6 @@
 import type { MaintenanceCategoryCode } from './maintenance';
 
-// Preventive-care routines common in Nigerian homes. Intervals are typical, not rules: the owner
-// edits every field before the plan is saved.
+// Intervals are typical, not rules: the owner edits every field before the plan is saved.
 
 export type CareTemplate = {
   id: string;

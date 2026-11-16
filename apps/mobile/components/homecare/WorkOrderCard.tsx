@@ -28,7 +28,6 @@ export function PriorityTag({ p }: { p: Priority }) {
   return <Badge label={humaniseEnum(p)} tone={tone} />;
 }
 
-/** `from="managed"`: the owner opened it from Managed, so the detail reads through the owner route. */
 export function WorkOrderCard({ w, from }: { w: WorkOrder; from?: 'managed' }) {
   const { colors, spacing } = useTheme();
   const sla = slaState(w);

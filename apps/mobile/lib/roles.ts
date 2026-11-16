@@ -51,8 +51,6 @@ const PORTAL_PRIORITY: Portal[] = [
   'gateman',
 ];
 
-// Consumer workspaces follow the account's own order (the API lists the sign-up role first), so someone who
-// signed up to rent and later added buying still opens their renting app, as on the web.
 const CONSUMER_PORTALS: readonly Portal[] = ['buyer', 'renter', 'resident'];
 
 export function portalsForRoles(roles: BackendRole[]): Portal[] {
@@ -131,7 +129,6 @@ export interface SignupRole {
   id: SignupRoleId;
   name: string;
   tagline: string;
-  /** @sureground/icons/native icon name */
   icon: 'Home' | 'Building2' | 'TrendingUp' | 'Search' | 'Users' | 'UserCheck' | 'Briefcase';
   requires: VerificationReq[];
 }
@@ -194,7 +191,7 @@ export const SIGNUP_ROLES: SignupRole[] = [
   },
 ];
 
-/** Group segments are not in URLs, so "/messages" can resolve into another portal's group; open it in the user's own. Keep in step with app/(app)/(<portal>)/<screen>.tsx. */
+/** Group segments are not in URLs, so open the screen in the user's own portal. Keep in step with app/(app)/(<portal>)/<screen>.tsx. */
 const SHARED_TAB_SCREENS: Record<string, readonly Portal[]> = {
   discover: ['buyer', 'renter'],
   messages: ['agent', 'buyer', 'landlord', 'owner', 'realtor', 'renter'],

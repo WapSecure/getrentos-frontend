@@ -272,7 +272,6 @@ test('floor plans: one level per tagged photo, named by the caption exactly as w
   ];
   assert.deepEqual(floorPlanLevels(items), [
     { index: 0, label: 'Ground floor' },
-    // Numbers in a caption are the lister's words: shown as written, never parsed.
     { index: 2, label: 'First floor, 120 sqm (approx.)' },
   ]);
   assert.equal(isFloorPlan(items[3]!), false, 'only photos are plans');
@@ -444,7 +443,6 @@ test('sale: the trust chain never claims more than the verification summary on t
     }).trustChain;
     assert.equal(cleared?.metCount, 4, status);
   }
-  // A list card has no summary: the API's chain stands.
   assert.equal(
     fromSale({ id: 's', title: 'x', price: 1, trustChain: fullChain }).trustChain?.metCount,
     4

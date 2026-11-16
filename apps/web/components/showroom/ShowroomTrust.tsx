@@ -35,14 +35,12 @@ export function ShowroomTrust({ listing }: { listing: ShowroomListing }) {
           <PropertyTrustChain property={{ trustChain: chain }} />
         </div>
       )}
-      {/* The summary replaces the single verified row: it says what was checked rather than "verified". */}
       {summary && (
         <div className="mt-4">
           <VerificationSummaryCard summary={summary} />
         </div>
       )}
       <ul className="mt-4 space-y-3 text-sm">
-        {/* The bare flag is only the fallback, where the API sends neither a chain nor a summary. */}
         {!summary && !chain && (
           <li className="flex items-start gap-3 rounded-md border border-border bg-card p-4">
             {listing.verified ? (

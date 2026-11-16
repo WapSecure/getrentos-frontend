@@ -17,7 +17,6 @@ export interface DevelopmentsPage {
   totalPages: number;
 }
 
-/** A page from `GET /developments`, each item through the shared mapper; malformed ones are dropped. */
 export function developmentsPageOf(raw: unknown): DevelopmentsPage {
   const r = (raw && typeof raw === 'object' ? raw : {}) as {
     items?: unknown;
@@ -45,7 +44,6 @@ export const longDay = (iso: string) =>
 export const approvalCheckedLine = (checkedAt?: string) =>
   `Checked by Sureground${checkedAt ? ` on ${shortDay(checkedAt)}` : ''}. The documents stay private.`;
 
-/** "By Palm Developers (registered as Palm Developers Ltd)", the second name only when it differs. */
 export function developerLine(d: Pick<ShowroomDevelopment, 'developerName' | 'registeredName'>) {
   const registered =
     d.registeredName && d.registeredName.toLowerCase() !== d.developerName.toLowerCase()

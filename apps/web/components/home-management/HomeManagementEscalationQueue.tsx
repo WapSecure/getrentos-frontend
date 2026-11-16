@@ -191,7 +191,6 @@ export function HomeManagementEscalationQueue({
     />
   );
 
-  // Nothing to coordinate: a work order list should not sit under a full-height empty panel.
   if (!isPropertiesLoading && properties.length === 0) return null;
   const selectedProperty = properties.find((property) => property.id === effectivePropertyId);
   if (

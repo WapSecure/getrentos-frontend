@@ -16,7 +16,6 @@ export interface PassportSession extends SmileLivenessSession {
   freeAutomatedAttempts: number;
 }
 
-/** Error codes the foreign identity endpoints answer with (body `error`). */
 export type ForeignIdentityErrorCode =
   | 'FOREIGN_IDENTITY_NOT_ELIGIBLE'
   | 'AUTOMATED_ATTEMPT_USED'
@@ -25,5 +24,4 @@ export type ForeignIdentityErrorCode =
   | 'PASSPORT_VERIFIED'
   | 'ALREADY_APPROVED'
   | 'IN_REVIEW'
-  /** The offer or deposit step until source of funds is approved (403). */
   | 'SOURCE_OF_FUNDS_REVIEW_REQUIRED';

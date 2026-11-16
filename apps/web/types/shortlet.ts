@@ -52,7 +52,6 @@ export interface ShortletListing {
   longitude?: number;
   locationPrecision?: 'exact' | 'approximate';
   coverImageUrl?: string;
-  /** List only: resized copies and the cover's size and blurred placeholder. */
   imageVariants?: ImageVariant[];
   imagePreview?: ImagePreview;
   imageKeys: string[];
@@ -62,7 +61,6 @@ export interface ShortletListing {
   /** Once ready; its poster is used here. */
   videoStream?: { hlsUrl: string; posterUrl: string; durationSeconds?: number };
   tourUrl?: string;
-  /** Photos (with resized copies), then the video, then the 360 tour; absent from older API builds. */
   media?: MediaItem[];
   cancellationPolicy: ShortletCancellationPolicy;
   deposit?: number;
@@ -398,7 +396,6 @@ export interface ShortletPayout {
   status: 'PENDING' | 'SUCCESS' | 'FAILED';
   transferRef?: string;
   paidAt?: string;
-  /** Why the last transfer did not complete, while FAILED. */
   failureReason?: string | null;
   bookingCount: number;
   /** Bank + last four digits, only when the API can prove it. */

@@ -19,10 +19,6 @@ export function breadcrumbJsonLd(crumbs: Crumb[]) {
   };
 }
 
-/**
- * The listings a market page shows, each pointing at its own listing page (Google's summary-page
- * list format). Only for the unfiltered first page: filtered views are noindex.
- */
 export function itemListJsonLd(items: Crumb[]) {
   return {
     '@context': 'https://schema.org',
@@ -38,10 +34,7 @@ export function itemListJsonLd(items: Crumb[]) {
 
 const PRICE_UNIT: Record<string, string> = { month: 'MON', year: 'ANN' };
 
-/**
- * A RealEstateListing describing only what the page shows: no ratings, no invented dates.
- * Rentals carry a per-month or per-year price; land is a Place rather than a home.
- */
+/** Only what the page shows: no ratings, no invented dates. */
 export function listingJsonLd(listing: PublicListingDetail, path: string) {
   const url = `${SITE_URL}${path}`;
   const address = {
@@ -110,10 +103,7 @@ export function listingJsonLd(listing: PublicListingDetail, path: string) {
   };
 }
 
-/**
- * A guide as an Article, published by Sureground. No dates: the guides do not record when they were
- * written or last reviewed yet, and a made-up date would be worse than none.
- */
+/** No dates: the guides do not record them, and a made-up date would be worse than none. */
 export function articleJsonLd(article: { title: string; summary: string; path: string }) {
   return {
     '@context': 'https://schema.org',

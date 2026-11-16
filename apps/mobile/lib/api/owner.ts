@@ -283,7 +283,6 @@ export interface OwnerMarketInsights {
     size: number | null;
     soldMonthsAgo: number | null;
   }[];
-  /** Null when there are no comparable sales. */
   lowEstimate: number | null;
   highEstimate: number | null;
   suggested: number | null;
@@ -348,19 +347,14 @@ export interface OwnerRatingSummary {
 export interface OwnerInvestmentMetric {
   propertyId: string;
   propertyName: string;
-  /** Purchase price on the property record; null when none was entered. */
   purchasePrice: number | null;
-  /** Asking price on the latest sale listing; null when not listed. */
   askingPrice?: number | null;
-  /** Net rent over the last 12 months as a share of purchase price; null without both. */
   rentalYield?: number | null;
   /** Whole naira from the latest accredited valuer report while under 12 months old; null otherwise. */
   currentValue: number | null;
-  /** The latest valuer report with valuer, method and date; outOfDate when over 12 months old. */
   valuation?: PropertyValuation | null;
   /** Percent between the two latest in-date valuer reports; null without two. Not annualised. */
   appreciationRate: number | null;
-  /** The two reports behind appreciationRate, with both dates. */
   valuationChange?: {
     fromAmount: number;
     fromDate: string;
@@ -368,7 +362,6 @@ export interface OwnerInvestmentMetric {
     toDate: string;
     changePercent: number;
   } | null;
-  /** Always null: needs a valuation. */
   roiPercentage: number | null;
 }
 
@@ -475,7 +468,6 @@ export const ownerApi = {
     }),
   /** Stages a photo or video; it becomes the property's once attached. */
   uploadMedia: (file: PickedFile, kind: 'image' | 'video') => {
-    // Videos go straight to storage, so a large tour never passes through the API.
     if (kind === 'video') return uploadVideoDirect('/owner/properties', file);
     const form = new FormData();
     appendFile(form, 'file', file);

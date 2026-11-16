@@ -28,7 +28,6 @@ export const DepositEndOfTenancy = ({
   leaseStatus: string;
   leaseEnd?: string;
 }) => {
-  // Read once: whether the tenancy has ended only decides if the move-out button shows.
   const [now] = useState(() => Date.now());
   const leaseEnded =
     leaseStatus === 'EXPIRED' || (leaseEnd ? new Date(leaseEnd).getTime() <= now : false);

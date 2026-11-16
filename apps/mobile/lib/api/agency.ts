@@ -269,11 +269,8 @@ export interface AttentionItem {
 
 export interface OwnerInvite {
   id: string;
-  /** Empty when the invite went by phone number to an account with no email. */
   email: string;
-  /** The owner's number, masked ("+234 803 *** 4567"), when the invite has no email. */
   phoneMasked?: string | null;
-  /** Only on a new invite: how it reached them (IN_APP is a notification in their app). */
   deliveredBy?: ('EMAIL' | 'IN_APP')[];
   name: string | null;
   status: 'PENDING' | 'CLAIMED' | 'REVOKED' | 'EXPIRED';
@@ -284,9 +281,7 @@ export interface OwnerInvite {
 
 export interface OwnerInviteClaimInfo {
   organizationName: string;
-  /** Empty for an invite sent by phone number. */
   email: string;
-  /** Set instead of email for a phone invite: the invited number, masked. */
   phoneMasked?: string | null;
   status: OwnerInvite['status'];
   expired: boolean;
@@ -397,7 +392,6 @@ export const agencyApi = {
   attention: () => apiFetch<{ items: AttentionItem[] }>('/agency/assistant/attention'),
   managedProperties: () => apiFetch<ManagedProperty[]>('/property-authorities/managed'),
   ownerInvites: () => apiFetch<OwnerInvite[]>('/agency/owner-invites'),
-  /** `contact` is the owner's phone number or email; an owner on Sureground hears in their app. */
   inviteOwner: ({ contact, ...input }: { contact: string; name?: string; note?: string }) =>
     apiFetch<OwnerInvite>('/agency/owner-invites', {
       method: 'POST',
@@ -405,7 +399,6 @@ export const agencyApi = {
     }),
   ownerInviteClaimInfo: (token: string) =>
     apiFetch<OwnerInviteClaimInfo>(`/agency/owner-invites/claim/${encodeURIComponent(token)}`),
-  /** Accept as the signed-in owner; a phone-only owner accepts as the account the invite names. */
   claimOwnerInvite: (token: string) =>
     apiFetch<{ organizationName: string }>(
       `/agency/owner-invites/claim/${encodeURIComponent(token)}`,

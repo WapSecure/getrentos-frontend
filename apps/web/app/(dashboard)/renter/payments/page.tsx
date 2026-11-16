@@ -73,7 +73,6 @@ export default function PaymentsPage() {
     TABS.map((tab) => tab.id)
   );
   const toast = useToast();
-  // Only tenants who have been billed a service charge see its tab.
   const serviceChargesQuery = useQuery({
     queryKey: renterKeys.serviceCharges,
     queryFn: () => unwrap(renterServiceChargesService.list()),
@@ -286,7 +285,6 @@ export default function PaymentsPage() {
 
   const confirmingMoveInPayment = payments.find((p) => p.id === confirmingMoveInId) ?? null;
   const releaseActions = rentReleaseActions(payments);
-  // After move-in the same release is an early payout of rent that would release on its own date.
   const releasingEarly =
     !!confirmingMoveInId && releaseActions.get(confirmingMoveInId) === 'release-now';
   const heldFigure = confirmingMoveInPayment?.heldAmountNaira

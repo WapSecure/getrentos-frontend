@@ -25,11 +25,9 @@ export interface InvestorAttentionItem extends AttentionItem {
   kind: InvestorAttentionKind;
   /** ISO date-time the item is due or expected by, shown as Lagos time beside the investor's own. */
   dueAt?: string;
-  /** What `dueAt` means, e.g. "Earliest time offered". */
   dueLabel?: string;
 }
 
-/** A sale whose deposit the buyer has not paid yet (`GET buyer/transactions`, `deposit_pending`). */
 export interface DepositDue {
   id: string;
   propertyTitle: string;
@@ -52,13 +50,11 @@ export interface InspectionLike {
 }
 
 export interface AttentionLinks {
-  /** Where a purchase opens: the buyer's own workspace or the one a representative sees. */
   purchase: (purchase: Pick<PurchaseSummary, 'role' | 'transactionId'>) => string;
   risk: string;
   tours?: string;
   approvals?: string;
   identity: string;
-  /** Where a dispute opens; without it, the purchase's own workspace. */
   dispute?: (dispute: Pick<PurchaseDispute, 'id' | 'kind'>) => string;
 }
 
@@ -114,7 +110,6 @@ const identityItems = (identity: ForeignIdentityStatus, href: string): InvestorA
       });
     }
   }
-  // Only the passport is asked for up front; address and bank statement follow when needed.
   if (identity.passport.state === 'NOT_STARTED') {
     items.push({
       key: 'identity-passport-start',
@@ -128,7 +123,6 @@ const identityItems = (identity: ForeignIdentityStatus, href: string): InvestorA
   return items;
 };
 
-/** A row only while it is needed and not already with our team. */
 const sourceOfFundsItems = (
   identity: ForeignIdentityStatus,
   href: string
@@ -169,7 +163,6 @@ const sourceOfFundsItems = (
   return [];
 };
 
-/** Most pressing first; a purchase appears once, preferring the deposit row because it carries the amount. */
 export const buildAttentionQueue = (input: AttentionInput): InvestorAttentionItem[] => {
   const items: InvestorAttentionItem[] = [];
   const { links } = input;
@@ -232,8 +225,6 @@ export const buildAttentionQueue = (input: AttentionInput): InvestorAttentionIte
     }
     const dispute = purchase.dispute;
     if (dispute) {
-      // The model records no turn for the buyer, only Sureground's response deadline, so this is
-      // information with that deadline rather than a task.
       items.push({
         key: `dispute-${dispute.id}`,
         kind: 'dispute',
@@ -297,7 +288,6 @@ export const buildAttentionQueue = (input: AttentionInput): InvestorAttentionIte
     .map(({ item }) => item);
 };
 
-/** The usual path of a purchase; paused and cancelled sit outside it. */
 const STAGE_PATH = [
   'INTERESTED',
   'OFFER_ACCEPTED',
@@ -333,7 +323,6 @@ const openCount = (counts: InvestorStatusCounts | undefined, closed: Set<string>
 
 export interface PortfolioFigures {
   activePurchases: number | null;
-  /** Purchases I follow as someone's representative. */
   representing: number;
   depositsHeldCount: number | null;
   /** Their total in whole naira, only when every held deposit's amount is known. */
@@ -363,7 +352,6 @@ export interface HeldDepositSource {
   depositAmount?: number;
 }
 
-/** The naira total comes only from the buyer's own list, when complete and every held deposit has an amount. */
 export const portfolioFigures = (
   overview: InvestorOverview | undefined,
   transactions?: { items: HeldDepositSource[]; complete: boolean }
@@ -374,7 +362,6 @@ export const portfolioFigures = (
 
   let activePurchases: number | null = null;
   if (overview?.protectedPurchases || overview?.landPurchases || own) {
-    // `purchases` covers sales only; land purchases still come from their own counts.
     const sales = own ? (ownActive ?? 0) : openCount(overview?.protectedPurchases, CLOSED_SALE);
     activePurchases = sales + openCount(overview?.landPurchases, CLOSED_LAND);
   }

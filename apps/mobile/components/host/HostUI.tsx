@@ -36,7 +36,6 @@ export const BOOKING_STATUS: Record<ShortletBookingStatus, { label: string; tone
   COMPLETED: { label: 'Completed', tone: 'info' },
 };
 
-/** A confirmed request is not a secured stay until the guest pays: say so, or a host may hold dates for nobody. */
 export function bookingStatus(b: {
   status: ShortletBookingStatus;
   paymentStatus?: string;

@@ -66,7 +66,6 @@ interface GeoInsightsPanelProps {
   listingId: string;
   title?: string;
   defaultDestination?: string;
-  /** `public` reads the open endpoint, for listing pages that don't require sign-in. */
   audience?: 'renter' | 'public';
 }
 
@@ -96,7 +95,6 @@ export const GeoInsightsPanel = ({
           ? publicMarketService.geoInsights(listingId, destination || undefined)
           : renterService.getGeoInsights(listingId, destination || undefined)
       ),
-    // A side panel: its own message below, never the page's error screen.
     throwOnError: false,
   });
 

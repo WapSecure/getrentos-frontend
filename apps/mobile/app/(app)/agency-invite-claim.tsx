@@ -10,7 +10,6 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** A phone-only owner arrives from the invite notification; the server checks they are the account it names. */
 export default function AgencyInviteClaim() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

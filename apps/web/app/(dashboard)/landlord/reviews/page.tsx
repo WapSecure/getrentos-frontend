@@ -39,7 +39,6 @@ export default function LandlordReviewsPage() {
   });
 
   const overallRating = summary?.averageRating ?? 0;
-  // Tenants rate you and the home separately; a category nobody has rated yet is left out, not shown as 0.
   const categories = [
     {
       label: 'You as landlord',

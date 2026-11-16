@@ -34,8 +34,7 @@ type Pending =
   | { kind: 'all'; listingId: string; listingTitle: string }
   | { kind: 'allow'; optOut: ListingCollectionOptOut };
 
-// Consent rule: the lister is told once when their listing is added, can remove it in one tap,
-// and can keep it out of every Sureground collection.
+// Consent rule: the lister is told once, can remove it in one tap, and can opt out of every collection.
 export function ListingCollectionsDesk() {
   const toast = useToast();
   const queryClient = useQueryClient();

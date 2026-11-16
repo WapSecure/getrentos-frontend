@@ -21,8 +21,6 @@ export function ApplicationAssistantCard() {
   if (query.isLoading) return <Skeleton height={160} radius={radius.xl} />;
   if (!query.data) return null;
 
-  // The tip is built here from the renter's own contact details and checks, so it only asks for
-  // what applies to them (a phone-only renter is never sent to verify an email).
   const identityState: IdentityState = !identity.known
     ? 'unknown'
     : identity.verified

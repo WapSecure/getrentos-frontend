@@ -76,7 +76,6 @@ export function ShowroomPreview(props: HeroViewerProps) {
   return <HeroWithViewer {...props} />;
 }
 
-/** One `property_detail_view` per listing shown. */
 export function useTrackDetailView(listingId: string | undefined, market: ShowroomEventMarket) {
   useEffect(() => {
     if (listingId) trackShowroom({ name: 'property_detail_view', listingId, market });

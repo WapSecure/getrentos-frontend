@@ -252,7 +252,6 @@ export interface AgentNotificationPreference {
   push: boolean;
 }
 
-/** The agent's own feed, keyed by the caller. */
 export interface AgentNotification {
   id: string;
   type: string;

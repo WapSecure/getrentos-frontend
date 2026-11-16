@@ -8,7 +8,6 @@ import type {
   RoleNavigationConfig,
 } from './types';
 
-/** Typed ids: a group, primary or utility entry naming an unknown item fails to compile. */
 export const defineRoleNavigation = <const Id extends string>(config: {
   ariaLabel: string;
   workspaceLabel: string;

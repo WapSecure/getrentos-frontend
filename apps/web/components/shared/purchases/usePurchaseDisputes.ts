@@ -16,7 +16,6 @@ const ACTIVE_SALE_DISPUTE = new Set<SaleDispute['status']>(['OPEN', 'UNDER_REVIE
 const DISPUTABLE_MONEY = new Set(['PROTECTED', 'RELEASE_REQUESTED']);
 
 export interface PurchaseDisputes {
-  /** Steps the buyer disputed with the seller (a step flag, not a case Sureground decides). */
   milestones: WorkspaceMilestone[];
   sale: SaleDispute[];
   land: LandDispute[];

@@ -24,7 +24,6 @@ const formatDateTime = (value: string) =>
 
 interface DeliveryLogRowProps {
   log: DeliveryLog;
-  /** Omit to show the row read-only. */
   onMarkCollected?: () => void;
   isMarkingCollected?: boolean;
 }

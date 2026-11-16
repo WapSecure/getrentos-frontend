@@ -61,7 +61,6 @@ export interface MaintenanceRequest {
   images: string[];
   assignedVendorId?: string;
   assignedVendorName?: string;
-  /** When the vendor is due, once the landlord books a visit. */
   scheduledFor?: string;
   createdAt: string;
   updatedAt: string;

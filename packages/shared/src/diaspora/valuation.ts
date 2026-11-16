@@ -1,9 +1,6 @@
 import { formatCurrency } from '../utils/format';
 
-/**
- * A value exists only as a dated accredited valuer report, never "market value". A report over 12 months
- * old is shown as out of date and never counted in a total; nothing is estimated between reports.
- */
+/** A value is only a dated accredited valuer report; one over 12 months old is shown out of date and never totalled. */
 export type ValuationMethod = 'COMPARABLE_SALES' | 'INCOME' | 'COST' | 'RESIDUAL';
 
 export const VALUATION_METHOD_LABELS: Record<ValuationMethod, string> = {
@@ -30,7 +27,6 @@ export interface PropertyValuation {
   validUntil: string;
   /** Over 12 months old: shown, never counted. */
   outOfDate: boolean;
-  /** Portfolio rows only. */
   propertyTitle?: string;
 }
 

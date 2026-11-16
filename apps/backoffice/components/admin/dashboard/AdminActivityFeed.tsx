@@ -34,7 +34,6 @@ const typeFor = (type: string): ActivityType => {
   }
 };
 
-// Six recent events keep the dashboard a glance; staff load older ones on request.
 const PAGE = 6;
 /** The API returns at most this many events. */
 const MAX = 48;

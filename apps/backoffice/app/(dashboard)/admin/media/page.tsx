@@ -54,7 +54,6 @@ function formatSize(bytes: number | null): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-/** The file name after the upload id, for a readable row; the full key stays in the title for support. */
 function displayName(key: string): string {
   const name = key.slice(key.lastIndexOf('/') + 1);
   return (

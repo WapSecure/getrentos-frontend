@@ -116,7 +116,6 @@ export default function AdminFraudPage() {
       unwrap(adminService.updateFraudAlertStatus(id, status)),
     onSuccess: (_updated, { status, subjectName }) => {
       toast.success(STATUS_TOASTS[status](subjectName));
-      // Deciding an alert also decides the automated listing warning it carries.
       void queryClient.invalidateQueries({ queryKey: adminKeys.listingWarnings });
       return queryClient.invalidateQueries({ queryKey: ['admin', 'fraudAlerts'] });
     },

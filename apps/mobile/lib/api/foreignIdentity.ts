@@ -8,8 +8,6 @@ import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { SmileLivenessSession } from './trust';
 
-// The status itself is `investorApi.identityAbroad`.
-
 export interface PassportSession extends SmileLivenessSession {
   automatedAttemptsUsed: number;
   freeAutomatedAttempts: number;
@@ -36,7 +34,6 @@ export const foreignIdentityApi = {
     appendFile(form, 'selfie', selfie);
     return apiUpload<ForeignSubmission>('/trust/foreign-identity/passport/review', form);
   },
-  /** Would a purchase at this price need source of funds approved first? */
   checkSourceOfFunds: (amount: number) =>
     apiFetch<SourceOfFundsCheck>(
       `/trust/foreign-identity/source-of-funds/check?amount=${Math.round(amount)}`
@@ -50,7 +47,6 @@ export const foreignIdentityApi = {
       return null;
     }
   },
-  /** Bank statements, a supporting document, and the donor's ID with a gift or inheritance letter. */
   submitSourceOfFunds: (input: {
     bankStatement: PickedFile;
     supportingKind: SourceOfFundsSupportingKind;

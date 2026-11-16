@@ -2,8 +2,7 @@ import { createHmac } from 'crypto';
 import { expect, test, type Page } from '@playwright/test';
 import { accountFromEnv, signIn } from './helpers/auth';
 
-// Runs against a local stack (API, web, back office, MailHog); each test skips when the E2E_* env
-// vars it needs are unset. No real personal data.
+// Needs a local stack (API, web, back office, MailHog); each test skips when its E2E_* env vars are unset.
 
 const landlord = accountFromEnv('LANDLORD');
 const pin = process.env.E2E_LANDLORD_PIN;
@@ -126,7 +125,6 @@ test.describe('security flows', () => {
 
     await signIn(page, landlord!);
     await change(changed, true);
-    // Put the account back so the next run starts from the same place.
     await change(original, false);
   });
 

@@ -199,7 +199,6 @@ const StatGroupFrame = ({ items }: { items: number }) => (
   </div>
 );
 
-/** Shaped like StatGroup panels; `groups` gives the number of figures in each panel. */
 export const StatGroupSkeleton = ({
   groups = [4],
   className,

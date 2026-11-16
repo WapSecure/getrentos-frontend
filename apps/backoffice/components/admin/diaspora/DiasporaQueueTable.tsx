@@ -39,7 +39,6 @@ interface DiasporaQueueTableProps {
   groups: DiasporaQueueGroup[];
   currentUserId?: string;
   canAssign: boolean;
-  /** The item being taken right now, so only its button shows progress. */
   pendingId?: string;
   onOpen: (item: DiasporaQueueItem) => void;
   onTake: (item: DiasporaQueueItem) => void;
@@ -55,7 +54,6 @@ const dueTone = {
   none: 'text-muted-foreground',
 } as const;
 
-/** Clicks on controls inside a clickable row must not open the row as well. */
 const stop = (event: MouseEvent) => event.stopPropagation();
 
 function DueCell({ item }: { item: DiasporaQueueItem }) {

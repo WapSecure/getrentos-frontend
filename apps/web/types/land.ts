@@ -195,7 +195,6 @@ export interface PublicLandListing {
   longitude?: number;
   locationPrecision?: 'exact' | 'approximate';
   coverImageUrl?: string | null;
-  /** List only: resized copies and the cover's size and blurred placeholder. */
   imageVariants?: ImageVariant[];
   imagePreview?: ImagePreview;
   ownerVerified?: boolean;

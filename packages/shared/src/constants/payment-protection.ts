@@ -1,4 +1,3 @@
-/** Said the same way on web, mobile and the API's trust chain. */
 export const RENT_PROTECTION_RULE =
   'Sureground holds your rent and releases it to the landlord when you confirm move-in or on its scheduled release date, whichever comes first. A dispute raised before then keeps it held until it is resolved.';
 

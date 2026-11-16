@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 import { Select, type SelectOption } from '@sureground/ui/Select';
 
-/** Used when the browser cannot list its zones. */
 const FALLBACK_ZONES = [
   'Africa/Lagos',
   'Europe/London',
@@ -31,7 +30,6 @@ export const browserTimeZone = (fallback = ''): string => {
   }
 };
 
-/** Every zone the browser knows, searchable by city; keeps a saved zone it does not list. */
 export const TimeZoneSelect = ({
   value,
   onValueChange,

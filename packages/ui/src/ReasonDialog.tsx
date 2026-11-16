@@ -11,8 +11,6 @@ import { RadioGroup } from './RadioGroup';
 import { Select } from './Select';
 import { Textarea } from './Textarea';
 
-// Callers keep their own copy, limits and API call; the layout and submit/close rules are shared.
-
 export interface ReasonCategory<C extends string = string> {
   value: C;
   label: string;
@@ -20,10 +18,8 @@ export interface ReasonCategory<C extends string = string> {
 }
 
 export interface ReasonDialogValues<C extends string = string> {
-  /** Trimmed. */
   reason: string;
   category?: C;
-  /** Trimmed; only when `subject` is set. */
   subject?: string;
   evidence: File[];
 }
@@ -36,7 +32,6 @@ interface ReasonDialogProps<C extends string = string> {
   subject?: { label: string; placeholder?: string; minLength?: number; maxLength?: number };
   categories?: {
     options: readonly ReasonCategory<C>[];
-    /** Without it the control is named by `ariaLabel` and shows `placeholder` only. */
     label?: string;
     ariaLabel?: string;
     placeholder?: string;
@@ -45,17 +40,11 @@ interface ReasonDialogProps<C extends string = string> {
   };
   reasonLabel: string;
   reasonPlaceholder?: string;
-  /** A function receives the trimmed length, for a running count. */
   reasonHint?: ReactNode | ((length: number) => ReactNode);
-  /** Counted on the trimmed text. */
   minLength?: number;
   maxLength?: number;
   showCount?: boolean;
   rows?: number;
-  /**
-   * `change` (default) keeps the confirm button disabled until the form is valid.
-   * `submit` leaves it enabled and shows `tooShortMessage` after a submit attempt.
-   */
   validateOn?: 'change' | 'submit';
   tooShortMessage?: string;
   evidence?: {

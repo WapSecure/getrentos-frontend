@@ -65,9 +65,7 @@ export type LandDiligenceStatus =
   | 'VERIFIED'
   | 'REJECTED'
   | 'EXPIRED'
-  /** Approved subject to conditions: public, but not open to reservations or offers yet. */
   | 'CONDITIONAL'
-  /** Paused by staff or the system (a dispute hold, an encumbrance): off the market. */
   | 'SUSPENDED';
 
 export type LandTitleType =
@@ -133,7 +131,6 @@ export interface VerificationSummary {
   checkedBy: string[];
   documentsReviewed: { kind: string; label: string }[];
   openIssues: string[];
-  /** What the verification does not cover; the API never sends it empty. */
   limits: string[];
   recheckBy: string | null;
 }
@@ -205,7 +202,6 @@ export const VERIFICATION_LIMITS_FALLBACK = [
   'Take independent legal advice before you commit money.',
 ];
 
-/** Undefined when missing or the status is unknown (an older API). */
 export function verificationSummaryOf(value: unknown): VerificationSummary | undefined {
   if (!value || typeof value !== 'object') return undefined;
   const v = value as Record<string, unknown>;

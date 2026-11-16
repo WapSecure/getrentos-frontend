@@ -17,8 +17,6 @@ export function useCardAnalytics(
   surface: string,
   { inView = true }: { inView?: boolean } = {}
 ) {
-  // One tracker per list and surface. `inView` is the starting state (a constant per list); later
-  // changes go through setInView.
   const tracker = useMemo(
     () =>
       new CardImpressionTracker(

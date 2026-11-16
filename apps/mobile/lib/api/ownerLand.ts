@@ -262,7 +262,6 @@ export interface LandTour {
   recording?: SiteTourRecording;
 }
 
-/** Joining the built-in call; `recordingEnabled` says whether this call may be recorded. */
 export type TourJoin = VideoCallJoin & { recordingEnabled: boolean };
 
 /** Tours start between 08:00 and 16:30 Lagos time, so there is daylight at the land. */

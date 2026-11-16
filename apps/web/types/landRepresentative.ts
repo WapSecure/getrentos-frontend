@@ -33,7 +33,6 @@ export interface CoApprovalView {
   disableEffectiveAt?: string;
   representative?: { appointmentId: string; name?: string };
   pending?: CoApprovalPendingStep[];
-  /** Both approved the deposit release; the buyer still has to press Release. */
   releaseApproved?: boolean;
 }
 
@@ -65,7 +64,6 @@ export const REPRESENTATIVE_SCOPE_LABELS: Record<RepresentativeScope, string> = 
   ATTEND: 'Attend site visits and tours for me',
 };
 
-/** For tables, where the full sentences do not fit. */
 export const REPRESENTATIVE_SCOPE_SHORT_LABELS: Record<RepresentativeScope, string> = {
   VIEW: 'See purchases',
   CO_APPROVE: 'Approve the release',

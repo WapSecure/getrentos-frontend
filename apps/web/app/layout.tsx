@@ -21,7 +21,6 @@ const newsreader = Newsreader({
   subsets: ['latin'],
   display: 'swap',
   weight: ['300', '400', '500'],
-  // No italic: nothing sets the serif in italics, and every style is another preloaded file on every page.
   style: ['normal'],
   variable: '--font-newsreader',
 });

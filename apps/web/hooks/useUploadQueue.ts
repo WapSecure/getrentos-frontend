@@ -10,10 +10,6 @@ export type UploadState =
 
 const isAbort = (error: unknown) => error instanceof Error && error.name === 'AbortError';
 
-/**
- * A failure only stops its own file; everything still running is cancelled on unmount. A finished
- * upload leaves the queue and goes to `onSuccess`.
- */
 export function useUploadQueue<R>({
   upload,
   onSuccess,
@@ -100,7 +96,6 @@ export function useUploadQueue<R>({
     [pump, setState]
   );
 
-  /** Stops the file and forgets it. */
   const cancel = useCallback(
     (id: string) => {
       running.current.get(id)?.abort();
@@ -138,7 +133,6 @@ export function useUploadQueue<R>({
     add,
     cancel,
     retry,
-    /** Files still queued or sending. */
     busy: values.some((s) => s.status !== 'failed'),
     failed: values.filter((s) => s.status === 'failed').length,
   };

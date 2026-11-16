@@ -85,7 +85,6 @@ const useNow = () => {
   return now;
 };
 
-/** Enough rows to total the deposits held; a longer history shows the count only. */
 const LIST_PAGE = 50;
 
 // Link across portals only when the viewer holds that role: the other portal turns everyone else away.
@@ -105,7 +104,6 @@ const usePortalLinks = (portal: InvestorPortal) => {
     landPurchases: buyer ? LAND_BUYER_ROUTES.HUB : undefined,
     tours: buyer ? VISIT_ROUTES.BUYER_TOURS : undefined,
     inspections: buyer ? VISIT_ROUTES.BUYER_INSPECTIONS : undefined,
-    // The owner's own agreements with Sureground Managed (OWNER_MANAGED is the reverse).
     managed: owner ? ROUTES.OWNER_MANAGEMENT : undefined,
     managedArea: owner ? DIASPORA_ROUTES.OWNER_MANAGED : undefined,
     approvals: owner ? ROUTES.OWNER_APPROVALS : undefined,
@@ -234,7 +232,6 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
     enabled: Boolean(links.tours),
     retry: false,
   });
-  // Deposit amounts: the overview counts purchases but does not total what is held.
   const transactions = useQuery({
     queryKey: [...buyerKeys.transactions, { investor: true, pageSize: LIST_PAGE }],
     queryFn: () => unwrap(buyerService.listTransactions({ page: 1, pageSize: LIST_PAGE })),
@@ -243,7 +240,6 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
   });
   const data = overview.data;
   const profile = data?.profile ?? null;
-  // Complete profile; the risk statement may still be owed, which the queue asks for.
   const profileComplete = Boolean(profile) && (profile?.missingFields ?? []).length === 0;
   const risk = data?.riskDeclaration ?? null;
   const timeZone = profile?.timeZone ?? null;
@@ -318,7 +314,6 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
       href: links.managed,
     });
   }
-  // Only figures with a record behind them.
   if (figures.acquisitionCost !== null) {
     portfolio.push({
       icon: Landmark,

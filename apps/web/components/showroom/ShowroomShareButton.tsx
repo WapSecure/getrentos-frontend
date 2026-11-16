@@ -20,7 +20,6 @@ export function ShowroomShareButton({
   const share = async () => {
     track({ name: 'property_share', listingId, surface: 'listing_page' });
     const url = `${window.location.origin}${path}`;
-    // Phones get the system sheet (WhatsApp is usually first); everyone else gets our dialog.
     if (typeof navigator.share === 'function' && window.matchMedia('(pointer: coarse)').matches) {
       try {
         await navigator.share({ title, url });

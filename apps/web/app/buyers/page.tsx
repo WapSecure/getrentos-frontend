@@ -117,7 +117,6 @@ const LAND_FAQ: PlainFaq = {
 
 export default async function BuyersPage() {
   const land = await landAvailability();
-  // A failed call counts as open, matching the land pages themselves.
   const showLand = !land || land.marketplace;
   const faq = showLand ? [...HOME_FAQ, LAND_FAQ] : HOME_FAQ;
 

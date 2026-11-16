@@ -90,7 +90,6 @@ export default function AgentHome() {
   );
 
   const d = dashboard.data;
-  // Assigned, in progress and overdue are exclusive statuses, so together they are the open tasks.
   const openTasks = d ? d.assignedTasks + d.inProgressTasks + d.overdueTasks : 0;
   const statGroups = d ? (
     <>

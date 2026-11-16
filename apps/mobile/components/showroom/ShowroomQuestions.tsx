@@ -38,7 +38,6 @@ const QUESTION_MAX = 200;
 interface Asked {
   key: number;
   question: string;
-  /** Empty when the question matched nothing the listing could answer. */
   answers: ListingAnswer[];
 }
 
@@ -52,7 +51,6 @@ export function ShowroomQuestions({
   askListerLabel = 'Ask the lister',
 }: {
   listing: ShowroomListing;
-  /** The screen's existing enquiry flow. Without one, no ask button is shown. */
   onAskLister?: () => void;
   askListerLabel?: string;
 }) {

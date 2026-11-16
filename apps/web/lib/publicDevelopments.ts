@@ -1,4 +1,4 @@
-// Server-safe (no client imports). Both routes are `@Public()` and return live developments only.
+// Server-safe (no client imports).
 import {
   developmentOf,
   developmentSummaryOf,
@@ -27,7 +27,6 @@ async function get(path: string): Promise<unknown> {
   return res.json();
 }
 
-/** Null when it is not live (or the id is not one). */
 export async function fetchPublicDevelopment(id: string): Promise<ShowroomDevelopment | null> {
   if (!UUID.test(id)) return null;
   return developmentOf(await get(`/developments/${encodeURIComponent(id)}`)) ?? null;

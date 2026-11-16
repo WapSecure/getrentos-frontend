@@ -1,4 +1,3 @@
-/** Words that identify each kind of application document, in a saved file's name or category. */
 const KINDS: { slot: RegExp; file: RegExp }[] = [
   {
     slot: /government id|identity|\bid\b/i,
@@ -24,7 +23,6 @@ export function savedDocumentFits(
   const kind = KINDS.find((k) => k.slot.test(slotName));
   if (!kind) return false;
   const words = `${file.name} ${file.category ?? ''}`;
-  // A file that names another kind first (an ID called "ID for income check") still counts as that other kind.
   const otherKind = KINDS.find(
     (k) => k !== kind && k.file.test(file.name) && !kind.file.test(file.name)
   );

@@ -60,7 +60,6 @@ export function OpsToolbar({ children, className }: { children: ReactNode; class
 export interface Fact {
   label: string;
   value: ReactNode;
-  /** Spans the full row, for long values such as references. */
   wide?: boolean;
   mono?: boolean;
 }

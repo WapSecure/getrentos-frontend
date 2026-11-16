@@ -27,7 +27,6 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
       ),
     },
     {
-      // Property and unit on two lines, so the row fits a laptop screen.
       key: 'property',
       header: 'Property',
       render: (payment) => (
@@ -97,7 +96,6 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
             {payout.label}
           </Badge>
         ) : (
-          // "None" read as if the landlord got nothing, even beside "Released to landlord".
           <span className="text-muted-foreground">Not yet</span>
         );
       },
@@ -140,7 +138,6 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
   );
 };
 
-/** Rent is the default, so only other charges are named: a service charge otherwise reads as rent. */
 function chargeLabel(category?: string): string | null {
   if (!category || category === 'rent') return null;
   const words = category.replace(/_/g, ' ').toLowerCase();

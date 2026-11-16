@@ -21,14 +21,10 @@ import {
   type MediaItem,
 } from '@sureground/shared/showroom';
 
-// Over a photo the pills keep a fixed dark backing, so they read on any image in either theme.
 const PILL = { bg: 'rgba(0,0,0,0.6)', fg: '#fff' };
-// Floor plans are line drawings: shown whole on a light page.
 const PAPER = '#fff';
-// A phone-width hero; the 1600px copy is for the full-screen viewer.
 const HERO_PX = 960;
 
-/** The API's tiny blurred stand-in, shown until the photo loads; none for photos not yet backfilled. */
 const blurSource = (m: MediaItem) => {
   const uri = m.kind === 'image' ? placeholderOf(m.placeholder) : undefined;
   return uri ? { uri } : undefined;
@@ -45,7 +41,6 @@ export function ShowroomHero({
   height?: number;
   emptyLabel?: string;
   area?: string | null;
-  /** Index into `items`; `room` is set when a room shortcut (floor plans) opened it. */
   onOpen: (index: number, room?: 'floor_plan') => void;
 }) {
   const { spacing } = useTheme();
@@ -56,7 +51,6 @@ export function ShowroomHero({
   const [measured, setMeasured] = useState<number | null>(null);
   const width = measured ?? window.width;
 
-  // Cover first; floor plans come after every other photo, so a line drawing is never the cover.
   const photos = heroPhotos(items).map((m) => ({ m, index: items.indexOf(m) }));
   const levels = floorPlanLevels(items);
   const videoAt = items.findIndex((m) => m.kind === 'video');
@@ -102,7 +96,6 @@ export function ShowroomHero({
   );
 
   if (photos.length === 0) {
-    // Shorter than a real hero: an empty state should not take half the screen.
     return (
       <View style={{ height: Math.min(height, 220) }}>
         <ListingPlaceholder size="hero" area={area} caption={emptyLabel} topInset={spacing.lg} />
@@ -150,7 +143,6 @@ export function ShowroomHero({
               transition={reduced ? 0 : 200}
               accessible={false}
               alt={m.alt ?? `Photo ${i + 1} of ${photos.length}`}
-              // Only the first photo loads at once; the rest wait until they are near.
               priority={i === 0 ? 'high' : 'normal'}
               style={{ width, height, backgroundColor: isFloorPlan(m) ? PAPER : undefined }}
             />
@@ -230,7 +222,6 @@ function Pill({
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={a11y ?? label}
-      // The pill is small to keep the photo clear; the touch target is not.
       hitSlop={12}
     >
       {body}

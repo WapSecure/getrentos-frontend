@@ -154,7 +154,6 @@ const PassportCard = ({ status }: { status: ForeignIdentityStatus['passport'] })
     },
     onError: (reason) => {
       const code = errorCode(reason);
-      // The free check is used, or Smile ID is off: the passport goes to our team instead.
       if (code === 'AUTOMATED_ATTEMPT_USED' || code === 'PASSPORT_CHECK_UNAVAILABLE') {
         setNotice(errorText(reason, 'Send your passport to our team instead.'));
         refresh();
@@ -182,7 +181,6 @@ const PassportCard = ({ status }: { status: ForeignIdentityStatus['passport'] })
     },
   });
 
-  // While Smile decides, ask the server too (the webhook can be slow); same pattern as VerificationCenter.
   useEffect(() => {
     if (!job) return;
     let stopped = false;

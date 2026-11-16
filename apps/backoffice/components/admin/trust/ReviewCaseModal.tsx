@@ -331,7 +331,6 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
     return next.data?.items.find((item) => item.id === evidenceId)?.url ?? null;
   };
   const dueAt = documents.data?.dueAt ?? detail?.dueAt ?? caseItem?.dueAt ?? null;
-  // Staff only: the automatic check ran against Smile ID's sandbox.
   const testMode =
     Boolean(foreign) &&
     (documentItems.some((item) => hasSandboxFlag(item.summary)) ||

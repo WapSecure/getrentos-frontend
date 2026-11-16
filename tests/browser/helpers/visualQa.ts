@@ -22,7 +22,6 @@ export async function auditVisualPage(page: Page, path: string, testInfo: TestIn
   const findings: Finding[] = [];
   const onConsole = (message: { type: () => string; text: () => string }) => {
     if (message.type() !== 'error') return;
-    // The browser logs each refused API call as a console error, and the app logs its own offline error.
     if (
       offlineApiOrigin &&
       /Failed to load resource|ERR_CONNECTION_REFUSED|Unable to reach the server/.test(message.text())

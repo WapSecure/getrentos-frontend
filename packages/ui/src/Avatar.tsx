@@ -14,12 +14,10 @@ const TONES = {
 export interface AvatarProps {
   name: string;
   size?: keyof typeof SIZES;
-  /** `neutral` for someone who is not the subject of the row, such as an assignee. */
   tone?: keyof typeof TONES;
   className?: string;
 }
 
-/** Decorative: show the name beside it. */
 export function Avatar({ name, size = 'sm', tone = 'primary', className }: AvatarProps) {
   return (
     <span

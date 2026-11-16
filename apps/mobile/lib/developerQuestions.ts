@@ -30,7 +30,6 @@ export function mergeQuestionPages(
   return out;
 }
 
-/** The next page to load, or undefined once every question has been loaded (or a page came back empty). */
 export function nextQuestionsPage(
   last: Pick<BuyerDevelopmentEnquiryPage, 'items' | 'page' | 'pageSize' | 'total'>
 ): number | undefined {
@@ -38,7 +37,6 @@ export function nextQuestionsPage(
   return last.page * last.pageSize < last.total ? last.page + 1 : undefined;
 }
 
-/** "Palm Developers · Lekki, Lagos", with "No longer listed on Sureground" once the page is gone. */
 export function questionDevelopmentLine(e: Pick<BuyerDevelopmentEnquiry, 'development'>): string {
   const d = e.development;
   return [
@@ -50,6 +48,5 @@ export function questionDevelopmentLine(e: Pick<BuyerDevelopmentEnquiry, 'develo
     .join(' · ');
 }
 
-/** The development screen while it is still listed; nothing to open once it is not. */
 export const questionDevelopmentRoute = (e: Pick<BuyerDevelopmentEnquiry, 'development'>) =>
   e.development.live ? developmentRoute(e.development.id) : null;

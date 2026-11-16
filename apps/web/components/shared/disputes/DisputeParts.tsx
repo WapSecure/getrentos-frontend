@@ -24,7 +24,6 @@ export const LAND_DISPUTE_STATUS: Record<LandDispute['status'], string> = {
   CLOSED: 'Closed',
 };
 
-/** The deadline staff work to; the only turn the dispute records is Sureground's. */
 export const respondByText = (respondBy: string, viewerTimeZone?: string | null) =>
   `Sureground replies by ${formatDate(respondBy)}, ${formatDualTime(respondBy, viewerTimeZone)}`;
 

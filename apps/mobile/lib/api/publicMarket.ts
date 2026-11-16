@@ -66,9 +66,7 @@ export interface MarketFact {
 export interface MarketDetail extends MarketCard {
   images: string[];
   media: MediaItem[];
-  /** Rent, buy and land: price lines, stated total and fees not stated. Stays itemise their own. */
   costs?: ShowroomCosts;
-  /** Sale: the seller has accepted an offer. */
   underOffer?: boolean;
   /** Left out until the property is verified (a stay: until booked); see addressHidden. */
   address?: string;
@@ -83,9 +81,7 @@ export interface MarketDetail extends MarketCard {
   facts: MarketFact[];
   /** Shortlets: the full listing, for the essentials, rules, prices and trust sections. */
   stay?: ShortletListing;
-  /** Rent and sale: structured floor plans (rooms and labelled sizes), when the lister added them. */
   floorPlans?: ShowroomFloorPlan[];
-  /** Rent and sale, commercial properties only: what the lister stated, from `commercialDetailsOf`. */
   commercial?: CommercialDetails;
 }
 
@@ -200,7 +196,6 @@ const money = (v: unknown) => {
   const n = typeof v === 'string' ? Number(v) : (v as number);
   return Number.isFinite(n) ? n : 0;
 };
-// "Lagos, Lagos" reads as "Lagos", as on the web.
 const place = formatLocation;
 // Falsy, not nullish: listings without bedroom data come back as 0, and "0 bed"
 // reads as a claim about the property rather than a missing field.
@@ -493,7 +488,6 @@ export const publicMarketApi = {
     }
   },
 
-  /** Rent, buy and land go through the shared showroom mappers, so the app and the web agree on facts and costs. */
   async detail(kind: MarketKind, id: string): Promise<MarketDetail> {
     switch (kind) {
       case 'rent': {

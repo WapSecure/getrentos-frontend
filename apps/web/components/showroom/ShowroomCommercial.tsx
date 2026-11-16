@@ -13,7 +13,6 @@ function Rows({ rows }: { rows: CommercialRow[] }) {
       <DescriptionList
         columns={2}
         items={rows.map((row) => ({
-          // The VAT row is the one the note by the costs links to.
           label:
             row.key === 'vat' ? (
               <span id={COMMERCIAL_VAT_ANCHOR} className="scroll-mt-24">
@@ -31,7 +30,6 @@ function Rows({ rows }: { rows: CommercialRow[] }) {
   );
 }
 
-// Everything is the lister's own statement; a section with nothing stated is left out.
 export function ShowroomCommercial({
   commercial,
   market,

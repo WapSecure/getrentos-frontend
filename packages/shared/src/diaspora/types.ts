@@ -119,16 +119,13 @@ export interface PurchaseSummary {
   title: string;
   propertyType: string;
   role: 'BUYER' | 'REPRESENTATIVE';
-  /** Set when I see this purchase as someone's representative. */
   representing?: { principalId: string; principalName: string };
   operationalStage: OperationalStage;
   moneyStatus: MoneyStatus;
   legalStatus: LegalStatus;
   nextAction: string | null;
-  /** Something is waiting for me, including a two-person approval. */
   waitingForYou: boolean;
   pendingApprovals: number;
-  /** The active dispute; not set for purchases seen as a representative. */
   dispute?: PurchaseDispute | null;
 }
 
@@ -164,7 +161,6 @@ export type OwnershipStructure = (typeof OWNERSHIP_STRUCTURES)[number];
 export const SUMMARY_FREQUENCIES = ['NONE', 'WEEKLY', 'MONTHLY'] as const;
 export type SummaryFrequency = (typeof SUMMARY_FREQUENCIES)[number];
 
-/** Where the summary goes besides the notifications list, which always has it. */
 export const SUMMARY_CHANNELS = ['EMAIL', 'PUSH'] as const;
 export type SummaryChannel = (typeof SUMMARY_CHANNELS)[number];
 
@@ -185,7 +181,6 @@ export interface InvestorProfileInput {
   horizon?: InvestmentHorizon;
   ownershipStructure?: OwnershipStructure;
   summaryFrequency?: SummaryFrequency;
-  /** May be empty: the summary then shows only in notifications. */
   summaryChannels?: SummaryChannel[];
 }
 
@@ -199,7 +194,6 @@ export type InvestorProfileField =
   | 'horizon'
   | 'ownershipStructure';
 
-/** Fields stay null until the investor fills them in. */
 export interface InvestorProfile {
   countryOfResidence: string | null;
   nationality: string | null;
@@ -214,7 +208,6 @@ export interface InvestorProfile {
   summaryFrequency?: SummaryFrequency;
   summaryChannels?: SummaryChannel[];
   missingFields: string[];
-  /** Set once the profile is complete and the current risk statement is accepted. */
   onboardingCompletedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -233,7 +226,6 @@ export interface InvestorAvailability {
 
 export interface InvestorStatusCounts {
   total: number;
-  /** Every status, with 0 for the empty ones. */
   byStatus: Record<string, number>;
 }
 
@@ -247,7 +239,6 @@ export interface InvestorStatementSummary {
   payoutStatus: string;
 }
 
-/** Fields are optional on read: the workspace renders what arrives and skips the rest. */
 export interface InvestorOverview {
   profile?: Pick<
     InvestorProfile,
@@ -265,7 +256,6 @@ export interface InvestorOverview {
   activeManagedProperties?: number;
   pendingSpendApprovals?: { count: number; totalAmount: string };
   latestStatement?: InvestorStatementSummary | null;
-  /** My purchases with their three statuses, then those I see as a representative. */
   purchases?: PurchaseSummary[];
   portfolio?: InvestorPortfolio;
 }
@@ -286,7 +276,6 @@ export interface InvestorPortfolio {
   valuedCount?: number;
   /** Properties and plots with no in-date report; never estimated. */
   notValuedCount?: number;
-  /** Latest report per valued property, out-of-date ones marked. */
   valuations?: PropertyValuation[];
   asOf: string;
 }
@@ -307,7 +296,6 @@ export interface ForeignIdentityStatus {
   passport: ForeignDocumentStatus & {
     automatedAttemptsUsed: number;
     freeAutomatedAttempts: number;
-    /** The automatic Smile ID check, or an upload a person reviews. */
     nextAttempt: 'AUTOMATED' | 'STAFF_REVIEW';
     automatedCheckAvailable: boolean;
     sandbox: boolean;
@@ -326,7 +314,6 @@ export type SourceOfFundsSupportingKind =
   | 'BUSINESS_ACCOUNTS';
 
 export interface SourceOfFundsStatus extends ForeignDocumentStatus {
-  /** True once an existing commitment, or the running total, crosses a threshold. */
   required: boolean;
   reason: 'SINGLE_PURCHASE' | 'TOTAL_COMMITTED' | null;
   /** Whole naira already committed to purchases. */
@@ -351,7 +338,6 @@ export interface SourceOfFundsCheck {
   reason: SourceOfFundsStatus['reason'];
   state: ForeignCheckState;
   renewal: SourceOfFundsRenewal | null;
-  /** False when the offer or deposit would be refused until source of funds is approved. */
   cleared: boolean;
 }
 
@@ -367,9 +353,7 @@ export type MoneyValue = number | string;
 
 /** Spending limits on one management agreement. `null` means no limit for that band. */
 export interface SpendBands {
-  /** The manager spends up to this without asking. */
   routineCap: number | null;
-  /** Urgent repairs (safety, water, power) the manager may spend up to before asking. */
   emergencyCap: number | null;
   /** Above this, approval needs the owner to confirm their identity again. */
   explicitAbove: number | null;
@@ -378,10 +362,8 @@ export interface SpendBands {
 export const SPEND_BANDS = ['ROUTINE', 'OWNER', 'EXPLICIT', 'EMERGENCY'] as const;
 export type SpendBand = (typeof SPEND_BANDS)[number];
 
-/** EXPENSE posts an expense when approved; WORK_ORDER authorises a job the manager then carries out. */
 export type SpendApprovalKind = 'EXPENSE' | 'WORK_ORDER';
 
-/** Nothing is approved yet; once the owner approves, the manager repeats the same call. */
 export interface AwaitingOwnerApproval {
   state: 'AWAITING_OWNER_APPROVAL';
   approvalId: string;
@@ -418,17 +400,14 @@ export interface EvidenceStage {
   at?: string | null;
   by?: EvidenceActor | null;
   detail?: string | null;
-  /**
-   * By stage: PHOTOS holds `MaintenancePhoto`, QUOTE `EvidenceQuote`, APPROVAL `EvidenceApproval`,
-   * INVOICE `EvidenceInvoice`. Other stages send none.
-   */
+  /** By stage: PHOTOS `MaintenancePhoto`, QUOTE `EvidenceQuote`, APPROVAL `EvidenceApproval`, INVOICE `EvidenceInvoice`; others none. */
   items?: unknown[] | null;
 }
 
 export const PHOTO_STAGES = ['REPORTED', 'PROGRESS', 'COMPLETION'] as const;
 export type WorkOrderPhotoStage = (typeof PHOTO_STAGES)[number];
 
-/** The `POST …/photos` response and a PHOTOS item. URLs are signed per read. */
+/** URLs are signed per read. */
 export interface MaintenancePhoto {
   id: string;
   stage: WorkOrderPhotoStage;
@@ -438,7 +417,6 @@ export interface MaintenancePhoto {
   by: EvidenceActor | null;
   latitude: number | null;
   longitude: number | null;
-  /** From the old images list: no stage, uploader or capture time of its own. */
   legacy: boolean;
 }
 
@@ -534,7 +512,6 @@ export interface InvestorManagedProperty {
     /** `MandateStatus`. */
     status: string;
     bands: SpendBands;
-    /** Only for a percentage fee. */
     feePercent?: number | null;
     startedAt?: string | null;
   } | null;
@@ -542,10 +519,7 @@ export interface InvestorManagedProperty {
   intake: { id: string; status: string } | null;
   openJobs: number;
   pendingApprovals: number;
-  /**
-   * The owner's latest statement touching this property. Statements are per owner, so `net` is
-   * the whole statement's net payout, not this property's income.
-   */
+  /** Statements are per owner, so `net` is the whole statement's net payout, not this property's income. */
   lastStatement: {
     id: string;
     periodStart: string;

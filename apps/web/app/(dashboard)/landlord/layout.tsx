@@ -45,7 +45,6 @@ export default function LandlordLayout({ children }: { children: ReactNode }) {
         );
         if (!hasLandlordRole) {
           const primary = resolvePrimaryRoleId(parsedUser.roles);
-          // Notifications link owners here too; send them to their own agreements page, not their dashboard.
           const ownersOwn =
             primary === 'owner' && window.location.pathname.startsWith('/landlord/managed')
               ? ROUTES.OWNER_MANAGEMENT

@@ -74,7 +74,6 @@ export default function PropertyDetail() {
   const [viewingSheetOpen, setViewingSheetOpen] = useState(false);
   const [descriptionOpen, setDescriptionOpen] = useState(false);
   const [touring, setTouring] = useState(false);
-  // Past the gallery the back and share buttons get a solid bar, so they never sit on text.
   const [scrolled, setScrolled] = useState(false);
 
   const query = useQuery({
@@ -112,7 +111,6 @@ export default function PropertyDetail() {
   const p = query.data;
   const showroom = useMemo(() => (p ? fromRental(p) : undefined), [p]);
   useTrackDetailView(p?.id, 'rent');
-  // Only asked when the home is let: it might be the one this renter lives in.
   const lease = useQuery({
     queryKey: qk.renter.lease,
     queryFn: leaseApi.getLease,
@@ -275,7 +273,6 @@ export default function PropertyDetail() {
                 {showroom ? (
                   <ShowroomQuestions
                     listing={showroom}
-                    // The same conversation as the message button up top.
                     onAskLister={p.landlordId ? () => messageMutation.mutate() : undefined}
                   />
                 ) : null}

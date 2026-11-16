@@ -159,7 +159,6 @@ export default function ResidentVisitorPasses() {
   // Walk-ins get their own section at the top: a real person is waiting at the barrier.
   const awaiting = passes.filter((pass) => pass.status === 'awaiting_approval');
   const others = passes.filter((pass) => pass.status !== 'awaiting_approval');
-  // Passes that can still be used come first; the rest are a record of past visits.
   const active = others.filter((pass) => ACTIVE_STATUSES.has(pass.status));
   const finished = others.filter((pass) => !ACTIVE_STATUSES.has(pass.status));
 
@@ -266,7 +265,6 @@ export default function ResidentVisitorPasses() {
   );
 }
 
-/** A real person is standing at the barrier: the two answers are large, stacked and labelled with their name. */
 function GateArrivalCard({
   pass,
   approving,

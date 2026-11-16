@@ -1,7 +1,4 @@
-/**
- * Display only, never a quote: naira stays the price and the payment currency. Two significant figures,
- * whole units, half up (£82,345 → about £82,000); anything under one unit gives no figure.
- */
+/** Display only, never a quote: naira stays the price. Two significant figures, half up; under one unit gives none. */
 
 export const INDICATIVE_CURRENCIES = ['GBP', 'USD', 'EUR', 'CAD'] as const;
 export type IndicativeCurrency = (typeof INDICATIVE_CURRENCIES)[number];

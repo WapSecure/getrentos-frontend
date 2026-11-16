@@ -47,8 +47,7 @@ export const RenterRecentActivity = () => {
     icon: iconByType[n.type as ActivityType] ?? Bell,
     title: n.title,
     at: n.createdAt,
-    // The row's own link first, as on the notifications page; the category only as a fallback, since an estate
-    // announcement or gate update is categorised "message" but belongs on the resident board.
+    // The row's own link first: an estate notice is categorised "message" but belongs on the resident board.
     href:
       notificationHref('renter', n) ??
       activityRoutes[n.type as ActivityType] ??

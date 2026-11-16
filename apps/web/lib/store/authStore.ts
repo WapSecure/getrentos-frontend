@@ -13,8 +13,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   init: () => set({ isAuthenticated: isAuthenticated() }),
   setAuthenticated: (value) => set({ isAuthenticated: value }),
   logout: async () => {
-    // Drop the realtime socket first so no events fire after logout. Loaded on demand so
-    // socket.io stays out of the public pages that only read the signed-in flag.
+    // Drop the socket first so no events fire after logout; loaded on demand to keep socket.io off public pages.
     try {
       (await import('@/lib/realtime/socket')).disconnectRealtime();
     } catch {

@@ -77,10 +77,8 @@ export interface LandlordProperty {
   totalUnits: number;
   occupiedUnits: number;
   annualRentRoll: number;
-  /** Lowest asking rent among units with no current tenancy, in its own period. */
   askingRent?: number;
   askingRentPeriod?: 'month' | 'year';
-  /** The vacant units ask different rents, so `askingRent` is the lowest. */
   askingRentVaries?: boolean;
   createdAt: string;
   archived: boolean;
@@ -92,7 +90,6 @@ export type RentStatus = 'paid' | 'pending' | 'due' | 'overdue' | 'partial';
 export interface LandlordTenant {
   id: string;
   name: string;
-  /** The tenant's account; null for a tenant recorded by name only. */
   tenantUserId?: string | null;
   email: string;
   phone: string;
@@ -156,7 +153,6 @@ export interface LandlordUnit {
   occupancyStatus: OccupancyStatus;
   /** Who lives there, when the portfolio list knows. */
   tenantName?: string;
-  /** The API enum (e.g. 'COMMERCIAL'), on vacant units: a commercial unit's listing form adds the commercial block. */
   propertyType?: string;
 }
 
@@ -176,7 +172,6 @@ export type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejec
 
 export interface LandlordApplication {
   id: string;
-  /** Only on an approval: whether a draft lease was created (false when the unit has no advertised rent). */
   leaseDrafted?: boolean;
   applicantName: string;
   applicantEmail: string;
@@ -246,17 +241,13 @@ export interface LandlordLease {
   paymentDueAt?: string;
   tenantSigned: boolean;
   landlordSigned: boolean;
-  /** How often the rent amount is charged. Older APIs leave it out. */
   rentPeriod?: 'month' | 'year';
   createdAt: string;
 }
 
-/** Signed in a way that leaves no e-signature records: imported, paper or pre-launch leases. */
 const SIGNED_STATUSES = new Set<LeaseStatus>(['signed', 'active', 'expired', 'terminated']);
-/** The tenant has already signed by the time a lease reaches these. */
 const TENANT_SIGNED_STATUSES = new Set<LeaseStatus>(['awaiting_payment', 'awaiting_landlord']);
 
-/** Who has signed, trusting the lease status over the e-signature records. */
 export function leaseSignatures(
   l: Pick<LandlordLease, 'status' | 'tenantSigned' | 'landlordSigned'>
 ): {
@@ -321,7 +312,6 @@ export interface LandlordMaintenance {
   propertyId: string;
   propertyName: string;
   unitName?: string;
-  // The API names these assignedVendor*, not vendorName.
   assignedVendorId?: string;
   assignedVendorName?: string;
   scheduledFor?: string;
@@ -367,7 +357,6 @@ export interface LandlordPayment {
   unitId?: string;
   unitName?: string;
   amount: number;
-  /** 'rent', 'service_charge', 'deposit', 'levy', ... */
   category?: string;
   dueDate: string;
   paidDate?: string;
@@ -608,7 +597,6 @@ export interface MicrositeSettings {
 export interface LandlordReviewSummary {
   averageRating: number;
   reviewCount: number;
-  /** Null until a tenant has rated that. */
   averageAsLandlord: number | null;
   averagePropertyCondition: number | null;
   landlordReviewCount: number;
@@ -642,7 +630,6 @@ export interface LandlordReview {
   tenantName: string;
   propertyName: string;
   rating: number;
-  /** LANDLORD: how the tenant rated you. PROPERTY: how they rated the home. */
   category: string;
   comment: string;
   createdAt: string;
@@ -1298,7 +1285,6 @@ export const landlordApi = {
 
   /** Returns the storage key to attach to a property; the file is not committed yet. */
   uploadPropertyMedia: (file: PickedFile, kind: 'image' | 'video') => {
-    // Videos go straight to storage, so a large tour never passes through the API.
     if (kind === 'video') return uploadVideoDirect('/landlord/properties', file);
     const form = new FormData();
     appendFile(form, 'file', file);

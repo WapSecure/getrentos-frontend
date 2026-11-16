@@ -1,5 +1,4 @@
-// Server-safe (no client imports): the public market pages pre-render their first page with it,
-// and the browsers import the page sizes so both sides ask for the same page.
+// Server-safe (no client imports): the public market pages pre-render their first page with it.
 import type { Paginated } from '@/lib/apiHelpers';
 import { OPTIONAL_FETCH_TIMEOUT_MS, publicFetchInit } from '@/lib/publicFetch';
 import { toQueryString } from '@/lib/publicListingMap';
@@ -18,14 +17,12 @@ export const landFirstPagePath = (): string =>
 export const isFilteredView = (params: Record<string, string | string[] | undefined>): boolean =>
   Object.values(params).some((value) => value !== undefined && value !== '');
 
-/** The unfiltered first page, or null so the browser's own fetch takes over. */
 export async function fetchFirstPage<Api, Item>(
   path: string,
   map: (item: Api) => Item
 ): Promise<Paginated<Item> | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    // A slow API leaves the list to the browser rather than holding back the page.
     const res = await fetch(
       `${apiUrl}${path}`,
       publicFetchInit({ timeoutMs: OPTIONAL_FETCH_TIMEOUT_MS })

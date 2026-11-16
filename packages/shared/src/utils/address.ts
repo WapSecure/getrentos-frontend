@@ -100,16 +100,12 @@ const placeKey = (part: string) =>
     .replace(/\s+state$/, '')
     .replace(/\s+/g, ' ');
 
-/**
- * Parts may hold commas. Blanks go, and a repeated part (ignoring case and a trailing "State") is shown
- * once, at its last place, since broader parts come last: "Lagos, Ikeja, Lagos" reads "Ikeja, Lagos".
- */
+/** A repeated part (ignoring case and a trailing "State") shows once, at its last place: "Lagos, Ikeja, Lagos" reads "Ikeja, Lagos". */
 export function formatLocation(...parts: (string | null | undefined)[]): string {
   const all = parts
     .flatMap((p) => (p ?? '').split(','))
     .map((p) => p.trim())
     .filter(Boolean);
-  // Each place keeps its first spelling ("Abuja", not a later "abuja") at its last position.
   return all
     .filter((p, i) => !all.slice(i + 1).some((later) => placeKey(later) === placeKey(p)))
     .map((p) => all.find((first) => placeKey(first) === placeKey(p)) ?? p)

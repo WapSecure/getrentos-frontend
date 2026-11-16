@@ -1,4 +1,3 @@
-/** Structural, so web and mobile can pass their own delivery types. */
 interface CollectableDelivery {
   residentName?: string;
   collectedAt?: string;
@@ -32,7 +31,6 @@ export const collectionSummary = (
   return `Collected${who} ${when}`;
 };
 
-/** Trimmed to what the API accepts. */
 export const defaultCollectorName = (log: CollectableDelivery): string =>
   (log.residentName ?? '').trim().slice(0, MAX_COLLECTOR_NAME);
 

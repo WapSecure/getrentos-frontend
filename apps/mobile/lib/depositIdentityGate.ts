@@ -2,7 +2,6 @@ import type { KycStatusResponse } from '@/lib/api/kyc';
 
 export interface DepositIdentityNotice {
   message: string;
-  /** Offer the way to verify; not while a check is already in review. */
   verifyLink: boolean;
 }
 

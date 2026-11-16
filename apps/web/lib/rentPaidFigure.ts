@@ -1,4 +1,3 @@
-// A money figure only once the payments have loaded: an early "₦0" reads as a real balance.
 export interface PaymentsForTotal {
   summary?: { totalPaidNaira?: number | null } | null;
   items?: { status: string; amount: number }[];

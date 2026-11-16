@@ -284,7 +284,6 @@ export function HomeManagementWorkspace({
     queryFn: () => unwrap(homeManagementService.getDashboard()),
   });
 
-  // Utilities figures follow the same rule: hidden while narrowed to one client, and tiles only once something is recorded.
   const utilitiesQuery = useQuery({
     queryKey: homeManagementKeys.utilities.summary(),
     enabled: !scopePropertyId,

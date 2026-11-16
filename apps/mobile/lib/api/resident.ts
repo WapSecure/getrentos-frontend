@@ -106,7 +106,6 @@ export interface DeliveryLog {
   gateName?: string;
   receivedAt: string;
   collectedAt?: string;
-  /** Name of whoever took the parcel, if the gate recorded one. */
   collectedBy?: string;
   createdAt: string;
 }

@@ -1,5 +1,4 @@
-// Sureground is not a party to a development sale and takes no payment for it. Everything from the
-// API goes through the mappers below, which drop anything malformed.
+// Sureground is not a party to a development sale and takes no payment for it.
 
 export type DevelopmentEnquiryStatus = 'NEW' | 'ANSWERED' | 'CLOSED';
 

@@ -2,7 +2,6 @@ import { Bot, ShieldCheck, UserRound, Wrench } from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { formatDualTime } from '@/lib/format';
 
-/** Who did it. Staff always show as "Sureground"; `YOU` is the viewer's own action. */
 export type ActivityFeedActorKind =
   | 'MANAGER'
   | 'SUREGROUND'

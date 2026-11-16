@@ -341,7 +341,6 @@ export const ROUTES = {
   OWNER_REVIEWS: '/owner/reviews',
   OWNER_TRUST_PROFILE: '/owner/trust-profile',
   OWNER_MANAGED: '/owner/managed',
-  /** The owner's own agreements with a manager (Sureground Managed or a firm); OWNER_MANAGED is the reverse. */
   OWNER_MANAGEMENT: '/owner/management',
   OWNER_ACTIVITY: '/owner/activity',
   OWNER_QUERIES: '/owner/queries',
@@ -484,8 +483,6 @@ export const getDashboardRoute = (roleId: string): string => {
   return roleMap[roleId] || ROUTES.DASHBOARD;
 };
 
-// The estate manager's dashboard wins over the gate console: someone who runs an estate and also
-// mans its gate starts where they manage it, as on mobile. Either beats the sign-up role.
 const INVITED_ROLE_PRECEDENCE: readonly string[] = ['ESTATE_MANAGER', 'GATEMAN'];
 
 // Takes the first role the web app has a portal for: an unmapped roles[0] fell back to renter and

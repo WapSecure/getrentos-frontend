@@ -9,7 +9,6 @@ import {
 import { track } from '@/lib/analytics';
 import { serialise, type UrlValue } from '@/hooks/useUrlState';
 
-// Browse-state URL keys to the filter names the API accepts. Page, view and the selected pin are not filters.
 const FILTER_OF: Record<string, SearchFilterKey> = {
   q: 'query',
   area: 'area',
@@ -38,10 +37,7 @@ const FILTER_OF: Record<string, SearchFilterKey> = {
   amenities: 'amenities',
 };
 
-/**
- * Sends `search_submit` with filter names, never values, when the set changes. The opening view and
- * clearing every filter are not counted.
- */
+/** Sends `search_submit` with filter names, never values, when the set changes. */
 export function useTrackSearch(
   market: ShowroomEventMarket,
   surface: string,
@@ -73,7 +69,6 @@ export function useTrackSearch(
   }, [signature, market, surface]);
 }
 
-/** For a search box that navigates: one event per submit. */
 export function trackSearchSubmit(
   market: ShowroomEventMarket,
   surface: string,

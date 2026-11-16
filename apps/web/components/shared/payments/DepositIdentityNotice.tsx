@@ -10,8 +10,7 @@ import { ROUTES } from '@/lib/constants/auth';
 import { depositIdentityNotice, identityGate } from '@/lib/identityGate';
 import { kycService } from '@/services/kycService';
 
-// The server refuses a deposit from an unverified buyer; a loading or failed status never blocks,
-// since the server has the final say.
+// The server refuses unverified buyers; a loading or failed status never blocks, the server has the final say.
 export function useDepositIdentityNotice(enabled: boolean): ReactNode | null {
   const { data: kycStatus } = useQuery({
     queryKey: ['kyc-status'],

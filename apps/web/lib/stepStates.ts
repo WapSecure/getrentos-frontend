@@ -1,9 +1,5 @@
 import type { TimelineState } from '@sureground/ui';
 
-/**
- * Reaching the last step means the process is finished, so every step is done. A stopped (`blocked`)
- * or unwound (`skipped`) process marks every step that way instead.
- */
 export function stepStates(
   keys: readonly string[],
   current: string,
@@ -23,10 +19,6 @@ export function stepStates(
 
 type MilestoneStatus = 'PENDING' | 'DELIVERED' | 'CONFIRMED' | 'DISPUTED' | 'WAIVED';
 
-/**
- * Only one step is current: the earliest delivered one awaiting the buyer, else the first undelivered.
- * Other delivered steps show as pending; their badge still says they await confirmation.
- */
 export function milestoneStates(statuses: readonly MilestoneStatus[]): TimelineState[] {
   const delivered = statuses.indexOf('DELIVERED');
   const current = delivered >= 0 ? delivered : statuses.indexOf('PENDING');

@@ -40,10 +40,8 @@ const FILTERS = [
 const formatWhen = (iso?: string) =>
   iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : null;
 
-// Every status filter and page, so a confirm or cancel refreshes all of them.
 const VIEWING_REQUESTS_ROOT = ['landlord', 'viewingRequests'] as const;
 
-// The backend lets any property controller (landlord, owner, manager) act on these.
 export function RentalViewingRequests({
   emptyDescription = 'Requests to view your properties will appear here.',
   initialStatus = 'all',
@@ -190,7 +188,6 @@ export function RentalViewingRequests({
                             renterName: viewing.renterName,
                             preferredAt: viewing.preferredAt,
                           });
-                          // Start from the renter's requested slot; the landlord can still change it.
                           setScheduledAt(preferredSlotValue(viewing.preferredAt));
                         }}
                       >

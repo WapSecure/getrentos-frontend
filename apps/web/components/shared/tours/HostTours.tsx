@@ -58,7 +58,6 @@ const HostTourRow = ({
 }) => {
   const queryClient = useQueryClient();
   const copy = PLACE_COPY[tourPlace(tour)];
-  // Until the host chooses, follow whether the built-in call is available (it loads separately).
   const [chosen, setCall] = useState<CallChoice | null>(null);
   const call = chosen ?? (canUseBuiltIn && !tour.meetingUrl ? 'builtIn' : 'link');
   const builtIn = canUseBuiltIn && call === 'builtIn';
@@ -69,7 +68,6 @@ const HostTourRow = ({
   const [notes, setNotes] = useState('');
   const [reason, setReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
-  // A new request opens on the times form; once times are offered it folds away until asked for.
   const [offering, setOffering] = useState(tour.status === 'REQUESTED');
   const key = siteTourKeys.host(scope);
   const update = (updated: SiteTour, message: string) => {

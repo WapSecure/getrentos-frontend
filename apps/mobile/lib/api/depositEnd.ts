@@ -94,7 +94,6 @@ export interface DepositClaimItemInput {
   evidenceKeys?: string[];
 }
 
-/** The API's limits, so the button only lights up for a claim it will take. */
 export const CLAIM_REASON_MIN = 10;
 export const DISPUTE_REASON_MIN = 10;
 export const CLAIM_MAX_ITEMS = 20;
@@ -103,7 +102,6 @@ export const CLAIM_MAX_FILES = 10;
 export interface ClaimDraftItem {
   key: string;
   reason: string;
-  /** Raw digits from the number field. */
   amount: string;
   files: PickedFile[];
 }
@@ -143,7 +141,6 @@ export function settlementText(
   return `${how}${naira(s.refundAmount)} refunded to you${refund}${toLandlord}.`;
 }
 
-/** Whether the tenancy has ended, which is when the tenant may say they have moved out. */
 export function leaseHasEnded(leaseStatus: string, leaseEnd?: string | null, now = Date.now()) {
   if (leaseStatus === 'EXPIRED') return true;
   return leaseEnd ? new Date(leaseEnd).getTime() <= now : false;

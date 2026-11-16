@@ -438,7 +438,6 @@ const RiskStep = ({ portal, onBack }: { portal: InvestorPortal; onBack: () => vo
       router.push(DIASPORA_ROUTES.workspace(portal));
     },
     onError: async (error) => {
-      // A newer statement was published while this one was open: show it and ask again.
       if (error instanceof ApiError && error.status === 409) {
         setStale(true);
         setAgreed(false);
@@ -533,7 +532,6 @@ export const InvestorOnboarding = ({ portal }: { portal: InvestorPortal }) => {
   const onboarded = Boolean(profile.data?.onboardingCompletedAt);
   const wantsRisk = searchParams.get('step') === 'risk';
   const [chosen, setStep] = useState<Step | null>(null);
-  // A saved profile can go straight to the statement when the link asks for it.
   const step: Step = chosen ?? (profile.isSuccess ? firstStep(profile.data, wantsRisk) : 'about');
 
   const index = STEPS.findIndex((item) => item.id === step);

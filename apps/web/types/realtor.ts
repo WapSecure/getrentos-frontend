@@ -54,7 +54,6 @@ export interface RealtorListing {
   state: string;
   bedrooms?: number;
   bathrooms?: number;
-  /** Commercial properties only: what was stated on the listing. */
   commercial?: CommercialDetails;
   status: RealtorListingStatus;
   createdAt: string;

@@ -31,7 +31,6 @@ interface TrustHubProps {
 const TRUST_TAB: HubTab = { id: 'trust', label: 'Trust score', icon: Star };
 const VERIFICATION_TAB: HubTab = { id: 'verification', label: 'Verification', icon: ShieldCheck };
 
-// Requirements fixed outside the verification flow open the page that owns them.
 function hrefFor(portal: HubPortal, key: TrustRequirementKey): string | null {
   switch (key) {
     case 'EMAIL':

@@ -25,7 +25,6 @@ const canDecodeH264 = (video: HTMLVideoElement) =>
     MediaSource.isTypeSupported('video/mp4; codecs="avc1.42E01E,mp4a.40.2"')) ||
   video.canPlayType('video/mp4; codecs="avc1.42E01E"') !== '';
 
-/** Nothing downloads until the viewer presses play, so a page with a video costs no extra data. */
 export function VideoPlayer({
   src,
   poster,
@@ -62,8 +61,7 @@ export function VideoPlayer({
     }
     try {
       const Hls = isHls(src) ? (await import('hls.js')).default : null;
-      // hls.js first: Chrome now claims native HLS but stalled at 0:00 in testing. Native is
-      // the fallback for browsers without Media Source Extensions (iPhone Safari).
+      // hls.js first: Chrome claims native HLS but stalled at 0:00; native is for browsers without MSE (iPhone Safari).
       if (Hls?.isSupported()) {
         hlsRef.current?.destroy();
         // No worker: the page's CSP doesn't allow blob: workers.

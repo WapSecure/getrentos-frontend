@@ -126,7 +126,6 @@ export const FOREIGN_CHECK_STATUS: Record<ForeignCheckState, { label: string; to
     REJECTED: { label: 'Not approved', tone: 'danger' },
   };
 
-/** A gift or inheritance letter also needs the donor's ID. */
 export const SOURCE_OF_FUNDS_SUPPORTING_LABELS: Record<SourceOfFundsSupportingKind, string> = {
   PAYSLIPS: 'Payslips',
   TAX_RETURN: 'Tax return',
@@ -135,7 +134,6 @@ export const SOURCE_OF_FUNDS_SUPPORTING_LABELS: Record<SourceOfFundsSupportingKi
   BUSINESS_ACCOUNTS: 'Business accounts',
 };
 
-/** Fallback when the API sends no reason line. */
 export const SOURCE_OF_FUNDS_WHY =
   'Nigerian and international anti-money-laundering rules require us to confirm where larger sums come from.';
 

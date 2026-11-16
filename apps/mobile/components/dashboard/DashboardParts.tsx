@@ -141,8 +141,7 @@ export function PortfolioCard({
 }) {
   const { spacing } = useTheme();
   const name = spokenLabel ?? label;
-  // The toggle sits beside the grouped figure, not inside it: screen readers read an `accessible`
-  // view as one element, so a button inside it could never be focused.
+  // Beside the grouped figure, not inside it: screen readers read an `accessible` view as one element.
   return (
     <Card elevated style={{ gap: spacing.xs }}>
       <View
@@ -284,7 +283,6 @@ export function ActivityFeed({
   description?: string;
 }) {
   const { colors, spacing, radius } = useTheme();
-  // A home screen is a glance: the latest few, the rest on request.
   const [expanded, setExpanded] = useState(false);
   const shown = expanded ? items : items.slice(0, ACTIVITY_INITIAL_COUNT);
   const hidden = items.length - shown.length;

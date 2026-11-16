@@ -81,7 +81,6 @@ export function RentalApplicationsBoard({ leasesHref, nav }: RentalApplicationsB
 
   const openDraftLeases = () => router.push(`${leasesHref}?status=draft`);
 
-  // A notification links here with ?application=<id>; open that one once it is on the page.
   const searchParams = useSearchParams();
   const linkedId = searchParams.get('application');
   const [linkedDismissed, setLinkedDismissed] = useState(false);

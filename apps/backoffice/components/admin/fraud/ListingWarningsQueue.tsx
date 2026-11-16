@@ -41,7 +41,6 @@ function linkedWarningId(): string | null {
   return new URLSearchParams(window.location.search).get('warning');
 }
 
-/** A property cannot be verified while one is open; one arriving after verification shows here, not silently. */
 export function ListingWarningsQueue({ onOpenAlert }: { onOpenAlert: (alertId: string) => void }) {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -54,7 +53,6 @@ export function ListingWarningsQueue({ onOpenAlert }: { onOpenAlert: (alertId: s
     queryKey: adminKeys.listingWarnings,
     queryFn: () => unwrap(adminService.listListingWarnings()),
   });
-  // A list, or nothing to show: never let an unexpected payload break the whole fraud page.
   const items = Array.isArray(data) ? data : [];
 
   useEffect(() => {
@@ -72,7 +70,6 @@ export function ListingWarningsQueue({ onOpenAlert }: { onOpenAlert: (alertId: s
     onSuccess: (_result, { decision }) => {
       toast.success(DECISION_COPY[decision].toast);
       void queryClient.invalidateQueries({ queryKey: adminKeys.listingWarnings });
-      // The verification review screen holds approval on these.
       void queryClient.invalidateQueries({ queryKey: ['admin', 'verifications'] });
     },
   });

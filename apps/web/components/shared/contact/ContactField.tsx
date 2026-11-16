@@ -9,7 +9,6 @@ export function contactIsReady(value: string): boolean {
   return kind === 'email' || kind === 'phone';
 }
 
-/** Accounts can be phone-only, so a lookup that takes only an email strands many people. */
 export function ContactField({
   id,
   value,

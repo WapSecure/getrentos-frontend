@@ -26,7 +26,6 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 import { AcquisitionStatusBadges } from '@/components/purchases/AcquisitionStatusBadges';
 
-// Shown when an older server sends no note of its own.
 const DEPOSIT_NOTE =
   'This covers the deposit held under Payment Protection only. It does not show that the property is legally yours.';
 

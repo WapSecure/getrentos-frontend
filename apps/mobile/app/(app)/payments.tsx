@@ -144,7 +144,6 @@ export default function Payments() {
     onError: (err) => toast.show(errorMessage(err, 'Could not release this payment.'), 'error'),
   });
 
-  // Over every loaded payment: move-in is asked once per home, then held rent can be released early.
   const releaseActions = useMemo(() => rentReleaseActions(items), [items]);
 
   const confirmMoveIn = (payment: Payment) => {
@@ -312,7 +311,6 @@ function PaymentsSummaryCard({
       ? `${formatNaira(summary.totalHeldNaira)} of your rent is held by Sureground until it is released to your landlord.`
       : null;
 
-  // A charge in processing is not owed yet, but saying "up to date" above it reads as a contradiction.
   if (summary.openCount === 0 && processingCount > 0) {
     return (
       <Card elevated>

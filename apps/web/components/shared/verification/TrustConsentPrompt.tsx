@@ -12,7 +12,6 @@ export type TrustConsentType =
   | 'BANK_ACCOUNT_CHECK'
   | 'DOCUMENT_PROCESSING';
 
-/** What each consent covers, named on screen so two prompts on one card never read as the same question twice. */
 const CONSENT_LABEL: Record<TrustConsentType, string> = {
   ID_CHECK: 'ID check',
   BIOMETRIC: 'Selfie comparison',

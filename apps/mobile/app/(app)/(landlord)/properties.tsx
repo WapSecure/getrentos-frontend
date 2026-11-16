@@ -181,7 +181,6 @@ function PropertyRow({ property: p }: { property: LandlordProperty }) {
   );
 }
 
-/** The rent roll once let, else the asking rent; nothing rather than "₦0/yr" (the badge already says vacant). */
 function PropertyRent({ property }: { property: LandlordProperty }) {
   const rent = propertyRentSummary(property);
   if (rent.kind === 'none') return null;
@@ -196,7 +195,6 @@ function PropertyRent({ property }: { property: LandlordProperty }) {
   );
 }
 
-/** "1 of 4 let" rather than "25% occupied"; "0% occupied" on every empty home read as a warning. */
 function occupancyLabel(occupied: number, total: number): string {
   if (total === 0) return 'No units yet';
   if (occupied === 0) return total === 1 ? 'Vacant' : `All ${total} vacant`;

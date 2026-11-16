@@ -3,7 +3,6 @@ const TITLE_SUFFIX_LENGTH = ' | Sureground'.length;
 export const MAX_TITLE_LENGTH = 60;
 export const MAX_DESCRIPTION_LENGTH = 155;
 
-/** Cuts text at a word boundary so it fits `max`, adding an ellipsis only when something was cut. */
 export function trimToWords(text: string, max: number): string {
   const clean = text.replace(/\s+/g, ' ').trim();
   if (clean.length <= max) return clean;
@@ -13,7 +12,6 @@ export function trimToWords(text: string, max: number): string {
   return `${base.replace(/[\s,.;:–-]+$/, '')}…`;
 }
 
-/** A listing's page title: "Title: Location" when it fits, otherwise the title alone, trimmed. */
 export function listingPageTitle(title: string, location: string): string {
   const room = MAX_TITLE_LENGTH - TITLE_SUFFIX_LENGTH;
   const full = location ? `${title}: ${location}` : title;

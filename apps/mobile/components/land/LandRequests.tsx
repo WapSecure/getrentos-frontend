@@ -182,7 +182,6 @@ export function RequestInspection({
 }
 
 const CO_APPROVAL_COPY = {
-  // Plot purchases and land resales: each step can release money held for the deal.
   steps: {
     on: (name: string) =>
       `Money is only released to the seller once you and ${name} have both approved each step.`,
@@ -215,7 +214,6 @@ export function CoApprovalCard({
 }: {
   deal: Deal;
   viewer?: 'buyer' | 'representative';
-  /** `deposit` for a built home, where only the held deposit is released. */
   moneyScope?: 'steps' | 'deposit';
   labelFor?: (milestoneKey: string) => string;
   onApproved?: () => void;
@@ -282,7 +280,6 @@ export function CoApprovalCard({
 
   const c = q.data;
   if (!c) return null;
-  // A representative who does not hold the rule has nothing to approve here.
   if (!isBuyer && !c.binding) return null;
   const approvers = (reps.data ?? []).filter(
     (r) => r.status === 'ACTIVE' && r.scopes.includes('CO_APPROVE')

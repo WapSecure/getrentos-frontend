@@ -3,8 +3,7 @@ import { Check, Minus, X } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 import { singleCurrent, type TimelineState } from './timelineStates';
 
-// Presentational and hook-free, so it renders on the server. Nothing fades in: a list that
-// only appears after JavaScript runs is invisible to a slow first paint and to reduced motion.
+// Hook-free and nothing fades in: a list that appears only after JavaScript is invisible to a slow first paint.
 
 export type { TimelineState };
 
@@ -12,7 +11,6 @@ export interface TimelineItem {
   id: string;
   title: ReactNode;
   description?: ReactNode;
-  /** Shown beside the title; pass a `<time>` when there is a machine-readable date. */
   date?: ReactNode;
   state: TimelineState;
   icon?: ReactNode;
@@ -22,13 +20,9 @@ export interface TimelineItem {
 
 interface TimelineProps {
   items: readonly TimelineItem[];
-  /** `steps`: a process with an order and a current step. `feed`: things that happened. */
   variant?: 'steps' | 'feed';
-  /** `horizontal` is the compact stepper for cards: markers and titles only. */
   orientation?: 'vertical' | 'horizontal';
-  /** Heading level of each title; `p` when the list sits under a heading of its own. */
   titleAs?: 'p' | 'h3' | 'h4';
-  /** Spoken after each title so state never rests on colour or shape alone. */
   stateLabels?: Partial<Record<TimelineState, string>>;
   'aria-label'?: string;
   'aria-labelledby'?: string;
@@ -106,7 +100,6 @@ export function Timeline({
     }
   });
   const label = (state: TimelineState) => stateLabels?.[state] ?? STATE_LABEL[state];
-  // A feed of things that happened says nothing extra for an ordinary past event.
   const spoken = (state: TimelineState) =>
     variant === 'feed' && state === 'done' ? '' : label(state);
 

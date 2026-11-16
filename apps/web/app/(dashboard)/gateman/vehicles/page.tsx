@@ -329,7 +329,6 @@ export default function GatemanVehiclesPage() {
   );
 }
 
-/** Decorative bolt heads, so the plate field reads as a number plate. */
 const PlateBolt = () => (
   <span aria-hidden="true" className="block h-1.5 w-1.5 rounded-full bg-foreground/25" />
 );

@@ -86,7 +86,6 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
       // Signed in from a public listing: land on it, with the portal home
       // underneath so Back goes somewhere sensible.
       if (status === 'authenticated' && portalReady && !inApp) {
-        // Or back on the development they wanted to ask about: any signed-in user may ask.
         const askHref = takeAskIntent();
         const { href, blockedKind } = takeListingIntent(usablePortal);
         if (askHref) router.push(askHref as never);

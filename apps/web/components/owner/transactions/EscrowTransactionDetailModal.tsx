@@ -52,8 +52,6 @@ const actorConfig: Record<
   system: { label: 'System', icon: Cog },
 };
 
-// Only the states the backend drives a sale through: deposit → held → released. A finished step
-// reads in the past tense.
 const escrowSteps: {
   key: SaleEscrowStatus;
   label: string;

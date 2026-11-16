@@ -1,4 +1,3 @@
-/** What a held rent row asks of the tenant. Move-in happens once per lease, so only one row ever asks for it. */
 export type RentReleaseAction = 'confirm-move-in' | 'release-now';
 
 export interface RentReleasePayment {
@@ -12,7 +11,6 @@ export interface RentReleasePayment {
   moveInConfirmed?: boolean;
 }
 
-/** Before move-in only each home's oldest held rent asks to confirm move-in; after it, every held rent offers early release. */
 export function rentReleaseActions(
   payments: readonly RentReleasePayment[]
 ): Map<string, RentReleaseAction> {

@@ -4,7 +4,6 @@ import { useLayoutEffect, useRef, useState, type ImgHTMLAttributes } from 'react
 import { cn, placeholderOf } from '@sureground/shared';
 
 export interface ProgressiveImgProps extends ImgHTMLAttributes<HTMLImageElement> {
-  /** A tiny blurred `data:` URI; without a valid one this is a plain `<img>`. */
   placeholder?: string | null;
 }
 
@@ -28,7 +27,6 @@ export function ProgressiveImg({ placeholder, className, onLoad, ...props }: Pro
 
   return (
     <>
-      {/* Stays behind the photo, so the fade never shows the bare background. */}
       <span
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 scale-110 bg-cover bg-center blur-lg"

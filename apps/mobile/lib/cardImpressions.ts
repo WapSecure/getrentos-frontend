@@ -1,5 +1,4 @@
 import { CARD_IMPRESSION_RULE } from '@sureground/shared';
-// Pure, so the de-duplication and visibility rules can be unit tested without a list on screen.
 
 /** Half the card on screen for one continuous second, once per screen visit, as on the web. */
 export const CARD_VIEWABILITY = {
@@ -25,14 +24,12 @@ export function visibleCards(
   return out;
 }
 
-/** Share of a box (top and height in window points) inside a viewport of `viewport` points from 0. */
 export function visibleFraction(top: number, height: number, viewport: number): number {
   if (!(height > 0) || !(viewport > 0)) return 0;
   const shown = Math.min(top + height, viewport) - Math.max(top, 0);
   return Math.max(0, Math.min(1, shown / height));
 }
 
-/** Cards seen while the screen is unfocused or the list is scrolled out of view (`setInView`) wait until both are true. */
 export class CardImpressionTracker {
   private seen = new Set<string>();
   private visible: VisibleCard[] = [];

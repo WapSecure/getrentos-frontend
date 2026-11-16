@@ -55,7 +55,6 @@ export function AskTheDeveloperLink({ developmentId }: { developmentId: string }
   );
 }
 
-// Signed in only; questions and answers are kept so an unanswered one can be followed up.
 export function AskTheDeveloper({
   developmentId,
   developerName,

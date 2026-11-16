@@ -17,7 +17,6 @@ const qs = (params: Record<string, string | undefined>) => {
   return s ? `?${s}` : '';
 };
 
-/** Staff curation across owners; the backend requires collections.manage on every route. */
 export const adminCollectionsService = {
   list(): Promise<ApiResponse<ManagedCollection[]>> {
     return safeCall(() => authFetch<ManagedCollection[]>(BASE));
@@ -80,7 +79,6 @@ export const adminCollectionsService = {
       })
     );
   },
-  /** Step-up is asked for by the API and handled by the StepUpDialog. */
   setSponsorship(id: string, input: SponsorshipInput): Promise<ApiResponse<ManagedCollection>> {
     return safeCall(() =>
       authFetch<ManagedCollection>(`${BASE}/${id}/sponsorship`, {

@@ -83,10 +83,8 @@ export function UploadRow({
   onRemove,
   onRetry,
 }: {
-  /** Read out with the buttons, e.g. "new photo 2". */
   name: string;
   preview: ReactNode;
-  /** None once the file is up and waiting to be added with the others. */
   state?: UploadState;
   onRemove: () => void;
   onRetry: () => void;

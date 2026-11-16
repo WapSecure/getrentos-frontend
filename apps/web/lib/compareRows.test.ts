@@ -7,7 +7,6 @@ const chain = (met: Record<string, boolean>) => ({
 });
 
 test('verification follows the trust chain, not the bare property flag', () => {
-  // The reported case: the property flag is set but two links are outstanding.
   const inProgress = compareVerification({
     verified: true,
     trustChain: chain({ owner: false, authority: false }),

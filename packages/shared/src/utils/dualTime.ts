@@ -28,7 +28,6 @@ const clockParts = (date: Date, timeZone: string) => {
   return { time: `${part('hour')}:${part('minute')}`, day: part('day'), weekday: part('weekday') };
 };
 
-/** A viewer in Lagos, or with an unknown zone, sees Lagos only. */
 export const formatDualTime = (date: Date | string, viewerTimeZone?: string | null): string => {
   const value = typeof date === 'string' ? new Date(date) : date;
   if (Number.isNaN(value.getTime())) return '—';

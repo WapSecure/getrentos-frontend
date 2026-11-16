@@ -113,7 +113,6 @@ export function DevelopmentEditorView({ id }: { id: string }) {
     },
   });
 
-  /** Every change returns the whole development; put it straight into the cache. */
   const run = async (call: () => Promise<Result>, done: string) => {
     const res = await call();
     if (!res.success || !res.data) {

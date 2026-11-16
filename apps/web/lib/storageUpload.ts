@@ -14,7 +14,6 @@ export interface StorageUploadOptions {
   signal?: AbortSignal;
 }
 
-/** Storage refused or could not be reached; `status` is 0 for a network failure. */
 export class StorageUploadError extends Error {
   readonly status: number;
   constructor(status: number, message: string) {
@@ -100,11 +99,9 @@ export function partRange(
   return { start, end: Math.min(start + partSize, size) };
 }
 
-/** Part numbers 1..count that storage does not hold yet. */
 export function missingParts(count: number, uploaded: readonly number[]): number[] {
   const have = new Set(uploaded);
   return Array.from({ length: count }, (_, i) => i + 1).filter((n) => !have.has(n));
 }
 
-/** Wait before retry `attempt` (1-based): 1 s, 2 s, 4 s… capped at 8 s, so a weak network gets breathing room. */
 export const retryDelayMs = (attempt: number) => Math.min(8000, 1000 * 2 ** (attempt - 1));

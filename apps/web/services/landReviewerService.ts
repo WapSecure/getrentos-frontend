@@ -71,7 +71,6 @@ export const landReviewerService = {
       })
     ),
 
-  /** A valuer seat files the signed report. Neutral path: valuations are not land-only. */
   submitValuation: (seatId: string, input: LandReviewValuationInput) => {
     const form = new FormData();
     form.append('file', input.file);

@@ -19,7 +19,6 @@ const statusLabels: Record<BuyerEscrowStatus, string> = {
   refunded: 'Refunded',
 };
 
-/** The deposit line says what happened to the deposit; only a held one is under Payment Protection. */
 const depositLabels: Record<BuyerEscrowStatus, string> = {
   deposit_pending: 'Deposit due',
   funds_held: 'Deposit under Payment Protection',
@@ -43,7 +42,6 @@ export const BuyerEscrowTransactionCard = ({
   const isRefunded = transaction.escrowStatus === 'refunded';
   const canPay = transaction.escrowStatus === 'deposit_pending' && onPayDeposit;
   const deposit = transaction.depositAmount ?? transaction.purchasePrice;
-  // Cancelled before any deposit arrived: nothing was refunded because nothing was paid.
   const neverPaid = isRefunded && transaction.statuses?.moneyStatus.code === 'NOT_DUE';
   const statuses =
     neverPaid && transaction.statuses
@@ -128,7 +126,6 @@ export const BuyerEscrowTransactionCard = ({
             Opened {formatDate(transaction.createdAt)}
           </p>
           {canPay && (
-            // Above the card's link, so it takes its own click.
             <Button
               size="sm"
               className="relative z-20"

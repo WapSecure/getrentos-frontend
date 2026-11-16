@@ -23,7 +23,6 @@ export const UTILITY_KIND_LABELS: Record<UtilityKind, string> = {
   WATER_TREATMENT: 'Water treatment',
 };
 
-/** The utility type a common asset category implies, so picking "Generator" tags it for the Utilities tab. */
 export function utilityKindForCategory(category: string | null | undefined): UtilityKind | null {
   const key = (category ?? '').trim().toLowerCase();
   const map: Record<string, UtilityKind> = {
@@ -479,7 +478,6 @@ export type UpsertGeneratorProfileInput = {
   preventivePlanId?: string;
 };
 
-/** Commas and the naira sign are ignored so "₦180,000" works. */
 export function parseWholeNaira(input: string): number | null {
   const cleaned = input.replace(/[₦,\s]/g, '');
   if (!/^\d+$/.test(cleaned)) return null;
@@ -535,12 +533,10 @@ export type UtilitiesSummary = {
   waterTestsFailedRecently: number;
 };
 
-/** The overview shows utility tiles only once something has been recorded, so a new owner never sees a row of ₦0. */
 export function shouldShowUtilityTiles(summary: UtilitiesSummary | null | undefined): boolean {
   return summary?.hasUtilityData === true;
 }
 
-/** Naira for a recorded figure; "No data yet" when nothing was logged, never ₦0. */
 export function formatSpendOrNoData(
   value: number | null | undefined,
   empty = 'No data yet'
@@ -616,7 +612,6 @@ export function formatWaterParameters(
     .join(', ');
 }
 
-/** A set that is nearly due is never shown as 0. */
 export function generatorServiceSummary(due: number, dueSoon: number): string {
   if (due > 0 && dueSoon > 0) return `${due} due, ${dueSoon} soon`;
   if (dueSoon > 0) return `${dueSoon} due soon`;
@@ -811,7 +806,6 @@ export const SERVICE_CHARGE_QUERY_STATUS_LABELS: Record<ServiceChargeQueryStatus
   WITHDRAWN: 'Withdrawn',
 };
 
-/** A tenant's charge collection status; a lapsed tenancy's unpaid charge is removed. */
 export type RenterServiceChargeCollection = 'PAID' | 'PART_PAID' | 'UNPAID' | 'REMOVED';
 
 export type RenterServiceCharge = {
@@ -821,7 +815,6 @@ export type RenterServiceCharge = {
   unit: string;
   instalment: number;
   periodStart: string;
-  /** The last day covered. */
   periodEnd: string;
   dueDate: string;
   amount: number;
@@ -852,7 +845,6 @@ export type RenterServiceChargeStatement = Omit<RenterServiceCharge, 'openQuerie
     label: string;
     amount: number;
     budgetTotal: number | null;
-    /** Spent so far on this line, when the budget is open book; null otherwise. */
     spentSoFar: number | null;
   }[];
   budget: {
@@ -905,7 +897,6 @@ export function statementShareBasis(
   return `Shared equally across ${budget.unitsSharing} ${budget.unitsSharing === 1 ? 'unit' : 'units'}`;
 }
 
-/** A query can still be raised on a live charge if nothing about the same line is open. */
 export function hasLiveQuery(queries: RenterServiceChargeQuery[], lineId: string | null): boolean {
   return queries.some(
     (q) => (q.status === 'OPEN' || q.status === 'ANSWERED') && q.lineId === lineId
@@ -947,9 +938,7 @@ export type ServiceChargeReconciliation = {
     actual: number;
     variance: number;
     billed: number;
-    /** Cash received from tenants. */
     collected: number;
-    /** Settled by credits from upheld queries, not cash. */
     credited: number;
     outstanding: number;
     ownerBears: number;

@@ -1,7 +1,6 @@
 import type { MediaItem } from './types';
 
-// Sureground takes and holds no money for developments: buyers pay the developer. Everything is read
-// through `developmentOf` / `developmentSummaryOf`, which drop anything malformed.
+// Sureground takes and holds no money for developments: buyers pay the developer.
 
 export type DevelopmentStage = 'PLANNED' | 'APPROVED' | 'UNDER_CONSTRUCTION' | 'COMPLETED';
 export type DevelopmentCheckKind =
@@ -24,7 +23,6 @@ export const DEVELOPMENT_CHECK_KINDS: readonly DevelopmentCheckKind[] = [
   'BUILDING_APPROVAL',
 ];
 
-/** As the developer states it; the page says so. */
 export const DEVELOPMENT_STAGE_LABEL: Record<DevelopmentStage, string> = {
   PLANNED: 'Planned',
   APPROVED: 'Approved, not started',
@@ -56,7 +54,6 @@ export const DEVELOPMENT_CHECK_COPY: Record<
   },
 };
 
-/** Said on every development page, next to the checks, so nobody reads more into them. */
 export const DEVELOPMENT_NOT_CHECKED: readonly string[] = [
   'The construction itself: its quality, its progress, or whether it will finish on time',
   'The prices, unit types and payment plan, which are as the developer states them',
@@ -85,7 +82,6 @@ export interface ShowroomDevelopmentApproval {
   kind: 'SITE_TITLE' | 'BUILDING_APPROVAL' | 'OTHER_APPROVAL';
   label: string;
   authority?: string;
-  /** True only when a Sureground staff check of it passed. */
   checked: boolean;
   checkedAt?: string;
 }
@@ -125,12 +121,9 @@ export interface ShowroomDevelopment {
   expectedCompletion?: string;
   developerName: string;
   registeredName?: string;
-  /** Always all four: a development without them is not shown at all. */
   checks: ShowroomDevelopmentCheck[];
   approvals: ShowroomDevelopmentApproval[];
-  /** Site photos are captioned with the date taken; impressions say they are impressions. */
   media: MediaItem[];
-  /** Site photos only, newest first: the progress gallery. */
   progress: MediaItem[];
   unitTypes: ShowroomUnitType[];
   paymentNote?: string;
@@ -186,7 +179,6 @@ export function completionLabel(value: string | undefined): string | undefined {
 const takenLabel = (iso: string) =>
   `Taken ${new Date(iso).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })}`;
 
-/** A site photo without a capture date is dropped: the gallery is dated. */
 function mediaItemOf(raw: unknown, order: number): MediaItem | undefined {
   if (!isRecord(raw) || raw.kind !== 'image') return undefined;
   const id = text(raw.id, 80);
@@ -247,7 +239,6 @@ function unitTypesOf(raw: unknown): ShowroomUnitType[] {
     const priceFromNaira = positive(u.priceFromNaira, 1e12);
     const unitsTotal = count(u.unitsTotal);
     let unitsAvailable = count(u.unitsAvailable);
-    // A count above the total is not shown rather than guessed at.
     if (unitsAvailable !== undefined && unitsTotal !== undefined && unitsAvailable > unitsTotal)
       unitsAvailable = undefined;
     out.push({
@@ -291,7 +282,6 @@ function instalmentsOf(raw: unknown, unitTypes: ShowroomUnitType[]): ShowroomIns
   return out;
 }
 
-/** Undefined unless it names all four checks with a date and its payment goes to the developer. */
 export function developmentOf(raw: unknown): ShowroomDevelopment | undefined {
   if (!isRecord(raw)) return undefined;
   const id = text(raw.id, 80);

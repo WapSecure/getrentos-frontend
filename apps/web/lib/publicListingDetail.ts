@@ -58,7 +58,6 @@ export const MARKET_PATH: Record<PublicDetailMarket, string> = {
   land: LISTING_BASE.land,
 };
 
-/** Canonical public path for a listing detail page. */
 export const publicListingPath = (listing: Pick<PublicListingDetail, 'market' | 'id' | 'title'>) =>
   listingPath(listing.market, listing.id, listing.title);
 

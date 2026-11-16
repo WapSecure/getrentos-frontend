@@ -16,19 +16,15 @@ import { createPortal } from 'react-dom';
 import { cn } from '@sureground/shared';
 
 export interface TooltipProps {
-  /** Short text: what the control does ("Mark resolved"), not how it looks. */
   content: ReactNode;
-  /** One focusable element, e.g. an IconButton. It receives aria-describedby. */
   children: ReactElement<Record<string, unknown>>;
   side?: 'top' | 'bottom';
-  /** Hover delay; keyboard focus shows it at once. */
   delay?: number;
   className?: string;
 }
 
 const GAP = 8;
 
-/** In a portal so card overflow never clips it. Not a substitute for a visible label on controls that change data. */
 export function Tooltip({ content, children, side = 'top', delay = 250, className }: TooltipProps) {
   const id = useId();
   const triggerRef = useRef<HTMLElement | null>(null);

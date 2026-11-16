@@ -37,7 +37,6 @@ test('each status has its own badge, and unknown codes read as neutral', () => {
   assert.equal(stageVariant('HANDED_OVER'), 'success');
   assert.equal(moneyVariant('FROZEN'), 'danger');
   assert.equal(legalVariant('PERFECTED'), 'success');
-  // A released deposit is not legal completion: the legal badge stays neutral.
   assert.equal(moneyVariant('RELEASED'), 'success');
   assert.equal(legalVariant('NOT_STARTED'), 'neutral');
   assert.equal(stageVariant('SOMETHING_NEW'), 'neutral');
@@ -63,7 +62,6 @@ test('a release waiting for the representative says nothing moved and the buyer 
     {
       state: 'WAITING_FOR_CO_APPROVAL',
       waitingFor: 'REPRESENTATIVE',
-      // An older API message implying an automatic release is not shown.
       message:
         'Your approval is recorded. The deposit is released once your representative approves too.',
     },
@@ -77,7 +75,6 @@ test('a release waiting for the representative says nothing moved and the buyer 
     waiting: false,
     message: 'Deposit released to the seller.',
   });
-  // Older responses carry no outcome: the release went through.
   assert.equal(releaseOutcome(undefined).waiting, false);
   assert.match(
     releaseOutcome({ state: 'WAITING_FOR_CO_APPROVAL', waitingFor: 'REPRESENTATIVE' }).message,
@@ -120,7 +117,6 @@ test('deposit release stage follows the two approvals', () => {
     stageOf('PROTECTED', { binding: true, releaseApproved: true, pending: [] }),
     'BOTH_APPROVED'
   );
-  // Released already: nothing left to approve.
   assert.equal(stageOf('RELEASED', { binding: true, releaseApproved: true }), 'NEEDS_APPROVALS');
 });
 
@@ -263,9 +259,7 @@ test('a built home’s handover cannot be approved or released before the seller
   assert.equal(handoverAwaitingDelivery(plan('DELIVERED')), false);
   assert.equal(handoverAwaitingDelivery(plan('CONFIRMED')), false);
   assert.equal(handoverAwaitingDelivery(plan('WAIVED')), false);
-  // Planned but not saved yet: still not delivered.
   assert.equal(handoverAwaitingDelivery({ plan: 'BUILT_HOME', milestones: [] }), true);
-  // Land sales keep their own release rules.
   assert.equal(handoverAwaitingDelivery({ plan: 'LAND_RESALE', milestones: [] }), false);
   assert.match(RELEASE_BLOCKED_NOTE, /has not marked the keys as handed over yet/);
 });
@@ -281,7 +275,6 @@ test('an undelivered handover is not waiting for anyone’s approval, and says w
   const delivered = { ...awaiting, stepDelivered: true };
   assert.equal(stepAwaitingDelivery(awaiting), true);
   assert.equal(stepAwaitingDelivery(delivered), false);
-  // Older responses without the flag are not blocked here; the server refuses anyway.
   const { stepDelivered: _omit, ...legacy } = awaiting;
   assert.equal(stepAwaitingDelivery(legacy), false);
   assert.equal(stepAwaitingDelivery({ ...awaiting, releasesDeposit: undefined }), false);

@@ -26,7 +26,6 @@ export interface PayoutPreference {
   fallbackToNgAccount: boolean;
   ngAccount: { bankName: string; accountNumber: string; accountName: string } | null;
   foreignAccount: ForeignBankAccount | null;
-  /** False until a licensed foreign payout partner is live. */
   foreignPayoutsAvailable: boolean;
   nextPayout: {
     state: 'NG_ACCOUNT' | 'FOREIGN_ACCOUNT' | 'FOREIGN_PAYOUT_PENDING_PARTNER';
@@ -35,7 +34,6 @@ export interface PayoutPreference {
   updatedAt: string | null;
 }
 
-/** Where statement payouts go: the Nigerian account (landlord/settings/payout) or an account abroad. */
 export const ownerPayoutService = {
   getPreference: () => safeCall(() => authFetch<PayoutPreference>('/owner/payout-preference')),
   updatePreference: (data: {

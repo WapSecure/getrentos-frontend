@@ -1,6 +1,3 @@
-// Public pages are app-specific: the web app passes its own `isPublicPath`.
-
-/** Null means stay: public pages just drop the stale session, as does the sign-in page itself. */
 export function sessionExpiredRedirect(
   location: { pathname: string; search: string },
   loginPath: string,

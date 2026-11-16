@@ -3,7 +3,6 @@ export type FunnelMarket = 'all' | 'rent' | 'sale' | 'land' | 'shortlet' | 'unsp
 export interface FunnelStep {
   sessions: number;
   converted: number;
-  /** Null when no session reached the first step. */
   rate: number | null;
 }
 
@@ -19,7 +18,6 @@ export interface FunnelMarketReport {
   };
   media: { galleryOpen: FunnelStep; videoStart: FunnelStep; tourStart: FunnelStep };
   devices: { phone: number; tablet: number; desktop: number };
-  /** Counted from existing records, not from browser events; absent for all/unspecified. */
   outcomes?: Record<string, number>;
 }
 

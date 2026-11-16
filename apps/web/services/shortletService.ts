@@ -69,7 +69,6 @@ export interface ShortletListParams {
   /** Only `true` is sent; unticked means "don't filter". */
   instantBooking?: boolean;
   verifiedOnly?: boolean;
-  /** Only stays shown inside this map area. */
   area?: MapArea;
 }
 
@@ -324,7 +323,6 @@ export const shortletService = {
     ),
 
   uploadMedia: (kind: 'image' | 'video', file: File) => {
-    // Videos go straight to storage, so a large video never passes through the API.
     if (kind === 'video') return safeCall(() => uploadVideoDirect('/host/shortlets', file));
     const fd = new FormData();
     fd.append('file', file);

@@ -77,8 +77,6 @@ export default function LandlordLeases() {
   });
 
   const items = query.data?.items ?? [];
-  // Drafts haven't gone out and lapsed or ended leases won't be signed, so neither is "awaiting".
-  // A lease waiting on the first rent is counted on its own: nobody can sign it until the money is held.
   const awaitingPayment = items.filter((l) => l.status === 'awaiting_payment').length;
   const awaitingSignature = items.filter((l) => {
     if (!AWAITING_STATUSES.has(l.status) || l.status === 'awaiting_payment') return false;
@@ -207,7 +205,6 @@ function LeaseCard({
           <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
             {formatDate(l.leaseStart, 'short')} – {formatDate(l.leaseEnd, 'short')}
           </Text>
-          {/* Older leases have no stored period: show the amount alone rather than guess. */}
           <Price amount={l.rentAmount} period={l.rentPeriod} variant="callout" />
         </View>
 
@@ -339,7 +336,6 @@ function SignatureChip({ label, signed }: { label: string; signed: boolean }) {
   );
 }
 
-/** A signed lease past its end date: the tenant is still in the unit until renewal or notice. */
 function isHoldingOver(l: { status: string; leaseEnd: string }): boolean {
   return l.status === 'signed' && new Date(l.leaseEnd).getTime() < Date.now();
 }

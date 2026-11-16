@@ -191,7 +191,6 @@ export default function LandlordPropertyDetail() {
           icon={<ChevronLeft size={22} color={colors.foreground} />}
         />
         <View style={{ flex: 1 }}>
-          {/* Two action buttons share this row, so long names wrap instead of cutting to a few letters. */}
           <Text variant="heading" numberOfLines={2}>
             {p?.name ?? 'Property'}
           </Text>

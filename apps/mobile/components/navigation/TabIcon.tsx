@@ -6,7 +6,6 @@ import { TAB_ICON_SIZE, TAB_PILL } from '@/lib/navigationStyles';
 
 type TabIconRenderProps = { focused: boolean; color: ColorValue; size: number };
 
-/** Every role's tab bar draws its icons through this, so they share one size and one active treatment. */
 export function TabIcon({
   icon: Icon,
   focused,
@@ -25,7 +24,6 @@ export function TabIcon({
         borderRadius: TAB_PILL.height / 2,
         alignItems: 'center',
         justifyContent: 'center',
-        // The dark palette's blue is lighter, so it needs a little more weight to show on the card.
         backgroundColor: focused
           ? withAlpha(colors.primary, scheme === 'dark' ? 0.2 : 0.12)
           : 'transparent',

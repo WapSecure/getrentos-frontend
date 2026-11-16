@@ -50,9 +50,7 @@ interface MediaViewerProps {
   onOpenChange: (open: boolean) => void;
   startIndex?: number;
   title: string;
-  /** For measurement; the viewer itself never sends anything. */
   onMediaEvent?: (event: MediaEvent) => void;
-  /** From `floorPlansOf`; without one, the Floor plans tab shows the plan image alone. */
   floorPlans?: ShowroomFloorPlan[];
 }
 
@@ -173,14 +171,12 @@ function ViewerBody({
     thumbsRef.current
       ?.querySelector<HTMLElement>(`[data-index="${index}"]`)
       ?.scrollIntoView({ block: 'nearest', inline: 'center' });
-    // Warm the neighbours so the next swipe shows a photo, not a blank.
     for (const n of [index - 1, index + 1]) {
       const m = items[(n + items.length) % items.length];
       if (m?.kind === 'image') new Image().src = m.url;
     }
   }, [index, items]);
 
-  // Videos and tours pause the slideshow: they need the viewer's attention, not a timer.
   const sliding = playing && isImage;
   useEffect(() => {
     if (!sliding) return;
@@ -298,7 +294,6 @@ function ViewerBody({
             {position}
           </DialogDescription>
         </div>
-        {/* Phones and tablets have no room rail, so floor plans get a button of their own. */}
         {levels.length > 0 && !onPlan && (
           <button
             type="button"
@@ -322,7 +317,6 @@ function ViewerBody({
         <div
           className={cn(
             'relative min-h-0 min-w-0 flex-1 overflow-hidden rounded-2xl',
-            // Line drawings read on a light page; photos stay on the dark stage.
             onPlan && !grid ? 'bg-white' : 'bg-white/5'
           )}
         >
@@ -350,7 +344,6 @@ function ViewerBody({
                 className={cn(
                   'flex h-full w-full items-center justify-center',
                   isImage && 'touch-none select-none',
-                  // Room for the level chips (top-3 plus a 52px bar), so they never cover the plan.
                   onPlan && levels.length > 1 && 'pt-18'
                 )}
                 onPointerDown={onPointerDown}
@@ -413,7 +406,6 @@ function ViewerBody({
                     )}
                     style={{
                       transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})`,
-                      // Drawn where the photo will be (same shape, centred) and covered once it loads.
                       ...placeholderBackdrop(item.placeholder),
                     }}
                   />
@@ -684,7 +676,6 @@ function Thumb({ item, load = true }: { item: MediaItem; load?: boolean }) {
           loading="lazy"
           decoding="async"
           onError={() => setBroken(true)}
-          // A plan is never cropped, even as a thumbnail.
           className={cn(
             'h-full w-full',
             isFloorPlan(item) ? 'bg-white object-contain' : 'object-cover'

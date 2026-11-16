@@ -41,7 +41,6 @@ const ICONS: Record<MaintenanceCategoryIconName, typeof Wrench> = {
   Zap,
 };
 
-/** Decorative category icon; the category name always sits next to it. */
 export function MaintenanceCategoryIcon({
   category,
   ...props

@@ -44,7 +44,6 @@ const FILTERS: { value: LandlordViewingStatus | undefined; label: string }[] = [
 
 const when = (iso: string) => `${formatDate(iso, 'short')}, ${formatTime(iso)}`;
 
-/** The backend lets any property controller confirm, decline and host these, so the owner's renters tab reuses it. */
 export function RentalViewingsScreen({
   eyebrow,
   subtitle,
@@ -54,7 +53,6 @@ export function RentalViewingsScreen({
   eyebrow: string;
   subtitle: string;
   emptyDescription?: string;
-  /** Shown under the header, above the status filters (the owner's renters/buyers switch). */
   top?: ReactNode;
 }) {
   const { colors, spacing, radius } = useTheme();
@@ -207,7 +205,6 @@ function ViewingCard({
   onComplete: () => void;
 }) {
   const { colors, spacing } = useTheme();
-  // When the card first showed; close enough to "now" for offering "Mark as done".
   const [shownAt] = useState(() => Date.now());
   const past = !!v.scheduledAt && new Date(v.scheduledAt).getTime() < shownAt;
   return (

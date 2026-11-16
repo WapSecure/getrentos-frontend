@@ -48,7 +48,6 @@ import type { EstateAgreement, EstateListing, EstateListingType } from '@/types/
 import { useEstatePlan } from '@/hooks/useEstatePlan';
 import type { ApiError } from '@sureground/shared';
 
-// Publishing needs a verified identity; point the manager at the page that gives one.
 const identityAction = (err: Error, router: { push: (href: string) => void }) =>
   (err as Partial<ApiError>).code === 'IDENTITY_REQUIRED' || /approved identity/i.test(err.message)
     ? {

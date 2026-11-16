@@ -18,7 +18,6 @@ import { roleLabel } from '@/lib/roleLabels';
 interface ReviewVerificationModalProps {
   request: VerificationRequest | null;
   onClose: () => void;
-  /** crossCheckIssues lists problems the document cross-check raised in this session, if it was run. */
   onApprove: (id: string, crossCheckIssues: string[]) => void;
   onReject: (id: string, reason: string) => void;
   onRequestClarification: (id: string, reason: string) => void;
@@ -294,7 +293,6 @@ export const ReviewVerificationModal = ({
                       className="flex-1 gap-1.5"
                       onClick={handleApprove}
                       isLoading={isApproving}
-                      // The server refuses it too; the panel above says what to resolve first.
                       disabled={isSubmitting || detailUnavailable || listingWarnings.length > 0}
                       title={
                         listingWarnings.length > 0

@@ -7,7 +7,6 @@ import type {
   SourceOfFundsSupportingKind,
 } from '@/types/foreignIdentity';
 
-/** Diaspora investors only; every route acts on the signed-in user. */
 export const foreignIdentityService = {
   getStatus(): Promise<ApiResponse<ForeignIdentityStatus>> {
     return safeCall(() => authFetch<ForeignIdentityStatus>('/trust/foreign-identity'));
@@ -58,7 +57,6 @@ export const foreignIdentityService = {
     return foreignIdentityService.submitDocument('bank-statement', document, note);
   },
 
-  /** Would a purchase at this price need source of funds approved first? */
   checkSourceOfFunds(amount: number): Promise<ApiResponse<SourceOfFundsCheck>> {
     return safeCall(() =>
       authFetch<SourceOfFundsCheck>(
@@ -74,7 +72,6 @@ export const foreignIdentityService = {
     return res.success ? sourceOfFundsHoldMessage(res.data) : null;
   },
 
-  /** Six months of statements, one or more supporting documents, and the donor's ID with a gift letter. */
   submitSourceOfFunds(params: {
     bankStatements: File[];
     supportingKind: SourceOfFundsSupportingKind;

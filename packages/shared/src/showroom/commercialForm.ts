@@ -108,7 +108,6 @@ export const commercialFromDetails = (d?: CommercialDetails): CommercialValues =
   vatIncluded: toStated(d?.vatIncluded),
 });
 
-/** Only what is stated; undefined when nothing is. Used on create. */
 export function commercialToCreatePayload(v: CommercialValues): CommercialDetails | undefined {
   const payload: CommercialDetails = {
     permittedUse: v.permittedUse || undefined,

@@ -2,7 +2,6 @@ import { PricingView } from '@/components/pricing/PricingView';
 import { OPTIONAL_FETCH_TIMEOUT_MS, PUBLIC_REVALIDATE } from '@/lib/publicFetch';
 import type { PlanPricing } from '@/services/subscriptionService';
 
-// Without it (API down or slow) the page loads the pricing in the browser.
 async function fetchPricing(): Promise<PlanPricing | undefined> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';

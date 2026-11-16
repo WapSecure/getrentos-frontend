@@ -307,7 +307,6 @@ export function HomeManagementSlaPolicies({
     if (!mutationPending) setDialogState(null);
   };
 
-  // Waits for the property's policies so it knows which priorities are still free.
   const policiesReady =
     !isPropertiesLoading && !policiesQuery.isLoading && !activePoliciesQuery.isLoading;
   useCreateRequest(

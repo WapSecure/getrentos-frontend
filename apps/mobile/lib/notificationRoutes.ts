@@ -22,10 +22,8 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/buyer/viewings': '/(app)/buyer-viewings',
   '/buyer/messages': '/(app)/(buyer)/messages',
   '/buyer/representatives': '/(app)/buyer-land-representatives',
-  // Sent to someone a buyer appointed to act for them, whatever their own role.
   '/representing': '/(app)/land-representing',
   '/land/representing': '/(app)/land-representing',
-  // The answered notification links buyers here; anyone else gets `/developments/<id>`.
   [ROUTES.BUYER_DEVELOPER_QUESTIONS]: DEVELOPER_QUESTIONS_ROUTE,
   '/landlord/applications': '/(app)/landlord-applications',
   '/landlord/reviews': '/(app)/landlord-reviews',
@@ -206,7 +204,6 @@ export function routeForActionUrl(url?: string | null): string | null {
     .replace(/^\/dashboard/, '')
     .replace(/\/$/, '');
   if (WEB_PATH_TO_ROUTE[path]) return WEB_PATH_TO_ROUTE[path];
-  // Invitations carry their token: a phone-only invitee accepts from the notification itself.
   const token = url.match(/[?&]token=([^&#\s]+)/)?.[1];
   if (token && path === '/agency/join') return `/(app)/agency-join?token=${token}`;
   if (token && path === '/agency-invite/claim') return `/(app)/agency-invite-claim?token=${token}`;
@@ -269,9 +266,6 @@ export function routeForNotification(
   }
   const direct = routeForActionUrl(actionUrl);
   if (direct) return (portal === 'owner' && OWNER_LANDLORD_LINKS[direct]) || direct;
-  // The developer answered: their answer shows under "Your questions" on the development screen.
-  // DEVELOPMENT_ENQUIRY_REMINDER (to the developer's firm) is left to the notification list: the
-  // app has no developer inbox, and the public page cannot answer a question.
   if (type === 'DEVELOPMENT_ENQUIRY_ANSWERED' && isDevelopmentId(developmentId)) {
     return developmentRoute(developmentId);
   }

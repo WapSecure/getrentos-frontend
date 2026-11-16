@@ -82,7 +82,6 @@ interface DraftItem {
   visible: boolean;
 }
 
-/** The server decides which listings a curator may add; the picker only offers those. */
 export function AdminCollectionsView({
   manager,
   queryKey,

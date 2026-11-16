@@ -12,7 +12,6 @@ import {
 
 interface LandDocumentUploadFieldsProps {
   id: string;
-  /** Leave both out when the type is fixed (e.g. a valuation report): only the file is asked for. */
   documentType?: LandDocumentType | '';
   onDocumentTypeChange?: (value: LandDocumentType) => void;
   file: File | null;

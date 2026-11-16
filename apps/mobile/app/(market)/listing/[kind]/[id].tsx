@@ -97,7 +97,6 @@ export default function PublicListing() {
   useTrackDetailView(p?.id, isMarketKind(kind) ? kind : 'rent');
 
   const back = () => (router.canGoBack() ? router.back() : router.replace('/(market)'));
-  // Sections that count impressions re-measure themselves when the page scrolls.
   const [scrollListeners] = useState(() => new Set<() => void>());
 
   const share = async () => {
@@ -482,9 +481,7 @@ function SimilarListings({
 }) {
   const { spacing } = useTheme();
   const saved = useMarketSaved(listing.kind);
-  // The web's similar strip counts under `${market}_similar`. The row scrolls sideways (the list
-  // reports which cards are half in view) inside a page that scrolls down (we measure the row), so
-  // a card counts only when both say it is on screen.
+  // Counts under the web's `${market}_similar`, and only when both the row and the page say the card is on screen.
   const cards = useCardAnalytics(listing.kind, `${listing.kind}_similar`, { inView: false });
   const row = useRef<ComponentRef<typeof View>>(null);
   const { setInView } = cards;

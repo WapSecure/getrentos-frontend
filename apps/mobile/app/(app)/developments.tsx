@@ -7,7 +7,6 @@ import {
 } from '@/components/market/DevelopmentsDirectory';
 import { goBack } from '@/lib/goBack';
 
-/** The public off-plan list, for signed-in people: the market tab is for signed-out visitors only. */
 export default function Developments() {
   const { colors } = useTheme();
   return (

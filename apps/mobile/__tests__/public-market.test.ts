@@ -389,7 +389,6 @@ describe('listing detail uses the shared showroom mappers', () => {
       'Service charge',
     ]);
     expect(d.costs?.total?.amount).toBe(3500000);
-    // A stated zero deposit is not "missing"; unsent fees are.
     expect(d.costs?.notStated).toEqual(['Agency fee', 'Legal fee']);
     expect(d.facts.find((f) => f.label === 'Furnished')?.value).toBe('Yes');
   });

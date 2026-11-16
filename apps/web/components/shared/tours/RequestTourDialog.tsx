@@ -43,7 +43,6 @@ export const RequestTourDialog = ({
   const [accepted, setAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Representatives are a land feature for now.
   const reps = useQuery({
     queryKey: representativeKeys.mine,
     queryFn: () => unwrap(representativeService.mine()),

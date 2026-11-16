@@ -1,6 +1,5 @@
 import type { MediaItem } from './types';
 
-/** `estimated`: the lister's own figures. `checked`: Sureground staff checked them. */
 export type FloorPlanMeasurement = 'estimated' | 'checked';
 
 export interface ShowroomFloorPlanRoom {
@@ -9,7 +8,6 @@ export interface ShowroomFloorPlanRoom {
   /** Metres. Both sides or neither. */
   widthM?: number;
   lengthM?: number;
-  /** The `id` of a photo in the listing's media. */
   photoMediaId?: string;
   /** The room's tap target on the plan image, as percentages from the top left. Both or neither. */
   x?: number;
@@ -19,14 +17,12 @@ export interface ShowroomFloorPlanRoom {
 export interface ShowroomFloorPlan {
   id: string;
   levelName: string;
-  /** The `id` of the plan image in the listing's media. */
   imageMediaId: string;
   measurement: FloorPlanMeasurement;
   checkedAt?: string;
   rooms: ShowroomFloorPlanRoom[];
 }
 
-/** As the API sends it; read only through `floorPlansOf`. */
 export interface FloorPlanDto {
   id: string;
   levelName: string;
@@ -57,7 +53,6 @@ const metres = (v: unknown) =>
 const percent = (v: unknown) =>
   typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 100 ? v : undefined;
 
-/** A level shows only when its plan image is in `media`; `checked` only when the API says CHECKED with a check time. */
 export function floorPlansOf(raw: unknown, media: MediaItem[]): ShowroomFloorPlan[] {
   if (!Array.isArray(raw)) return [];
   const images = new Set(media.filter((m) => m.kind === 'image').map((m) => m.id));
@@ -107,7 +102,6 @@ export function floorPlansOf(raw: unknown, media: MediaItem[]): ShowroomFloorPla
 
 export const formatMetres = (n: number) => String(Number(n.toFixed(2)));
 
-/** The plan-level label. These are the only two wordings a size may carry. */
 export const FLOOR_PLAN_MEASUREMENT_LABEL: Record<FloorPlanMeasurement, string> = {
   estimated: 'Estimated',
   checked: 'Measured, checked by Sureground',

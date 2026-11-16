@@ -81,7 +81,6 @@ export const LandlordStatsCards = ({
             label: 'Reserved',
             icon: Clock,
             value: reservedUnits,
-            // Off the market but not let (awaiting signature or first payment), so not counted as rented.
             subtitle: 'Awaiting signature or payment',
           },
           {

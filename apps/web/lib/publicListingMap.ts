@@ -52,7 +52,6 @@ export interface PublicMarketFilters {
   sort?: string;
   page?: number;
   pageSize?: number;
-  /** Only listings shown inside this map area. */
   area?: MapArea;
 }
 
@@ -133,7 +132,6 @@ export const rentToCard = (item: RentApiItem): PublicListingCard => ({
   bedrooms: item.bedrooms,
   bathrooms: item.bathrooms,
   size: item.size,
-  // The trust chain decides, as on mobile; the bare flag only where there is none.
   verified: isListingVerified(item),
   trustChain: item.trustChain,
   image: item.image || undefined,
@@ -211,6 +209,5 @@ export const firstPagePath = (market: PublicMarket): string => {
     : `/marketplace/listings${toQueryString(saleQuery(filters))}`;
 };
 
-/** The server's similar-listings route for a market. */
 export const similarPath = (market: PublicMarket, id: string, limit: number): string =>
   `${market === 'rent' ? '/rentals' : '/marketplace/listings'}/${encodeURIComponent(id)}/similar?limit=${limit}`;

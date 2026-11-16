@@ -16,7 +16,6 @@ const post = <T>(path: string, body?: unknown) =>
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
 
-/** A plot purchase (land only) or any sale transaction: a land resale or a built home. */
 export type LandDealRef = { purchaseId: string } | { transactionId: string };
 
 const dealPath = (deal: LandDealRef) =>
@@ -42,7 +41,6 @@ export const representativeKeys = {
 export const representativeService = {
   mine: () => safeCall(() => authFetch<LandRepresentativeAppointment[]>('/buyer/representatives')),
 
-  /** `contact` is their phone number or email; see `contactRequestBody`. */
   appoint: (input: {
     contact: string;
     relationship: RepresentativeRelationship;

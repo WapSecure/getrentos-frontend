@@ -73,14 +73,12 @@ const SCENARIO_ROWS: ScenarioRow[] = [
 export function ListingInvestmentAnalysis({ listingId }: { listingId: string }) {
   const { enabled } = useDiasporaAvailability();
   const [edits, setEdits] = useState<AnalysisEdits>({});
-  // Debounced as a string, so an unchanged input never schedules another render.
   const settled = useDebouncedValue(JSON.stringify(analysisInput(edits)), 500);
   const input = useMemo(() => JSON.parse(settled) as ReturnType<typeof analysisInput>, [settled]);
   const analysis = useQuery({
     queryKey: investorKeys.analysis(listingId, input),
     queryFn: () => unwrap(investorService.getListingAnalysis(listingId, input)),
     enabled,
-    // An optional section: if the analysis can't load, leave it out rather than failing the listing page.
     throwOnError: false,
     retry: false,
     placeholderData: keepPreviousData,

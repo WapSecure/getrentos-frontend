@@ -135,9 +135,7 @@ export function ShowroomCostsCard({
   costs: ShowroomCosts;
   price: number;
   priceUnit?: ShowroomListing['priceUnit'];
-  /** The landlord states a VAT rate or whether VAT is included: say it is never added here. */
   vatStated?: boolean;
-  /** A next step that belongs with the price, such as Apply or Make an offer. */
   footer?: ReactNode;
 }) {
   const { colors, spacing } = useTheme();
@@ -212,10 +210,8 @@ export function ShowroomPriceBar({
 }: {
   price: number;
   period?: 'month' | 'year' | 'night' | 'total';
-  /** A short line under the price, such as an offer in progress. */
   caption?: ReactNode;
   action: ReactNode;
-  /** Small icon actions before the price, such as save. */
   leading?: ReactNode;
 }) {
   const { colors, spacing, shadows } = useTheme();

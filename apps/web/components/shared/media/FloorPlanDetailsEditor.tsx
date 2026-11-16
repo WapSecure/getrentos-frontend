@@ -83,7 +83,6 @@ const toInput = (draft: LevelDraft): FloorPlanInput => ({
   })),
 });
 
-// Only what a staff check vouches for: the image and each room's name and size.
 const measured = (draft: LevelDraft) =>
   JSON.stringify([
     draft.imageKey,
@@ -104,7 +103,6 @@ interface FloorPlanDetailsEditorProps {
   photos: EditablePhoto[];
 }
 
-// Sizes always show as "Estimated" on the listing until Sureground checks them.
 export function FloorPlanDetailsEditor({ propertyId, photos }: FloorPlanDetailsEditorProps) {
   const queryClient = useQueryClient();
   const queryKey = ['floor-plans', propertyId];
@@ -220,7 +218,6 @@ function LevelEditor({
   const checked = plan?.measurementStatus === 'CHECKED';
   const losesCheck = checked && measured(draft) !== initial;
   const image = saved.find((s) => s.key === draft.imageKey)?.photo;
-  // A plan whose photo was removed or untagged keeps its key so the lister sees why.
   const imageOptions = [
     ...(draft.imageKey && !planImages.some((p) => p.key === draft.imageKey)
       ? [{ value: draft.imageKey, label: 'A photo no longer tagged Floor plan' }]

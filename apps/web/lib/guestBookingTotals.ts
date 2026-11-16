@@ -1,5 +1,4 @@
-// Split like the booking quote (stay and refundable deposit): `total` on a booking excludes tax,
-// so on its own it disagrees with the "Pay" button.
+// `total` on a booking excludes tax, so it is split like the booking quote to agree with the "Pay" button.
 export interface GuestBookingAmounts {
   total?: number | null;
   taxAmount?: number | null;

@@ -64,7 +64,6 @@ const dt = (iso?: string | null) =>
 
 export default function WorkOrderDetail() {
   const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
-  // Opened from Managed: the owner reads it through the owner route (no Pro plan) and the manager acts on it.
   const managed = from === 'managed';
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

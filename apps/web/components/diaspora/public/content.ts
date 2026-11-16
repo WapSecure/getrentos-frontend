@@ -13,8 +13,7 @@ import {
 import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 import { LAND_PROTECTION } from '@/lib/paymentCopy';
 
-// Every claim describes what the product does today (docs/diaspora/README.md §2): no figures, no
-// promises of returns, title or price, and "Payment Protection", never "escrow".
+// Copy describes only what the product does today: no figures or promises, and "Payment Protection", never "escrow".
 
 export interface IconCopy {
   icon: SgIcon;

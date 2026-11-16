@@ -32,7 +32,6 @@ interface PayoutSettingsProps {
   verificationHref?: string;
 }
 
-/** Owners use it too (the route accepts every property-controller role), with their own links. */
 export const PayoutSettings = ({
   title = 'Payout account',
   description = 'Where rent released by Sureground Payment Protection is sent: transfers run through Paystack.',

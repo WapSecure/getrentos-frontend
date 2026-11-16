@@ -176,7 +176,6 @@ function PurchaseForm({
           note: optionalText(note),
         })
       );
-      // The record stands on its own; a receipt that fails to upload is reported, not rolled back.
       if (receipt) {
         try {
           await unwrap(utilitiesService.addPurchaseDocument(purchase.id, receipt));

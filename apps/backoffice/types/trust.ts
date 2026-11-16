@@ -78,7 +78,6 @@ export interface TrustReviewCaseDetail {
   updatedAt: string;
   resolvedAt?: string | null;
   subject?: { id: string; legalName?: string; email?: string };
-  /** Diaspora identity cases only. */
   dueAt?: string | null;
   verification: {
     id: string;
@@ -147,14 +146,12 @@ export interface TrustAppeal {
   targetLabel?: string | null;
 }
 
-/** Staff-reviewed Diaspora Invest uploads (identity, source of funds) on the same review endpoints. */
 export type ForeignPurpose =
   | 'FOREIGN_IDENTITY'
   | 'FOREIGN_ADDRESS'
   | 'FOREIGN_BANK_STATEMENT'
   | 'SOURCE_OF_FUNDS';
 
-/** GET /admin/trust/foreign-identity/review-cases, soonest due first. */
 export interface ForeignReviewCaseSummary {
   id: string;
   status: TrustReviewCaseStatus;
@@ -168,7 +165,7 @@ export interface ForeignReviewCaseSummary {
   createdAt: string;
 }
 
-/** One upload or Smile ID result on a diaspora case. `url` is null for Smile results and files removed by retention. */
+/** `url` is null for Smile results and files removed by retention. */
 export interface ForeignCaseDocument {
   id: string;
   category: string;

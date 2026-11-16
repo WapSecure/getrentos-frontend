@@ -3,7 +3,6 @@ import { cn } from '@sureground/shared';
 
 interface EyebrowProps {
   children: ReactNode;
-  /** `light` is for a `bg-primary` band: full-strength foreground, never faded. */
   tone?: 'brand' | 'light';
   rule?: boolean;
   as?: ElementType;

@@ -32,7 +32,6 @@ export default function BuyerTransactionsPage() {
   const toast = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
-  // The deposit is paid from the list; everything else lives on the purchase's workspace page.
   const [payingId, setPayingId] = useState<string | null>(null);
   const PAGE_SIZE = 9;
   const [page, setPage] = useState(1);

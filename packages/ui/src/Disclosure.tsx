@@ -11,7 +11,6 @@ export interface DisclosureProps extends Omit<
   summary: ReactNode;
   children: ReactNode;
   defaultOpen?: boolean;
-  /** Disclosures sharing a name form an exclusive group: opening one closes the others. */
   name?: string;
   className?: string;
 }
@@ -49,13 +48,11 @@ export interface DisclosureListItem {
 
 interface DisclosureListProps {
   items: readonly DisclosureListItem[];
-  /** Makes the list single-open. */
   name?: string;
   defaultOpenIndex?: number;
   className?: string;
 }
 
-/** A divided list of disclosures, sized to sit directly inside a Card. */
 export const DisclosureList = ({
   items,
   name,

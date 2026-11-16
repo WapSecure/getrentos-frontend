@@ -133,7 +133,6 @@ export interface OwnerMandate {
   managerOrganizationName?: string | null;
   /** The most a manager may spend without owner sign-off (whole naira); null = no cap. */
   maintenanceApprovalCap: number | null;
-  /** Spending bands (routine, emergency, explicit); optional while older deploys catch up. */
   bands?: SpendBands | null;
   status: MandateStatus;
 }
@@ -169,11 +168,9 @@ export interface SpendApproval {
   decisionNote: string | null;
   decidedAt: string | null;
   createdAt: string;
-  /** Optional while older rows and deploys catch up. */
   band?: SpendBand | null;
   kind?: SpendApprovalKind;
   maintenanceRequestId?: string | null;
-  /** When the manager repeated the approved work-order call. */
   usedAt?: string | null;
 }
 

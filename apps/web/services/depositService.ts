@@ -53,7 +53,6 @@ export interface DepositHoldListItem {
   heldBySureground: boolean;
   returnable: number;
   createdAt: string;
-  /** Older API responses may leave it out. */
   endStage?: DepositEndStage;
   moveOutAt?: string | null;
   claimBy?: string | null;
@@ -247,7 +246,6 @@ export interface DepositClaim {
   items: DepositClaimItem[];
 }
 
-/** The deposit in the end-of-tenancy flow, as landlord, tenant and Sureground staff see it. */
 export interface DepositEndView {
   holdId: string;
   leaseId: string;

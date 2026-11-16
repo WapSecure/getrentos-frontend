@@ -6,7 +6,6 @@ interface PhotoFrameProps {
   photo: MarketingPhoto;
   aspect?: string;
   sizes: string;
-  /** Only for the one image that is the page's largest paint. */
   priority?: boolean;
   className?: string;
   imageClassName?: string;

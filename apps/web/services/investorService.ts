@@ -61,12 +61,10 @@ export const investorService = {
     return safeCall(() => authFetch<InvestorOverview>('/investor/overview'));
   },
 
-  /** Every property under Sureground Managed, with what waits on the owner. */
   getManaged(): Promise<ApiResponse<InvestorManaged>> {
     return safeCall(() => authFetch<InvestorManaged>('/investor/managed'));
   },
 
-  /** The jobs on one of my managed properties: read-only, no Pro plan needed, same shape as home management. */
   getManagedWorkOrders(
     propertyId: string,
     params: Omit<HomeManagementWorkOrdersParams, 'propertyId'> = {}
@@ -78,7 +76,6 @@ export const investorService = {
     );
   },
 
-  /** Public. 404 unless the listing is investment eligible. Only the figures given replace the defaults. */
   getListingAnalysis(
     listingId: string,
     input: ListingAnalysisInput = {}

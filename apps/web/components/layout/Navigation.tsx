@@ -28,7 +28,6 @@ interface NavLink {
   hint?: string;
 }
 
-// Audience-led top bar; every other marketplace stays one tap away in More.
 const FIND_LINKS: NavLink[] = [
   { label: 'Buy', href: '/buy', hint: 'Homes for sale' },
   { label: 'Rent', href: '/rent', hint: 'Homes to rent' },
@@ -74,12 +73,10 @@ const isCurrent = (pathname: string, href: string) => pathname === href;
 
 const FOCUSABLE = 'a[href], button:not([disabled])';
 
-// Availability is read in the browser, so with land off "Land" shows until the call returns;
-// seeding it server-side would make the root layout await two API calls on every route.
+// Read in the browser: seeding it server-side would make the root layout await two API calls on every route.
 export const Navigation = () => {
   const land = useLandAvailability();
   const diaspora = useDiasporaAvailability();
-  // Diaspora is a top-level journey only while the service is on.
   const findLinks = diaspora.enabled ? [...FIND_LINKS, DIASPORA_LINK] : FIND_LINKS;
   const moreLinks = land.marketplace
     ? MORE_LINKS

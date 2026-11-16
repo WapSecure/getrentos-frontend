@@ -1,7 +1,5 @@
-// An ended session goes to sign-in only on these guarded areas; elsewhere it is dropped quietly.
-// Keep in step with the guarded layouts under app/ (and robots.ts, which hides the same areas).
+// Sign-in redirect only on these areas; keep in step with the guarded layouts under app/ and robots.ts.
 const SIGNED_IN_SECTIONS = [
-  // Role dashboards: app/(dashboard)/<role>/layout.tsx
   '/agency',
   '/agent',
   '/buyer',

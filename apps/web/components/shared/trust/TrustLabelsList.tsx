@@ -14,7 +14,6 @@ export const TrustLabelsList = ({
   labels?: TrustCheck[];
   notVerified?: LandNotVerifiedItem[];
   compact?: boolean;
-  /** Off only where the caller already shows what the checks do not cover. */
   footnote?: boolean;
 }) => {
   const passed = labels ?? [];

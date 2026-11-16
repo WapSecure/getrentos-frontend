@@ -17,13 +17,11 @@ export interface PendingPhoto {
 
 let nextId = 0;
 
-/** Once nothing is sending, the photos that made it are attached in one go, in the order picked. */
 export function usePhotoUploads({
   upload,
   attach,
 }: {
   upload: (file: PickedFile, options: UploadTaskOptions) => Promise<string>;
-  /** Adds the storage keys to the property. A rejection puts those photos back as failed. */
   attach: (keys: string[]) => Promise<void>;
 }) {
   const [pending, setPending] = useState<PendingPhoto[]>([]);
@@ -51,7 +49,6 @@ export function usePhotoUploads({
   }, []);
   useEffect(
     () => () => {
-      // Photos uploaded but not attached are left to the server's clean-up of unattached uploads.
       queueRef.current?.dispose();
       queueRef.current = null;
     },
@@ -107,7 +104,6 @@ export function usePhotoUploads({
     add,
     remove,
     retry,
-    /** True until every photo is attached or has failed: changes to the saved photos wait for this. */
     busy: attaching || pending.some((p) => states[p.id]?.status !== 'failed'),
     failed: uploadsFailed(states),
   };

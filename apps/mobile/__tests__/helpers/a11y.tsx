@@ -23,7 +23,6 @@ export interface PressableIssue {
 }
 
 export interface AuditOptions {
-  /** Smallest tappable height/width in points, counting hitSlop. `false` skips the size check. */
   minTarget?: number | false;
 }
 
@@ -35,8 +34,6 @@ export function renderWithTheme(ui: ReactElement, wrapper?: (children: ReactNode
   );
 }
 
-// Props of the host element plus every composite that rendered it (Pressable, Button, Chip…),
-// stopping at the next host element up. That is where onPress and disabled are declared.
 function declaredProps(element: HostElement): Record<string, unknown>[] {
   const all: Record<string, unknown>[] = [element.props];
   let fiber = (element as unknown as { unstable_fiber: Fiber | null }).unstable_fiber?.return;
@@ -108,7 +105,6 @@ function slop(hitSlop: HitSlop, a: 'top' | 'left', b: 'bottom' | 'right'): numbe
   return (hitSlop[a] ?? 0) + (hitSlop[b] ?? 0);
 }
 
-/** A side sized by its content or by flex is `undefined`: it cannot be measured without layout. */
 export function touchTarget(element: HostElement): { height?: number; width?: number } {
   const style = StyleSheet.flatten(element.props.style) ?? {};
   const hitSlop = declared(element, 'hitSlop') as HitSlop;
@@ -140,7 +136,7 @@ export function auditPressables(root: HostElement, options: AuditOptions = {}): 
       report('is disabled but accessibilityState.disabled is not set');
     }
 
-    // VoiceOver and TalkBack focus an `accessible` container as one element, so a control
+    // VoiceOver and TalkBack focus an `accessible` container as one element, so controls inside it are unreachable.
     // inside one (including a button inside a button) can never be reached on its own.
     for (let parent = element.parent; parent; parent = parent.parent) {
       if (parent.type !== 'Text' && parent.props.accessible === true) {

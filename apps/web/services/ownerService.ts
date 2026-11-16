@@ -128,7 +128,6 @@ export interface OwnerMarketInsights {
     size: number | null;
     soldMonthsAgo: number | null;
   }[];
-  /** Null when there are no comparable sales. */
   lowEstimate: number | null;
   highEstimate: number | null;
   suggested: number | null;
@@ -231,13 +230,11 @@ export const ownerService = {
    */
   uploadPropertyMedia: (file: File, kind: 'image' | 'video' = 'image', upload?: UploadOptions) =>
     safeCall(async () => {
-      // Videos go straight to storage, so a large tour never passes through the API.
       if (kind === 'video') return uploadVideoDirect('/owner/properties', file, upload);
       const form = new FormData();
       form.append('kind', kind);
       form.append('file', file);
       const path = '/owner/properties/media/upload';
-      // With `upload` options it goes over XHR so it can report progress and be cancelled.
       return upload
         ? authUpload<{ key: string; kind: 'image' | 'video' }>(path, form, upload)
         : authFetch<{ key: string; kind: 'image' | 'video' }>(path, { method: 'POST', body: form });
@@ -286,7 +283,6 @@ export const ownerService = {
     commercial?: CommercialDetails;
   }) =>
     safeCall(() => authFetch('/owner/listings', { method: 'POST', body: JSON.stringify(data) })),
-  /** Every field is sent; null clears one. */
   updateListingCommercial: (id: string, details: CommercialUpdatePayload) =>
     safeCall(() =>
       authFetch<OwnerSaleListingApi>(`/owner/listings/${id}/commercial`, {

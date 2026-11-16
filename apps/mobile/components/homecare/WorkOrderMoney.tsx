@@ -340,7 +340,6 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
   const [adding, setAdding] = useState(false);
   const [payoutFor, setPayoutFor] = useState<string | null>(null);
   const [reasonFor, setReasonFor] = useState<{ kind: 'reject' | 'void'; id: string } | null>(null);
-  // The API thinks the invoice may already have been approved or paid: it goes ahead only with a reason.
   const [duplicate, setDuplicate] = useState<{
     kind: 'approve' | 'pay';
     id: string;
@@ -387,7 +386,6 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
       id: string;
       reason?: string;
       provider?: PaymentProvider;
-      /** The reason this is not a duplicate, after the API flagged it. */
       acknowledge?: string;
     }) => {
       const ack = acknowledge

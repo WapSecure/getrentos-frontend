@@ -8,7 +8,6 @@ import { ownerService } from '@/services/ownerService';
 import { ownerKeys } from '@/lib/queryKeys';
 
 export default function OwnerTrustPage() {
-  // Diaspora investors only: passport and documents from abroad.
   const extraTabs = useForeignIdentityTabs();
   return (
     <TrustHub

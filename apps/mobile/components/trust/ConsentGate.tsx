@@ -6,7 +6,6 @@ import { errorMessage } from '@/lib/api/client';
 import { activeConsent, CONSENT_COPY, trustApi, type ConsentType } from '@/lib/api/trust';
 import { qk } from '@/lib/query/keys';
 
-/** `text` overrides the standard wording for a type, e.g. a passport rather than a professional document. */
 export function ConsentGate({
   types,
   text,

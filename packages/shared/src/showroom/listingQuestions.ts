@@ -30,7 +30,6 @@ export type ListingQuestionTopic = (typeof LISTING_QUESTION_TOPICS)[number];
 
 export const UNMATCHED_QUESTION_TOPIC = 'unmatched';
 
-/** `stated`: the lister's own words. `checked`: Sureground checked it. `not_stated`: the data is silent. */
 export type ListingAnswerSource = 'stated' | 'checked' | 'not_stated';
 
 export const LISTING_ANSWER_SOURCES: readonly ListingAnswerSource[] = [
@@ -50,7 +49,6 @@ export interface ListingAnswer {
   text: string;
   source: ListingAnswerSource;
   facts: ShowroomFact[];
-  /** Parts of the question the listing leaves out, so the reader knows to ask. */
   gaps: string[];
 }
 
@@ -385,7 +383,6 @@ export interface TopicMatch {
   score: number;
 }
 
-/** Best first; ties keep the catalogue's order. */
 export function matchTopics(question: string): TopicMatch[] {
   const norm = normaliseQuestion(question);
   if (!norm) return [];
@@ -397,11 +394,9 @@ export function matchTopics(question: string): TopicMatch[] {
     }
     if (score > 0) scores.set(topic, score);
   }
-  // "How big is the main bedroom?" asks for one room's size: that lives on the floor plan.
   if (ROOM_WORDS.test(norm) && SIZE_WORDS.test(norm)) {
     scores.set('floor_plans', (scores.get('floor_plans') ?? 0) + 6);
   }
-  // "How much is service charge?" is about the charge, not the price.
   if (scores.has('service_charge') && scores.has('price')) {
     scores.set('price', Math.min(scores.get('price')!, 1));
   }
@@ -498,7 +493,6 @@ function matchingAmenities(listing: ShowroomListing, topic: ListingQuestionTopic
 class Builder {
   stated: string[] = [];
   checked: string[] = [];
-  /** Sureground's own status lines (not checked yet, under offer): context, never a source. */
   notes: string[] = [];
   facts: ShowroomFact[] = [];
   gaps: string[] = [];
@@ -575,11 +569,9 @@ function rentFeeLine(listing: ShowroomListing, label: string) {
   return listing.costs.lines.find((l) => l.label === label);
 }
 
-// The rental mapper lists these fees as lines when stated, as "not stated" when missing, and
-// leaves them out of both when the landlord entered zero: a stated "none".
+// Fees entered as zero are a stated "none": neither lines nor "not stated".
 const RENT_FEES = ['Service charge', 'Agency fee', 'Legal fee', 'Security deposit'];
-// Only when the costs came from that mapper (it always sets a total): a listing with no cost data
-// says nothing about fees.
+// Only when the costs came from that mapper (it always sets a total); otherwise the listing says nothing about fees.
 const statedNone = (listing: ShowroomListing, label: string) =>
   listing.market === 'rent' &&
   listing.costs.total !== undefined &&
@@ -687,7 +679,6 @@ const ANSWERS: Record<ListingQuestionTopic, (b: Builder) => Builder> = {
         `The lister states: ${lines.map((l) => `${lowerFirst(l.label)} ${naira(l.amount)}`).join(', ')}.`,
         ...lines.map((l) => ({ label: l.label, value: naira(l.amount) }))
       );
-      // The total is the listing's own sum of the lines above, shown on the page as well.
       if (costs.total && rest.length > 0) {
         b.state(`${costs.total.label}: ${naira(costs.total.amount)}.`, {
           label: costs.total.label,
@@ -1097,7 +1088,6 @@ function roomsAskedAbout(
   return best > 0 ? scored.filter((s) => s.score === best).map((s) => s.room) : [];
 }
 
-/** `question` narrows a room-size answer to the rooms it names; it never adds anything the listing does not state. */
 export function answerFor(
   listing: ShowroomListing,
   topic: ListingQuestionTopic,
@@ -1145,7 +1135,6 @@ const SUGGESTION_ORDER: Record<ShowroomListing['market'], ListingQuestionTopic[]
   land: ['title', 'size', 'commercial_use', 'power', 'water', 'location', 'fees'],
 };
 
-/** Always offered, even unanswered: they are what people ask most, and lead to "Ask the lister". */
 const COMMON: Record<ShowroomListing['market'], ListingQuestionTopic[]> = {
   rent: ['power', 'parking'],
   sale: ['title', 'parking'],

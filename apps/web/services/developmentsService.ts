@@ -44,7 +44,6 @@ export interface DevelopmentInstalment {
   dueWhen?: string;
 }
 
-/** The developer's own view. No storage keys: photos come with short-lived links. */
 export interface DeveloperDevelopment {
   id: string;
   name: string;
@@ -244,7 +243,6 @@ async function mapped<T>(
     : { success: true, data };
 }
 
-/** "Ask the developer": the buyer's side (any signed-in user) and the firm's inbox. */
 export const developmentEnquiriesService = {
   ask(developmentId: string, message: string, unitTypeId?: string) {
     return mapped(
@@ -257,7 +255,6 @@ export const developmentEnquiriesService = {
       buyerDevelopmentEnquiryOf
     );
   },
-  /** The caller's questions across all developments, newest first. */
   history(page: number, pageSize: number): Promise<ApiResponse<BuyerDevelopmentEnquiryPage>> {
     return mapped(
       safeCall(() =>

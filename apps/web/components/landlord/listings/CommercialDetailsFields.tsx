@@ -55,7 +55,6 @@ interface CommercialDetailsFieldsProps {
   deal?: CommercialDeal;
 }
 
-/** Everything here is the lister's own statement and is shown to renters or buyers as stated. */
 export function CommercialDetailsFields({
   value,
   onChange,
@@ -68,7 +67,6 @@ export function CommercialDetailsFields({
   const [otherTermError, setOtherTermError] = useState<string | null>(null);
   const terms = value.leaseTermOptionsYears;
   const atTermLimit = terms.length >= LEASE_TERM_LIMITS.count;
-  // The usual lengths, plus any other length already on the listing, so it can be removed too.
   const termChips = [...new Set([...LEASE_TERM_CHOICES, ...terms])].sort((a, b) => a - b);
   const toggleTerm = (years: number) => {
     setOtherTermError(null);
@@ -90,7 +88,6 @@ export function CommercialDetailsFields({
     set('leaseTermOptionsYears', result.years);
   };
   const onOtherTermKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    // Enter adds the term instead of submitting the listing form.
     if (e.key === 'Enter') {
       e.preventDefault();
       addOtherTerm();

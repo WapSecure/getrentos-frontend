@@ -784,7 +784,6 @@ export default function GatemanVerifyPage() {
   );
 }
 
-/** The guard's post as a chip, so it reads as state rather than a sentence. */
 function PostChip({ gateName, needsChoice }: { gateName?: string; needsChoice: boolean }) {
   if (gateName) {
     return (

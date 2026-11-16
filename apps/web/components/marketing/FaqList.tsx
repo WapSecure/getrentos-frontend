@@ -10,7 +10,6 @@ export interface Faq {
 
 interface FaqListProps {
   items: Faq[];
-  /** Disclosures sharing a name open one at a time. */
   name: string;
   title?: string;
   eyebrow?: string;

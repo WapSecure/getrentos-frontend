@@ -85,7 +85,6 @@ export const PropertyMap = ({
         const map = L.map(containerRef.current, {
           zoomControl: true,
           attributionControl: true,
-          // Sits in a scrolling page: the wheel scrolls the page, not the map.
           scrollWheelZoom: false,
         });
         addBaseTiles(L, map);

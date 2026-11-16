@@ -71,7 +71,6 @@ export function AskTheDeveloper({ development: d }: { development: ShowroomDevel
 
 function SignedIn({ development: d }: { development: ShowroomDevelopment }) {
   const { colors, spacing, radius } = useTheme();
-  // As on the web: the list across developments lives in the buyer area.
   const isBuyer = useAuth().workspaces.includes('buyer');
   const toast = useToast();
   const queryClient = useQueryClient();

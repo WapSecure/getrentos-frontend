@@ -1,4 +1,3 @@
-/** Marketing pages that render from the server alone, so they can be audited without the API. */
 export const marketingWebRoutes = [
   '/',
   '/sell',

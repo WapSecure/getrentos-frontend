@@ -82,7 +82,6 @@ const PLANS_FIELDS: readonly InvestorProfileField[] = [
   'ownershipStructure',
 ];
 
-/** Used when this device cannot list its zones. */
 const FALLBACK_ZONES = [
   'Africa/Lagos',
   'Europe/London',

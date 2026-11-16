@@ -56,7 +56,6 @@ export const ProfileSummaryCard = ({
   portal: InvestorPortal;
   fullName?: string;
 }) => {
-  // The overview carries only the zone and country; the rest of the profile comes from its own call.
   const full = useQuery({
     queryKey: investorKeys.profile,
     queryFn: () => investorService.getProfile(),
@@ -157,7 +156,6 @@ export const IdentityProgressCard = ({
   href: string;
 }) => {
   const { steps, approved, next } = identityProgress(status);
-  // The timeline has one current step; a second check in progress shows as waiting.
   const firstCurrent = steps.findIndex((step) => STEP_STATE[step.state] === 'current');
   const items: TimelineItem[] = steps.map((step, index) => {
     const mapped = STEP_STATE[step.state];

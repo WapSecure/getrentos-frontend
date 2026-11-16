@@ -38,7 +38,6 @@ export function ShowroomGallery({ children }: { children: ReactNode }) {
   );
 }
 
-/** Opens the viewer on the first floor plan. A plan is only an image, so this claims no sizes. */
 export function FloorPlansShortcut({
   listingId,
   market,
@@ -75,7 +74,6 @@ export function FloorPlansShortcut({
   );
 }
 
-/** The page is a server component, so the media callbacks live in this client island. */
 export function ShowroomMedia({
   listingId,
   market,

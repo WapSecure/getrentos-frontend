@@ -11,8 +11,6 @@ import type {
   WorkspaceViewerRole,
 } from './types';
 
-// Workspace shapes are taken structurally, so each app keeps its own milestone and legal-step types.
-
 interface WorkspaceShape {
   viewer: { role: WorkspaceViewerRole };
   statuses: { moneyStatus: { code: MoneyStatusCode | string } };
@@ -57,7 +55,6 @@ const LEGAL_VARIANT: Record<LegalStatusCode, StatusTone> = {
   PERFECTED: 'success',
 };
 
-/** A code the app does not know yet reads as neutral rather than breaking the page. */
 export const stageVariant = (code: string): StatusTone =>
   STAGE_VARIANT[code as OperationalStageCode] ?? 'neutral';
 export const moneyVariant = (code: string): StatusTone =>
@@ -130,10 +127,7 @@ export const representativeLabel = (name?: string | null): string =>
 
 const capitalise = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
 
-/**
- * A representative's approval never moves money: under two-person approval the buyer's first press only
- * records their approval. The API's own message is not used, so this copy stays accurate.
- */
+/** A representative's approval never moves money; the API's message is not used so this copy stays accurate. */
 export const releaseOutcome = (
   release: DepositReleaseOutcome | undefined,
   representativeName?: string | null
@@ -161,11 +155,9 @@ export const approvalOutcomeMessage = (
 export type DepositReleaseStage =
   /** No two-person rule: the buyer's release sends the deposit straight away. */
   | 'SINGLE'
-  /** Two-person approval is on and neither approval is in yet. */
   | 'NEEDS_APPROVALS'
   /** The buyer approved; the representative has not. Nothing has moved. */
   | 'WAITING_FOR_REPRESENTATIVE'
-  /** Both approved; the buyer still has to press Release. */
   | 'BOTH_APPROVED';
 
 interface ReleaseStageShape {
@@ -235,7 +227,6 @@ export const pendingApprovalStatus = (
       }`;
 };
 
-/** Excludes a handover the seller has not delivered yet. */
 export const approvalsWaitingFor = (
   viewer: 'BUYER' | 'REPRESENTATIVE',
   pending: readonly CoApprovalPendingStep[] | undefined
@@ -279,7 +270,6 @@ export const documentLinkLabel = (
   return list.find((item) => item.key === document.key)?.label ?? humaniseCode(document.key);
 };
 
-/** Required steps confirmed or waived, and legal steps approved or not applicable, for the progress bars. */
 export const workspaceProgress = (
   workspace: Pick<WorkspaceShape, 'milestones' | 'legalSteps'>
 ): { steps: { done: number; total: number }; legal: { done: number; total: number } } => {
@@ -300,7 +290,6 @@ export const workspaceProgress = (
 
 export type WorkspaceSection = 'approvals' | 'deposit' | 'steps';
 
-/** An approval first, then a step to confirm, then the deposit to release. */
 export const nextActionTarget = (
   workspace: Pick<
     WorkspaceShape,

@@ -4,7 +4,6 @@ export type UploadState =
   | { status: 'failed'; progress: 0; error: string };
 
 export interface UploadTaskOptions {
-  /** Whole percent sent, 0 to 100. At 100 the server may still be working. */
   onProgress: (percent: number) => void;
   signal: AbortSignal;
 }
@@ -12,7 +11,6 @@ export interface UploadTaskOptions {
 export interface UploadQueueOptions<F, R> {
   upload: (file: F, options: UploadTaskOptions) => Promise<R>;
   onSuccess: (id: string, result: R) => void;
-  /** Called with a fresh object after every change. */
   onChange: (states: Record<string, UploadState>) => void;
   concurrency?: number;
 }
@@ -22,7 +20,6 @@ export const UPLOAD_FALLBACK_ERROR =
 
 const isAbort = (error: unknown) => error instanceof Error && error.name === 'AbortError';
 
-/** A failure only stops its own file. Plain TypeScript so the rules can be tested without React. */
 export function createUploadQueue<F, R>({
   upload,
   onSuccess,
@@ -116,12 +113,10 @@ export function createUploadQueue<F, R>({
       setState(id, { status: 'queued', progress: 0 });
       pump();
     },
-    /** Puts a file that uploaded back in the queue as failed, e.g. when attaching it did not work. */
     fail(id: string, file: F, error: string) {
       files.set(id, file);
       setState(id, { status: 'failed', progress: 0, error });
     },
-    /** Cancels everything; the queue does nothing after this. */
     dispose() {
       disposed = true;
       waiting = [];

@@ -285,7 +285,6 @@ export type PhotoLocationLevel = 'all' | 'most' | 'some' | 'none' | 'empty';
 
 export interface PhotoLocationSummary {
   level: PhotoLocationLevel;
-  /** Captures with a location within the tolerance. */
   onSite: number;
   total: number;
   unlocated: number;
@@ -293,7 +292,6 @@ export interface PhotoLocationSummary {
   label: string;
 }
 
-/** Describes where the photos were taken; it does not judge the property. */
 export const photoLocationSummary = (
   evidence: readonly Pick<LandInspectionEvidence, 'distanceM' | 'mimeType'>[]
 ): PhotoLocationSummary => {

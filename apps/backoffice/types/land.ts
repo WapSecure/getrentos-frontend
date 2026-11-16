@@ -1,7 +1,6 @@
 import type { LandDiligenceStatus } from '@sureground/shared';
 import type { EvidenceItem } from '@/types/admin';
 
-// One definition, shared with web and the status badge map.
 export type { LandDiligenceStatus };
 
 export interface AdminLandDiligenceCondition {

@@ -8,9 +8,7 @@ export interface Column<T> {
   render: (row: T, index: number) => ReactNode;
   className?: string;
   align?: 'left' | 'center' | 'right';
-  /** Right-aligned with tabular figures, so amounts line up digit for digit. */
   numeric?: boolean;
-  /** Visible header text is optional (an actions column); this still names it for screen readers. */
   srHeader?: string;
 }
 
@@ -21,23 +19,17 @@ interface DataTableProps<T> {
   onRowClick?: (row: T) => void;
   getRowClassName?: (row: T, index: number) => string | undefined;
   getRowProps?: (row: T, index: number) => HTMLAttributes<HTMLTableRowElement>;
-  /** Tints the row in brand blue and marks it `data-state="selected"`; pair with a checkbox that says so. */
   isRowSelected?: (row: T, index: number) => boolean;
   renderExpanded?: (row: T, index: number) => ReactNode;
-  /** A totals row aligned under its columns, keyed by column key. */
   totals?: Partial<Record<string, ReactNode>>;
   isLoading?: boolean;
   emptyState?: ReactNode;
   footer?: ReactNode;
   className?: string;
-  /** Read by screen readers only: what the table lists. */
   caption?: string;
   density?: 'comfortable' | 'compact';
-  /** Below this width the table scrolls sideways instead of squeezing its columns. */
   minWidth?: string;
-  /** `bare` sits inside a Card that already draws the frame. */
   variant?: 'card' | 'bare';
-  /** Scrolls the body inside the frame so the header stays in view; left out, the table grows with its rows. */
   maxHeight?: string;
 }
 
@@ -90,7 +82,6 @@ export function DataTable<T>({
       >
         <table className="w-full text-sm" style={minWidth ? { minWidth } : undefined}>
           {caption && <caption className="sr-only">{caption}</caption>}
-          {/* Opaque under the tinted row when the body scrolls beneath it. */}
           <thead className={cn('sticky top-0 z-10', maxHeight && 'bg-card')}>
             <tr className="border-b border-border bg-secondary/40 text-left backdrop-blur-sm">
               {columns.map((column) => (

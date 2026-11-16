@@ -46,8 +46,6 @@ export const HomeHero = () => (
     </Container>
 
     <Container className="mt-8 md:mt-28">
-      {/* Phones get the search first and the photo after it. Wider screens float the search across the photo's top
-          edge, so the whole search sits above the fold on a 1440 x 900 screen instead of under the photo. */}
       <div className="relative flex flex-col-reverse gap-6 md:block">
         <PhotoFrame
           photo={photos.lagosAerial}

@@ -5,8 +5,7 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      // Filtered and paginated market views are not blocked here: they carry noindex,follow, which a crawler can only
-      // see if it may fetch them, and their listing links should still be followed. See docs/marketing/decisions.md.
+      // Filtered market views are not blocked: a crawler must fetch them to see their noindex,follow.
       // Robots rules match by prefix: '/agent' would also block '/agents', and '/estate' '/estates'. The longer allow wins.
       allow: ['/', '/agents', '/estates', '/landlords', '/renters', '/buyers'],
       disallow: [
@@ -24,7 +23,6 @@ export default function robots(): MetadataRoute.Robots {
         '/admin',
         '/oauth',
         '/magic-link',
-        // Private return and invitation screens (they also carry noindex).
         '/payments',
         '/billing',
         '/agency-invite',

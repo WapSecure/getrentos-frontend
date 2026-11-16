@@ -29,7 +29,6 @@ interface AttentionListProps {
   items: readonly AttentionListItem[];
   title?: string;
   description?: ReactNode;
-  /** Shown when nothing is waiting; without it the card is not drawn at all. */
   empty?: { title: string; description?: ReactNode };
   className?: string;
 }

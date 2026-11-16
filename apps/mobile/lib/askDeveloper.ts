@@ -33,7 +33,6 @@ export function rememberAskIntent(id: string, now = Date.now()) {
   pending = isDevelopmentId(id) ? { id, at: now } : null;
 }
 
-/** Once, after sign-in: the development screen to return to, if the intent is still fresh. */
 export function takeAskIntent(now = Date.now()): string | null {
   const intent = pending && now - pending.at <= TTL_MS ? pending : null;
   pending = null;
@@ -42,7 +41,6 @@ export function takeAskIntent(now = Date.now()): string | null {
 
 export const NO_UNIT_LABEL = 'No particular unit type';
 
-/** The unit type choices, "none in particular" first; none at all when the developer listed none. */
 export function unitTypeChoices(
   unitTypes: Pick<ShowroomUnitType, 'id' | 'name'>[]
 ): { id: string | undefined; label: string }[] {
@@ -61,7 +59,6 @@ export const SEND_FAILED = 'Your question was not sent. Try again.';
 export const SEND_TOO_OFTEN = 'You have sent a lot of questions. Try again in a little while.';
 export const OPEN_LIMIT_REACHED = `You have ${DEVELOPMENT_ENQUIRY_LIMITS.openPerDevelopment} questions waiting for an answer from this developer. You can ask more once they answer.`;
 
-/** What to show under the form when a send fails: the API's own words when it gives them. */
 export function sendProblem(e: unknown): string {
   const status =
     e && typeof e === 'object' && typeof (e as { status?: unknown }).status === 'number'

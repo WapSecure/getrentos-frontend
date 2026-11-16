@@ -72,7 +72,6 @@ export interface AssignedProperty {
   title: string;
   city: string;
   state: string;
-  /** The API enum (e.g. 'COMMERCIAL'): a commercial property's listing form adds the commercial block. */
   propertyType?: string;
 }
 
@@ -344,7 +343,6 @@ export const realtorApi = {
     /** Commercial properties only; the API refuses it on any other type. */
     commercial?: CommercialDetails;
   }) => apiFetch<RealtorListing>('/realtor/listings', { method: 'POST', body }),
-  /** Only on a listing this realtor drafted, while the property is still assigned. Null clears a field. */
   updateListingCommercial: (id: string, details: CommercialUpdatePayload) =>
     apiFetch<RealtorListing>(`/realtor/listings/${id}/commercial`, {
       method: 'PATCH',

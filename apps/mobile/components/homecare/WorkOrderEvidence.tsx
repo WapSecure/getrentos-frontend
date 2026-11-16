@@ -83,7 +83,6 @@ const viewerTimeZone = () => {
   }
 };
 
-/** Loads when opened, so the screen doesn't fetch the record until someone wants it. */
 export function WorkOrderEvidence({ w, canRate }: { w: WorkOrder; canRate: boolean }) {
   const { colors, spacing } = useTheme();
   const [open, setOpen] = useState(false);

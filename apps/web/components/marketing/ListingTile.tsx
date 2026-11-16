@@ -8,7 +8,6 @@ import type { PublicListingCard, PublicMarket } from '@/lib/publicListingMap';
 interface ListingTileProps {
   listing: PublicListingCard;
   market: PublicMarket;
-  /** Only the first row on a page should load eagerly. */
   eager?: boolean;
 }
 
@@ -28,7 +27,6 @@ export const ListingTile = ({ listing, market, eager = false }: ListingTileProps
       : null,
     listing.size ? { icon: Ruler, label: `${listing.size} m²` } : null,
   ].filter((fact): fact is NonNullable<typeof fact> => fact !== null);
-  // "Lagos, Lagos" (city and state with the same name) reads as a mistake.
   const location = formatLocation(listing.location);
   const basis =
     market === 'sale' ? 'asking' : listing.priceUnit ? PRICE_BASIS[listing.priceUnit] : null;
@@ -84,8 +82,7 @@ export const ListingTile = ({ listing, market, eager = false }: ListingTileProps
           </ul>
         ) : null}
       </div>
-      {/* Over the photo, but last in the markup so the link's name starts with the title.
-          Solid chips, not translucent: they have to read on any photo in both themes. */}
+      {/* Last in the markup so the link's accessible name starts with the title. */}
       <div className="pointer-events-none absolute inset-x-3 top-3 flex flex-wrap items-start gap-2">
         <span className="label-caps rounded-xs bg-card px-2.5 py-1 text-foreground shadow-sm">
           {MARKET_LABEL[market]}

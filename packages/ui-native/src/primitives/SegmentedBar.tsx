@@ -14,7 +14,6 @@ export function SegmentedBar({
   style,
 }: {
   segments: SegmentedBarSegment[];
-  /** What the whole bar measures, for screen readers ("Units by status"). */
   label: string;
   style?: StyleProp<ViewStyle>;
 }) {

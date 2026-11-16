@@ -79,7 +79,7 @@ const send = <T>(path: string, method: string, body?: unknown) =>
     authFetch<T>(path, { method, ...(body === undefined ? {} : { body: JSON.stringify(body) }) })
   );
 
-/** An estate's service-charge budgets, billed to households as dues. Publish, close and void ask for step-up. */
+/** An estate's service-charge budgets; publish, close and void ask for step-up. */
 export const estateServiceChargesService = {
   list: (estateId: string) =>
     safeCall(() => authFetch<EstateServiceChargeBudget[]>(base(estateId))),

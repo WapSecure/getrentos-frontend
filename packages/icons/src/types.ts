@@ -6,16 +6,11 @@ export type IconNode = ReadonlyArray<
 >;
 
 export interface SgIconProps extends Omit<SVGProps<SVGSVGElement>, 'ref'> {
-  /** Width and height, in px or any CSS length. Default 24. */
   size?: number | string;
-  /** Stroke and fill colour. Default currentColor, so icons follow the text colour. */
   color?: string;
-  /** Default 1.75. */
   strokeWidth?: number | string;
   absoluteStrokeWidth?: boolean;
-  /** Any colour other than "none" paints the tinted body solid (filled star, saved heart). */
   fill?: string;
-  /** Opacity of the tinted body. Default 0.16. */
   tint?: number;
 }
 

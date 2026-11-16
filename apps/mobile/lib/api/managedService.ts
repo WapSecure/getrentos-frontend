@@ -84,7 +84,6 @@ export interface Mandate {
   activatedAt: string | null;
   status: MandateStatus;
   createdAt: string;
-  /** Worked out by the API from the rules it enforces; older responses may leave it out. */
   permissions?: { canSign: boolean };
 }
 
@@ -286,7 +285,6 @@ export const managedApi = {
       method: 'POST',
       body: { reason },
     }),
-  /** The owner's signature; the API infers the side from who is calling. */
   sign: (mandateId: string) =>
     apiFetch<Mandate>(`/management-mandates/${mandateId}/sign`, { method: 'POST', body: {} }),
   recordHandover: (mandateId: string) =>

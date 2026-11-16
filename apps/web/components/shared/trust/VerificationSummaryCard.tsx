@@ -22,7 +22,6 @@ export function VerificationSummaryBadge({
   );
 }
 
-// The API sends roles in sentence case ("Accredited surveyor"); they sit mid-sentence after "by".
 const inSentence = (role: string) =>
   role.startsWith('Sureground') ? role : role.charAt(0).toLowerCase() + role.slice(1);
 

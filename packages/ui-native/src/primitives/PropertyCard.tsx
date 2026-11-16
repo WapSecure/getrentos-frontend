@@ -58,7 +58,6 @@ export function describeProperty(p: PropertyCardData): string {
     p.bathrooms ? `${p.bathrooms} bathroom${p.bathrooms === 1 ? '' : 's'}` : null,
     p.size ? `${p.size} square metres` : null,
     p.tag,
-    // The home's review score out of 100 (the web calls it Property score), not a personal match.
     p.score != null ? `property score ${Math.round(p.score)} out of 100` : null,
     p.trustLabel ? p.trustLabel.label : p.verified ? 'Verified' : null,
     ...(p.badges ?? []),
@@ -154,7 +153,6 @@ function PropertyCardBase({
     <View
       style={{
         width: row ? 116 : '100%',
-        // A photo keeps a 3:2 frame at any card width; without one, a short branded band.
         ...(row ? { height: 116 } : property.image ? { aspectRatio: 3 / 2 } : { height: 96 }),
         backgroundColor: colors.secondary,
       }}
@@ -175,7 +173,6 @@ function PropertyCardBase({
         <ListingPlaceholder
           size={row ? 'thumb' : 'card'}
           area={listingArea(property)}
-          // Pushed below the top badges so the placeholder never sits under them.
           topInset={row ? 0 : 28}
         />
       )}
@@ -196,7 +193,6 @@ function PropertyCardBase({
               />
             )}
             <Text variant="caption" numberOfLines={1} style={styles.badgeText}>
-              {/* The full wording stays in the card's accessibility label; the badge has a narrow lane. */}
               {property.trustLabel.tone === 'pending' ? 'Verifying' : property.trustLabel.label}
             </Text>
           </View>
@@ -287,8 +283,7 @@ function PropertyCardBase({
             saved ? `Remove ${property.title} from saved` : `Save ${property.title}`
           }
           accessibilityState={{ selected: saved }}
-          // Over a photo the heart sits on dark glass; over the placeholder it is a surface
-          // button, since a white glyph on grey disappears in light mode.
+          // Over the placeholder the heart is a surface button: a white glyph on grey disappears in light mode.
           style={[
             styles.heart,
             property.image
@@ -338,8 +333,7 @@ function PropertyCardBase({
   );
 }
 
-// Badges sit on photos, so their colours are fixed rather than themed: theme tokens such as
-// primaryForeground turn near-black in dark mode and vanish on the dark overlay.
+// Fixed, not themed: badges sit on photos, and tokens like primaryForeground vanish on the dark overlay.
 const OVERLAY = {
   text: '#ffffff',
   glass: 'rgba(10,14,22,0.74)',

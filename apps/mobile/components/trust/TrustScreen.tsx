@@ -66,7 +66,6 @@ function routeFor(portal: ScreenPortal, key: TrustRequirementKey): Href {
     case 'PROPERTY_OWNERSHIP':
       return OWNERSHIP_ROUTE[portal] ?? '/(app)/verify-identity';
     default:
-      // Phone, NIN, live selfie and the bank check live on the verification screen.
       return '/(app)/verify-identity';
   }
 }
@@ -74,7 +73,6 @@ function routeFor(portal: ScreenPortal, key: TrustRequirementKey): Href {
 interface ProfileSource {
   queryKey: readonly unknown[];
   queryFn: () => Promise<TrustProfile>;
-  /** Who sees the profile, e.g. "owners and realtors". */
   audience: string;
 }
 

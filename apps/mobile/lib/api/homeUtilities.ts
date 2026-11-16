@@ -35,7 +35,6 @@ export function dayToInstant(day: string, now: Date = new Date()): string {
 
 /** Power and water records, captured on site. Meter numbers arrive as the last 4 digits only. */
 export const homeUtilitiesApi = {
-  /** This month's recorded spend and generators due; `hasUtilityData` is false until something is logged. */
   summary: (propertyId?: string) =>
     apiFetch<UtilitiesSummary>(`${BASE}/summary${toQuery({ propertyId })}`),
   /** Recorded spend by Lagos month, at most 24 months back. Months with nothing logged come back as null. */

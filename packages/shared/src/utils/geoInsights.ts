@@ -33,7 +33,6 @@ export function shownTravelMode<T extends { durationSeconds: number; distanceMet
   return result;
 }
 
-/** An unknown source (an older API) reads as a plain estimate. */
 export function commuteSourceNote(source: TravelTimesSource | null | undefined): string {
   if (source === 'openstreetmap') {
     return 'Rough estimate from OpenStreetMap routing. Lagos traffic can double these times.';

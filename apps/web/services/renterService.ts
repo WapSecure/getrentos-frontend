@@ -231,7 +231,6 @@ export interface Payment {
   heldAmountNaira?: number;
   /** The first rent on a new lease: paid in full, never in part. */
   fullPaymentOnly?: boolean;
-  /** The tenant has the keys: held rent is then released early, not "on move-in". */
   moveInConfirmed?: boolean;
   /** Reopenable until `expiresAt`. */
   resumeCheckout?: { url: string; reference: string; expiresAt: string };
@@ -812,7 +811,6 @@ export const renterService = {
     );
   },
 
-  /** Reviews written about this renter by their past landlords. */
   async getReceivedReviews(
     params: { page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<ReviewItem>>> {
@@ -1018,7 +1016,6 @@ export const renterService = {
         body: JSON.stringify({ participantId, propertyId: propertyId ?? undefined }),
       })
     ).then((res) =>
-      // Only a conversation about a home counts as an enquiry.
       propertyId ? trackOnSuccess(res, { name: 'inquiry_submitted', market: 'rent' }) : res
     );
   },
@@ -1379,7 +1376,6 @@ export const renterService = {
     );
   },
 
-  /** Homes the renter can report a problem in, one per signed lease. */
   async listMaintenanceHomes(): Promise<ApiResponse<MaintenanceHome[]>> {
     return safeCall(() => authFetch('/renter/maintenance/homes'));
   },

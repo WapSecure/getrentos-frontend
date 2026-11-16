@@ -1,4 +1,3 @@
-// Sureground Diaspora Invest: the investor profile, risk acknowledgement and workspace overview.
 // The shapes live in @sureground/shared so web and mobile read one copy.
 export {
   BUDGET_BANDS,

@@ -23,7 +23,6 @@ export interface AdminDeposit {
   propertyTitle: string | null;
   unitName: string | null;
   tenantName: string | null;
-  // Naira.
   amount: number;
   heldBySureground: boolean;
   funded: number;
@@ -90,7 +89,6 @@ export const adminDepositsService = {
       })
     );
   },
-  /** Needs rentfinance.approve and a step-up confirmation. */
   retryRefund(holdId: string): Promise<ApiResponse<AdminDeposit>> {
     return safeCall(() =>
       authFetch<AdminDeposit>(`/admin/deposits/${holdId}/retry-refund`, { method: 'POST' })

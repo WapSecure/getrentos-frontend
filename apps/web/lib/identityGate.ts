@@ -2,10 +2,7 @@ import type { KycStatus } from '@/services/kycService';
 
 export type IdentityGate = 'unknown' | 'verified' | 'in_review' | 'unverified';
 
-/**
- * Same rule as IdentityNudge: `identityVerified` wins, else tier 2+ or the legacy flag.
- * 'unknown' while the status has not loaded, so callers never block on a missing answer.
- */
+/** `identityVerified` wins, else tier 2+ or the legacy flag; 'unknown' until loaded so callers never block. */
 export function identityGate(
   status: Pick<KycStatus, 'identityVerified' | 'tier' | 'isVerified' | 'identity'> | undefined
 ): IdentityGate {
@@ -18,14 +15,10 @@ export function identityGate(
 
 export interface DepositIdentityNotice {
   message: string;
-  /** Offer the verification link; not while a check is already in review. */
   verifyLink: boolean;
 }
 
-/**
- * What the pay deposit dialog says to a buyer the server will refuse (403 IDENTITY_REQUIRED).
- * `null` when they can pay, or while the status is unknown: the server stays the source of truth.
- */
+/** `null` while the status is unknown: the server (403 IDENTITY_REQUIRED) stays the source of truth. */
 export function depositIdentityNotice(gate: IdentityGate): DepositIdentityNotice | null {
   if (gate === 'unverified') {
     return {

@@ -190,7 +190,6 @@ function PassportCard({ status }: { status: ForeignIdentityStatus['passport'] })
     },
     onError: (e) => {
       const code = codeOf(e);
-      // The free check is used, or Smile ID is off: the passport goes to our team instead.
       if (code === 'AUTOMATED_ATTEMPT_USED' || code === 'PASSPORT_CHECK_UNAVAILABLE') {
         setNotice(errorMessage(e, 'Send your passport to our team instead.'));
         void refresh();
@@ -469,7 +468,6 @@ const SUPPORTING_OPTIONS = (
   Object.keys(SOURCE_OF_FUNDS_SUPPORTING_LABELS) as SourceOfFundsSupportingKind[]
 ).map((value) => ({ value, label: SOURCE_OF_FUNDS_SUPPORTING_LABELS[value] }));
 
-/** Asked above the thresholds before an offer or deposit; reviewed like the documents above. */
 function SourceOfFundsCard({ status }: { status: SourceOfFundsStatus }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();

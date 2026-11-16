@@ -11,7 +11,6 @@ interface DisputePaymentDialogProps {
 const MIN_REASON = 10;
 const MAX_REASON = 1000;
 
-// The parent displays the server error; a failed send keeps the reason for a retry.
 export const DisputePaymentDialog = ({
   open,
   onOpenChange,

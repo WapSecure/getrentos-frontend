@@ -11,9 +11,7 @@ export interface SiteTourRecording {
   requesterConsentedAt: string | null;
   hostConsentedAt: string | null;
   bothConsented: boolean;
-  /** True only when the call will actually let the host record. */
   recordingEnabled: boolean;
-  /** Recording is switched on for this tour's call at all. */
   recordingAvailable: boolean;
   hasRecording: boolean;
 }
@@ -78,7 +76,6 @@ export const nextBookedTour = <T extends GroupableTour>(
     .filter((t) => t.status === 'SCHEDULED' && time(t.scheduledAt) >= now)
     .sort((a, b) => time(a.scheduledAt) - time(b.scheduledAt))[0];
 
-/** `started` is true once a booked tour's start time has passed. */
 export const tourNextStep = (
   tour: { status: SiteTourStatus; buyerRating?: number | null },
   viewer: TourViewer,

@@ -258,7 +258,6 @@ export const adminKeys = {
   reviewCases: (params?: {
     status?: string;
     priority?: string;
-    /** 'foreign' lists only diaspora identity cases. */
     purpose?: string;
     page?: number;
     pageSize?: number;

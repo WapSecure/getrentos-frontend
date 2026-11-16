@@ -246,7 +246,6 @@ export const PropertyDetailModal = ({
                 Request viewing
               </Button>
               {!openOffer && listing?.acceptingOffers === false ? (
-                // A greyed-out primary button read as clickable; say why there is no offer button instead.
                 <p
                   role="status"
                   className="flex items-start gap-2 rounded-lg bg-secondary px-3 py-2.5 text-sm text-muted-foreground"

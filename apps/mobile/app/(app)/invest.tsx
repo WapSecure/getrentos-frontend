@@ -76,7 +76,6 @@ import { PurchaseSummaryList } from '@/components/purchases/PurchaseSummaryList'
 import { StepProgress } from '@/components/purchases/StepProgress';
 import { purchaseWorkspaceHref } from '@/components/purchases/purchaseHref';
 
-/** Enough rows to total the deposits held; a longer history shows the count only. */
 const LIST_PAGE = 50;
 
 const KIND_ICON: Record<InvestorAttentionKind, SgIcon> = {
@@ -122,7 +121,6 @@ export default function InvestorWorkspace() {
   const insets = useSafeAreaInsets();
   const now = useNow();
   const { profile: account, workspaces } = useAuth();
-  // Purchases live with buying and managed property with owning: link across only for that role.
   const buyer = workspaces.includes('buyer');
   const owner = workspaces.includes('owner');
 
@@ -134,7 +132,6 @@ export default function InvestorWorkspace() {
     enabled: buyer,
     retry: false,
   });
-  // Deposit amounts: the overview counts purchases but does not total what is held.
   const transactions = useQuery({
     queryKey: [...qk.investor.transactions, LIST_PAGE],
     queryFn: () => buyerTransactionsApi.list(1, LIST_PAGE),
@@ -166,7 +163,6 @@ export default function InvestorWorkspace() {
       risk: ROUTES.risk,
       tours: buyer ? ROUTES.tours : undefined,
       approvals: owner ? ROUTES.approvals : undefined,
-      // No dispute screens on mobile yet, so a dispute opens its purchase workspace (no `dispute` link).
       identity: ROUTES.identity,
     },
   }).map((item) => ({
@@ -481,7 +477,6 @@ function ProfileSummary({
   const { colors, spacing, radius } = useTheme();
   const { profile: account } = useAuth();
   const [open, setOpen] = useState(false);
-  // The overview carries only the zone and country; the rest comes from the profile itself.
   const full = useQuery({ queryKey: qk.investor.profile, queryFn: investorApi.profile });
   const profile: Partial<InvestorProfile> = { ...summary, ...(full.data ?? {}) };
   const livesIn = countryName(profile.countryOfResidence) ?? profile.countryOfResidence;

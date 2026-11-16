@@ -4,7 +4,6 @@ import { Divider, Text, useTheme } from '@sureground/ui-native';
 
 export interface Fact {
   label: string;
-  /** Text, or a badge. Rows with no value are left out. */
   value: ReactNode;
   hint?: string;
 }

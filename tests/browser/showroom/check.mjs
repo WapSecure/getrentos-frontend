@@ -1,5 +1,4 @@
-// Run: node tests/browser/showroom/fixture-api.mjs, then start web with
-// SHOWROOM_ENABLED=on NEXT_PUBLIC_API_URL=http://localhost:4300, then node tests/browser/showroom/check.mjs
+// Run fixture-api.mjs, start web with SHOWROOM_ENABLED=on NEXT_PUBLIC_API_URL=http://localhost:4300, then this script.
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from '@playwright/test';

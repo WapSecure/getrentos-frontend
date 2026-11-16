@@ -128,7 +128,6 @@ export const CoApprovalCard = ({
 
   if (rule.isLoading || rule.isError || !rule.data) return null;
   const data = rule.data;
-  // A representative who does not hold the rule has nothing to approve here.
   if (!isBuyer && !data.binding) return null;
   const stepLabel = (step: CoApprovalPendingStep) =>
     step.releasesDeposit

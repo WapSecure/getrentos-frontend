@@ -65,7 +65,6 @@ const featureOptions = [
   'Solar Power',
 ];
 
-// A parcel has no rooms or building services, so it gets the features a land buyer checks.
 const landFeatureOptions = [
   'Fenced',
   'Dry land',
