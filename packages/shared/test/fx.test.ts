@@ -59,12 +59,12 @@ test('labels the source, Lagos time and day, and that payment is in naira', () =
   // 13:05 UTC is 14:05 in Lagos (UTC+1, no daylight saving).
   assert.equal(
     indicativeRateLabel('Open Exchange Rates', '2026-11-11T13:05:00Z'),
-    'Indicative, Open Exchange Rates rate at 14:05 Lagos, 11 Nov. You pay in naira.'
+    'Indicative, Open Exchange Rates rate at 2:05 PM Lagos, 11 Nov. You pay in naira.'
   );
   // 23:30 UTC is already the next day in Lagos.
   assert.equal(
     indicativeRateLabel('Open Exchange Rates', new Date('2026-11-11T23:30:00Z')),
-    'Indicative, Open Exchange Rates rate at 00:30 Lagos, 12 Nov. You pay in naira.'
+    'Indicative, Open Exchange Rates rate at 12:30 AM Lagos, 12 Nov. You pay in naira.'
   );
   assert.equal(indicativeRateLabel('Open Exchange Rates', 'not a date'), null);
   assert.equal(indicativeRateLabel(' ', '2026-11-11T13:05:00Z'), null);

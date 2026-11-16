@@ -35,6 +35,6 @@ test('codes embedded in sentences are replaced, plain words are not', () => {
 
 test('formatDateTime is unambiguous', () => {
   const out = formatDateTime(new Date(2026, 10, 9, 14, 5));
-  assert.equal(out, '9 Nov 2026, 14:05');
+  assert.equal(out, '9 Nov 2026, 2:05 PM');
   assert.equal(formatDateTime('not a date'), '');
 });

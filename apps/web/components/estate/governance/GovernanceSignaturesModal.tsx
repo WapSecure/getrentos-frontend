@@ -14,6 +14,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import type { CommitteeTitle } from '@/types/estate';
+import { formatClock } from '@sureground/shared';
 
 interface GovernanceSignaturesModalProps {
   estateId: string;
@@ -30,13 +31,12 @@ const titleLabel: Record<CommitteeTitle, string> = {
 };
 
 const formatDate = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', {
+  formatClock(new Date(value), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-    hour: '2-digit',
     minute: '2-digit',
-  }).format(new Date(value));
+  });
 
 export const GovernanceSignaturesModal = ({
   estateId,

@@ -25,6 +25,7 @@ import { estateResidentKeys } from '@/lib/queryKeys';
 import { IssueResidentVisitorPassModal } from '@/components/estate/resident/IssueResidentVisitorPassModal';
 import { VisitorPinDialog } from '@/components/estate/visitor-passes/VisitorPinDialog';
 import type { IssuedVisitorPass, VisitorPass } from '@/types/estate';
+import { formatClock } from '@sureground/shared';
 
 const statusVariant: Record<VisitorPass['status'], 'success' | 'warning' | 'neutral' | 'danger'> = {
   pending: 'warning',
@@ -49,12 +50,7 @@ const statusLabels: Record<VisitorPass['status'], string> = {
 };
 
 const formatDate = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value));
+  formatClock(new Date(value), { day: 'numeric', month: 'short', minute: '2-digit' });
 
 export default function ResidentVisitorPassesPage() {
   const queryClient = useQueryClient();

@@ -24,6 +24,7 @@ import { renterService } from '@/services/renterService';
 import { renterKeys } from '@/lib/queryKeys';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
 import type { SupportThread } from '@/types/support';
+import { formatClock } from '@sureground/shared';
 
 const CATEGORIES = [
   { value: 'payments', label: 'Payments & rent' },
@@ -34,14 +35,7 @@ const CATEGORIES = [
 ];
 
 const fmt = (value?: string | null) =>
-  value
-    ? new Date(value).toLocaleString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    : '';
+  value ? formatClock(new Date(value), { day: '2-digit', month: 'short', minute: '2-digit' }) : '';
 
 export const RenterSupportPage = () => {
   const queryClient = useQueryClient();

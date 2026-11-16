@@ -39,6 +39,7 @@ import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import type { MaintenanceRequest, MaintenanceRequestStatus } from '@/types/maintenance';
+import { formatClock } from '@sureground/shared';
 
 const formatter = new Intl.NumberFormat('en-NG', {
   style: 'currency',
@@ -63,12 +64,7 @@ const formatServiceTarget = (value?: string | null) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
 
-  return new Intl.DateTimeFormat('en-NG', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
+  return formatClock(date, { day: 'numeric', month: 'short', minute: '2-digit' });
 };
 
 const maintenanceStatusMeta: Record<

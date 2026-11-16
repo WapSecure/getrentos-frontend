@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Clock, Download, FileText, RotateCcw, ChevronUp, ChevronDown } from '@sureground/icons';
 import { Badge, Card, IconButton } from '@sureground/ui';
+import { formatClock } from '@sureground/shared';
 
 interface Version {
   id: string;
@@ -29,11 +30,10 @@ export const DocumentVersionHistory = ({
   const [isExpanded, setIsExpanded] = useState(true);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
+    return formatClock(new Date(dateString), {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
-      hour: '2-digit',
       minute: '2-digit',
     });
   };

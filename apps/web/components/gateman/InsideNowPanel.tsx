@@ -3,12 +3,11 @@
 import { useEffect, useState } from 'react';
 import { DoorOpen, LogOut, SearchX } from '@sureground/icons';
 import { Button, EmptyState, ListSkeleton, Pagination, SearchInput } from '@sureground/ui';
-import { cn } from '@sureground/shared';
+import { cn, formatClock } from '@sureground/shared';
 import type { VisitorPass } from '@/types/estate';
 import { formatStay } from '@/lib/visitorStay';
 
-const formatTime = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', { hour: '2-digit', minute: '2-digit' }).format(new Date(value));
+const formatTime = (value: string) => formatClock(new Date(value), { minute: '2-digit' });
 
 const initials = (name: string) =>
   name

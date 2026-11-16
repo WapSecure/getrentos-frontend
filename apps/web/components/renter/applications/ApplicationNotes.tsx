@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Edit2, Trash2, Clock, StickyNote } from '@sureground/icons';
 import { Alert, Button, ConfirmDialog, EmptyState, IconButton, Textarea } from '@sureground/ui';
+import { formatClock } from '@sureground/shared';
 
 interface Note {
   id: string;
@@ -74,11 +75,10 @@ export const ApplicationNotes = ({
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', {
+    return formatClock(date, {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
-      hour: '2-digit',
       minute: '2-digit',
     });
   };
