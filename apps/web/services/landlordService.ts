@@ -635,7 +635,7 @@ export const landlordService = {
   },
 
   async listLeases(
-    params: { status?: string; page?: number; pageSize?: number } = {}
+    params: { status?: string; leaseId?: string; page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<Lease>>> {
     return safeCall(() => authFetch<Paginated<Lease>>(`/landlord/leases${toQuery(params)}`));
   },

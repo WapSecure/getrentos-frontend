@@ -422,6 +422,8 @@ export interface LandlordMaintenanceRequest {
 export interface Tenant {
   id: string;
   name: string;
+  /** The tenant's account; absent for a tenant recorded by name only. */
+  tenantUserId?: string | null;
   email: string;
   phone: string;
   avatar?: string;

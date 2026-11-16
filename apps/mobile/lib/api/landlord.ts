@@ -92,6 +92,8 @@ export type RentStatus = 'paid' | 'pending' | 'due' | 'overdue' | 'partial';
 export interface LandlordTenant {
   id: string;
   name: string;
+  /** The tenant's account; null for a tenant recorded by name only. */
+  tenantUserId?: string | null;
   email: string;
   phone: string;
   propertyId: string;
@@ -916,6 +918,8 @@ export interface LandlordConversation {
   id: string;
   participantName: string;
   participantRole: string;
+  /** The home the conversation is about. */
+  propertyTitle?: string;
   lastMessage: string;
   lastMessageTime: string;
   unreadCount: number;

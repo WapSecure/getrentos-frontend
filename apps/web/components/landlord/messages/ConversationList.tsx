@@ -9,6 +9,8 @@ export interface Conversation {
   id: string;
   participantName: string;
   participantRole: 'Tenant' | 'Vendor' | 'Applicant';
+  /** The home the conversation is about; tells apart chats with one tenant about different homes. */
+  propertyTitle?: string;
   lastMessage: string;
   lastMessageTime: string;
   unreadCount: number;
@@ -64,14 +66,21 @@ export const ConversationList = ({
                   >
                     {conversation.participantName}
                   </p>
-                  <span className="whitespace-nowrap text-xs tabular-nums text-muted-foreground">
-                    {formatRelativeTime(conversation.lastMessageTime)}
-                  </span>
+                  {/* A conversation just opened has no messages, so no time to show. */}
+                  {conversation.lastMessageTime ? (
+                    <span className="whitespace-nowrap text-xs tabular-nums text-muted-foreground">
+                      {formatRelativeTime(conversation.lastMessageTime)}
+                    </span>
+                  ) : null}
                 </div>
-                <p className="text-xs text-muted-foreground mb-0.5">
-                  {conversation.participantRole}
+                <p className="text-xs text-muted-foreground mb-0.5 truncate">
+                  {[conversation.participantRole, conversation.propertyTitle]
+                    .filter(Boolean)
+                    .join(' · ')}
                 </p>
-                <p className="text-xs text-muted-foreground truncate">{conversation.lastMessage}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {conversation.lastMessage || 'No messages yet'}
+                </p>
               </div>
               {conversation.unreadCount > 0 && (
                 <span className="mt-0.5 flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-2xs font-bold text-primary-foreground">

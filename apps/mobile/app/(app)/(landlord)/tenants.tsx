@@ -1,17 +1,20 @@
-import { RefreshControl, View } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
+import { Linking, RefreshControl, View } from 'react-native';
+import { router } from 'expo-router';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ShieldCheck, Users } from '@sureground/icons/native';
 import {
   Avatar,
   Badge,
+  Button,
   Card,
   EmptyState,
   QueryState,
   Skeleton,
   Text,
   useTheme,
+  useToast,
 } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
@@ -21,6 +24,7 @@ import {
   type LandlordTenant,
 } from '@/lib/api/landlord';
 import { formatDate } from '@/lib/format';
+import { errorMessage } from '@/lib/api/client';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function LandlordTenants() {
@@ -49,7 +53,8 @@ export default function LandlordTenants() {
           title="Tenants"
           subtitle={
             query.data
-              ? `${query.data.total} tenant${query.data.total === 1 ? '' : 's'}${behind > 0 ? ` · ${behind} behind on rent` : ''}`
+              ? // One tenant renting two homes has two rows, so this counts tenancies.
+                `${query.data.total} tenanc${query.data.total === 1 ? 'y' : 'ies'}${behind > 0 ? ` · ${behind} behind on rent` : ''}`
               : 'Lease relationships and rent status'
           }
         />
@@ -95,6 +100,14 @@ export default function LandlordTenants() {
 
 function TenantRow({ tenant: t }: { tenant: LandlordTenant }) {
   const { colors, spacing } = useTheme();
+  const toast = useToast();
+  // Opens the existing conversation with this tenant, or starts one about their home.
+  const message = useMutation({
+    mutationFn: () => landlordApi.startConversation(t.tenantUserId as string, t.propertyId),
+    onSuccess: (conversation) =>
+      router.push({ pathname: '/(app)/landlord-conversation/[id]', params: { id: conversation.id } }),
+    onError: (e) => toast.show(errorMessage(e, 'Could not open the chat.'), 'error'),
+  });
   return (
     <Card padding={spacing.lg} style={{ marginBottom: spacing.sm }}>
       <View style={{ flexDirection: 'row', gap: spacing.md }}>
@@ -120,6 +133,27 @@ function TenantRow({ tenant: t }: { tenant: LandlordTenant }) {
           </Text>
         </View>
       </View>
+      {t.tenantUserId ? (
+        <Button
+          label="Message"
+          size="sm"
+          variant="outline"
+          loading={message.isPending}
+          accessibilityLabel={`Message ${t.name}`}
+          onPress={() => message.mutate()}
+          style={{ marginTop: spacing.md }}
+        />
+      ) : t.phone ? (
+        // A tenant recorded by name only has no inbox here; their phone is the way to reach them.
+        <Button
+          label="Call"
+          size="sm"
+          variant="outline"
+          accessibilityLabel={`Call ${t.name}`}
+          onPress={() => void Linking.openURL(`tel:${t.phone}`)}
+          style={{ marginTop: spacing.md }}
+        />
+      ) : null}
     </Card>
   );
 }
