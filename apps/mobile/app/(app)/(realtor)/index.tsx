@@ -294,7 +294,6 @@ export default function RealtorHome() {
         onToggle={toggleMoney}
       />
 
-
       <QueryState
         query={dashboard}
         skeleton={<StatGroupSkeleton groups={[2, 3]} />}
