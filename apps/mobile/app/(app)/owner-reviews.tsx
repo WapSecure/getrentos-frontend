@@ -45,7 +45,7 @@ export default function OwnerReviews() {
         onBack={() => goBack()}
       />
 
-      {s ? (
+      {s?.reviewCount ? (
         <Card
           elevated
           accessible

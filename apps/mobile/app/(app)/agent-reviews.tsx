@@ -38,7 +38,7 @@ export default function AgentReviews() {
           eyebrow="Reputation"
           title="Reviews"
           subtitle={
-            summaryQuery.data
+            summaryQuery.data?.reviewCount
               ? `${summaryQuery.data.averageRating.toFixed(1)} average from ${summaryQuery.data.reviewCount} review${summaryQuery.data.reviewCount === 1 ? '' : 's'}`
               : 'Client feedback and rating trends'
           }
@@ -46,7 +46,7 @@ export default function AgentReviews() {
         />
       </View>
 
-      {summaryQuery.data ? (
+      {summaryQuery.data?.reviewCount ? (
         <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
           <Card elevated>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.lg }}>

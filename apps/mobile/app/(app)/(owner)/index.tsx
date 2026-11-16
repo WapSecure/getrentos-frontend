@@ -107,6 +107,7 @@ export default function OwnerHome() {
             label: 'Verified',
             value: d.verifiedProperties,
             Icon: BadgeCheck,
+            subtitle: 'Ownership checked by our team',
             onPress: () => router.push('/(app)/(owner)/properties'),
           },
           {
