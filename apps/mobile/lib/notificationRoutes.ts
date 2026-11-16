@@ -93,6 +93,7 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/estate/emergency': '/(app)/estate-emergency',
   '/estate/visitor-passes': '/(app)/estate-visitors',
   '/estate/watchlist': '/(app)/estate-watchlist',
+  '/resident/dashboard': '/(app)/(resident)',
   '/resident/violations': '/(app)/violations',
   '/resident/amenities': '/(app)/amenities',
   '/estate/polls': '/(app)/estate-polls',
