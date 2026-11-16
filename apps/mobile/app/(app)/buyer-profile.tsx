@@ -3,7 +3,7 @@ import { ScrollView, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ShieldCheck } from '@sureground/icons/native';
+import { Shield, ShieldAlert, ShieldCheck, ShieldX } from '@sureground/icons/native';
 import {
   Avatar,
   Card,
@@ -67,6 +67,15 @@ function ProfileForm({ data }: { data: BuyerProfileData }) {
     onError: (err) => toast.show(errorMessage(err, 'Could not save your profile.'), 'error'),
   });
 
+  const status =
+    data.verificationStatus === 'approved'
+      ? { label: 'Verified', Icon: ShieldCheck, color: colors.success }
+      : data.verificationStatus === 'needs_clarification'
+        ? { label: 'More details needed', Icon: ShieldAlert, color: colors.warning }
+        : data.verificationStatus === 'rejected'
+          ? { label: 'Verification not approved', Icon: ShieldX, color: colors.destructive }
+          : { label: 'Verification in review', Icon: Shield, color: colors.mutedForeground };
+
   return (
     <ScrollView
       contentContainerStyle={{
@@ -81,9 +90,9 @@ function ProfileForm({ data }: { data: BuyerProfileData }) {
           {data.email}
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-          <ShieldCheck size={14} color={colors.success} />
-          <Text variant="caption" style={{ color: colors.success }}>
-            {data.verificationStatus} · Trust score {data.trustScore}
+          <status.Icon size={14} color={status.color} />
+          <Text variant="caption" style={{ color: status.color }}>
+            {status.label} · Trust score {data.trustScore}
           </Text>
         </View>
       </View>
