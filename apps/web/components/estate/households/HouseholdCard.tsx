@@ -21,6 +21,10 @@ export const HouseholdCard = ({
   onUnlinkResident,
 }: HouseholdCardProps) => {
   const isActive = household.status === 'active';
+  const showAccountName =
+    !!household.residentAccountName &&
+    household.residentAccountName.trim().toLowerCase() !==
+      household.residentName.trim().toLowerCase();
   return (
     <EstateRow
       leading={<RowAvatar name={household.residentName} />}
@@ -36,7 +40,7 @@ export const HouseholdCard = ({
       meta={
         <>
           <p className="truncate">{household.residentName}</p>
-          {household.residentAccountName && (
+          {showAccountName && (
             <p className="truncate">Linked account: {household.residentAccountName}</p>
           )}
           {(household.contactPhone || household.contactEmail) && (
