@@ -9,11 +9,9 @@ import type { TrustProfile } from '@/types/trust-score';
 interface TrustProfileDetailsProps {
   queryKey: readonly unknown[];
   queryFn: () => Promise<ApiResponse<TrustProfile>>;
-  /** Who sees the profile, e.g. "owners and realtors". */
   audience: string;
 }
 
-/** The checks and badges other people see on this person's profile. */
 export function TrustProfileDetails({ queryKey, queryFn, audience }: TrustProfileDetailsProps) {
   const profile = useQuery({ queryKey, queryFn: () => unwrap(queryFn()) });
   if (!profile.data) return null;

@@ -221,7 +221,6 @@ const BuyerTourRow = ({
   );
 };
 
-/** `land`: land tours only (land routes). `all`: every tour, homes and land. */
 export const BuyerTours = ({ scope }: { scope: TourScope }) => {
   const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
     null

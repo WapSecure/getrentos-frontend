@@ -6,7 +6,6 @@ import { Card, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { statementsApi, type StatementKind } from '@/lib/api/serviceChargeStatements';
 
-/** A way into the service-charge statements, shown only to someone who has been billed one. */
 export function ServiceChargesEntry({ kind }: { kind: StatementKind }) {
   const { colors, spacing } = useTheme();
   const list = useQuery({

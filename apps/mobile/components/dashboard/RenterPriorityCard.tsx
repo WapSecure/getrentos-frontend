@@ -33,7 +33,6 @@ export interface RenterPriority {
   href: string;
 }
 
-/** The single most useful next step for a renter, most urgent first. */
 export function pickRenterPriority(i: RenterPriorityInput): RenterPriority | null {
   const s = i.summary;
   if (s && s.openCount > 0 && s.amountOwedNaira > 0) {
@@ -135,7 +134,6 @@ export function pickRenterPriority(i: RenterPriorityInput): RenterPriority | nul
 }
 
 export function RenterPriorityCard({ priority }: { priority: RenterPriority }) {
-  // The lead card: one blue button for every priority, red only in the accent when it is overdue.
   return (
     <AttentionCard
       Icon={priority.Icon}

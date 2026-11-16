@@ -95,7 +95,6 @@ export interface RealtorListingApi {
     bathrooms: number | null;
     owner: { legalName: string | null };
   };
-  /** Commercial properties only: what was stated. */
   commercial?: CommercialDetails;
 }
 
@@ -407,7 +406,6 @@ export const realtorService = {
         body: JSON.stringify(contactRequestBody(contact) ?? { contact }),
       })
     ),
-  /** Whether a phone number or email belongs to an owner or landlord account. */
   checkClientEmail: (contact: string) =>
     safeCall(() =>
       authFetch<{
@@ -433,7 +431,6 @@ export const realtorService = {
     commercial?: CommercialDetails;
   }) =>
     safeCall(() => authFetch('/realtor/listings', { method: 'POST', body: JSON.stringify(data) })),
-  /** Only on a listing this realtor drafted, while the property is still assigned. Null clears a field. */
   updateListingCommercial: (id: string, details: CommercialUpdatePayload) =>
     safeCall(() =>
       authFetch<RealtorListingApi>(`/realtor/listings/${id}/commercial`, {

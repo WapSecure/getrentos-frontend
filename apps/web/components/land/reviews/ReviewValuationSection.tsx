@@ -22,7 +22,7 @@ const Filed = ({ valuation }: { valuation: PropertyValuation }) => (
   </div>
 );
 
-/** DIA-30: the valuer files the signed report with the value, method and dates; nothing else counts as a value. */
+/** The valuer files the signed report with the value, method and dates; nothing else counts as a value. */
 export const ReviewValuationSection = ({
   state,
   valuation,
@@ -30,7 +30,6 @@ export const ReviewValuationSection = ({
   onSubmit,
 }: {
   state: ReviewSubmissionState;
-  /** What I filed on this property already, if anything. */
   valuation: PropertyValuation | null | undefined;
   isSubmitting: boolean;
   onSubmit: (input: LandReviewValuationInput) => Promise<unknown>;

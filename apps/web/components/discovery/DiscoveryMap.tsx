@@ -24,13 +24,11 @@ export interface DiscoveryPin {
 
 interface DiscoveryMapProps {
   pins: DiscoveryPin[];
-  /** The searched area, drawn as a box. */
   area?: MapArea;
   selectedId?: string;
   highlightedId?: string;
   onSelect: (id: string) => void;
   onSearchArea: (area: MapArea) => void;
-  /** Shows a "Clear area" control on the map while an area is searched. */
   onClearArea?: () => void;
   className?: string;
 }
@@ -100,7 +98,6 @@ export function DiscoveryMap({
     onSearchAreaRef.current = onSearchArea;
   }, [onSearchArea]);
 
-  // Leaflet touches `window`, so it is loaded on the client, once.
   useEffect(() => {
     let cancelled = false;
     const markers = markersRef.current;
@@ -120,11 +117,9 @@ export function DiscoveryMap({
         });
         addBaseTiles(L, map);
         map.setView(LAGOS, 11);
-        // Only a move the person made offers "Search this area"; fitting to results does not.
         map.on('movestart', () => {
           if (!programmaticMove.current) setMoved(true);
         });
-        // A finished drawing becomes the searched area: a box stays a box, a shape is sent as a polygon.
         map.on(L.Draw.Event.CREATED, (event: any) => {
           drawHandlerRef.current = null;
           setDrawing(null);
@@ -163,8 +158,7 @@ export function DiscoveryMap({
     };
   }, []);
 
-  // Leaflet fires movestart synchronously inside setView, fitBounds and panTo, so the flag only needs to
-  // cover the call itself; a fit that changes nothing fires nothing and leaves no stale flag behind.
+  // Leaflet fires movestart synchronously inside setView, fitBounds and panTo, so the flag only wraps the call.
   const fit = (run: () => void) => {
     programmaticMove.current = true;
     try {
@@ -175,7 +169,6 @@ export function DiscoveryMap({
     setMoved(false);
   };
 
-  // Frame the searched area, or else the results; refit only when the set changes, never on hover.
   const pinKey = pins.map((p) => p.id).join('|');
   const areaKey = keyOfArea(area);
   useEffect(() => {
@@ -195,7 +188,6 @@ export function DiscoveryMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, areaKey, pinKey]);
 
-  // One marker per pin; recreated when the result set changes.
   useEffect(() => {
     const map = mapRef.current;
     const L = leafletRef.current;
@@ -221,7 +213,6 @@ export function DiscoveryMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, pinKey]);
 
-  // Selection and hover restyle the pins in place, so the map never jumps.
   useEffect(() => {
     if (!ready) return;
     for (const pin of pins) {
@@ -237,7 +228,6 @@ export function DiscoveryMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, pinKey, selectedId, highlightedId]);
 
-  // The searched box, and the honest circle around a selected approximate pin.
   useEffect(() => {
     const map = mapRef.current;
     const L = leafletRef.current;
@@ -277,7 +267,6 @@ export function DiscoveryMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, areaKey, pinKey, selectedId]);
 
-  // A pin chosen from the list is brought into view if it is off screen.
   useEffect(() => {
     const map = mapRef.current;
     const pin = pins.find((p) => p.id === selectedId);
@@ -301,7 +290,6 @@ export function DiscoveryMap({
     });
   };
 
-  // leaflet-draw's own toolbar is replaced by these buttons, so the controls match the rest of the page.
   const startDrawing = (mode: DrawMode) => {
     const map = mapRef.current;
     const L = leafletRef.current;

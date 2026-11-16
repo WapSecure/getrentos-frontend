@@ -10,7 +10,6 @@ import {
 } from '@/lib/publicListingMap';
 import type { Paginated } from '@/lib/apiHelpers';
 
-/** The newest public listings for a market, server-side; an empty list when the API is unreachable or slow. */
 export async function latestListings(
   market: PublicMarket,
   limit: number

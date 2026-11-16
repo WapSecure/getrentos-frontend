@@ -2,7 +2,6 @@ import { Bot, ShieldCheck, UserRound, Wrench } from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { formatDualTime } from '@/lib/format';
 
-/** Who did it. Staff always show as "Sureground"; `YOU` is the viewer's own action. */
 export type ActivityFeedActorKind =
   | 'MANAGER'
   | 'SUREGROUND'
@@ -10,7 +9,6 @@ export type ActivityFeedActorKind =
   | 'SYSTEM'
   | 'OTHER'
   | 'YOU'
-  // On a purchase, the actor's role in that sale.
   | 'BUYER'
   | 'SELLER'
   | 'REPRESENTATIVE';
@@ -22,7 +20,6 @@ export interface ActivityFeedItem {
   actor: string;
   actorKind: ActivityFeedActorKind;
   important: boolean;
-  /** Shown before the time when the feed spans several properties. */
   propertyTitle?: string;
 }
 
@@ -57,10 +54,6 @@ const timeOf = (iso: string) =>
     minute: '2-digit',
   });
 
-/**
- * Who did what and when, grouped by Lagos day. With `viewerTimeZone`, each time shows Lagos
- * time next to the viewer's own. Shared by the owner's activity log and the purchase workspace.
- */
 export const ActivityFeed = ({
   items,
   viewerTimeZone,

@@ -12,7 +12,6 @@ export interface ListDiasporaQueueParams {
   kind?: DiasporaQueueKind;
   overdue?: boolean;
   due?: DiasporaQueueDue;
-  /** The item title or the investor's name. */
   search?: string;
   /** 'me', 'unassigned' or a staff user id. */
   assignee?: string;
@@ -44,7 +43,6 @@ export const adminDiasporaService = {
       )
     );
   },
-  /** Leave staffId out to take the item yourself. */
   assign(
     kind: DiasporaQueueKind,
     subjectId: string,

@@ -199,7 +199,6 @@ export default function AdminEscrowPage() {
                     actions.request({
                       key: `release:${t.id}`,
                       title: 'Release these funds to the seller?',
-                      // A buyer's confirmation of receipt releases the deposit itself, so anything still held here has not been confirmed.
                       description: `${t.buyerName} has not confirmed receipt. Release only if you have checked the handover yourself. ${held} held for ${t.propertyTitle} (sale price ${amount}) will be released to ${t.sellerName}. This settles the escrow and cannot be reversed from here.`,
                       confirmLabel: 'Release funds',
                       successMessage: `${held} released to ${t.sellerName}.`,

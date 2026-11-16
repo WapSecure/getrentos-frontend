@@ -18,9 +18,7 @@ import { InviteToSignUp } from '@/components/shared/representatives/InviteToSign
 interface InviteOwnerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** `contact` is the owner's phone number or email, as typed. */
   onSubmit: (input: { contact: string; name?: string; note?: string }) => void;
-  /** Called when the contact changes, so a stale server error can be cleared. */
   onEdit?: () => void;
   isSubmitting?: boolean;
   error?: string | null;

@@ -26,7 +26,7 @@ export default function OwnerAnalytics() {
   const insets = useSafeAreaInsets();
   const query = useQuery({ queryKey: qk.owner.metrics, queryFn: ownerApi.metrics });
   const items = query.data ?? [];
-  // Recorded purchase prices only; a value comes only from an accredited valuer's report (DIA-30).
+  // Recorded purchase prices only; a value comes only from an accredited valuer's report.
   const priced = items.filter((m) => m.purchasePrice != null);
   const invested = priced.reduce((sum, m) => sum + (m.purchasePrice ?? 0), 0);
   // Analytics may be a paid feature; say so rather than showing a generic error.

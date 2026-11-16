@@ -38,7 +38,6 @@ export const DIASPORA_QUEUE_KIND_ICON: Record<DiasporaQueueKind, SgIcon> = {
 
 export const DIASPORA_QUEUE_KINDS = Object.keys(DIASPORA_QUEUE_KIND_LABEL) as DiasporaQueueKind[];
 
-/** Source statuses read as words; anything not listed falls back to sentence case. */
 const STATUS_LABEL: Record<string, string> = {
   OPEN: 'Open',
   ASSIGNED: 'Assigned',
@@ -71,7 +70,7 @@ const lagosDue = new Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
 });
 
-/** Business dates are Lagos dates (decision D2): "11 Nov 2026". */
+/** Business dates are Lagos dates: "11 Nov 2026". */
 export function formatLagosDate(iso: string): string {
   const date = new Date(iso);
   return Number.isNaN(date.getTime()) ? '' : lagosDue.format(date);
@@ -87,14 +86,11 @@ function lagosDay(date: Date): number {
 }
 
 export interface DueDescription {
-  /** "3 days overdue", "Due today", "Due in 4 days". */
   label: string;
-  /** The Lagos date, "14 Nov 2026"; empty with no deadline. */
   date: string;
   tone: 'overdue' | 'soon' | 'ok' | 'none';
 }
 
-/** A deadline as people say it, counted in Lagos days. `overdue` comes from the server. */
 export function describeDue(
   dueAt: string | undefined,
   overdue: boolean,
@@ -119,14 +115,11 @@ export function describeDue(
   return { label: `Due in ${days} days`, date, tone: 'ok' };
 }
 
-/** Open items that read the same: one investor, one kind, one title (six photo-reuse flags, say). */
 export interface DiasporaQueueGroup {
   key: string;
-  /** In queue order, so the first is the most urgent. */
   items: DiasporaQueueItem[];
 }
 
-/** Folds repeated items into groups, keeping queue order by each group's first item. */
 export function groupQueueItems(items: DiasporaQueueItem[]): DiasporaQueueGroup[] {
   const groups = new Map<string, DiasporaQueueGroup>();
   for (const item of items) {

@@ -3,15 +3,12 @@ import { cn } from '@sureground/shared';
 
 interface EyebrowProps {
   children: ReactNode;
-  /** `light` is for a `bg-primary` band: full-strength foreground, never faded. */
   tone?: 'brand' | 'light';
-  /** Centred intros drop the leading rule so the label sits square. */
   rule?: boolean;
   as?: ElementType;
   className?: string;
 }
 
-/** The tracked-capitals label above a heading, in Sureground blue with a short leading rule. */
 export const Eyebrow = ({
   children,
   tone = 'brand',

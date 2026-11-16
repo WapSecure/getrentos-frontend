@@ -1,5 +1,4 @@
 export type NudgeRequirement = 'identity' | 'licence';
-/** Where the person's own submission stands: none sent yet, being reviewed, or sent back. */
 export type NudgeState = 'missing' | 'pending' | 'rejected';
 
 export function identityNudgeCopy({
@@ -13,7 +12,6 @@ export function identityNudgeCopy({
 }): { title: string; detail: string; accessibilityLabel: string } {
   const noun = requirement === 'licence' ? 'licence' : 'identity check';
   if (state === 'pending') {
-    // They already sent it: asking them to "verify" again reads as if it never arrived.
     const title = `Your ${noun} is being reviewed`;
     const detail = `${capitalise(unlocks)} unlock once it is approved. We will let you know.`;
     return { title, detail, accessibilityLabel: `${title}. ${detail}` };
@@ -30,8 +28,6 @@ export function identityNudgeCopy({
       accessibilityLabel: `Verify your licence. Unlocks ${unlocks}.`,
     };
   }
-  // No "verify by <date>": the identity gate on clients and listings refuses an unverified account even in
-  // the grace period, so the card says what is blocked now.
   return {
     title: 'Verify your identity',
     detail: `Unlocks ${unlocks}. Takes two minutes`,

@@ -67,7 +67,6 @@ import {
   RulesBlock,
 } from '@/components/shortlet/StaySections';
 
-// One primary action per market; each signs in first and comes back to this listing.
 const CTA: Record<MarketKind, { label: string; a11y: string }> = {
   rent: { label: 'Request viewing', a11y: 'Sign in to request a viewing' },
   sale: { label: 'Request inspection', a11y: 'Sign in to request an inspection' },
@@ -98,7 +97,6 @@ export default function PublicListing() {
   useTrackDetailView(p?.id, isMarketKind(kind) ? kind : 'rent');
 
   const back = () => (router.canGoBack() ? router.back() : router.replace('/(market)'));
-  // Sections that count impressions re-measure themselves when the page scrolls.
   const [scrollListeners] = useState(() => new Set<() => void>());
 
   const share = async () => {
@@ -353,7 +351,6 @@ function Body({
         </Card>
       ) : null}
 
-      {/* Commercial: the lease and the space come before the description, as on the web. */}
       {p.commercial && (p.kind === 'rent' || p.kind === 'sale') ? (
         <ShowroomCommercial commercial={p.commercial} market={p.kind} />
       ) : null}
@@ -484,9 +481,7 @@ function SimilarListings({
 }) {
   const { spacing } = useTheme();
   const saved = useMarketSaved(listing.kind);
-  // The web's similar strip counts under `${market}_similar`. The row scrolls sideways (the list
-  // reports which cards are half in view) inside a page that scrolls down (we measure the row), so
-  // a card counts only when both say it is on screen.
+  // Counts under the web's `${market}_similar`, and only when both the row and the page say the card is on screen.
   const cards = useCardAnalytics(listing.kind, `${listing.kind}_similar`, { inView: false });
   const row = useRef<ComponentRef<typeof View>>(null);
   const { setInView } = cards;
@@ -599,7 +594,6 @@ function Footer({ listing, kind }: { listing: MarketDetail; kind: MarketKind }) 
               surface: 'app_sticky_bar',
               props: { variant: 'signed_out' },
             });
-            // Come back to this listing once signed in.
             rememberListing(kind, listing.id);
             router.push('/(auth)/sign-in');
           }}

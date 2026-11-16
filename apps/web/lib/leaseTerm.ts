@@ -26,14 +26,11 @@ export function leaseRentLabel(
   return describeRentPeriod(leaseStart, leaseEnd, rentChargeCount);
 }
 
-/** How many charges of exactly the rent amount the lease's payment schedule holds. */
 export function countRentCharges(rentAmount: number, payments: { amount: number }[]): number {
   return payments.filter((p) => p.amount === rentAmount).length;
 }
 
-// A 12-month term says how long the tenancy runs, not how often rent is due: a monthly rent on a
-// one-year lease was labelled "Annual rent". Three or more rent-sized charges mean instalments
-// (two could be an annual rent plus a deposit of the same amount), so read it as monthly.
+// A 12-month term is the tenancy's length; three or more rent-sized charges mean instalments (two may be rent plus deposit).
 export function describeRentPeriod(
   leaseStart: string,
   leaseEnd: string,

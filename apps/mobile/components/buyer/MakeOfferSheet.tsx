@@ -66,7 +66,7 @@ function OfferForm({
   const [depositAmount, setDepositAmount] = useState('');
   const [financingType, setFinancingType] = useState<BuyerFinancingType>('cash');
   const [message, setMessage] = useState('');
-  // DIA-07: asked before sending, so a large offer is not refused with a 403.
+  // Asked before sending, so a large offer is not refused with a 403.
   const [fundsHold, setFundsHold] = useState<string | null>(null);
 
   const mutation = useMutation({

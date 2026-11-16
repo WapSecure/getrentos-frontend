@@ -32,14 +32,12 @@ import {
 } from '@sureground/ui';
 import { RENTER_COLLECTION, formatDay } from '@/components/renter/payments/ServiceChargesTab';
 
-/** A statement from either a tenancy (rent account) or an estate household (dues). */
 export type ServiceChargeStatementData = Omit<
   RenterServiceChargeStatement,
   'collection' | 'partOfInstalment' | 'budget' | 'lines'
 > & {
   collection: RenterServiceChargeStatement['collection'] | 'WAIVED';
   partOfInstalment?: number | null;
-  /** For a household due an upheld query lowered. */
   amountDue?: number | null;
   lines: (Omit<RenterServiceChargeStatement['lines'][number], 'spentSoFar'> & {
     spentSoFar?: number | null;
@@ -51,16 +49,13 @@ export type ServiceChargeStatementData = Omit<
 
 export interface ServiceChargeStatementConfig {
   queryKey: readonly unknown[];
-  /** Refreshed after a query is raised or withdrawn. */
   listKey: readonly unknown[];
   get: (id: string) => Promise<ServiceChargeStatementData>;
   raiseQuery: (id: string, input: { reason: string; invoiceLineId?: string }) => Promise<unknown>;
   withdrawQuery: (queryId: string) => Promise<unknown>;
   back: { label: string; href: string };
   pay: { href: string; label: string; how: string };
-  /** "Your landlord or their agency", "Your estate manager". */
   replier: string;
-  /** "tenancy" or "household". */
   holder: string;
 }
 
@@ -69,7 +64,6 @@ const COLLECTION = {
   WAIVED: { label: 'Waived', variant: 'neutral' as const },
 };
 
-/** One service charge as a statement: what you owe, the budget it comes from, and how your share was worked out. */
 export function ServiceChargeStatementView({
   id,
   config,

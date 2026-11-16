@@ -1,8 +1,4 @@
-/**
- * Landlord-portal links the backend sends to anyone who controls a property (landlord, owner,
- * manager). An owner without the landlord role can't open /landlord, so these go to the owner
- * portal's equivalent page. Mirrors OWNER_LANDLORD_LINKS in apps/mobile/lib/notificationRoutes.ts.
- */
+/** An owner can't open /landlord, so these go to the owner portal. Mirrors OWNER_LANDLORD_LINKS in apps/mobile/lib/notificationRoutes.ts. */
 const PORTAL_LINKS: Record<string, [from: string, to: string][]> = {
   owner: [
     ['/landlord/viewing-requests', '/owner/viewings?tab=renters'],
@@ -11,7 +7,6 @@ const PORTAL_LINKS: Record<string, [from: string, to: string][]> = {
   ],
 };
 
-/** Rewrites an in-app link for the portal the user is in; any query string is kept. */
 export function portalLink(portal: string, url: string): string {
   const q = url.indexOf('?');
   const path = q === -1 ? url : url.slice(0, q);

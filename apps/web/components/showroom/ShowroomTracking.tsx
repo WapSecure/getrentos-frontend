@@ -29,7 +29,6 @@ export function TrackDetailView({
 type GalleryState = { openIndex: number | null; setOpenIndex: (index: number | null) => void };
 const GalleryContext = createContext<GalleryState | null>(null);
 
-/** Shares the viewer between the mosaic and buttons further down the page (the floor plans shortcut). */
 export function ShowroomGallery({ children }: { children: ReactNode }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   return (
@@ -39,7 +38,6 @@ export function ShowroomGallery({ children }: { children: ReactNode }) {
   );
 }
 
-/** Opens the viewer on the first floor plan. A plan is only an image, so this claims no sizes. */
 export function FloorPlansShortcut({
   listingId,
   market,
@@ -48,7 +46,6 @@ export function FloorPlansShortcut({
 }: {
   listingId: string;
   market: ShowroomEventMarket;
-  /** Index into the listing's media of its first floor plan. */
   firstIndex: number;
   count: number;
 }) {
@@ -77,7 +74,6 @@ export function FloorPlansShortcut({
   );
 }
 
-/** The page is a server component, so the media callbacks live in this client island. */
 export function ShowroomMedia({
   listingId,
   market,

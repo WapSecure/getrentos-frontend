@@ -72,7 +72,6 @@ export const VirtualTourViewerModal = ({
     onClose();
   };
 
-  // Only offer a way back to the tour when there was a video tour to come back to.
   const fromVideoTour = initialMode === 'tour' && !!videoTourUrl;
 
   const formattedRequest = confirmedTime

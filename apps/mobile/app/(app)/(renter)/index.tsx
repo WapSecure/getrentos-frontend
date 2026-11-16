@@ -66,13 +66,11 @@ interface Metric {
 }
 
 const CARD_WIDTH = 200;
-// Fixed colours: the hero text and badge sit on a photo under a dark scrim in both themes. Theme tokens such as
-// primaryForeground turn near-black in dark mode and vanish there.
+// Fixed colours: the hero sits on a photo under a dark scrim, and theme tokens turn near-black in dark mode.
 const ON_SCRIM = {
   text: '#ffffff',
   glass: 'rgba(10,14,22,0.74)',
   glassEdge: 'rgba(255,255,255,0.16)',
-  // The Sureground Verified blue, fixed rather than themed for the same reason.
   verified: '#0057d9',
   partial: '#4ade80',
   pending: '#ffb454',
@@ -544,7 +542,6 @@ function HeroCard({
   );
 }
 
-/** Tiles reading 0 crowd out the ones that matter; a brand-new renter still sees all four. */
 function visibleMetrics<T extends { value: number }>(items: T[]): T[] {
   const nonZero = items.filter((i) => i.value > 0);
   return nonZero.length > 0 ? nonZero : items;

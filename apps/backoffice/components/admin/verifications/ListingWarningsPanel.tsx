@@ -5,7 +5,6 @@ import { formatDate } from '@sureground/shared';
 import { useAdminCan } from '@/hooks/useAdminCan';
 import type { ListingWarning } from '@/types/admin';
 
-/** The property cannot be approved while any of these is undecided; a fraud reviewer clears or upholds each one. */
 export function ListingWarningsPanel({ warnings }: { warnings: ListingWarning[] }) {
   const canResolve = useAdminCan('fraud.review');
   if (!warnings.length) return null;

@@ -218,7 +218,6 @@ export default function GatemanIncidentsPage() {
                   <GateRowIcon tone={tone}>
                     <TriangleAlert />
                   </GateRowIcon>
-                  {/* The shared card brings its own padding; the row supplies it here. */}
                   <div className="min-w-0 flex-1 [&>div]:p-0">
                     <IncidentCard incident={incident} />
                   </div>

@@ -14,7 +14,6 @@ import { routeTemplate } from '@/lib/routeTemplate';
 
 const TOUCH_KEY = 'sureground.analytics.touch';
 const VITALS_KEY = 'sureground.analytics.vitals';
-/** Share of tab sessions that report web vitals; decided once per session so a session is all in or all out. */
 const VITALS_SAMPLE_RATE = 0.5;
 const METRICS: readonly WebVitalMetric[] = ['LCP', 'INP', 'CLS', 'FCP', 'TTFB'];
 
@@ -59,10 +58,6 @@ function vitalsSampled(): boolean {
   return inSample;
 }
 
-/**
- * Anonymous site measurement, mounted once in the root layout: one `session_start` per tab with the
- * landing route pattern and first-touch campaign fields, and Core Web Vitals for a sample of sessions.
- */
 export function SiteMeasurement() {
   const pathname = usePathname();
   const params = useParams();

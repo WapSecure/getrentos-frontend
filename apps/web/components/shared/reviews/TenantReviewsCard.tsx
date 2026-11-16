@@ -29,10 +29,6 @@ const Stars = ({ rating }: { rating: number }) => (
   </div>
 );
 
-/**
- * Lets a landlord or owner review tenants whose tenancy has ended. These reviews are what tenant screening shows
- * other landlords as "reviews from past landlords".
- */
 export function TenantReviewsCard() {
   const queryClient = useQueryClient();
   const toast = useToast();

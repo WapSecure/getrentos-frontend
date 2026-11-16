@@ -41,7 +41,6 @@ export default function OwnerListingsPage() {
   const [filter, setFilter] = useState<StatusFilter>('all');
   const router = useRouter();
   const pathname = usePathname();
-  // ?property=<id> (e.g. from a land parcel's "Create sale listing") opens the new listing on it.
   const presetPropertyId = useSearchParams().get('property') ?? undefined;
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(Boolean(presetPropertyId));
   const [manageListing, setManageListing] = useState<SaleListing | null>(null);

@@ -56,7 +56,6 @@ export const RenterStatsCards = () => {
     isError: paymentsError,
   });
 
-  // Each figure waits for its own query: rendering before then showed "₦0" and "—" as if real.
   if (statsLoading) {
     return <StatGroupSkeleton groups={[4, 2]} />;
   }

@@ -8,7 +8,6 @@ import { publishedAreas } from '@/lib/areaInventory';
 import { listingPath, type PublicListingKind } from '@/lib/listingSlug';
 import { DEVELOPMENTS_PATH, developmentPath } from '@/lib/publicDevelopments';
 
-// Rebuilt at most hourly; listings are published and withdrawn through the day.
 export const revalidate = 3600;
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -16,7 +15,6 @@ const PAGE_SIZE = 100;
 // 10 pages x 100 per market keeps one sitemap well under the 50,000 URL limit.
 const MAX_PAGES = 10;
 
-// Public list endpoints: each returns only published listings.
 const LISTING_SOURCES: Array<{ kind: PublicListingKind; path: string }> = [
   { kind: 'rent', path: '/rentals' },
   { kind: 'sale', path: '/marketplace/listings' },
@@ -45,7 +43,6 @@ async function listingEntries(
       if (!res.ok) break;
       body = await res.json();
     } catch {
-      // API unreachable: publish the static pages rather than failing the whole sitemap.
       break;
     }
     for (const item of body.items ?? []) {
@@ -63,7 +60,7 @@ async function listingEntries(
   return entries;
 }
 
-// The public endpoint returns live developments only (every staff check passed); 48 is its page cap.
+// The public endpoint returns live developments only; 48 is its page cap.
 const DEVELOPMENT_PAGE_SIZE = 48;
 
 async function developmentEntries(): Promise<MetadataRoute.Sitemap> {
@@ -123,7 +120,6 @@ const publicRoutes: Array<{
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
-  // Diaspora Invest pages 404 while the service is switched off, so they are listed only when it is on.
   const routes = (await diasporaInvestEnabled())
     ? [
         ...publicRoutes,
@@ -141,7 +137,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const [listings, areas, guides, developments] = await Promise.all([
     Promise.all(LISTING_SOURCES.map(({ kind, path }) => listingEntries(kind, path))),
-    // Only areas with enough live listings have a page; the rest 404.
     publishedAreas(),
     availableGuides(),
     developmentEntries(),

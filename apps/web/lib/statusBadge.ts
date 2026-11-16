@@ -171,7 +171,6 @@ export const taskStatusBadges: Record<TaskStatus, StatusBadgeEntry> = {
   cancelled: { label: 'Cancelled', variant: 'neutral' },
 };
 
-/** A status map from @sureground/shared (shared with backoffice) plus web's icons. */
 const withIcons = <S extends string>(
   shared: Record<S, { label: string; tone: BadgeVariant }>,
   icons: Record<S, SgIcon>
@@ -194,7 +193,7 @@ export const landDiligenceBadges = withIcons(LAND_DILIGENCE_STATUS, {
   SUSPENDED: PauseCircle,
 });
 
-// A listing's verification summary (DIA-11). "Investment eligible" never stands alone: the card shows its limits.
+// "Investment eligible" never stands alone: the card shows its limits.
 export const verificationSummaryBadges = withIcons(VERIFICATION_SUMMARY_STATUS, {
   NOT_STARTED: CircleDashed,
   SUBMITTED: FileCheck,

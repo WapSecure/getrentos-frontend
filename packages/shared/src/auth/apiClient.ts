@@ -396,11 +396,7 @@ export interface UploadOptions {
 
 const abortError = () => new DOMException('The upload was cancelled.', 'AbortError');
 
-/**
- * A multipart POST like `apiFetch`, over XHR so the upload can report progress (fetch cannot).
- * Errors become the same `ApiError`s, with the same friendly messages; a cancel rejects with an `AbortError`.
- * No refresh retry here: `authUpload` owns that, as `authFetch` does for `apiFetch`.
- */
+/** Over XHR so the upload can report progress (fetch cannot); `authUpload` owns the refresh retry. */
 export function apiUpload<T>(
   path: string,
   body: FormData,
@@ -437,7 +433,6 @@ export function apiUpload<T>(
     };
     xhr.onload = () => {
       done();
-      // A Response lets the shared body and error handling read it exactly as they read fetch results.
       const nullBody = xhr.status === 204 || xhr.status === 205;
       const response = new Response(nullBody ? null : xhr.responseText, {
         status: xhr.status,

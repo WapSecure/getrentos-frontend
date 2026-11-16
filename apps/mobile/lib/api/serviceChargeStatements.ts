@@ -1,7 +1,6 @@
 import type { RenterServiceCharge, RenterServiceChargeStatement } from '@sureground/shared';
 import { apiFetch } from './client';
 
-/** Whose statements: a tenant's (rent account) or an estate resident's (dues). */
 export type StatementKind = 'renter' | 'resident';
 
 export type StatementCollection = RenterServiceCharge['collection'] | 'WAIVED';
@@ -17,7 +16,6 @@ export type Statement = Omit<
 > & {
   collection: StatementCollection;
   partOfInstalment?: number | null;
-  /** A household due an upheld query lowered. */
   amountDue?: number | null;
   estate?: string | null;
   lines: (Omit<RenterServiceChargeStatement['lines'][number], 'spentSoFar'> & {
@@ -33,7 +31,6 @@ const BASE: Record<StatementKind, string> = {
   resident: '/estate/resident/service-charges',
 };
 
-/** Service-charge statements and queries for tenants and estate residents. Paying stays in Payments or Dues. */
 export const statementsApi = {
   list: async (kind: StatementKind) => {
     const rows = await apiFetch<StatementListItem[]>(BASE[kind]);

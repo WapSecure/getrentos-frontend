@@ -5,10 +5,7 @@ export interface LatLng {
   lng: number;
 }
 
-/**
- * A searched area: a box (south-west and north-east corners, in degrees), or a drawn polygon with its
- * bounding box. The box is always set, so framing the map works the same for both.
- */
+/** Corners in degrees; the box is always set, even for a drawn polygon. */
 export interface MapArea {
   minLat: number;
   minLng: number;
@@ -42,10 +39,6 @@ export function boundsOfPolygon(points: LatLng[]): MapArea {
   };
 }
 
-/**
- * A drawn shape as a search area, or undefined when it cannot be one (too few corners or no size).
- * A shape with more corners than the API takes is thinned evenly rather than refused.
- */
 export function polygonArea(points: LatLng[]): MapArea | undefined {
   let clean = points
     .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng))
@@ -74,7 +67,6 @@ export function formatAreaParam(area: MapArea): string {
   return [area.minLat, area.minLng, area.maxLat, area.maxLng].map(round).join(',');
 }
 
-/** Undefined for anything that is not a valid box or shape, so a mangled link falls back to the full list. */
 export function parseAreaParam(value: string | null | undefined): MapArea | undefined {
   if (!value) return undefined;
   const parts = value.split(',').map((p) => Number(p.trim()));
@@ -106,7 +98,6 @@ export function areaQuery(area: MapArea | undefined) {
     : {};
 }
 
-/** A stable key for an area, so effects refit or redraw only when it really changes. */
 export const areaKey = (area: MapArea | undefined) => (area ? formatAreaParam(area) : '');
 
 export const parseView = (value: string | null | undefined): DiscoveryView =>

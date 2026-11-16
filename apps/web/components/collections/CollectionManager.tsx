@@ -62,10 +62,6 @@ interface DraftItem {
   visible: boolean;
 }
 
-/**
- * List and edit one curator's collections. The server decides which listings are theirs to add;
- * the picker only offers those, and a refusal is shown as it comes back.
- */
 export function CollectionManager({
   manager,
   queryKey,
@@ -73,7 +69,6 @@ export function CollectionManager({
   description = 'Group your live listings into sets people can browse and share. Only listings that are live show publicly.',
 }: {
   manager: CollectionsManager;
-  /** Distinguishes one curator's cache from another's. */
   queryKey: readonly unknown[];
   title?: string;
   description?: string;

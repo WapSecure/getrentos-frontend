@@ -4,7 +4,6 @@ import { Badge, Card, FormAlert, Text, useTheme } from '@sureground/ui-native';
 import { PERFECTION_OWNER, PERFECTION_STEP, type Perfection } from '@/lib/api/landSales';
 import { formatDate } from '@/lib/format';
 
-/** Consent and registration with the state, step by step, with who is responsible for each. */
 export function TitlePerfection({ perfection: t }: { perfection: Perfection }) {
   const { colors, spacing } = useTheme();
   const overall =

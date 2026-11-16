@@ -1,7 +1,6 @@
 // Pure: the `/land` server page pre-renders its first page with it, and the api helpers reach for localStorage.
 import type { PublicLandListing, PublicLandListingApi } from '@/types/land';
 
-/** Same adaptation as landService's public mapper, kept separate so that file stays untouched. */
 export const mapPublicLand = (listing: PublicLandListingApi): PublicLandListing => ({
   id: listing.id,
   propertyId: listing.propertyId,

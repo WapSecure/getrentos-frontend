@@ -15,13 +15,11 @@ const PAGE_SIZE = 20;
 interface NotificationsInboxProps {
   portal: NotificationPortal;
   queryKey: QueryKey;
-  /** Some feeds only return their latest page; those show it without paging. */
   fetchPage: (page: number, pageSize: number) => Promise<BellFeed>;
   markRead: (id: string) => Promise<unknown>;
   markAllRead: () => Promise<unknown>;
 }
 
-/** Every notification for a role, newest first, the full-page view behind the bell's "View all". */
 export function NotificationsInbox({
   portal,
   queryKey,

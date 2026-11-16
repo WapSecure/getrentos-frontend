@@ -66,7 +66,6 @@ function routeFor(portal: ScreenPortal, key: TrustRequirementKey): Href {
     case 'PROPERTY_OWNERSHIP':
       return OWNERSHIP_ROUTE[portal] ?? '/(app)/verify-identity';
     default:
-      // Phone, NIN, live selfie and the bank check live on the verification screen.
       return '/(app)/verify-identity';
   }
 }
@@ -74,7 +73,6 @@ function routeFor(portal: ScreenPortal, key: TrustRequirementKey): Href {
 interface ProfileSource {
   queryKey: readonly unknown[];
   queryFn: () => Promise<TrustProfile>;
-  /** Who sees the profile, e.g. "owners and realtors". */
   audience: string;
 }
 
@@ -112,7 +110,6 @@ function ProfileDetails({ queryKey, queryFn, audience }: ProfileSource) {
   );
 }
 
-/** The trust screen every role opens from its account: identity, role needs and score. */
 export function TrustScreen({
   portal,
   eyebrow,
@@ -121,9 +118,7 @@ export function TrustScreen({
 }: {
   portal: ScreenPortal;
   eyebrow: string;
-  /** The public profile, for roles others look up. */
   profile?: ProfileSource;
-  /** Anything else under the score, e.g. a renter's score history. */
   moreDetails?: ReactNode;
 }) {
   const { colors } = useTheme();

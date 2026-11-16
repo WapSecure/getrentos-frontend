@@ -9,34 +9,20 @@ export interface StatGroupItem {
   subtitle?: ReactNode;
   /** A change against an earlier period; `tone` says whether it is good news, not its direction. */
   trend?: { label: string; tone: 'positive' | 'negative' | 'neutral' };
-  /** Makes the figure the way into its page. */
   href?: string;
-  /**
-   * Makes the figure a filter on the same page: a toggle button, pressed while `selected`.
-   * Use instead of `href`.
-   */
   onSelect?: () => void;
   selected?: boolean;
-  /** Draws attention to a figure that needs action (overdue rent), without colouring the value. */
   attention?: boolean;
-  /** A small glyph beside the label, as on StatCard, so a row of figures scans at a glance. */
   icon?: SgIcon;
-  /** Block content under the figure, such as an indicative amount in another currency. */
   supplement?: ReactNode;
 }
 
 interface StatGroupProps {
-  /** Shown above the figures; also names the group for screen readers. */
   title: string;
   items: StatGroupItem[];
-  /** Content under the figures, such as a SegmentedBar. */
   footer?: ReactNode;
   action?: ReactNode;
   className?: string;
-  /**
-   * Caps the columns, for groups in a narrow column (e.g. 8 of 12) where five or six figures in a row
-   * would squeeze long amounts. Figures wrap onto further rows instead.
-   */
   maxColumns?: 2 | 3;
 }
 
@@ -130,7 +116,6 @@ function Figure({ item }: { item: StatGroupItem }) {
   );
 }
 
-/** Related figures in one panel, divided by hairlines, instead of a box per number. */
 export function StatGroup({ title, items, footer, action, className, maxColumns }: StatGroupProps) {
   return (
     <section

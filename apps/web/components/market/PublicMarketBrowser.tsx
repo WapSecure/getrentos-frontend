@@ -42,7 +42,6 @@ import { Eyebrow } from '@/components/marketing/Eyebrow';
 
 // Shared with the server component that pre-renders the first page, so both ask for the same page size.
 const PAGE_SIZE = PUBLIC_MARKET_PAGE_SIZE;
-/** More pins per page on the map; still a page, so a slow phone is never asked for everything. */
 const MAP_PAGE_SIZE = 24;
 
 const SORTS: Record<PublicMarket, { value: string; label: string }[]> = {
@@ -114,7 +113,6 @@ const MarketListingCard = ({
       imageAlt={listing.title}
       eager={eager}
       status={market === 'rent' ? 'For rent' : 'For sale'}
-      // One trust signal: the chain pill already says "Verified" when there is no chain.
       badges={<TrustChainBadge chain={listing.trustChain} fallbackVerified={listing.verified} />}
       facts={{
         beds: listing.bedrooms,
@@ -220,7 +218,6 @@ export const PublicMarketBrowser = ({
   const searchParams = useSearchParams();
   const estateFromUrl = searchParams.get('estate')?.trim() ?? '';
 
-  // The first render reads the link; after that React owns the state and mirrors it back to the URL.
   const [search, setSearch] = useState(() => urlParam.text(searchParams, 'q'));
   const debouncedSearch = useDebouncedValue(search.trim(), 350);
   const [refine, setRefine] = useState<Refinements>(() => refinementsFromUrl(searchParams));

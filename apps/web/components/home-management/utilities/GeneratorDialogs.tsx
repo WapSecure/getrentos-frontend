@@ -56,7 +56,6 @@ const FormActions = ({
   </div>
 );
 
-/** Log the number on the hour meter. A lower number is refused unless the meter was reset. */
 export function HourReadingDialog({ generator, onOpenChange }: GeneratorDialogProps) {
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -178,7 +177,6 @@ export function HourReadingDialog({ generator, onOpenChange }: GeneratorDialogPr
   );
 }
 
-/** Rating, fuel and the service interval. Owner or agency only; the server refuses a field agent. */
 export function GeneratorProfileDialog({ generator, onOpenChange }: GeneratorDialogProps) {
   return (
     <Dialog open={!!generator} onOpenChange={onOpenChange}>
@@ -315,7 +313,6 @@ function ProfileForm({ generator, onDone }: { generator: UtilityGenerator; onDon
   );
 }
 
-/** Record a service and restart the running-hours count. Owner or agency only. */
 export function GeneratorServiceDialog({ generator, onOpenChange }: GeneratorDialogProps) {
   return (
     <Dialog open={!!generator} onOpenChange={onOpenChange}>

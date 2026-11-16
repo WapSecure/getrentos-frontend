@@ -9,7 +9,6 @@ import { InviteToSignUp } from '@/components/shared/representatives/InviteToSign
 interface InviteGatemanModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Their phone number or email, as typed. */
   onSubmit: (contact: string) => void;
   isSubmitting?: boolean;
   error?: string | null;

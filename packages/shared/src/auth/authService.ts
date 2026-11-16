@@ -100,7 +100,6 @@ export const authService = {
     );
   },
 
-  /** Staff set their own password from a single-use emailed link; no session exists yet. */
   async acceptStaffInvite(
     token: string,
     password: string

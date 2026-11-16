@@ -64,7 +64,6 @@ const errorText = (reason: unknown, fallback: string) =>
   reason instanceof Error ? reason.message : fallback;
 const errorCode = (reason: unknown) => (reason as { code?: string } | null)?.code;
 
-/** The investor's checks abroad; shared by the trust tab and the investor workspace. */
 export const useForeignIdentityStatus = () =>
   useQuery({
     queryKey: foreignIdentityKeys.status,
@@ -74,7 +73,6 @@ export const useForeignIdentityStatus = () =>
     refetchInterval: (q) => (q.state.data?.passport.state === 'CHECKING' ? 15_000 : false),
   });
 
-/** The "Passport and address abroad" tab for TrustHub: only for investors who can use it. */
 export function useForeignIdentityTabs(): TrustHubExtraTab[] {
   const { data } = useForeignIdentityStatus();
   if (!data?.eligible) return [];
@@ -90,7 +88,6 @@ export function useForeignIdentityTabs(): TrustHubExtraTab[] {
   ];
 }
 
-/** True once the status says this person can use the foreign identity checks. */
 export function useForeignIdentityEligible(): boolean {
   return Boolean(useForeignIdentityStatus().data?.eligible);
 }
@@ -105,7 +102,6 @@ const StatusBadge = ({ status }: { status: ForeignDocumentStatus }) => {
   );
 };
 
-/** Shown for every state except "send it now". */
 const StatusNote = ({ status, what }: { status: ForeignDocumentStatus; what: string }) => {
   if (status.state === 'APPROVED') {
     return <p className="text-sm text-muted-foreground">Your {what} is approved.</p>;
@@ -136,8 +132,6 @@ const asManyUploads = (files: File[], prefix: string): PendingUpload[] =>
   files.map((file, index) => ({ id: `${prefix}-${index}`, file }));
 const asUploads = (file: File | null, id: string): PendingUpload[] => (file ? [{ id, file }] : []);
 
-// ------------------------------------------------------------------ passport
-
 const PassportCard = ({ status }: { status: ForeignIdentityStatus['passport'] }) => {
   const queryClient = useQueryClient();
   const { isActive } = useTrustConsents();
@@ -160,7 +154,6 @@ const PassportCard = ({ status }: { status: ForeignIdentityStatus['passport'] })
     },
     onError: (reason) => {
       const code = errorCode(reason);
-      // The free check is used, or Smile ID is off: the passport goes to our team instead.
       if (code === 'AUTOMATED_ATTEMPT_USED' || code === 'PASSPORT_CHECK_UNAVAILABLE') {
         setNotice(errorText(reason, 'Send your passport to our team instead.'));
         refresh();
@@ -188,7 +181,6 @@ const PassportCard = ({ status }: { status: ForeignIdentityStatus['passport'] })
     },
   });
 
-  // While Smile decides, ask the server too (the webhook can be slow); same pattern as VerificationCenter.
   useEffect(() => {
     if (!job) return;
     let stopped = false;
@@ -387,8 +379,6 @@ const PassportCard = ({ status }: { status: ForeignIdentityStatus['passport'] })
   );
 };
 
-// ------------------------------------------- proof of address and bank statement
-
 const DOCUMENTS = {
   address: {
     title: 'Proof of address abroad',
@@ -491,8 +481,6 @@ const ForeignDocumentCard = ({
     </Card>
   );
 };
-
-// --------------------------------------------------------- source of funds (DIA-07)
 
 const SUPPORTING_OPTIONS = (
   Object.keys(SOURCE_OF_FUNDS_SUPPORTING_LABELS) as SourceOfFundsSupportingKind[]
@@ -634,9 +622,6 @@ const SourceOfFundsCard = ({ status }: { status: SourceOfFundsStatus }) => {
   );
 };
 
-// ----------------------------------------------------------------------- panel
-
-/** Diaspora investors: a passport checked by Smile ID, and two documents our team reviews. */
 export function ForeignIdentityPanel() {
   const status = useForeignIdentityStatus();
   const data = status.data;

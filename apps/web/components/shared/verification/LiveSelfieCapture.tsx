@@ -35,7 +35,7 @@ export function liveCaptureBlocker(): string | null {
 }
 
 // Frames go straight to Smile with our short-lived token, and Smile tells our server by signed webhook: `onSubmitted` only means "sent", never "passed".
-// `document` mode adds Smile's document capture after the selfie (smart-camera-web `capture-id`) and sends one Document Verification job (POST /v3/document_verification); the country and ID type are bound into the token.
+// `document` mode adds Smile's document capture and one Document Verification job; country and ID type are bound into the token.
 export function LiveSelfieCapture({
   session,
   onSubmitted,
@@ -135,7 +135,6 @@ export function LiveSelfieCapture({
         if (mode === 'document') {
           element.setAttribute('capture-id', '');
           element.setAttribute('document-type', session.idInfo?.idType ?? 'PASSPORT');
-          // A passport has one photo page.
           element.setAttribute('hide-back-of-id', '');
         }
         element.addEventListener('smart-camera-web.publish', (event) => {

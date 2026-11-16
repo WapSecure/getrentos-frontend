@@ -116,7 +116,6 @@ export default function AdminFraudPage() {
       unwrap(adminService.updateFraudAlertStatus(id, status)),
     onSuccess: (_updated, { status, subjectName }) => {
       toast.success(STATUS_TOASTS[status](subjectName));
-      // Deciding an alert also decides the automated listing warning it carries.
       void queryClient.invalidateQueries({ queryKey: adminKeys.listingWarnings });
       return queryClient.invalidateQueries({ queryKey: ['admin', 'fraudAlerts'] });
     },
@@ -230,7 +229,6 @@ export default function AdminFraudPage() {
       <PageHeader
         eyebrow="Risk"
         title="Fraud and risk review"
-        // The open-alert counts live in the strip below; the header only says what the page is for.
         description="Triage new alerts, investigate them and record a decision."
         actions={
           <div className="flex flex-wrap gap-2">

@@ -156,7 +156,6 @@ export default function Maintenance() {
                   </Text>
                 ) : null}
 
-                {/* The tenant needs this most: someone has to be in to let the vendor in. */}
                 {item.scheduledFor && item.status !== 'resolved' && item.status !== 'cancelled' ? (
                   <View
                     style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: spacing.xs }}

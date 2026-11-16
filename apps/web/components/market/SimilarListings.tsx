@@ -18,7 +18,6 @@ export type SimilarMarket = 'rent' | 'sale' | 'land' | 'shortlet';
 
 const LIMIT = 3;
 
-/** Ranked by the server: same market, nearby, a comparable price and about the same bedrooms. */
 async function fetchSimilar(market: SimilarMarket, id: string): Promise<MarketCard[]> {
   const path = (base: string) => `${base}/${encodeURIComponent(id)}/similar?limit=${LIMIT}`;
   if (market === 'rent' || market === 'sale') {

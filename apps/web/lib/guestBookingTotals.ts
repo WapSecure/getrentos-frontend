@@ -1,6 +1,4 @@
-// What a guest pays for a short-stay booking, split the same way as the booking quote: the stay
-// (nights, fees and tax) and the refundable deposit charged with it. `total` on a booking excludes
-// tax, so showing it alone made the card disagree with the "Pay" button.
+// `total` on a booking excludes tax, so it is split like the booking quote to agree with the "Pay" button.
 export interface GuestBookingAmounts {
   total?: number | null;
   taxAmount?: number | null;

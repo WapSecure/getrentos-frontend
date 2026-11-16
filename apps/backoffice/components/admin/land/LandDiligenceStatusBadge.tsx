@@ -16,7 +16,6 @@ import {
 } from '@sureground/shared';
 import { Badge } from '@sureground/ui';
 
-// Labels and colours are shared with web (@sureground/shared); only the icons are backoffice's.
 const statusIcons: Record<LandDiligenceStatus, SgIcon> = {
   NOT_STARTED: FileClock,
   IN_REVIEW: Clock3,

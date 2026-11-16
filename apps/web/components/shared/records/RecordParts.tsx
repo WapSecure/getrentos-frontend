@@ -2,13 +2,6 @@ import type { ElementType, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import { getInitials } from '@/lib/format';
 
-/**
- * Shared presentation for the role list pages (tenants, applications, leases, leads, offers and
- * the like) so every record reads the same: a quiet card, a blue avatar or icon tile, two meta
- * lines, a key facts strip and a footer of actions. Presentation only; no data lives here.
- */
-
-/** The card shell: warm neutral surface, a blue edge on hover, a stronger one when selected. */
 export const recordCardClass = (selected = false) =>
   cn(
     'min-w-0 rounded-2xl border bg-card p-4 shadow-xs transition-[border-color,box-shadow] duration-150 sm:p-5',
@@ -22,7 +15,6 @@ const avatarSizes = {
   md: 'h-11 w-11 text-sm',
 } as const;
 
-/** Initials on a soft blue tile; the solid blue stays for primary actions. */
 export function RecordAvatar({
   name,
   size = 'md',
@@ -46,7 +38,6 @@ export function RecordAvatar({
   );
 }
 
-/** An icon on a soft blue tile, for records that are things rather than people. */
 export function RecordIconTile({
   icon: Icon,
   size = 'md',
@@ -73,13 +64,10 @@ export function RecordIconTile({
 export interface RecordFact {
   label: string;
   value: ReactNode;
-  /** `brand` sets the value in Sureground blue, for the one figure that matters most. */
   tone?: 'default' | 'brand';
-  /** Wrap instead of cutting the value off with an ellipsis: for values that must be read whole, like a date range. */
   wrap?: boolean;
 }
 
-/** A small inset grid of label and value pairs. */
 export function RecordFacts({
   facts,
   columns = 2,
@@ -115,7 +103,6 @@ export function RecordFacts({
   );
 }
 
-/** The footer row of actions, divided from the body. */
 export function RecordActions({
   children,
   className,
@@ -135,7 +122,6 @@ export function RecordActions({
   );
 }
 
-/** A loading placeholder shaped like a record card, for list pages that show cards. */
 export function RecordCardSkeleton({ className }: { className?: string }) {
   return (
     <div className={cn(recordCardClass(), 'hover:border-border hover:shadow-xs', className)}>
@@ -151,7 +137,6 @@ export function RecordCardSkeleton({ className }: { className?: string }) {
   );
 }
 
-/** A grid of card placeholders, passed to ListState's `skeleton` while the first page loads. */
 export function RecordGridSkeleton({
   count = 6,
   className = 'grid gap-5 sm:grid-cols-2 lg:grid-cols-3',
@@ -168,7 +153,6 @@ export function RecordGridSkeleton({
   );
 }
 
-/** The search and filter bar above a list, set on its own card so it reads as one control. */
 export function RecordToolbar({
   children,
   className,

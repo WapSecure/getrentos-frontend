@@ -133,7 +133,6 @@ test('site photos carry their date, impressions say so, and undated or unsafe ph
   assert.equal(d.media[1]!.caption, "Artist's impression · Front");
   assert.equal(d.media[1]!.source, 'render');
   assert.match(d.media[2]!.caption!, /^Taken 30 Oct 2026 · Roof level$/);
-  // The progress gallery is site photos only, newest first.
   assert.deepEqual(
     d.progress.map((m) => m.id),
     ['img_new', 'img_old']

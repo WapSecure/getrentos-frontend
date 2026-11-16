@@ -7,7 +7,6 @@ import { formatDate } from '@/lib/format';
 import { verificationSummaryBadges } from '@/lib/statusBadge';
 import { TrustLabelsList } from './TrustLabelsList';
 
-/** The summary's status as a badge, from the shared map (same words as the card). */
 export function VerificationSummaryBadge({
   summary,
   className,
@@ -23,7 +22,6 @@ export function VerificationSummaryBadge({
   );
 }
 
-// The API sends roles in sentence case ("Accredited surveyor"); they sit mid-sentence after "by".
 const inSentence = (role: string) =>
   role.startsWith('Sureground') ? role : role.charAt(0).toLowerCase() + role.slice(1);
 
@@ -34,11 +32,7 @@ const issuesVariant = (status: VerificationSummary['status']): AlertVariant =>
       ? 'neutral'
       : 'warning';
 
-/**
- * A listing's verification summary (DIA-11): status, what was checked, by whom and when,
- * the documents seen, what is still open, the re-check date, and what it does not cover.
- * The limits are always shown, whatever the status.
- */
+/** The limits are always shown, whatever the status. */
 export function VerificationSummaryCard({ summary }: { summary: VerificationSummary }) {
   const { status, scope, checkedAt, checkedBy, documentsReviewed, openIssues, limits, recheckBy } =
     summary;

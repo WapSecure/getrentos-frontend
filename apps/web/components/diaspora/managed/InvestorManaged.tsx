@@ -40,24 +40,17 @@ import type { InvestorManagedProperty } from '@/types/managed';
 import { STATEMENT_PAYOUT_LABELS, humaniseStatus } from '@sureground/shared';
 
 const JOB_PAGE_SIZE = 10;
-/** Past this many properties a segmented control stops fitting a phone. */
 const SEGMENTED_MAX = 3;
 
 const isSet = (value: number | null | undefined): value is number =>
   value !== null && value !== undefined;
 
-/**
- * Sureground Managed for an investor (DIA-20): one property at a time, with its agreement, the
- * spending waiting for them, its repairs and the latest statement. Actions on the agreement stay
- * on the management page; this page links there.
- */
 export function InvestorManaged() {
   const managed = useQuery({
     queryKey: investorKeys.managed,
     queryFn: () => unwrap(investorService.getManaged()),
   });
   const properties = managed.data?.properties ?? [];
-  // From the workspace: open on the property whose latest statement was linked.
   const linkedStatement = useSearchParams().get('statement');
   const [chosenId, setChosenId] = useState<string | null>(null);
   const property =
@@ -339,7 +332,6 @@ function StatementCard({
   );
 }
 
-/** The ledger lines behind the statement, read when opened. */
 function StatementDetail({
   statementId,
   defaultOpen = false,

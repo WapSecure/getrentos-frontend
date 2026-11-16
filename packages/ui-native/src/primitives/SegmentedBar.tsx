@@ -8,14 +8,12 @@ export interface SegmentedBarSegment {
   tone: 'primary' | 'success' | 'warning' | 'danger' | 'neutral';
 }
 
-/** Parts of a whole (occupied, reserved, vacant) as one bar with a legend. */
 export function SegmentedBar({
   segments,
   label,
   style,
 }: {
   segments: SegmentedBarSegment[];
-  /** What the whole bar measures, for screen readers ("Units by status"). */
   label: string;
   style?: StyleProp<ViewStyle>;
 }) {

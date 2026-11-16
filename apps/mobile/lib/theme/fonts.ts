@@ -18,7 +18,6 @@ export const BRAND_FONT_SOURCES = {
   Newsreader_400Regular,
 };
 
-/** Page titles and display text, matching the web's serif. */
 export const DISPLAY_FONT = 'Newsreader_400Regular';
 
 export const BRAND_FONTS: FontFamilies = {

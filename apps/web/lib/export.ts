@@ -1,7 +1,6 @@
 const escapeCsvValue = (value: unknown): string => {
   let str = value === null || value === undefined ? '' : String(value);
-  // A cell starting with = + - @ (or a tab/CR) runs as a formula in Excel and Sheets: prefix it
-  // so exported user text is always read as text (CSV/formula injection).
+  // A cell starting with = + - @ (or tab/CR) runs as a formula in Excel and Sheets: prefix it (CSV injection).
   if (/^[=+\-@\t\r]/.test(str)) str = `'${str}`;
   if (/[",\n]/.test(str)) {
     return `"${str.replace(/"/g, '""')}"`;

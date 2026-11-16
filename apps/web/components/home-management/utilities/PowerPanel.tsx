@@ -53,7 +53,6 @@ const SERVICE_BADGE: Record<GeneratorServiceState, { label: string; variant: Bad
 interface PowerPanelProps {
   propertyId?: string;
   properties: HomeManagementProperty[];
-  /** Field agents record readings and purchases; set-up actions are hidden for them. */
   recordOnly?: boolean;
   openPurchase: { kinds: UtilityPurchaseKind[] } | null;
   onOpenPurchaseChange: (value: { kinds: UtilityPurchaseKind[] } | null) => void;
@@ -77,7 +76,6 @@ export function PowerPanel({
   const [serviceFor, setServiceFor] = useState<UtilityGenerator | null>(null);
   const [supplyFor, setSupplyFor] = useState<ElectricityMeter | null>(null);
   const [retiring, setRetiring] = useState<ElectricityMeter | null>(null);
-  // Opened from a generator or meter, the form starts on that property and that equipment.
   const [purchaseDefaults, setPurchaseDefaults] = useState<{
     propertyId?: string;
     generatorId?: string;

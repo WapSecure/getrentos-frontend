@@ -27,7 +27,6 @@ export function ShowroomAside({
   return (
     <aside className="lg:sticky lg:top-24 lg:self-start" aria-label="Price and next steps">
       <div className="space-y-5 overflow-hidden rounded-md border border-border bg-card p-6 shadow-lg shadow-foreground/5">
-        {/* A thin brand rule across the top of the card. */}
         <div aria-hidden="true" className="-mx-6 -mt-6 mb-1 h-1 bg-primary" />
         <div>
           <p className="text-sm font-semibold text-primary">{PRICE_LABEL[listing.market]}</p>

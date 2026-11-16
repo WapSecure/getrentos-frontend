@@ -101,7 +101,6 @@ export interface LandReviewCase extends MyLandReviewSummary {
   ownerLegalName: string | null;
   documents: LandReviewDocument[];
   report: string | null;
-  /** Valuer seats only: the latest valuation I filed on this property (never another valuer's). */
   valuation?: PropertyValuation | null;
 }
 

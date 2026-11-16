@@ -7,7 +7,6 @@ import { Eye, EyeOff, KeyRound, ShieldCheck } from '@sureground/icons';
 import { Alert, Button, Field, IconButton, Input, Logo } from '@sureground/ui';
 import { AUTH_CONSTANTS, ERROR_MESSAGES, ROUTES, authService } from '@sureground/shared';
 
-/** Staff choose their own password from the single-use link in their invite or reset email. */
 export function SetStaffPasswordForm() {
   const params = useSearchParams();
   // Read the token once on first render; the effect below then clears it from the address bar.

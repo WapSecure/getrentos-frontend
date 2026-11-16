@@ -129,7 +129,6 @@ export const utilitiesService = {
       'PUT'
     ),
 
-  /** Overview figures; `hasUtilityData` decides whether the tiles show at all. */
   summary: (propertyId?: string) =>
     safeCall(() => authFetch<UtilitiesSummary>(`${BASE}/summary${toQuery({ propertyId })}`)),
   /** Recorded spend for the last `months` Lagos months, ending this month (24 at most). */

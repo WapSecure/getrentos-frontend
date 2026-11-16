@@ -103,7 +103,6 @@ export type HomeAsset = {
   installedAt?: string | null;
   warrantyExpiresAt?: string | null;
   status: HomeAssetStatus;
-  /** Set for generators, inverters, solar, boreholes, pumps, tanks and treatment. */
   utilityKind?: UtilityKind | null;
   createdAt: string;
   updatedAt: string;
@@ -119,7 +118,6 @@ export type PreventiveMaintenancePlan = {
   assetId?: string | null;
   title: string;
   category: HomeManagementMaintenanceCategory;
-  /** Checklist or instructions copied into each work order the plan raises. */
   notes?: string | null;
   frequencyDays: number;
   nextDueAt: string;
@@ -695,7 +693,6 @@ export const homeManagementService = {
         body: JSON.stringify(data),
       })
     ),
-  /** No property: every property the caller manages here. */
   listEscalations: (propertyId: string | undefined, params: HomeManagementPageParams = {}) =>
     safeCall(() =>
       authFetch<Paginated<HomeManagementEscalation>>(
@@ -825,7 +822,6 @@ export const homeManagementService = {
       })
     ),
 
-  /** Each stage of the job, from the problem reported to the owner's feedback. */
   getWorkOrderEvidence: (workOrderId: string) =>
     safeCall(() =>
       authFetch<WorkOrderEvidence>(`/home-management/work-orders/${workOrderId}/evidence`)
@@ -855,7 +851,6 @@ export const homeManagementService = {
       })
     );
   },
-  /** Owner or manager attaches the paperwork behind a quote or an invoice on the job. */
   uploadWorkOrderDocument: (
     workOrderId: string,
     target: { quoteId: string } | { invoiceId: string },
@@ -875,7 +870,6 @@ export const homeManagementService = {
       })
     );
   },
-  /** The owner's rating, once, after the job is RESOLVED. */
   submitWorkOrderFeedback: (workOrderId: string, input: WorkOrderFeedbackInput) =>
     safeCall(() =>
       authFetch<WorkOrderFeedback>(`/home-management/work-orders/${workOrderId}/feedback`, {

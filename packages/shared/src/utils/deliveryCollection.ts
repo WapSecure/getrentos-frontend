@@ -1,4 +1,3 @@
-/** Structural, so web and mobile can pass their own delivery types. */
 interface CollectableDelivery {
   residentName?: string;
   collectedAt?: string;
@@ -18,10 +17,6 @@ const formatTime = (value: Date) =>
 const formatDay = (value: Date) =>
   new Intl.DateTimeFormat('en-NG', { day: 'numeric', month: 'short' }).format(value);
 
-/**
- * "Collected by Ada Okoro at 2:05 pm", with the day added when it was not today.
- * Undefined for a parcel still at the gate.
- */
 export const collectionSummary = (
   log: CollectableDelivery,
   now: Date = new Date()
@@ -36,7 +31,6 @@ export const collectionSummary = (
   return `Collected${who} ${when}`;
 };
 
-/** The name the confirm dialog starts with: the household resident, trimmed to what the API accepts. */
 export const defaultCollectorName = (log: CollectableDelivery): string =>
   (log.residentName ?? '').trim().slice(0, MAX_COLLECTOR_NAME);
 

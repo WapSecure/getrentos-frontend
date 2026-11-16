@@ -38,24 +38,19 @@ const QUESTION_MAX = 200;
 interface Asked {
   key: number;
   question: string;
-  /** Empty when the question matched nothing the listing could answer. */
   answers: ListingAnswer[];
 }
 
 const list = (items: string[]) =>
   items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`;
 
-/**
- * Questions about a listing, answered only from its own data and always attributed, with the same
- * shared functions as the web page. Only the topic and the answer's source are ever recorded.
- */
+/** Answers only from the listing's own data; only the topic and the answer's source are ever recorded. */
 export function ShowroomQuestions({
   listing,
   onAskLister,
   askListerLabel = 'Ask the lister',
 }: {
   listing: ShowroomListing;
-  /** The screen's existing enquiry flow. Without one, no ask button is shown. */
   onAskLister?: () => void;
   askListerLabel?: string;
 }) {

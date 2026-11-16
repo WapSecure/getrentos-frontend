@@ -2,7 +2,6 @@ import { AlertTriangle, CircleDashed, ShieldCheck } from '@sureground/icons';
 import { formatDate } from '@/lib/format';
 import { checkedByText, type LandNotVerifiedItem, type LandTrustLabel } from '@sureground/shared';
 
-/** A land trust label, or any other dated check with a scope (a listing's verification summary). */
 type TrustCheck = Omit<LandTrustLabel, 'kind'> & { kind: string };
 
 // Deliberately no single "Verified" tick: a buyer sees the gaps alongside the passes.
@@ -15,7 +14,6 @@ export const TrustLabelsList = ({
   labels?: TrustCheck[];
   notVerified?: LandNotVerifiedItem[];
   compact?: boolean;
-  /** Off only where the caller already shows what the checks do not cover. */
   footnote?: boolean;
 }) => {
   const passed = labels ?? [];

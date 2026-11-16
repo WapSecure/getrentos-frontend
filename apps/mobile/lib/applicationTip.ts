@@ -12,10 +12,6 @@ export interface ApplicationTipInput {
 const stepStatus = (steps: AssistantStep[], key: string) =>
   steps.find((s) => s.key === key)?.status;
 
-/**
- * The profile step counts an email address, so a renter who signed up with a phone alone could
- * never tick it. Here it is done once their phone and identity are both verified.
- */
 export function applicationSteps({
   steps,
   phone,
@@ -28,11 +24,6 @@ export function applicationSteps({
   );
 }
 
-/**
- * One plain next step for the renter, built from what we know rather than free text. It only asks
- * for checks the app can do (phone and identity), so a phone-only renter is never told to verify an
- * email address.
- */
 export function applicationTip({
   steps,
   phone,

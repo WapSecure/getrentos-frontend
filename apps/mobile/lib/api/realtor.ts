@@ -72,7 +72,6 @@ export interface AssignedProperty {
   title: string;
   city: string;
   state: string;
-  /** The API enum (e.g. 'COMMERCIAL'): a commercial property's listing form adds the commercial block. */
   propertyType?: string;
 }
 
@@ -319,13 +318,11 @@ export const realtorApi = {
     apiFetch<Paginated<RealtorClient>>(
       `/realtor/clients${toQuery({ page: opts.page ?? 1, pageSize: 100, status: opts.status, search: opts.search })}`
     ),
-  /** Whether a phone number or email belongs to an owner or landlord account. */
   checkClient: (contact: string) =>
     apiFetch<ClientEligibility>('/realtor/clients/check', {
       method: 'POST',
       body: contactBody(contact),
     }),
-  /** By the client's phone number or email; they hear in their app. */
   inviteClient: (contact: string) =>
     apiFetch<RealtorClient>('/realtor/clients', { method: 'POST', body: contactBody(contact) }),
   assignedProperties: (relationshipId: string) =>
@@ -346,7 +343,6 @@ export const realtorApi = {
     /** Commercial properties only; the API refuses it on any other type. */
     commercial?: CommercialDetails;
   }) => apiFetch<RealtorListing>('/realtor/listings', { method: 'POST', body }),
-  /** Only on a listing this realtor drafted, while the property is still assigned. Null clears a field. */
   updateListingCommercial: (id: string, details: CommercialUpdatePayload) =>
     apiFetch<RealtorListing>(`/realtor/listings/${id}/commercial`, {
       method: 'PATCH',

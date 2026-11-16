@@ -1,14 +1,12 @@
 import type { MaintenanceCategoryCode } from './maintenance';
 
-// Preventive-care routines common in Nigerian homes. Intervals are typical, not rules: the owner
-// edits every field before the plan is saved.
+// Intervals are typical, not rules: the owner edits every field before the plan is saved.
 
 export type CareTemplate = {
   id: string;
   title: string;
   category: MaintenanceCategoryCode;
   frequencyDays: number;
-  /** Plain description of the interval, e.g. "Every 3 months". */
   frequencyLabel: string;
   /** For seasonal jobs: the month (1 to 12) the job should fall in, e.g. 3 for before the rains. */
   dueMonth?: number;
@@ -161,7 +159,6 @@ export function findCareTemplate(id: string | null | undefined): CareTemplate | 
   return id ? CARE_TEMPLATES.find((template) => template.id === id) : undefined;
 }
 
-/** The checklist as plain text for the plan's notes field. */
 export function careTemplateNotes(template: CareTemplate): string {
   return template.checklist.map((item) => `- ${item}`).join('\n');
 }
@@ -170,10 +167,6 @@ const pad = (value: number) => String(value).padStart(2, '0');
 const isoDate = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
-/**
- * Suggested first due date (YYYY-MM-DD, local time). Seasonal jobs fall on the 1st of their month,
- * this year if it is still ahead, otherwise next year. Others start in 7 days.
- */
 export function careTemplateFirstDueDate(template: CareTemplate, from: Date = new Date()): string {
   if (template.dueMonth) {
     const thisYear = new Date(from.getFullYear(), template.dueMonth - 1, 1);

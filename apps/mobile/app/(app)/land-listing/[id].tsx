@@ -61,7 +61,6 @@ export default function LandListingDetail() {
 
   const query = useQuery({ queryKey: qk.land.detail(id), queryFn: () => landApi.get(id) });
   const listing = query.data;
-  // Shared with the web showroom, so both show the same parcel facts, costs and photos.
   const showroom = useMemo(() => (listing ? fromLand(listing) : undefined), [listing]);
   useTrackDetailView(listing?.id, 'land');
   const outline = boundaryCorners(listing?.parcel.boundaryGeometry);

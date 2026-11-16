@@ -2,8 +2,7 @@ import { FileCheck, Lock, Shield, Users } from '@sureground/icons';
 import { Logo } from '@/components/ui/Logo';
 import { RENT_RELEASE_RULE } from '@sureground/shared';
 
-// Only what the platform demonstrably does: no "bank-grade", biometric, forgery-detection,
-// round-the-clock or "every user is verified" claims (see the landing-page honesty rules).
+// Only what the platform demonstrably does (see the landing-page honesty rules).
 const FACTS = [
   {
     icon: Shield,
@@ -45,7 +44,6 @@ const COPY = {
   },
 } as const;
 
-/** The left panel shared by sign-in, sign-up and password reset. Server-rendered, no motion. */
 export const AuthAside = ({ variant }: { variant: keyof typeof COPY }) => {
   const copy = COPY[variant];
   return (

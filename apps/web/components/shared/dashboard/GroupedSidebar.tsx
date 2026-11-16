@@ -40,7 +40,6 @@ export const activeSidebarHref = (
     .filter((href) => isSidebarRouteActive(pathname, href, dashboardHref))
     .sort((a, b) => b.length - a.length)[0];
 
-/** The workspace's first letter in a small blue tile, as a workspace switcher shows it. */
 function WorkspaceMark({ label, size = 'md' }: { label: string; size?: 'sm' | 'md' }) {
   return (
     <span

@@ -131,7 +131,6 @@ export const radius = {
 
 export type RadiusKey = keyof typeof radius;
 
-/** Serif for places and page titles, sans for everything people operate. */
 export const fontFamilies = {
   display: 'Newsreader',
   sans: 'Manrope',

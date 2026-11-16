@@ -86,7 +86,6 @@ export const UnitsTable = ({
             header: 'Rent',
             className: 'text-foreground font-medium whitespace-nowrap',
             render: (unit) =>
-              // A unit with no rent shows a plain dash, not "—/yr".
               unit.leaseRent !== undefined || unit.askingRent !== undefined ? (
                 <>
                   {formatCurrency((unit.leaseRent ?? unit.askingRent)!, { compact: true })}

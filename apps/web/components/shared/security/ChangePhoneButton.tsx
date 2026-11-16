@@ -21,7 +21,6 @@ export function ChangePhoneButton({
   adding = false,
 }: {
   onChanged?: (phone: string) => void;
-  /** The account has no phone yet. */
   adding?: boolean;
 }) {
   const qc = useQueryClient();

@@ -9,12 +9,10 @@ interface FeatureRowProps {
   title: ReactNode;
   children: ReactNode;
   photo: MarketingPhoto;
-  /** Puts the photo on the left on wide screens; phones always show text first. */
   reverse?: boolean;
   action?: ReactNode;
 }
 
-/** One alternating image-and-text row. Stack several for a "how it works" story. */
 export const FeatureRow = ({
   eyebrow,
   title,

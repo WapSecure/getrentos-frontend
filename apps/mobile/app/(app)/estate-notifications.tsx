@@ -15,7 +15,6 @@ import { estateManagerApi, type EstateNotification } from '@/lib/api/estateManag
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { NotificationsInbox } from '@/components/notifications/NotificationsInbox';
 
-/** `type` is an open string: match on what it mentions and fall back to a bell. */
 function iconFor(type: string) {
   if (type.includes('incident') || type.includes('panic') || type.includes('muster')) {
     return ShieldAlert;
@@ -36,7 +35,6 @@ export default function EstateNotifications() {
     queryFn: estateManagerApi.notifications,
   });
 
-  // Reading is instant; a refused change is rolled back with a toast.
   const readOne = useOptimisticMutation({
     mutationFn: (id: string) => estateManagerApi.markNotificationRead(id),
     patches: (id) => [

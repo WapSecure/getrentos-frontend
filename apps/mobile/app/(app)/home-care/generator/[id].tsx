@@ -25,7 +25,6 @@ import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
-/** One generator: log the hour meter where it stands, then see where the service is. */
 export default function GeneratorScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();

@@ -8,7 +8,6 @@ import {
 } from '../src/utils/geoInsights.ts';
 
 test('a walk faster than 7 km/h is not shown', () => {
-  // From the demo: 11.1 km in 48 min, and 27.3 km in 2 hr 2 min.
   assert.equal(plausibleWalk({ distanceMeters: 11_100, durationSeconds: 48 * 60 }), false);
   assert.equal(
     shownTravelMode('walking', { distanceMeters: 27_300, durationSeconds: 122 * 60 }),
@@ -42,7 +41,6 @@ test('walking distance shows counts, never a score, and unknown is not zero', ()
     }
   );
   assert.equal(walkabilityView(null), null);
-  // An older API response.
   assert.equal(
     walkabilityView({
       score: 0,

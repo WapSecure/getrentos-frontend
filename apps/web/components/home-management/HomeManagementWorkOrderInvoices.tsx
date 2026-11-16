@@ -382,7 +382,6 @@ export function HomeManagementWorkOrderInvoices({
       }
     | null
   >(null);
-  // The refusal's own flags can be dropped on the way; the job record lists them per invoice too.
   const duplicateEvidence = useQuery({
     queryKey: homeManagementKeys.workOrderEvidence(workOrder.id),
     queryFn: () => unwrap(homeManagementService.getWorkOrderEvidence(workOrder.id)),

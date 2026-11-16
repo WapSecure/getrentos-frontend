@@ -22,7 +22,6 @@ import { errorMessage } from '@/lib/api/client';
 import { serviceChargesApi } from '@/lib/api/serviceCharges';
 import { formatDay } from '@/lib/serviceCharge';
 
-/** Budget against what was actually spent, and what was billed, collected and credited. */
 export function ReconciliationSection({
   budgetId,
   editable,

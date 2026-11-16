@@ -74,7 +74,6 @@ const FILTERS: { value: Filter; label: string; match: (s: BuyerEscrowStatus) => 
   { value: 'refunded', label: 'Refunded', match: (s) => s === 'refunded' },
 ];
 
-// Purchases that still need something from the buyer come first, then the finished ones.
 const STATUS_ORDER: Record<string, number> = {
   frozen: 0,
   funds_held: 1,

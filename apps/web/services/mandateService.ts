@@ -105,7 +105,7 @@ export interface ManagementMandateDto {
   managerName?: string | null;
   /** The most a manager may spend without owner sign-off (whole naira); null = no cap. */
   maintenanceApprovalCap: number | null;
-  /** Spending bands (M4). Absent until the API sends them; fall back to `maintenanceApprovalCap`. */
+  /** Absent until the API sends them; fall back to `maintenanceApprovalCap`. */
   bands?: SpendBands | null;
   scope: MandateScope[];
   capabilities: MandateCapabilities;
@@ -366,8 +366,6 @@ export function cancelTermination(
   );
 }
 
-/* ── Fee changes (BD-2) ───────────────────────────────────────────────────────────────────────── */
-
 export type ManagementFeeType = 'PERCENTAGE' | 'FLAT';
 export type FeeAmendmentSide = 'OWNER' | 'MANAGER' | 'SUREGROUND';
 export type FeeAmendmentStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'WITHDRAWN' | 'EXPIRED';
@@ -383,7 +381,6 @@ export const FEE_AMENDMENT_STATUS_LABELS: Record<FeeAmendmentStatus, string> = {
 export interface FeeTerms {
   type: ManagementFeeType;
   value: number;
-  /** "8%" or "₦50,000", worded by the API. */
   label: string;
 }
 
@@ -432,7 +429,6 @@ export interface FeeAmendmentOverview {
   /** The first of a month at least 14 days away, YYYY-MM-DD: the earliest a new fee may start. */
   earliestEffectiveFrom: string;
   maxPercentage: number;
-  /** Managed only: the published tier rates. Null on a firm's agreement. */
   allowedPercentages: number[] | null;
   pending: FeeAmendment | null;
   history: FeeAmendment[];

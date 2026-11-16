@@ -35,11 +35,7 @@ const MAX_MESSAGE = 2000;
 /** Only plain web links from older disputes are shown, and never previewed. */
 const isWebLink = (value: string) => /^https?:\/\//i.test(value);
 
-/**
- * A deposit dispute's thread for one of its two parties: what was raised, the messages with the
- * other side and Sureground, a reply box while it is open, and Sureground's response deadline.
- * The model has no appeal, so the page says decisions are final and points to the transparency centre.
- */
+// The model has no appeal, so the page says decisions are final and points to the transparency centre.
 export const DepositDisputeThread = ({
   disputeId,
   back,

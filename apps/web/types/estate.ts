@@ -279,7 +279,6 @@ export interface IssuedVisitorPass extends VisitorPass {
 export interface StaffMember {
   userId: string;
   name: string;
-  /** Empty when the account is phone-only. */
   email: string;
   /** "+234 803 *** 4567" for a phone-only account; never the full number. */
   phoneMasked?: string | null;
@@ -301,7 +300,6 @@ export interface DeliveryLog {
   gateName?: string;
   receivedAt: string;
   collectedAt?: string;
-  /** Name of whoever took the parcel, if the gate recorded one. */
   collectedBy?: string;
   createdAt: string;
 }

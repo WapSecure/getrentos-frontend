@@ -46,7 +46,6 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
   const moveInLabel = moveInTense(tenant.moveInDate);
   const router = useRouter();
   const toast = useToast();
-  // Opens the existing conversation with this tenant, or starts one about their home.
   const openChat = useMutation({
     mutationFn: () =>
       unwrap(landlordService.startConversation(tenant.tenantUserId as string, tenant.propertyId)),
@@ -116,7 +115,6 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
             Message
           </Button>
         ) : tenant.phone ? (
-          // A tenant recorded by name only has no inbox here; their phone is the way to reach them.
           <Button
             href={`tel:${tenant.phone}`}
             variant="outline"

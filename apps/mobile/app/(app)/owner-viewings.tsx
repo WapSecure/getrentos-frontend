@@ -46,11 +46,9 @@ const when = (iso: string) => `${formatDate(iso, 'short')}, ${formatTime(iso)}`;
 
 type Tab = 'renters' | 'buyers';
 
-/** Renters asking to view a home the owner lets, and buyers asking to view one they sell. */
 export default function OwnerViewings() {
   const { tab: param } = useLocalSearchParams<{ tab?: string }>();
   const tab: Tab = param === 'renters' ? 'renters' : 'buyers';
-  // Requests still waiting on the owner, shown on each side of the switch.
   const renters = useQuery({
     queryKey: [...qk.landlord.viewings('requested'), 'count'],
     queryFn: () => landlordApi.viewingRequests('requested', 1, 1),

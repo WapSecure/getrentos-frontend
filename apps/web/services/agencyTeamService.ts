@@ -51,9 +51,7 @@ export interface AgencyMember {
 
 export interface AgencyStaffInvite {
   id: string;
-  /** Empty when the invite went by phone number to an account with no email. */
   email: string;
-  /** Their number, masked ("+234 803 *** 4567"), when the invite has no email. */
   phoneMasked?: string | null;
   role: AgencyMemberRole;
   roleLabel: string;
@@ -61,7 +59,6 @@ export interface AgencyStaffInvite {
   expiresAt: string;
   createdAt: string;
   status: 'PENDING' | 'EXPIRED';
-  /** Only on a new invite: how it reached them (IN_APP is a notification in their app). */
   deliveredBy?: ('EMAIL' | 'IN_APP')[];
 }
 
@@ -69,13 +66,11 @@ export interface AgencyInvitePreview {
   firmName: string;
   role: AgencyMemberRole;
   roleLabel: string;
-  /** Empty for an invite sent by phone number. */
   email: string;
   /** The invitee's own number, masked; only shown to them. */
   phoneMasked?: string | null;
   status: 'PENDING' | 'EXPIRED' | 'ACCEPTED' | 'REVOKED';
   membershipExpiresAt: string | null;
-  /** True when the signed-in account is the one invited (by email or by phone). */
   emailMatches: boolean;
 }
 

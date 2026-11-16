@@ -55,10 +55,6 @@ const GROUP_EMPTY: Record<
   },
 };
 
-/**
- * The tours screens' list: a switch between upcoming, waiting and past with counts, the next
- * booked tour in one line, and an empty state with a way forward when there are no tours at all.
- */
 export const TourList = ({
   tours,
   viewer,
@@ -67,7 +63,6 @@ export const TourList = ({
 }: {
   tours: readonly SiteTour[];
   viewer: TourViewer;
-  /** Shown when there are no tours at all. */
   empty: { title: string; description: ReactNode; action?: ReactNode };
   renderTour: (tour: SiteTour) => ReactNode;
 }) => {

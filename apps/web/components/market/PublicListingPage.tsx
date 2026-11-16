@@ -108,7 +108,6 @@ export async function PublicListingPage({
           <div className="space-y-10">
             <header className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
-                {/* Same trust chain as the browse card; the bare flag only where there is none. */}
                 {listing.trustChain ? (
                   <TrustChainBadge chain={listing.trustChain} />
                 ) : (

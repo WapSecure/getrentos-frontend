@@ -26,7 +26,6 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 import { AcquisitionStatusBadges } from '@/components/purchases/AcquisitionStatusBadges';
 
-// Shown when an older server sends no note of its own.
 const DEPOSIT_NOTE =
   'This covers the deposit held under Payment Protection only. It does not show that the property is legally yours.';
 
@@ -51,8 +50,7 @@ export default function LandRepresented() {
     },
     enabled: !!id,
   });
-  // The sale's workspace names the property, its deposit and what happens next. Same key as the
-  // full purchase screen, so opening that afterwards is instant.
+  // Same key as the full purchase screen, so opening that afterwards is instant.
   const workspace = useQuery({
     queryKey: qk.purchaseWorkspace.detail('REPRESENTATIVE', id),
     queryFn: () => purchaseWorkspaceApi.get('REPRESENTATIVE', id),

@@ -4,7 +4,6 @@ import { Paperclip } from '@sureground/icons/native';
 import { Divider, Price, Text, useTheme } from '@sureground/ui-native';
 import type { DepositClaim } from '@/lib/api/depositEnd';
 
-/** The claimed deductions with their evidence, read-only. Shown to the landlord and the tenant. */
 export function ClaimItems({ claim }: { claim: DepositClaim }) {
   const { colors, spacing, radius } = useTheme();
   return (

@@ -30,7 +30,6 @@ function LandlordVendorsPageContent() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  // ?add=1 (e.g. from assigning a repair) opens the add form straight away.
   const [isFormOpen, setIsFormOpen] = useState(useSearchParams().get('add') === '1');
   const [editing, setEditing] = useState<Vendor | null>(null);
   const [viewing, setViewing] = useState<Vendor | null>(null);

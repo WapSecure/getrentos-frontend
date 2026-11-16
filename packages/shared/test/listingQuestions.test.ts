@@ -169,10 +169,6 @@ const empty: ShowroomListing = {
 
 const FORBIDDEN = /\b(ai|assistant|smart|escrow)\b/i;
 
-// ---------------------------------------------------------------------------------------------
-// Matching
-// ---------------------------------------------------------------------------------------------
-
 const top = (q: string) => matchTopics(q)[0]?.topic;
 
 test('normalises punctuation and case, so C of O is found however it is written', () => {
@@ -231,13 +227,8 @@ test('ranking is deterministic and answers at most two topics', () => {
   const both = topicsToAnswer('Is there light and water?');
   assert.deepEqual([...both].sort(), ['power', 'water']);
   assert.ok(topicsToAnswer('parking light water security pets').length <= 2);
-  // "How much" alone must not drag the price into a service charge question.
   assert.deepEqual(topicsToAnswer('How much is service charge?'), ['service_charge']);
 });
-
-// ---------------------------------------------------------------------------------------------
-// Answers: stated and not stated, topic by topic
-// ---------------------------------------------------------------------------------------------
 
 test('parking: amenities and commercial spaces are stated; nothing otherwise', () => {
   const a = answerFor(richRental, 'parking');
@@ -357,7 +348,6 @@ test('room sizes: checked plans say so with the date; the question picks the roo
     /^Checked by Sureground on 3 Nov 2026, Ground floor: Master bedroom 4\.2 × 3\.8 m/
   );
   assert.doesNotMatch(a.text, /Kitchen/);
-  // No area is ever worked out from the sides.
   assert.doesNotMatch(a.text, /15\.96/);
   const all = answerFor(richRental, 'floor_plans');
   assert.match(all.text, /Kitchen 3 × 2\.5 m/);
@@ -410,7 +400,6 @@ test('title: checked evidence with its date; unchecked says so; lister title is 
     /^Checked by Sureground on 20 Oct 2026: Evidence checked\. Checks passed: title document matches/
   );
   assert.match(a.text, /not a guarantee of title/);
-  // Sureground's "not checked yet" is context, never a claim by the lister.
   const u = answerFor(unCheckedSale, 'title');
   assert.equal(u.source, 'not_stated');
   assert.match(u.text, /^Not stated by the lister\. Sureground has not reviewed any documents/);
@@ -465,10 +454,6 @@ test('amenities: the list as written', () => {
   assert.match(answerFor(richRental, 'amenities').text, /"Comes with a BQ\."/);
   assert.equal(answerFor(bareRental, 'amenities').source, 'not_stated');
 });
-
-// ---------------------------------------------------------------------------------------------
-// Guarantees across every topic
-// ---------------------------------------------------------------------------------------------
 
 test('nothing is answered without data: an empty listing is not stated on every topic', () => {
   for (const topic of LISTING_QUESTION_TOPICS) {
@@ -525,7 +510,6 @@ test('suggestions: topics with data first, then common questions, at most six', 
   assert.equal(s[0], 'fees');
   assert.ok(s.includes('power') && s.includes('parking'));
   for (const t of s.slice(0, -2)) assert.notEqual(answerFor(richRental, t).source, 'not_stated');
-  // A listing with little data still offers the common questions.
   assert.ok(suggestedTopics(bareRental).includes('power'));
   assert.ok(suggestedTopics(unCheckedSale).includes('title'));
   assert.ok(suggestedTopics(land).includes('title'));

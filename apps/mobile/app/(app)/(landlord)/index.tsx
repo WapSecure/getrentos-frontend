@@ -109,7 +109,6 @@ export default function LandlordOverview() {
   const units = s ? s.occupiedUnits + s.vacantUnits + s.reservedUnits : 0;
   const occupancy = s && units > 0 ? Math.round((s.occupiedUnits / units) * 100) : 0;
 
-  // Outstanding rent and open repairs live in the attention cards above, shown only when they need action.
   const statGroups = s ? (
     <>
       <StatGroup
@@ -129,7 +128,6 @@ export default function LandlordOverview() {
             Icon: UserCheck,
             onPress: () => router.push('/(app)/(landlord)/tenants'),
           },
-          // Only while a unit is actually held: a permanent "Reserved 0" was the one tile you couldn't tap.
           ...(s.reservedUnits > 0
             ? [
                 {
@@ -218,7 +216,6 @@ export default function LandlordOverview() {
           <AttentionCard
             Icon={TriangleAlert}
             tone="danger"
-            // Outstanding covers every unpaid charge (service charge, levies), not rent alone.
             title={`${s.outstandingPayments} unpaid ${s.outstandingPayments === 1 ? 'charge' : 'charges'}`}
             detail={
               <Text variant="caption" color="mutedForeground">
@@ -242,7 +239,6 @@ export default function LandlordOverview() {
                 ? 'Assign a vendor, book a visit or mark it resolved'
                 : 'Assign vendors, book visits or mark them resolved'
             }
-            // The lead card only when no rent is outstanding: one blue button per screen.
             eyebrow={s.outstandingPayments > 0 ? undefined : 'Repairs'}
             actionLabel={s.outstandingPayments > 0 ? undefined : 'See maintenance'}
             onPress={() => router.push('/(app)/landlord-maintenance')}

@@ -55,10 +55,6 @@ const tabs: { value: 'owner' | 'requester'; label: string }[] = [
 ];
 
 interface ApprovalsViewProps {
-  /**
-   * Narrows the view to one property's requests waiting for the owner, without the page header,
-   * limits and tabs: the Managed page shows it as one of its sections.
-   */
   propertyId?: string;
 }
 

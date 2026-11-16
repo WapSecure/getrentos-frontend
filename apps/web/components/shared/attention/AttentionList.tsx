@@ -13,9 +13,7 @@ import { cn } from '@sureground/shared';
 import type { AttentionItem } from '@/types/attention';
 
 export interface AttentionListItem extends AttentionItem {
-  /** Replaces the severity glyph with one that says what the item is (a deposit, a tour). */
   icon?: SgIcon;
-  /** When it is due, already formatted (Lagos time beside the viewer's own). */
   due?: ReactNode;
 }
 
@@ -31,15 +29,10 @@ interface AttentionListProps {
   items: readonly AttentionListItem[];
   title?: string;
   description?: ReactNode;
-  /** Shown when nothing is waiting; without it the card is not drawn at all. */
   empty?: { title: string; description?: ReactNode };
   className?: string;
 }
 
-/**
- * "Needs your attention" for any dashboard: one row per thing waiting, each with what it is, when
- * it is due and a single action. Feed it from the API (AttentionFeed) or from a page's own data.
- */
 export function AttentionList({
   items,
   title = 'Needs your attention',

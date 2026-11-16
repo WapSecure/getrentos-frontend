@@ -7,15 +7,12 @@ interface PageHeroProps {
   eyebrow: ReactNode;
   title: ReactNode;
   lead?: ReactNode;
-  /** Extra content under the lead, e.g. a status note or an in-page index. */
   children?: ReactNode;
   id?: string;
-  /** Narrows the text column for long-form pages (legal, policy). */
   narrow?: boolean;
   className?: string;
 }
 
-/** A text-only page opening for directories and long-form pages: eyebrow, light serif h1, lead. */
 export const PageHero = ({
   eyebrow,
   title,

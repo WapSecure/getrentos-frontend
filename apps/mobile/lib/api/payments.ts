@@ -52,7 +52,6 @@ export interface Payment {
   totalChargedNaira?: number;
   /** Naira Sureground is holding for this charge right now (0 once released). */
   heldAmountNaira?: number;
-  /** The tenant has the keys: held rent is then released early, not "on move-in". */
   moveInConfirmed?: boolean;
 }
 

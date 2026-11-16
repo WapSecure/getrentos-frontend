@@ -73,7 +73,6 @@ export const PaymentsList = ({
   serverFiltered,
 }: PaymentsListProps) => {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
-  // Over every payment on the page, not just the filtered ones: move-in is asked once per home.
   const releaseActions = useMemo(() => rentReleaseActions(payments), [payments]);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 

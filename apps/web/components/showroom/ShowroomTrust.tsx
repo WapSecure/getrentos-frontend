@@ -30,20 +30,17 @@ export function ShowroomTrust({ listing }: { listing: ShowroomListing }) {
           What has been checked
         </h2>
       </div>
-      {/* The chain is what the header badge and the browse card read from, step by step. */}
       {chain && (
         <div className="mt-4">
           <PropertyTrustChain property={{ trustChain: chain }} />
         </div>
       )}
-      {/* The summary replaces the single verified row: it says what was checked rather than "verified". */}
       {summary && (
         <div className="mt-4">
           <VerificationSummaryCard summary={summary} />
         </div>
       )}
       <ul className="mt-4 space-y-3 text-sm">
-        {/* The bare flag is only the fallback, where the API sends neither a chain nor a summary. */}
         {!summary && !chain && (
           <li className="flex items-start gap-3 rounded-md border border-border bg-card p-4">
             {listing.verified ? (
@@ -67,7 +64,7 @@ export function ShowroomTrust({ listing }: { listing: ShowroomListing }) {
             </div>
           </li>
         )}
-        {/* DIA-30: a value only from an accredited valuer's dated report, never an estimate. */}
+        {/* A value only from an accredited valuer's dated report, never an estimate. */}
         {valuation && (
           <li className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
             {valuation.outOfDate ? (

@@ -228,7 +228,7 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
     enabled: Boolean(depositId),
   });
 
-  // A deposit Sureground received is settled only through the end-of-tenancy flow (D-6).
+  // A deposit Sureground received is settled only through the end-of-tenancy flow.
   const { data: endView } = useQuery({
     queryKey: depositId ? landlordKeys.depositEnd(depositId) : ['deposit', 'end', 'none'],
     queryFn: () => unwrap(depositService.endOfTenancy(depositId!)),

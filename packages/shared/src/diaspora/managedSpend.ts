@@ -8,8 +8,6 @@ import type {
   SpendBands,
 } from './types';
 
-// Pure helpers for Sureground Managed spending and job evidence (DIA-21, DIA-22), for web and mobile.
-
 export const SPEND_BAND_LABELS: Record<SpendBand, string> = {
   ROUTINE: 'Routine',
   OWNER: 'Owner approval',
@@ -24,14 +22,9 @@ export const SPEND_BAND_VARIANT: Record<SpendBand, StatusTone> = {
   EMERGENCY: 'danger',
 };
 
-/** Approving an EXPLICIT request asks the owner to confirm who they are first. */
 export const needsExplicitAuthorisation = (band: SpendBand | null | undefined) =>
   band === 'EXPLICIT';
 
-/**
- * Evidence stages in their fixed order. Done, flagged and not-applicable stages say so; of the
- * stages still waiting, only the earliest is current.
- */
 export function evidenceStates(statuses: readonly EvidenceStageStatus[]): EvidenceTimelineState[] {
   const current = statuses.indexOf('PENDING');
   return statuses.map((status, index) => {
@@ -42,7 +35,6 @@ export function evidenceStates(statuses: readonly EvidenceStageStatus[]): Eviden
   });
 }
 
-/** Spend the API parked for the owner instead of refusing. */
 export function isAwaitingOwnerApproval(value: unknown): value is AwaitingOwnerApproval {
   return (
     typeof value === 'object' &&
@@ -51,7 +43,6 @@ export function isAwaitingOwnerApproval(value: unknown): value is AwaitingOwnerA
   );
 }
 
-/** What the manager is told when their spend went to the owner: nothing is approved until they retry. */
 export const AWAITING_OWNER_MESSAGE: Record<SpendBand, string> = {
   ROUTINE: 'Sent to the owner to approve. Approve it again here once they have.',
   OWNER:
@@ -61,10 +52,7 @@ export const AWAITING_OWNER_MESSAGE: Record<SpendBand, string> = {
   EMERGENCY: 'Sent to the owner as emergency spend. Approve it again here once they have.',
 };
 
-/**
- * The invoice looks like one already approved or paid (409 `INVOICE_POSSIBLE_DUPLICATE`): the
- * caller must acknowledge it with a reason.
- */
+/** 409 `INVOICE_POSSIBLE_DUPLICATE`: the caller must acknowledge it with a reason. */
 export function isDuplicateInvoiceRefusal(err: unknown): boolean {
   if (typeof err !== 'object' || err === null) return false;
   const { code, details } = err as { code?: unknown; details?: unknown };
@@ -73,10 +61,7 @@ export function isDuplicateInvoiceRefusal(err: unknown): boolean {
   return typeof detailCode === 'string' && /DUPLICATE/i.test(detailCode);
 }
 
-/**
- * Bands from the three inputs (0 means no limit). As the API requires, neither the emergency
- * limit nor the explicit threshold may sit below the routine limit.
- */
+/** 0 means no limit. As the API requires, neither emergency nor explicit may sit below the routine limit. */
 export function bandsFromInputs(input: { routine: number; emergency: number; explicit: number }): {
   bands: SpendBands;
   error: { field: 'emergency' | 'explicit'; message: string } | null;
@@ -106,7 +91,6 @@ export function bandsFromInputs(input: { routine: number; emergency: number; exp
   return { bands, error: null };
 }
 
-/** The duplicate flags carried by the refusal, when the response kept them. */
 export function duplicateFlagsOf(err: unknown): DuplicateFlag[] {
   const flags = (err as { details?: { flags?: unknown } } | null)?.details?.flags;
   if (!Array.isArray(flags)) return [];

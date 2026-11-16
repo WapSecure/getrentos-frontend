@@ -56,7 +56,6 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
   const StatusIcon = statusIconMap[currentStatus] || Clock;
   const statusColor = statusColorMap[currentStatus] || 'text-muted-foreground';
   const statusLabel = getStatusLabel(currentStatus);
-  // While the landlord is still deciding, the first unfinished step is the one in progress.
   const inReview = currentStatus === 'pending' || currentStatus === 'under_review';
   const firstOpen = timeline.findIndex((step) => !step.completed);
 

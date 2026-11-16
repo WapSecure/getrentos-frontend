@@ -250,7 +250,6 @@ const InspectionRow = ({
   );
 };
 
-/** `land`: land inspections only (land routes). `all`: every inspection, homes and land. */
 export const BuyerInspections = ({ scope }: { scope: TourScope }) => {
   const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
     null

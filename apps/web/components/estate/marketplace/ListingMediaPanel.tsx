@@ -39,8 +39,7 @@ export const ListingMediaPanel = ({
     void queryClient.invalidateQueries({ queryKey: estateKeys.inventory(estateId) });
   };
 
-  // One request per photo, one at a time: the server checks the photo limit before it appends, so parallel sends
-  // could overshoot it. Each success returns the listing with that photo in it.
+  // Sequential on purpose: the server checks the photo limit before appending, so parallel sends could overshoot it.
   const [names, setNames] = useState<Record<string, string>>({});
   const uploads = useUploadQueue({
     concurrency: 1,

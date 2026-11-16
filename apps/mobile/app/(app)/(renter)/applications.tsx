@@ -233,7 +233,6 @@ function ApplicationRow({ application: a }: { application: RenterApplication }) 
   );
 }
 
-/** One line on where the application stands, so "Pending" is never the only clue. */
 function applicationNextStep(a: RenterApplication): string {
   const missing = (a.documents ?? []).filter((d) => d.required && !d.uploaded).length;
   if (a.status === 'approved') return 'Approved. Next, sign your lease';

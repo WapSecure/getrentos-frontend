@@ -53,7 +53,6 @@ export default function MaintenancePage() {
   }, [summaryKey, reloadKey]);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
-  // Someone renting more than one home says which one; both report forms send it.
   const [homes, setHomes] = useState<MaintenanceHome[]>([]);
   const [chosenHome, setChosenHome] = useState<string | null>(null);
   useEffect(() => {

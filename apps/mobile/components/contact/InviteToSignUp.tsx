@@ -4,17 +4,12 @@ import { MessageCircle, Share2 } from '@sureground/icons/native';
 import { ROUTES, signupInviteMessage, whatsappShareUrl } from '@sureground/shared';
 import { env } from '@/lib/env';
 
-/**
- * Nobody on Sureground has that phone number or email: share the plain signup link (no tracking,
- * nothing about either person). We cannot text people, so the person inviting sends it themselves.
- */
 export function InviteToSignUp({
   message,
   reason,
   footnote,
 }: {
   message: string;
-  /** Finishes "Join me on Sureground so I can …" in the shared message. */
   reason?: string;
   footnote?: string;
 }) {

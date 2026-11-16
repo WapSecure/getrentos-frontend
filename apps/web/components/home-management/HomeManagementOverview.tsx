@@ -45,7 +45,6 @@ interface HomeManagementOverviewProps {
   /** Narrowed to one client's home: portfolio totals would describe other clients, so they are left out. */
   scopePropertyId?: string;
   tabHref: (tab: HomeManagementTab) => string;
-  /** Power and water figures; the tiles stay hidden until something has been recorded. */
   utilities?: UtilitiesSummary;
 }
 

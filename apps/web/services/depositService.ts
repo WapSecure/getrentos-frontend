@@ -53,7 +53,6 @@ export interface DepositHoldListItem {
   heldBySureground: boolean;
   returnable: number;
   createdAt: string;
-  /** D-6 end-of-tenancy stage; older API responses may leave it out. */
   endStage?: DepositEndStage;
   moveOutAt?: string | null;
   claimBy?: string | null;
@@ -193,7 +192,7 @@ export const depositService = {
   },
 };
 
-/** Mirrors the backend's `DepositEndStage` (D-6). */
+/** Mirrors the backend's `DepositEndStage`. */
 export type DepositEndStage =
   | 'TENANCY'
   | 'AWAITING_CLAIM'
@@ -247,7 +246,6 @@ export interface DepositClaim {
   items: DepositClaimItem[];
 }
 
-/** The deposit in the D-6 end-of-tenancy flow, as landlord, tenant and Sureground staff see it. */
 export interface DepositEndView {
   holdId: string;
   leaseId: string;

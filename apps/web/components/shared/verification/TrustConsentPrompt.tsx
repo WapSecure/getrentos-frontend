@@ -12,8 +12,6 @@ export type TrustConsentType =
   | 'BANK_ACCOUNT_CHECK'
   | 'DOCUMENT_PROCESSING';
 
-// What each consent is recorded for (the purpose the API stores with it).
-/** What each consent covers, named on screen so two prompts on one card never read as the same question twice. */
 const CONSENT_LABEL: Record<TrustConsentType, string> = {
   ID_CHECK: 'ID check',
   BIOMETRIC: 'Selfie comparison',
@@ -30,7 +28,6 @@ const CONSENT_PURPOSE: Record<TrustConsentType, string> = {
 
 export const TRUST_CONSENTS_KEY = ['trust-consents'] as const;
 
-/** The person's trust consents, and whether one of a type is active. */
 export function useTrustConsents() {
   const { data: consents } = useQuery({
     queryKey: TRUST_CONSENTS_KEY,
@@ -44,14 +41,12 @@ export function useTrustConsents() {
   return { consents, find, isActive };
 }
 
-/** Asks for one trust consent before a check, or shows when it was given with a way to withdraw it. */
 export function TrustConsentPrompt({
   type,
   text,
   onError,
 }: {
   type: TrustConsentType;
-  /** What the consent lets us do, in plain words. */
   text: string;
   onError?: (message: string | null) => void;
 }) {

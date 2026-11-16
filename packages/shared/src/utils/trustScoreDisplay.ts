@@ -1,5 +1,4 @@
-// One rule for every screen that shows someone's platform trust score: a score of zero (or a
-// missing one) means the person has no score yet, not a bad score.
+// A zero or missing platform trust score means no score yet, not a bad score.
 export const NO_TRUST_SCORE_LABEL = 'New to Sureground';
 
 export function hasTrustScore(score: number | null | undefined): score is number {

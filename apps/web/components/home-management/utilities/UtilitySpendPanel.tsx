@@ -36,7 +36,6 @@ import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import { utilitiesService } from '@/services/utilitiesService';
 
-/** Categorical slots 1 to 4 of the validated chart palette, light and dark (see the dataviz palette). */
 const SERIES_VAR: Record<UtilitySpendCategory, string> = {
   fuel: 'var(--utility-series-1)',
   electricity: 'var(--utility-series-2)',

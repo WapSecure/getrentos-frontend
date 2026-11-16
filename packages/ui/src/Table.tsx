@@ -4,14 +4,11 @@ import { TableSkeleton } from './Skeleton';
 
 export interface Column<T> {
   key: string;
-  /** Usually text; a node allows a select-all checkbox. */
   header: ReactNode;
   render: (row: T, index: number) => ReactNode;
   className?: string;
   align?: 'left' | 'center' | 'right';
-  /** Right-aligned with tabular figures, so amounts line up digit for digit. */
   numeric?: boolean;
-  /** Visible header text is optional (an actions column); this still names it for screen readers. */
   srHeader?: string;
 }
 
@@ -21,29 +18,18 @@ interface DataTableProps<T> {
   getRowKey: (row: T, index: number) => string;
   onRowClick?: (row: T) => void;
   getRowClassName?: (row: T, index: number) => string | undefined;
-  /** Extra attributes for a row, such as aria-current on the next instalment. */
   getRowProps?: (row: T, index: number) => HTMLAttributes<HTMLTableRowElement>;
-  /** Tints the row in brand blue and marks it `data-state="selected"`; pair with a checkbox that says so. */
   isRowSelected?: (row: T, index: number) => boolean;
-  /** A full-width panel under the row (payment history, line items); return null to show none. */
   renderExpanded?: (row: T, index: number) => ReactNode;
-  /** A totals row aligned under its columns, keyed by column key. */
   totals?: Partial<Record<string, ReactNode>>;
   isLoading?: boolean;
   emptyState?: ReactNode;
   footer?: ReactNode;
   className?: string;
-  /** Read by screen readers only: what the table lists. */
   caption?: string;
   density?: 'comfortable' | 'compact';
-  /** Below this width the table scrolls sideways instead of squeezing its columns. */
   minWidth?: string;
-  /** `bare` sits inside a Card that already draws the frame. */
   variant?: 'card' | 'bare';
-  /**
-   * Caps the table's height (any CSS length) and scrolls its body inside the frame, so the
-   * header row stays in view on a long list. Left out, the table grows with its rows.
-   */
   maxHeight?: string;
 }
 
@@ -96,7 +82,6 @@ export function DataTable<T>({
       >
         <table className="w-full text-sm" style={minWidth ? { minWidth } : undefined}>
           {caption && <caption className="sr-only">{caption}</caption>}
-          {/* Opaque under the tinted row when the body scrolls beneath it. */}
           <thead className={cn('sticky top-0 z-10', maxHeight && 'bg-card')}>
             <tr className="border-b border-border bg-secondary/40 text-left backdrop-blur-sm">
               {columns.map((column) => (

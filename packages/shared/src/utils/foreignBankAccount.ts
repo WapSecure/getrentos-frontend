@@ -1,8 +1,4 @@
-/**
- * Format and checksum rules for bank accounts abroad, for web and mobile. A port of the backend's
- * src/shared/banking/foreign-bank-account.rules.ts, which is the check that counts: change both together.
- * Pure: no lookup proves the account exists, only that it is well formed.
- */
+/** A port of the backend's src/shared/banking/foreign-bank-account.rules.ts, which is the check that counts: change both together. */
 
 /** IBAN lengths for the countries we take IBANs from (SEPA euro countries). */
 export const IBAN_LENGTHS: Readonly<Record<string, number>> = {
@@ -29,7 +25,6 @@ export const IBAN_LENGTHS: Readonly<Record<string, number>> = {
   SK: 24,
 };
 
-/** Euro countries in SEPA whose accounts are given as an IBAN. */
 export const SEPA_EURO_COUNTRIES: readonly string[] = [
   'AT',
   'BE',
@@ -64,7 +59,6 @@ export function schemeForCountry(country: string): ForeignAccountScheme | null {
   return null;
 }
 
-/** The only currency an account in that country is paid in; null for a country we do not support. */
 export function currencyForCountry(country: string): string | null {
   const scheme = schemeForCountry(country);
   if (scheme === 'UK') return 'GBP';
@@ -74,7 +68,6 @@ export function currencyForCountry(country: string): string | null {
   return null;
 }
 
-/** Uppercase with spaces, dashes and dots removed. */
 export function compactBankValue(value: string | null | undefined): string {
   return (value ?? '').replace(/[\s.-]/g, '').toUpperCase();
 }
@@ -130,7 +123,6 @@ export function isValidCaAccountNumber(value: string): boolean {
   return digits(compactBankValue(value), 7, 12);
 }
 
-/** ISO 9362: bank (4 letters), country (2 letters), location (2), optional branch (3). */
 export function isValidSwiftBic(value: string): boolean {
   return /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(compactBankValue(value));
 }
@@ -238,7 +230,6 @@ export function validateForeignBankAccount(
   };
 }
 
-/** The countries the form offers, by scheme, in the order shown. */
 export const FOREIGN_ACCOUNT_COUNTRIES: readonly { code: string; name: string }[] = [
   { code: 'GB', name: 'United Kingdom' },
   { code: 'US', name: 'United States' },

@@ -3,7 +3,6 @@ import { Globe } from '@sureground/icons/native';
 import { useDiasporaAvailability } from '@/hooks/useDiasporaAvailability';
 import type { SettingsItem } from './SettingsList';
 
-/** The Diaspora Invest workspace row, only while the API has it switched on. */
 export function useInvestItems(): SettingsItem[] {
   const { enabled } = useDiasporaAvailability();
   if (!enabled) return [];

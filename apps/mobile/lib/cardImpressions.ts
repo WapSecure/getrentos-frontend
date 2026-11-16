@@ -1,6 +1,4 @@
 import { CARD_IMPRESSION_RULE } from '@sureground/shared';
-// Listing-card impressions, the app's side of the web's ListingCard `onVisible`, on the shared CARD_IMPRESSION_RULE.
-// Pure, so the de-duplication and visibility rules can be unit tested without a list on screen.
 
 /** Half the card on screen for one continuous second, once per screen visit, as on the web. */
 export const CARD_VIEWABILITY = {
@@ -13,7 +11,6 @@ export interface VisibleCard {
   position: number;
 }
 
-/** The `viewableItems` FlashList and FlatList hand to `onViewableItemsChanged`, reduced to what we send. */
 export function visibleCards(
   tokens: readonly { item?: unknown; index?: number | null; isViewable?: boolean }[]
 ): VisibleCard[] {
@@ -27,19 +24,12 @@ export function visibleCards(
   return out;
 }
 
-/** Share of a box (top and height in window points) inside a viewport of `viewport` points from 0. */
 export function visibleFraction(top: number, height: number, viewport: number): number {
   if (!(height > 0) || !(viewport > 0)) return 0;
   const shown = Math.min(top + height, viewport) - Math.max(top, 0);
   return Math.max(0, Math.min(1, shown / height));
 }
 
-/**
- * One per list on a screen. A card counts once per screen visit: leaving the screen (blur) ends the
- * visit, and coming back starts a new one that counts whatever is on screen again, as a web page
- * revisit does. Cards seen while the screen is out of focus, or while the list itself is scrolled
- * out of view (`setInView`), wait until both are true.
- */
 export class CardImpressionTracker {
   private seen = new Set<string>();
   private visible: VisibleCard[] = [];

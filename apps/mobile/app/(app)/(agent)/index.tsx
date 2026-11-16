@@ -90,7 +90,6 @@ export default function AgentHome() {
   );
 
   const d = dashboard.data;
-  // Assigned, in progress and overdue are exclusive statuses, so together they are the open tasks.
   const openTasks = d ? d.assignedTasks + d.inProgressTasks + d.overdueTasks : 0;
   const statGroups = d ? (
     <>
@@ -114,7 +113,7 @@ export default function AgentHome() {
           {
             label: 'Overdue',
             value: d.overdueTasks,
-            // Not "Needs attention": the attention flag already reads that out, so it was said twice.
+            // Not "Needs attention": the attention flag already reads that out.
             subtitle: 'Past their due date',
             attention: d.overdueTasks > 0,
             Icon: Clock,
@@ -225,7 +224,6 @@ export default function AgentHome() {
               <EmptyState
                 size="compact"
                 icon={<IconTile Icon={ClipboardCheck} size="xl" />}
-                // "All caught up" only when nothing is open: with overdue work it was simply untrue.
                 title={openTasks ? 'Nothing else scheduled' : "You're all caught up"}
                 description={
                   openTasks

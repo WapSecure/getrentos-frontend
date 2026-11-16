@@ -146,7 +146,6 @@ function TriageBody({ request, onClose, onApplied }: Props & { request: Landlord
             value={assign}
             onValueChange={setAlsoAssign}
             accessibilityLabel={`Also assign ${t.suggestedVendor.name}`}
-            // Sureground blue when on, as in SwitchRow, instead of the platform green or teal.
             trackColor={{ true: colors.primary, false: colors.border }}
             thumbColor={colors.primaryForeground}
             ios_backgroundColor={colors.border}

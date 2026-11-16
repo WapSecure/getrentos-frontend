@@ -76,7 +76,6 @@ import { PurchaseSummaryList } from '@/components/purchases/PurchaseSummaryList'
 import { StepProgress } from '@/components/purchases/StepProgress';
 import { purchaseWorkspaceHref } from '@/components/purchases/purchaseHref';
 
-/** Enough rows to total the deposits held; a longer history shows the count only. */
 const LIST_PAGE = 50;
 
 const KIND_ICON: Record<InvestorAttentionKind, SgIcon> = {
@@ -104,11 +103,10 @@ const ROUTES = {
 
 const go = (path: string) => () => router.push(path as Href);
 
-/** "12 Nov 2026 · 10:00 Lagos · 09:00 London": business dates stay Lagos (D2). */
+/** "12 Nov 2026 · 10:00 Lagos · 09:00 London": business dates stay Lagos. */
 const dualMoment = (iso: string, timeZone?: string | null) =>
   `${formatDate(iso, 'short')} · ${formatDualTime(iso, timeZone)}`;
 
-/** Re-reads the clock every 30 seconds, so the times stay current while the screen is open. */
 function useNow() {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -118,16 +116,11 @@ function useNow() {
   return now;
 }
 
-/**
- * Sureground Diaspora Invest: the investor's one place for what needs them, their portfolio,
- * purchases, property care, profile and identity checks. The same sections as the web workspace.
- */
 export default function InvestorWorkspace() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const now = useNow();
   const { profile: account, workspaces } = useAuth();
-  // Purchases live with buying and managed property with owning: link across only for that role.
   const buyer = workspaces.includes('buyer');
   const owner = workspaces.includes('owner');
 
@@ -139,7 +132,6 @@ export default function InvestorWorkspace() {
     enabled: buyer,
     retry: false,
   });
-  // Deposit amounts: the overview counts purchases but does not total what is held.
   const transactions = useQuery({
     queryKey: [...qk.investor.transactions, LIST_PAGE],
     queryFn: () => buyerTransactionsApi.list(1, LIST_PAGE),
@@ -171,7 +163,6 @@ export default function InvestorWorkspace() {
       risk: ROUTES.risk,
       tours: buyer ? ROUTES.tours : undefined,
       approvals: owner ? ROUTES.approvals : undefined,
-      // No dispute screens on mobile yet, so a dispute opens its purchase workspace (no `dispute` link).
       identity: ROUTES.identity,
     },
   }).map((item) => ({
@@ -220,7 +211,7 @@ export default function InvestorWorkspace() {
       onPress: owner ? go(ROUTES.managedArea) : undefined,
     });
   }
-  // DIA-30: only in-date reports by accredited valuers, always with the valuer and date.
+  // Only in-date reports by accredited valuers, always with the valuer and date.
   const valued = portfolioValuationView(data?.portfolio);
   if (valued && (valued.valuedCount > 0 || valued.notValuedCount > 0)) {
     portfolio.push({
@@ -394,7 +385,6 @@ function Meta({ Icon, label }: { Icon: SgIcon; label: string }) {
   );
 }
 
-/** Managed property: agreements, spending waiting for approval and the latest statement. */
 function PropertyCare({ data, owner }: { data: InvestorOverview; owner: boolean }) {
   const { colors, spacing } = useTheme();
   const managed = data.activeManagedProperties ?? 0;
@@ -477,7 +467,6 @@ function PropertyCare({ data, owner }: { data: InvestorOverview; owner: boolean 
   );
 }
 
-/** Compact profile: who, where and what they are after; everything else behind a toggle. */
 function ProfileSummary({
   summary,
   risk,
@@ -488,7 +477,6 @@ function ProfileSummary({
   const { colors, spacing, radius } = useTheme();
   const { profile: account } = useAuth();
   const [open, setOpen] = useState(false);
-  // The overview carries only the zone and country; the rest comes from the profile itself.
   const full = useQuery({ queryKey: qk.investor.profile, queryFn: investorApi.profile });
   const profile: Partial<InvestorProfile> = { ...summary, ...(full.data ?? {}) };
   const livesIn = countryName(profile.countryOfResidence) ?? profile.countryOfResidence;
@@ -570,7 +558,6 @@ function ProfileSummary({
   );
 }
 
-/** Passport, address abroad and bank statement, with how far along they are and what is next. */
 function IdentityChecks({ status }: { status: ForeignIdentityStatus }) {
   const { colors, spacing } = useTheme();
   const { steps, approved, next } = identityProgress(status);

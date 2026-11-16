@@ -20,7 +20,6 @@ export function ReasonSheet({
   action: string;
   min?: number;
   busy?: boolean;
-  /** `primary` when the reason lets something go ahead rather than refusing it. */
   tone?: 'destructive' | 'primary';
   onClose: () => void;
   onConfirm: (reason: string) => void;

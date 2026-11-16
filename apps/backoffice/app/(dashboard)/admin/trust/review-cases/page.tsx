@@ -52,7 +52,6 @@ const PURPOSE_OPTIONS: { value: PurposeFilter; label: string }[] = [
   { value: 'foreign', label: 'Diaspora identity and funds' },
 ];
 
-// The diaspora queue has its own list (soonest due first); the card and modal take the shared shape.
 const fromForeign = (
   page: Paginated<ForeignReviewCaseSummary>
 ): Paginated<TrustReviewCaseSummary> => ({

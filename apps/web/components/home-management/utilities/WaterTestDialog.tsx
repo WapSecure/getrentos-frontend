@@ -40,7 +40,6 @@ interface WaterTestDialogProps {
   defaultPropertyId?: string;
 }
 
-/** The readings most labs report; anything else goes in the note. */
 const READINGS = [
   { key: 'pH', label: 'pH', placeholder: 'e.g. 7.1' },
   { key: 'tdsMgL', label: 'Dissolved solids (mg/L)', placeholder: 'e.g. 180' },

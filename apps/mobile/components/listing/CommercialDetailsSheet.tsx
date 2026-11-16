@@ -18,11 +18,9 @@ import { CommercialDetailsFields } from './CommercialDetailsFields';
 export interface CommercialDetailsTarget {
   id: string;
   title: string;
-  /** As the API sent it; read through `commercialDetailsOf`. */
   commercial?: unknown;
 }
 
-/** Edits a commercial listing's stated details; landlord, owner and realtor listings share it. */
 export function CommercialDetailsSheet({
   target,
   onClose,

@@ -6,9 +6,7 @@ interface SectionIntroProps {
   eyebrow?: string;
   title: ReactNode;
   lead?: ReactNode;
-  /** A link or button aligned with the lead, e.g. "View all homes to rent". */
   action?: ReactNode;
-  /** `split`: title left, lead right (Brik). `stacked`: one column. */
   layout?: 'split' | 'stacked' | 'centered';
   id?: string;
   className?: string;

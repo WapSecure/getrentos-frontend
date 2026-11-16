@@ -129,7 +129,6 @@ export const AssignVendorModal = ({
                 className="pt-3"
               />
             )}
-            {/* Without this, a landlord whose vendors are the wrong trade had no way forward from here. */}
             <p className="pt-2 text-sm text-muted-foreground">
               Need a different trade?{' '}
               <Link

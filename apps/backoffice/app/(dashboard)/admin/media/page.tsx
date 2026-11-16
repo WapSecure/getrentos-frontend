@@ -54,7 +54,6 @@ function formatSize(bytes: number | null): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-/** The file name after the upload id, for a readable row; the full key stays in the title for support. */
 function displayName(key: string): string {
   const name = key.slice(key.lastIndexOf('/') + 1);
   return (
@@ -73,7 +72,6 @@ function budgetNote(used: number, budget: number): string | undefined {
     : undefined;
 }
 
-/** Storage, uploads, backlog and holds from the hourly media health check, with any alerts on top. */
 function MediaHealthStrip({ health }: { health: AdminMediaHealth }) {
   const { stats, limits, alerts } = health;
   return (

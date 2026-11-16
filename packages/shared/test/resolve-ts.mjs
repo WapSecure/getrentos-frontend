@@ -1,5 +1,4 @@
-// Node's type stripping needs file extensions; the source imports without them, as the bundlers
-// expect. A folder import ("./types") resolves to its index.ts.
+// Node's type stripping needs file extensions; the source imports without them, as the bundlers expect.
 export async function resolve(specifier, context, next) {
   try {
     return await next(specifier, context);

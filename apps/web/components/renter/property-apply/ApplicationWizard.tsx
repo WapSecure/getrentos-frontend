@@ -188,8 +188,7 @@ export const ApplicationWizard = ({
     .filter((doc) => !doc.uploaded)
     .map((doc) => ({ doc, file: libraryDocs.find((d) => sameName(d.name, doc.name)) }))
     .filter((m): m is { doc: ApplicationDocument; file: RenterDocument } => !!m.file);
-  // Only files of the right kind, and not one already attached to another document, so one ID card cannot
-  // stand in for proof of income and a bank statement too.
+  // A file attached to one document can't be reused, so one ID card cannot stand in for proof of income too.
   const usedIds = new Set(data.documents.flatMap((d) => (d.documentId ? [d.documentId] : [])));
   const fittingDocs = (slotName: string) =>
     libraryDocs.filter((file) => !usedIds.has(file.id) && savedDocumentFits(slotName, file));
@@ -768,7 +767,6 @@ const UploadButton = ({
   );
 };
 
-/** "All 3 required documents, plus 1 optional", never a bare 3/5 that reads as incomplete when only optional ones are missing. */
 export function documentsSummary(documents: ApplicationDocument[]): string {
   const required = documents.filter((d) => d.required);
   const missing = required.filter((d) => !d.uploaded).map((d) => d.name);

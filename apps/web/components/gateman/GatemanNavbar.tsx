@@ -55,7 +55,6 @@ export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center gap-2 h-16">
           <div className="flex min-w-0 shrink-0 items-center gap-3">
-            {/* At lg the links take the room, so the wordmark steps aside for the console pill until xl. */}
             <Logo
               size="md"
               className="shrink-0 [&>span]:sr-only sm:[&>span]:not-sr-only lg:[&>span]:sr-only xl:[&>span]:not-sr-only"

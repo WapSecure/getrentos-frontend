@@ -37,7 +37,6 @@ const FEES: { key: keyof ListingFeeValues; label: string; hint: string; tenPerce
 interface ListingFeeFieldsProps {
   value: ListingFeeValues;
   onChange: (next: ListingFeeValues) => void;
-  /** Rent for one year, for the 10% shortcut. */
   annualRent?: number;
 }
 

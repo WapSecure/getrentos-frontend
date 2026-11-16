@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Any signed-in account: an accepted appointment, not a role, grants access.
 export default function RepresentingLayout({ children }: { children: ReactNode }) {
   return (
     <main className="min-h-screen bg-background pt-16">

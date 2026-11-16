@@ -55,7 +55,6 @@ export const OwnerStatsCards = ({
             icon: TrendingUp,
             value: visible ? formatCurrency(totalPortfolioValue, { compact: true }) : '••••••',
             subtitle: 'Current estimate',
-            // Analytics is a Pro feature; on Free the figure would lead to an upgrade wall.
             href: isPro ? ROUTES.OWNER_ANALYTICS : undefined,
           },
           {

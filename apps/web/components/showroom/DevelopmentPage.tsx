@@ -32,7 +32,6 @@ const naira = (n: number) => formatCurrency(n);
 const day = (iso: string) =>
   new Date(iso).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
 
-/** An off-plan development: listed only. The developer takes the money; the page says so in two places. */
 export function DevelopmentPage({ development: d }: { development: ShowroomDevelopment }) {
   const prices = d.unitTypes
     .map((u) => u.priceFromNaira)

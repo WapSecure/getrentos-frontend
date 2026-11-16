@@ -30,7 +30,6 @@ const BAND_FIELDS = [
 
 type BandKey = (typeof BAND_FIELDS)[number]['key'];
 
-// Shown only with a live engagement: the limits mean nothing without a manager to measure against.
 export function SpendCapSettings() {
   const { data } = useQuery({
     queryKey: ['mandates', 'mine'],

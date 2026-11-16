@@ -10,12 +10,9 @@ import type { Milestone, Perfection } from './landSales';
 import type { BuyerTransaction } from './buyerTransactions';
 import { withStepUpSummary } from '../stepUp';
 
-// One purchase (built home or land resale) as its buyer or the buyer's representative sees it
-// (DIA-15, DIA-16). Mirrors the backend's `land/dto/transaction-workspace.dto.ts` and web's
-// transactionWorkspaceService. Sureground holds only the deposit, never the rest of the price (D11).
+// Mirrors the backend's `land/dto/transaction-workspace.dto.ts`.
 
 export interface WorkspaceMilestone extends Milestone {
-  /** The professional who checked it. */
   verifiedBy?: { name: string; role?: string };
 }
 
@@ -43,7 +40,6 @@ export interface WorkspaceRepresentative {
   relationship: string;
   scopes: string[];
   status: 'INVITED' | 'ACTIVE';
-  /** Gives the second approval on this sale. */
   approvesPayments: boolean;
 }
 
@@ -68,7 +64,6 @@ export interface WorkspaceHistoryItem {
     | 'BUYER'
     | 'SELLER'
     | 'REPRESENTATIVE';
-  /** Staff always show as "Sureground". */
   actor: string;
   important: boolean;
 }
@@ -84,10 +79,8 @@ export interface TransactionWorkspace {
   nextAction: NextAction | null;
   milestones: WorkspaceMilestone[];
   conditions: WorkspaceCondition[];
-  /** Null, with no legal steps, until staff open title perfection. */
   legalCase: WorkspaceLegalCase | null;
   legalSteps: Perfection['steps'];
-  /** The seller sees `{ binding }` only. */
   coApproval: CoApproval;
   representatives: WorkspaceRepresentative[];
   professionals: WorkspaceProfessional[];
@@ -96,7 +89,6 @@ export interface TransactionWorkspace {
   history: WorkspaceHistoryItem[];
 }
 
-/** A signed, short-lived link to one document on the sale. */
 export interface WorkspaceDocumentLink {
   id: string;
   documentType: string;
@@ -108,7 +100,6 @@ export interface WorkspaceDocumentLink {
 
 export type WorkspaceViewer = Exclude<WorkspaceViewerRole, 'SELLER'>;
 
-// Neutral routes for any sale; they work wherever land is switched off.
 const BASE: Record<WorkspaceViewer, string> = {
   BUYER: '/buyer/transactions',
   REPRESENTATIVE: '/representing/transactions',
@@ -119,11 +110,9 @@ const step = (txId: string, key: string) =>
   `/buyer/transactions/${encodeURIComponent(txId)}/milestones/${encodeURIComponent(key)}`;
 
 export const purchaseWorkspaceApi = {
-  /** 404 for anyone but the party asked for; a representative needs VIEW (403 otherwise). */
   get: (role: WorkspaceViewer, txId: string) =>
     apiFetch<TransactionWorkspace>(`${tx(role, txId)}/workspace`),
 
-  /** Same access as the workspace. */
   document: (role: WorkspaceViewer, txId: string, documentId: string) =>
     apiFetch<WorkspaceDocumentLink>(
       `${tx(role, txId)}/documents/${encodeURIComponent(documentId)}`

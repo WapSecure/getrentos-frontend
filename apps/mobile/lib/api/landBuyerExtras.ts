@@ -162,14 +162,9 @@ export interface CoApproval {
   disableEffectiveAt?: string | null;
   representative?: { appointmentId: string; name: string } | null;
   pending?: CoApprovalPendingStep[];
-  /** Both approved the deposit release; the buyer still has to press Release. */
   releaseApproved?: boolean;
 }
 
-/**
- * A plot purchase, a land resale under the land routes, or any sale (built home or land resale)
- * under the neutral routes, which work wherever land is switched off.
- */
 export type Deal =
   | { kind: 'purchase'; id: string }
   | { kind: 'transaction'; id: string }
@@ -194,7 +189,6 @@ export interface PrincipalDeals {
     escrowStatus: string;
     amount: number;
     title: string;
-    /** `LAND` for a land resale; anything else is a built home. Older servers leave it out. */
     propertyType?: string | null;
     youApprovePayments: boolean;
   }[];
@@ -267,7 +261,6 @@ export const landBuyerExtrasApi = {
   disableCoApproval: (d: Deal) => post<CoApproval>(`${buyerDeal(d)}/co-approval/disable`),
   keepCoApproval: (d: Deal) => post<CoApproval>(`${buyerDeal(d)}/co-approval/keep`),
 
-  /** `name`, `email` and `phoneMasked` are the buyer's. */
   representing: () => apiFetch<Appointment[]>('/land/representing'),
   respond: (id: string, response: 'ACCEPT' | 'DECLINE') =>
     post<unknown>(`/land/representing/${id}/respond`, { response }),

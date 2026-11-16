@@ -4,14 +4,12 @@ import Onboarding from '@/app/(auth)/onboarding';
 import { expectAccessiblePressables, renderWithTheme, type HostElement } from './helpers/a11y';
 
 jest.mock('expo-router', () => ({ router: { replace: jest.fn(), push: jest.fn() } }));
-// The illustrations are decorative and hidden from screen readers; stub them out.
 jest.mock('@/components/onboarding/OnboardingScenes', () => ({
   FindPropertiesScene: () => null,
   EscrowScene: () => null,
   VerifiedPeopleScene: () => null,
   SceneMotionProvider: ({ children }: { children: ReactNode }) => children,
 }));
-// Without animation the slides change on press, so the last slide can be reached in a test.
 jest.mock('@sureground/ui-native', () => ({
   ...jest.requireActual<object>('@sureground/ui-native'),
   useReducedMotion: () => true,

@@ -44,11 +44,9 @@ export const transactionWorkspaceService = {
   disputeMilestone: (txId: string, key: string, reason: string) =>
     safeCall(() => post<LandMilestone>(`${step(txId, key)}/dispute`, { reason: reason.trim() })),
 
-  /** Deposit disputes I raised or am the subject of (buyer or seller only; newest first). */
   saleDisputes: () =>
     safeCall(() => authFetch<Paginated<SaleDispute>>('/marketplace/disputes?pageSize=100')),
 
-  /** One deposit dispute, for its thread (its two parties only). */
   saleDispute: (id: string) =>
     safeCall(() => authFetch<SaleDispute>(`/marketplace/disputes/${encodeURIComponent(id)}`)),
 
@@ -64,7 +62,6 @@ export const transactionWorkspaceService = {
       })
     ),
 
-  /** Puts the held deposit on hold until Sureground decides; the buyer or the seller may raise it. */
   disputeDeposit: (txId: string, input: { title: string; description: string }) =>
     safeCall(() =>
       post<SaleDispute>(`/marketplace/transactions/${encodeURIComponent(txId)}/dispute`, {

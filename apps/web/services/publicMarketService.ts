@@ -20,7 +20,6 @@ import {
 export type { PublicListingCard, PublicMarket, PublicMarketFilters } from '@/lib/publicListingMap';
 
 export const publicMarketService = {
-  /** Public, so anyone viewing a published listing sees the neighbourhood, not only signed-in renters. */
   geoInsights: (id: string, destination?: string) =>
     safeCall(() =>
       authFetch<GeoInsights>(
@@ -72,7 +71,6 @@ export const publicMarketService = {
     return market === 'rent' ? this.rentals(filters) : this.sales(filters);
   },
 
-  /** Ranked on the server: same market, nearby, a comparable price and about the same bedrooms. */
   similar(market: PublicMarket, id: string, limit = 3): Promise<ApiResponse<PublicListingCard[]>> {
     return safeCall(async () => {
       const items = await authFetch<Array<RentApiItem & SaleApiItem>>(

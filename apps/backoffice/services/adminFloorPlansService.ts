@@ -10,7 +10,6 @@ export interface AdminFloorPlan {
   propertyReference?: string;
   location: string;
   levelName: string;
-  /** Signed, short-lived. */
   imageUrl?: string;
   measurementStatus: FloorPlanMeasurementStatus;
   checkedAt?: string;
@@ -31,7 +30,7 @@ export const adminFloorPlansService = {
   list(status: FloorPlanMeasurementStatus): Promise<ApiResponse<AdminFloorPlan[]>> {
     return safeCall(() => authFetch<AdminFloorPlan[]>(`/admin/floor-plans?status=${status}`));
   },
-  /** Needs step-up; `seenUpdatedAt` makes a lister's edit in between a conflict, not a check. */
+  /** `seenUpdatedAt` makes a lister's edit in between a conflict, not a check. */
   setMeasurement(
     plan: Pick<AdminFloorPlan, 'id' | 'updatedAt'>,
     status: FloorPlanMeasurementStatus,

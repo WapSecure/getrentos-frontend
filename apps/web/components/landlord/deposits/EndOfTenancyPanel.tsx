@@ -41,7 +41,6 @@ interface DraftItem {
 
 const newItem = (): DraftItem => ({ key: crypto.randomUUID(), reason: '', amount: 0, files: [] });
 
-/** The claimed items with their evidence, read-only. */
 export const ClaimItems = ({ claim }: { claim: DepositClaim }) => (
   <ul className="divide-y divide-border rounded-xl border border-border">
     {claim.items.map((item) => (
@@ -184,7 +183,6 @@ const ClaimForm = ({ view, onDone }: { view: DepositEndView; onDone: () => void 
   );
 };
 
-/** D-6 end of tenancy, landlord side: record move-out, claim deductions within 14 days, follow the outcome. */
 export const EndOfTenancyPanel = ({
   depositId,
   onChanged,

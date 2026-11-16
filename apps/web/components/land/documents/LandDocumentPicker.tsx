@@ -96,8 +96,7 @@ export const LandDocumentPicker = ({
     );
   }
 
-  // Not a Field: a Field names every control inside it with its label, and the type filter
-  // needs a name of its own.
+  // Not a Field: a Field names every control inside it with its label, and the type filter needs its own name.
   return (
     <div role="group" aria-labelledby={`${id}-label`} className="space-y-1.5">
       <p id={`${id}-label`} className="text-sm font-medium tracking-[-0.01em] text-foreground">

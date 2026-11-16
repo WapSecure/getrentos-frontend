@@ -90,7 +90,6 @@ export const LeaseCard = ({
         facts={[
           {
             label: 'Lease period',
-            // Each date stays whole; a narrow card breaks the line between them, never inside one.
             value: (
               <>
                 <span className="whitespace-nowrap">{formatDate(lease.leaseStart)} –</span>{' '}
@@ -186,7 +185,6 @@ export const LeaseCard = ({
           </p>
         )}
         {lease.status === 'signed' && (
-          // A grid, not one row: three buttons ("Replace offer" is long) overflowed a narrow card.
           <div className="grid w-full grid-cols-2 gap-2">
             <Button
               variant="outline"

@@ -24,13 +24,11 @@ const PERSONAS: Segment<PlanPersona>[] = [
   { value: 'realtor', label: 'Realtors' },
 ];
 
-/** `initialPricing` comes from the server, so the price, trial and VAT lines are in the first HTML and nothing shifts. */
 export function PricingView({ initialPricing }: { initialPricing?: PlanPricing }) {
   const router = useRouter();
   const { pricing, entitlementsFor, isLoading } = usePlanPricing(initialPricing);
   const [persona, setPersona] = useState<PlanPersona>('landlord');
-  // Signed-in visitors go to their own workspace, not sign-up. The signed-in flag is set after
-  // mount, so the server HTML and the first client render both show the signed-out actions.
+  // The signed-in flag is set after mount, so the server HTML and first client render both show signed-out actions.
   const isSignedIn = useAuthStore((s) => s.isAuthenticated);
   const [accountLinks] = useState(() =>
     typeof window === 'undefined' ? null : signedInPricingLinks(getUserRole())

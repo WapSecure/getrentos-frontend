@@ -28,12 +28,10 @@ export interface SpendApproval {
   decidedAt: string | null;
   expenseId: string | null;
   createdAt: string;
-  /** Optional while older rows and deploys catch up. */
   band?: SpendBand | null;
   kind?: SpendApprovalKind;
   maintenanceRequestId?: string | null;
   quoteId?: string | null;
-  /** When the manager repeated the approved work-order call. */
   usedAt?: string | null;
 }
 

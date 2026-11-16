@@ -6,11 +6,9 @@ export interface PageHeaderProps {
   title: ReactNode;
   description?: ReactNode;
   eyebrow?: string;
-  /** `brand` (the default) sets the eyebrow in Sureground blue; `muted` keeps it grey. */
   eyebrowTone?: 'brand' | 'muted';
   actions?: ReactNode;
   meta?: ReactNode;
-  /** Where this page sits; the last item is the page itself. */
   breadcrumbs?: BreadcrumbItem[];
   className?: string;
 }

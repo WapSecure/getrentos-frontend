@@ -12,7 +12,7 @@ import type { Paginated } from './properties';
 
 const BASE = '/home-management/service-charges';
 
-/** Service-charge budgets. Set up on the web; the app shows them and can publish, close or void (step-up). */
+/** Set up on the web; publish, close and void use step-up. */
 export const serviceChargesApi = {
   list: (propertyId?: string) =>
     apiFetch<Paginated<ServiceChargeBudgetSummary>>(

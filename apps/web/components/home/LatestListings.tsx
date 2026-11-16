@@ -31,7 +31,6 @@ const Row = ({
   </div>
 );
 
-/** Live listings rendered on the server so they are in the first HTML. Hidden when there are none. */
 export async function LatestListings() {
   const [rent, sale] = await Promise.all([latestListings('rent', 3), latestListings('sale', 3)]);
   const rows = ROWS.map((row) => ({ ...row, items: row.market === 'rent' ? rent : sale })).filter(

@@ -13,7 +13,6 @@ export type ResidentServiceCharge = Omit<
   collection: 'PAID' | 'UNPAID' | 'REMOVED' | 'WAIVED';
 };
 
-/** An estate resident's own service charges. Paying stays on the dues page. */
 export const residentServiceChargesService = {
   list: () =>
     safeCall(async () =>

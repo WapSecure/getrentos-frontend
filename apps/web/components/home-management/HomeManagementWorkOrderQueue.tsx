@@ -223,17 +223,11 @@ interface HomeManagementWorkOrderQueueProps {
   pageSize: number;
   total: number;
   onPageChange: (page: number) => void;
-  /** Who is looking: the owner can rate a finished job. */
   viewerRole?: 'owner' | 'landlord' | 'manager';
-  /** Inside a page that already titles the section: drops the heading and the page counts. */
   compact?: boolean;
-  /** An owner looking at a property someone else manages: the jobs and their evidence, no actions. */
   readOnly?: boolean;
-  /** Off where the page header already offers "Create work order", so the action is not shown twice. */
   showCreateAction?: boolean;
-  /** Set by the page header's "Create work order"; see useCreateRequest. */
   createRequest?: number;
-  /** Fields a create request starts with, such as a failed water test's property and category. */
   createPrefill?: Partial<WorkOrderForm>;
   onCreateRequestHandled?: () => void;
 }
@@ -673,7 +667,6 @@ export function HomeManagementWorkOrderQueue({
                   !approvalPending &&
                   workOrder.approvedCost !== null &&
                   workOrder.approvedCost !== undefined;
-                // Until spend is approved, the estimate entered on creation is the figure to show.
                 const hasEstimateOnly =
                   !approvalPending &&
                   !hasApprovedCost &&

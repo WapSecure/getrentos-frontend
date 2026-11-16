@@ -100,7 +100,6 @@ const num = (v: string) => (v.trim() === '' ? undefined : Number(v));
 
 type Result = { success: boolean; data?: DeveloperDevelopment; error?: string };
 
-/** One editor for a firm's development: details, evidence for the four checks, media, units and payment plan. */
 export function DevelopmentEditorView({ id }: { id: string }) {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -114,7 +113,6 @@ export function DevelopmentEditorView({ id }: { id: string }) {
     },
   });
 
-  /** Every change returns the whole development; put it straight into the cache. */
   const run = async (call: () => Promise<Result>, done: string) => {
     const res = await call();
     if (!res.success || !res.data) {

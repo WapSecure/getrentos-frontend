@@ -178,7 +178,6 @@ const policyFormError = (form: SlaPolicyForm) => {
 interface HomeManagementSlaPoliciesProps {
   properties: HomeManagementProperty[];
   isPropertiesLoading?: boolean;
-  /** Set by the page header's Add menu; see useCreateRequest. */
   createRequest?: number;
   onCreateRequestHandled?: () => void;
 }
@@ -308,7 +307,6 @@ export function HomeManagementSlaPolicies({
     if (!mutationPending) setDialogState(null);
   };
 
-  // Waits for the property's policies so it knows which priorities are still free.
   const policiesReady =
     !isPropertiesLoading && !policiesQuery.isLoading && !activePoliciesQuery.isLoading;
   useCreateRequest(

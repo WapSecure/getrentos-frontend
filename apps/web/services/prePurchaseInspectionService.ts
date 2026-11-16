@@ -8,7 +8,6 @@ const post = <T>(path: string, body?: unknown) =>
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
 
-/** `land`: the land routes, behind the land rollout. `all`: the general routes, built homes too. */
 const base = (scope: TourScope) =>
   scope === 'land' ? '/buyer/land/inspections' : '/buyer/inspections';
 

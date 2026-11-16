@@ -17,7 +17,6 @@ export function SaveListingButton({
   listingId: string;
   returnPath: string;
   className?: string;
-  /** `card` matches the other actions on a ListingCard photo. */
   appearance?: 'overlay' | 'card';
 }) {
   const router = useRouter();

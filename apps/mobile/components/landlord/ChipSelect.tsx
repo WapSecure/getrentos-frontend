@@ -13,7 +13,6 @@ interface Props<T extends string> {
   onChange: (value: T) => void;
   emptyText?: string;
   disabled?: boolean;
-  /** One scrolling row instead of wrapping, for long lists such as property names. */
   scroll?: boolean;
 }
 

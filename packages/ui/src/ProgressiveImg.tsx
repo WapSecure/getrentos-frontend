@@ -4,14 +4,10 @@ import { useLayoutEffect, useRef, useState, type ImgHTMLAttributes } from 'react
 import { cn, placeholderOf } from '@sureground/shared';
 
 export interface ProgressiveImgProps extends ImgHTMLAttributes<HTMLImageElement> {
-  /** A tiny blurred `data:` URI from the API. Without a valid one this is a plain `<img>`, exactly as before. */
   placeholder?: string | null;
 }
 
-/**
- * An `<img>` that shows a blurred placeholder until the photo loads, then fades it in (no fade with reduced motion).
- * The parent must be positioned (`relative`) and clip (`overflow-hidden`): the placeholder fills it.
- */
+/** The parent must be positioned (`relative`) and clip (`overflow-hidden`): the placeholder fills it. */
 export function ProgressiveImg({ placeholder, className, onLoad, ...props }: ProgressiveImgProps) {
   const blur = placeholderOf(placeholder);
   const ref = useRef<HTMLImageElement>(null);
@@ -31,7 +27,6 @@ export function ProgressiveImg({ placeholder, className, onLoad, ...props }: Pro
 
   return (
     <>
-      {/* Stays behind the photo, so the fade never shows the bare background. */}
       <span
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 scale-110 bg-cover bg-center blur-lg"

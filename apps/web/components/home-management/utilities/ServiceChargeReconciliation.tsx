@@ -30,7 +30,6 @@ import { homeManagementKeys } from '@/lib/queryKeys';
 import { serviceChargesService } from '@/services/serviceChargesService';
 import { formatDay } from './ServiceChargePanel';
 
-/** Budget against what was actually spent, per line, and what was billed and collected. */
 export function ServiceChargeReconciliation({
   budgetId,
   editable,

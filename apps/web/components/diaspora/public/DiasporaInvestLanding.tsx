@@ -36,8 +36,6 @@ import {
 } from './content';
 import { Eyebrow } from '@/components/marketing/Eyebrow';
 
-// Server-rendered, like the landing page: plain markup that reads without JavaScript.
-
 const WORKSPACE_SIGN_IN = signInThen(DIASPORA_ROUTES.BUYER_WORKSPACE);
 
 const PROOF = [
@@ -46,7 +44,6 @@ const PROOF = [
   { icon: Clock, text: 'Your time next to Lagos time' },
 ];
 
-// Built from the same Card and Timeline the workspace uses, and labelled as an example.
 const PREVIEW_STEPS = [
   {
     id: 'proof',
@@ -102,7 +99,6 @@ const Dash = () => (
   </span>
 );
 
-/** A plain list with an em-dash marker, matching the other landing pages. */
 const DashList = ({ points }: { points: string[] }) => (
   <ul className="flex flex-col gap-3 text-[0.9375rem] leading-relaxed text-muted-foreground">
     {points.map((point) => (
@@ -119,7 +115,6 @@ interface TitledList {
   points: string[];
 }
 
-/** Two lists side by side under rules, e.g. what is covered and what is not. */
 const PairedLists = ({ left, right }: { left: TitledList; right: TitledList }) => (
   <div className="grid gap-x-12 gap-y-12 md:grid-cols-2">
     {[left, right].map((list, index) => (

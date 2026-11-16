@@ -91,7 +91,6 @@ export default function ResidentVisitorPassesPage() {
     mutationFn: (passId: string) => unwrap(estateResidentService.revokeMyVisitorPass(passId)),
     onSuccess: invalidate,
   });
-  // Revoking cannot be undone and turns the guest away at the gate, so it is confirmed first.
   const [revoking, setRevoking] = useState<{ id: string; visitorName: string } | null>(null);
 
   const approveMutation = useMutation({

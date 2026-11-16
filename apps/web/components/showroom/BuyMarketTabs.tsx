@@ -7,7 +7,6 @@ const TABS = [
   { key: 'developments', label: 'Off-plan developments', href: DEVELOPMENTS_PATH },
 ] as const;
 
-/** Buying has two places to look: finished homes, and off-plan developments (listed only). */
 export function BuyMarketTabs({
   current,
   className,

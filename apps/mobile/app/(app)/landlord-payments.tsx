@@ -113,7 +113,6 @@ export default function LandlordPayments() {
                   </View>
                 )}
                 {processing.count > 0 ? (
-                  // Not yet collected or owed: the tenant paid and the bank hasn't confirmed.
                   <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
                     {`${formatNaira(processing.total)} more is processing (${processing.count === 1 ? '1 payment' : `${processing.count} payments`}). It counts once the bank confirms.`}
                   </Text>
@@ -245,7 +244,6 @@ function PaymentRow({ payment: p }: { payment: LandlordPayment }) {
   );
 }
 
-/** Rent is the default, so only other charges are named on the row. */
 function chargeLabel(category?: string): string | null {
   if (!category || category === 'rent') return null;
   const words = category.replace(/_/g, ' ').toLowerCase();

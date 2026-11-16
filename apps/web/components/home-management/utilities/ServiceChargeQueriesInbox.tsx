@@ -29,8 +29,6 @@ import { formatDay } from './ServiceChargePanel';
 
 type Action = { kind: 'reply' | 'reject' | 'uphold'; query: ServiceChargeQuery } | null;
 
-/** Tenants' open queries on service charges, newest first. Only shown when there is something to answer. */
-/** Where the queries come from: a property's tenants (default) or an estate's residents. */
 export interface QueriesSource {
   queryKey: readonly unknown[];
   invalidateKey: readonly unknown[];
@@ -38,9 +36,7 @@ export interface QueriesSource {
   respond: (id: string, response: string) => Promise<unknown>;
   reject: (id: string, note: string) => Promise<unknown>;
   uphold: (id: string, note: string, credit: number) => Promise<unknown>;
-  /** "tenants" or "residents". */
   who: string;
-  /** What a credit does, e.g. "lands on the tenancy and pays towards their charges". */
   creditEffect: string;
   creditLabel: string;
 }

@@ -57,7 +57,7 @@ export type EstateInvoice = {
 const base = (estateId: string) => `/estate/${estateId}/service-charges`;
 const q = (estateId: string) => `/estate/${estateId}/service-charge-queries`;
 
-/** An estate's service-charge budgets (set up on the web) and residents' queries. Publish, close, void and uphold use step-up. */
+/** Publish, close, void and uphold use step-up. */
 export const estateServiceChargesApi = {
   list: (estateId: string) => apiFetch<EstateBudget[]>(base(estateId)),
   get: (estateId: string, id: string) => apiFetch<EstateBudget>(`${base(estateId)}/${id}`),

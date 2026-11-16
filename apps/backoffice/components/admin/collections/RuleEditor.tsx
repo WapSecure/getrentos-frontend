@@ -128,10 +128,7 @@ const PRICE_HINT: Record<ManagedCollection['market'], string> = {
   shortlet: 'Nightly rate in naira.',
 };
 
-/**
- * A rule-based collection: a saved public search. The public page runs it each time it loads, so it
- * only ever shows public listings, and leaves out listings their listers opted out of.
- */
+/** A saved public search, run on each public page load, so it only shows public, not opted-out, listings. */
 export function RuleEditor({
   manager,
   collection,

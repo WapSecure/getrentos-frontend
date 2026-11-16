@@ -112,7 +112,6 @@ describe('createUploadQueue', () => {
     expect(states().p1).toBeUndefined();
     expect(calls.map((c) => c.file)).toEqual(['f1', 'f2']);
 
-    // A late answer for the cancelled file changes nothing.
     calls[0]!.resolve('k1');
     await flush();
     expect(done).toEqual([]);

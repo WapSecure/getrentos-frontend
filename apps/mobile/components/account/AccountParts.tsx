@@ -62,10 +62,6 @@ export function AccountHeader({
   );
 }
 
-/**
- * The account tab's identity card: avatar, name, contact, a blue role chip and, once identity is
- * checked, the blue verified mark. Read as one header by screen readers.
- */
 export function ProfileCard({
   role,
   fallbackName,

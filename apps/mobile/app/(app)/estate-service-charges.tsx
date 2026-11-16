@@ -31,7 +31,6 @@ import { useEstate } from '@/hooks/useEstate';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
-/** The estate's service-charge budgets (set up on the web) and residents' queries. */
 export default function EstateServiceCharges() {
   const { estateId } = useEstate();
   const { colors, spacing } = useTheme();

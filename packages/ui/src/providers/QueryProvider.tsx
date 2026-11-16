@@ -23,9 +23,7 @@ const mutationErrorMessage = (error: unknown) => {
 interface QueryProviderProps {
   children: React.ReactNode;
   loginPath?: string;
-  /** Pages that work signed out: an ended session there is dropped without leaving the page. */
   isPublicPath?: (pathname: string) => boolean;
-  /** Called when an ended session is dropped on a public page, so the app can show it signed out. */
   onSignedOutInPlace?: () => void;
 }
 

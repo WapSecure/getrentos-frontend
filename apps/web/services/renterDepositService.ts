@@ -19,7 +19,6 @@ export interface TenantDeduction {
 export interface TenantDeposit {
   leaseId: string;
   leaseStatus: string;
-  /** Older API responses may leave it out. */
   leaseEnd?: string;
   propertyTitle: string;
   unitName: string;
@@ -34,7 +33,6 @@ export interface TenantDeposit {
     takenAt: string;
     returnedAt: string | null;
     returnedAmount: number | null;
-    /** D-6 end-of-tenancy stage; older API responses may leave it out. */
     endStage?: DepositEndStage;
     moveOutAt?: string | null;
     claimBy?: string | null;
@@ -84,7 +82,6 @@ export function depositPlans(): Promise<ApiResponse<{ plans: DepositPlan[]; disc
   return safeCall(() => authFetch('/renter/deposits/plan'));
 }
 
-/** D-6 end of tenancy, tenant side. */
 export function depositEndOfTenancy(holdId: string): Promise<ApiResponse<DepositEndView>> {
   return safeCall(() => authFetch<DepositEndView>(`/renter/deposits/${holdId}/end-of-tenancy`));
 }

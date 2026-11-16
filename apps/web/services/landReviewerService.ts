@@ -71,10 +71,6 @@ export const landReviewerService = {
       })
     ),
 
-  /**
-   * DIA-30: a valuer seat files the signed report with the value, method and dates. Neutral path: valuations
-   * are not land-only.
-   */
   submitValuation: (seatId: string, input: LandReviewValuationInput) => {
     const form = new FormData();
     form.append('file', input.file);

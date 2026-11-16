@@ -939,7 +939,6 @@ function RecentSignInsSection() {
   );
 }
 
-/** Shown only while a payout is paused for a check. */
 function PayoutHoldsSection() {
   const { colors, spacing } = useTheme();
   const toast = useToast();

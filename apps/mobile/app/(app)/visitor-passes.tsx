@@ -67,7 +67,6 @@ const EXPIRY_PRESETS = [
 ] as const;
 const DEFAULT_EXPIRY_HOURS = 24;
 
-/** Passes that can still be used at the gate. */
 const ACTIVE_STATUSES = new Set<VisitorPassStatus>(['pending', 'approved', 'checked_in']);
 
 export default function ResidentVisitorPasses() {
@@ -160,7 +159,6 @@ export default function ResidentVisitorPasses() {
   // Walk-ins get their own section at the top: a real person is waiting at the barrier.
   const awaiting = passes.filter((pass) => pass.status === 'awaiting_approval');
   const others = passes.filter((pass) => pass.status !== 'awaiting_approval');
-  // Passes that can still be used come first; the rest are a record of past visits.
   const active = others.filter((pass) => ACTIVE_STATUSES.has(pass.status));
   const finished = others.filter((pass) => !ACTIVE_STATUSES.has(pass.status));
 
@@ -267,7 +265,6 @@ export default function ResidentVisitorPasses() {
   );
 }
 
-/** A real person is standing at the barrier: the two answers are large, stacked and labelled with their name. */
 function GateArrivalCard({
   pass,
   approving,
@@ -339,7 +336,6 @@ function GateArrivalCard({
   );
 }
 
-/** Active passes are raised cards; finished ones sit flat and quiet so the live ones stand out. */
 function PassCard({
   pass,
   revoking = false,
@@ -392,7 +388,6 @@ function PassCard({
             flexDirection: 'row',
             alignItems: 'center',
             gap: spacing.sm,
-            // Lines the text up under the name rather than under the initials.
             paddingLeft: isActive ? 0 : 36 + spacing.md,
           }}
         >

@@ -150,10 +150,7 @@ const locationLabel = (event: HomeManagementTimelineEvent) => {
 interface HomeManagementTimelineProps {
   propertyId?: string;
   limit?: number;
-  /**
-   * Shows only the newest few events from the same query, with a link to the full history, so the
-   * overview adds no request of its own.
-   */
+  // Reuses the same query, so the overview adds no request of its own.
   preview?: number;
   viewAllHref?: string;
 }

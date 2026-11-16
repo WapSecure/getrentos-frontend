@@ -41,11 +41,7 @@ function Rows({ rows }: { rows: CommercialRow[] }) {
   );
 }
 
-/**
- * The commercial journey, as on the web showroom: the lease first, then the space, then what it
- * takes to run a business there. Every line is the lister's own statement, VAT included: it is shown
- * as stated and never worked out. A section with nothing stated is left out.
- */
+/** Every line is the lister's own statement, VAT included: shown as stated, never worked out. */
 export function ShowroomCommercial({
   commercial,
   market,

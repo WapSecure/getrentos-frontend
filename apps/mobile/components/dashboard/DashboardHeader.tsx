@@ -60,7 +60,6 @@ export function DashboardHeader({
   );
 }
 
-/** The workspace's role ("Landlord", "Renter") as a small Sureground blue chip beside the name. */
 function RoleChip({ label }: { label: string }) {
   const { colors, radius, scheme } = useTheme();
   return (

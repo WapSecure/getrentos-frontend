@@ -33,7 +33,6 @@ export function Text({
 }: TextProps) {
   const theme = useTheme();
   const t = theme.typography[variant];
-  // Titles use the serif, set light like the web's page titles.
   const serif = (variant === 'display' || variant === 'title') && theme.displayFont;
 
   return (

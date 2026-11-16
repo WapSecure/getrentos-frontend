@@ -5,16 +5,11 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 export type UrlValue = string | number | boolean | null | undefined;
 
-/** How a value is written: empty, false and the default are left out, so links stay short and stable. */
 export const serialise = (value: UrlValue): string | undefined => {
   if (value === undefined || value === null || value === false || value === '') return undefined;
   return value === true ? '1' : String(value);
 };
 
-/**
- * Mirrors browse state into the query string (replace, no scroll), so a view can be shared or
- * reloaded as it was. Keys not passed here, such as `estate`, are left alone.
- */
 export function useSyncUrlState(
   state: Record<string, UrlValue>,
   defaults: Record<string, UrlValue> = {}
@@ -24,7 +19,6 @@ export function useSyncUrlState(
   const searchParams = useSearchParams();
   const current = searchParams.toString();
 
-  // Cheap to rebuild each render; the effect only navigates when the text actually differs.
   const params = new URLSearchParams(current);
   for (const [key, value] of Object.entries(state)) {
     const text = serialise(value);
@@ -39,7 +33,6 @@ export function useSyncUrlState(
   }, [next, current, pathname, router]);
 }
 
-/** Readers for the first render; state then lives in React and is mirrored back by useSyncUrlState. */
 export const urlParam = {
   text: (params: URLSearchParams, key: string, fallback = '') =>
     params.get(key)?.trim() || fallback,

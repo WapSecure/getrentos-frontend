@@ -44,10 +44,6 @@ const FILTERS: { value: LandlordViewingStatus | undefined; label: string }[] = [
 
 const when = (iso: string) => `${formatDate(iso, 'short')}, ${formatTime(iso)}`;
 
-/**
- * Renters' requests to view a property for rent. The landlord's viewings screen, and the renters
- * tab of the owner's: the backend lets any property controller confirm, decline and host these.
- */
 export function RentalViewingsScreen({
   eyebrow,
   subtitle,
@@ -57,7 +53,6 @@ export function RentalViewingsScreen({
   eyebrow: string;
   subtitle: string;
   emptyDescription?: string;
-  /** Shown under the header, above the status filters (the owner's renters/buyers switch). */
   top?: ReactNode;
 }) {
   const { colors, spacing, radius } = useTheme();
@@ -210,7 +205,6 @@ function ViewingCard({
   onComplete: () => void;
 }) {
   const { colors, spacing } = useTheme();
-  // When the card first showed; close enough to "now" for offering "Mark as done".
   const [shownAt] = useState(() => Date.now());
   const past = !!v.scheduledAt && new Date(v.scheduledAt).getTime() < shownAt;
   return (
@@ -291,7 +285,6 @@ function ViewingCard({
 function ConfirmForm({ viewing, onDone }: { viewing: LandlordViewingRequest; onDone: () => void }) {
   const { spacing } = useTheme();
   const toast = useToast();
-  // Start from the renter's slot, in local time, when they gave one.
   const asked = viewing.preferredAt ? new Date(viewing.preferredAt) : null;
   const [date, setDate] = useState(asked ? toISODate(asked) : '');
   const [time, setTime] = useState(

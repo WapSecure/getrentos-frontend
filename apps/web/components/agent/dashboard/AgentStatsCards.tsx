@@ -17,7 +17,6 @@ export const AgentStatsCards = ({
   inProgress,
   overdueTasks,
 }: AgentStatsCardsProps) => {
-  // The server counts these three by exclusive status (overdue includes assigned tasks past due), so they add up to the open tasks.
   const openTasks = todaysTasks + inProgress + overdueTasks;
 
   return (

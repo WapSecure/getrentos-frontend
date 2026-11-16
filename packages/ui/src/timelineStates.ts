@@ -1,9 +1,6 @@
 export type TimelineState = 'done' | 'current' | 'pending' | 'blocked' | 'skipped';
 
-/**
- * Keeps at most one `current` item, so only one step carries aria-current="step". Any later
- * `current` is shown as `pending`; `onExtra` is told how many were passed so callers can be warned.
- */
+/** Only one step may carry aria-current="step": any later `current` shows as `pending`. */
 export function singleCurrent<T extends { state: TimelineState }>(
   items: readonly T[],
   onExtra?: (count: number) => void

@@ -1,8 +1,4 @@
-/**
- * Finding a person by "their phone number or email". Accounts can be phone-only, so a lookup that
- * asks only for an email strands many people. Mirrors the backend's `src/shared/phone/contact.ts`;
- * the server decides, this only checks input early and builds the request.
- */
+// Accounts can be phone-only. Mirrors the backend's `src/shared/phone/contact.ts`; the server decides.
 
 export type ContactInput =
   | { kind: 'empty' }
@@ -41,15 +37,11 @@ export function toE164Phone(raw: string | null | undefined): string | null {
   return national && NG_NATIONAL_RE.test(national) ? `+234${national}` : null;
 }
 
-/** Keeps only what `toE164Phone` accepts while someone types: digits, spaces, ( ) . - and one leading +. */
 export function sanitisePhoneInput(raw: string): string {
   return raw.replace(/[^\d\s().+-]/g, '').replace(/(?!^)\+/g, '');
 }
 
-/**
- * A phone number laid out for reading: Nigerian numbers as "+234 803 555 0143". Shows the whole
- * number, so use it only for the person's own number; anything else comes back as given.
- */
+/** Shows the whole number, so use it only for the person's own number. */
 export function formatPhoneForDisplay(raw: string | null | undefined): string {
   const value = raw?.trim() ?? '';
   const e164 = toE164Phone(value);
@@ -57,7 +49,6 @@ export function formatPhoneForDisplay(raw: string | null | undefined): string {
   return ng ? `+234 ${ng[1]} ${ng[2]} ${ng[3]}` : value;
 }
 
-/** Anything with an @ is read as an email; anything else as a phone number. */
 export function readContactInput(raw: string | null | undefined): ContactInput {
   const value = raw?.trim() ?? '';
   if (!value) return { kind: 'empty' };
@@ -70,10 +61,7 @@ export function readContactInput(raw: string | null | undefined): ContactInput {
   return e164 ? { kind: 'phone', e164 } : { kind: 'invalid', message: CONTACT_INVALID_PHONE };
 }
 
-/**
- * The request body for a lookup by phone or email. An email goes as `email`, which older servers
- * also accept; a phone number goes as `contact` in the normalised +234 form.
- */
+/** An email goes as `email`, which older servers also accept; a phone number as `contact` in +234 form. */
 export function contactRequestBody(raw: string): { email: string } | { contact: string } | null {
   const input = readContactInput(raw);
   if (input.kind === 'email') return { email: input.email };
@@ -81,7 +69,6 @@ export function contactRequestBody(raw: string): { email: string } | { contact: 
   return null;
 }
 
-/** How to show another person: their email, or their masked phone when they have no email. */
 export function personContactLabel(person: {
   email?: string | null;
   phoneMasked?: string | null;
@@ -94,10 +81,7 @@ export function isNoAccountMessage(message: string | null | undefined): boolean 
   return /^No Sureground account uses that/i.test(message?.trim() ?? '');
 }
 
-/**
- * A plain invitation to sign up. No tracking parameters and nothing about either person. `reason`
- * finishes "Join me on Sureground so I can …", for example "add you to my estate staff".
- */
+/** No tracking parameters and nothing about either person. `reason` finishes "Join me on Sureground so I can …". */
 export function signupInviteMessage(
   signupUrl: string,
   reason = 'add you as my representative'

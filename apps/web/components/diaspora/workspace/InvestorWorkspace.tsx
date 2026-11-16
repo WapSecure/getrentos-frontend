@@ -76,7 +76,6 @@ import { IdentityProgressCard, ProfileSummaryCard, dualMoment } from './Investor
 
 const lagosDay = (iso: string) => formatLagosDate(iso, 'short');
 
-/** Re-reads the clock every 30 seconds, so the times stay current while the page is open. */
 const useNow = () => {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -86,13 +85,9 @@ const useNow = () => {
   return now;
 };
 
-/** Enough rows to total the deposits held; a longer history shows the count only. */
 const LIST_PAGE = 50;
 
-/**
- * Purchases live in the buyer portal and managed property in the owner portal. Link across only
- * when the viewer holds that role, since the other portal turns everyone else away.
- */
+// Link across portals only when the viewer holds that role: the other portal turns everyone else away.
 const usePortalLinks = (portal: InvestorPortal) => {
   const user = useMemo(() => getStoredUser<{ roles?: string[]; fullName?: string }>(), []);
   const roles = useMemo(
@@ -109,9 +104,7 @@ const usePortalLinks = (portal: InvestorPortal) => {
     landPurchases: buyer ? LAND_BUYER_ROUTES.HUB : undefined,
     tours: buyer ? VISIT_ROUTES.BUYER_TOURS : undefined,
     inspections: buyer ? VISIT_ROUTES.BUYER_INSPECTIONS : undefined,
-    // The owner's own agreements with Sureground Managed (OWNER_MANAGED is the reverse).
     managed: owner ? ROUTES.OWNER_MANAGEMENT : undefined,
-    // Agreement, approvals, repairs and the latest statement on one page.
     managedArea: owner ? DIASPORA_ROUTES.OWNER_MANAGED : undefined,
     approvals: owner ? ROUTES.OWNER_APPROVALS : undefined,
     documents: portal === 'buyer' ? ROUTES.BUYER_DOCUMENTS : ROUTES.OWNER_DOCUMENTS,
@@ -133,7 +126,6 @@ const KIND_ICON: Record<InvestorAttentionKind, SgIcon> = {
   dispute: Scale,
 };
 
-/** Shaped like the loaded page: queue, figures and purchases on the left, the rail on the right. */
 const WorkspaceSkeleton = () => (
   <div className="grid gap-6 lg:grid-cols-12">
     <div className="min-w-0 space-y-6 lg:col-span-8">
@@ -149,7 +141,6 @@ const WorkspaceSkeleton = () => (
   </div>
 );
 
-/** Managed property: agreements, spending waiting for approval and the latest statement. */
 const PropertyCareCard = ({ data, links }: { data: InvestorOverview; links: PortalLinks }) => {
   const managed = data.activeManagedProperties ?? 0;
   const spend = data.pendingSpendApprovals;
@@ -235,14 +226,12 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
     queryKey: investorKeys.overview,
     queryFn: () => unwrap(investorService.getOverview()),
   });
-  // Tours feed the attention queue (times offered).
   const tours = useQuery({
     queryKey: siteTourKeys.buyer('all'),
     queryFn: () => unwrap(siteTourService.mine('all')),
     enabled: Boolean(links.tours),
     retry: false,
   });
-  // Deposit amounts: the overview counts purchases but does not total what is held.
   const transactions = useQuery({
     queryKey: [...buyerKeys.transactions, { investor: true, pageSize: LIST_PAGE }],
     queryFn: () => unwrap(buyerService.listTransactions({ page: 1, pageSize: LIST_PAGE })),
@@ -251,7 +240,6 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
   });
   const data = overview.data;
   const profile = data?.profile ?? null;
-  // Complete profile; the risk statement may still be owed, which the queue asks for.
   const profileComplete = Boolean(profile) && (profile?.missingFields ?? []).length === 0;
   const risk = data?.riskDeclaration ?? null;
   const timeZone = profile?.timeZone ?? null;
@@ -326,7 +314,6 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
       href: links.managed,
     });
   }
-  // DIA-30: only figures with a record behind them.
   if (figures.acquisitionCost !== null) {
     portfolio.push({
       icon: Landmark,
@@ -335,7 +322,7 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
       subtitle: 'Recorded prices of completed purchases',
     });
   }
-  // DIA-30: only in-date reports by accredited valuers, always with the valuer and date.
+  // Only in-date reports by accredited valuers, always with the valuer and date.
   const valued = portfolioValuationView(data?.portfolio);
   if (valued && (valued.valuedCount > 0 || valued.notValuedCount > 0)) {
     portfolio.push({
@@ -383,7 +370,6 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
       supplement: net ? (
         <IndicativeAmount naira={net} currency={currency} labelDisplay="popover" />
       ) : undefined,
-      // The statement itself, with its breakdown, in property care.
       href:
         statement && links.managedArea ? DIASPORA_ROUTES.managedStatement(statement.id) : undefined,
     });

@@ -12,7 +12,6 @@ const DASHBOARD: Record<InvestorPortal, string> = {
   owner: ROUTES.OWNER_DASHBOARD,
 };
 
-/** While Diaspora Invest is switched off its pages send the viewer back to their dashboard. */
 export const DiasporaGate = ({
   portal,
   children,

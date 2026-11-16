@@ -4,10 +4,8 @@ import type { SiteTourRecording, SiteTourStatus } from '@sureground/shared';
 
 export type { SiteTourRecording, SiteTourStatus } from '@sureground/shared';
 
-/** Which API a screen talks to: the land routes (behind the land rollout) or the general ones. */
 export type TourScope = 'land' | 'all';
 
-/** What is being visited, for copy: a land listing or estate plot, or a built home for sale. */
 export type TourPlace = 'land' | 'home';
 
 export interface SiteTourSlot {
@@ -19,7 +17,6 @@ export interface SiteTourSlot {
 export interface SiteTour {
   id: string;
   status: SiteTourStatus;
-  /** The place's name: the parcel, the plot or the home. */
   land: string;
   propertyId: string;
   listingId?: string;
@@ -38,7 +35,6 @@ export interface SiteTour {
   durationMinutes: number;
   meetingUrl?: string;
   propertyType?: string;
-  /** The listing's cover photo, once the API sends it; until then the list shows the place icon. */
   coverImageUrl?: string | null;
   videoCall?: 'BUILT_IN' | 'LINK' | null;
   recording?: SiteTourRecording;

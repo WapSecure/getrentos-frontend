@@ -76,7 +76,6 @@ export function IconButton({
             paddingHorizontal: 4,
             alignItems: 'center',
             justifyContent: 'center',
-            // Unread is a brand moment, not an error: the count sits on Sureground blue.
             backgroundColor: colors.primary,
             borderWidth: 2,
             borderColor: colors.background,

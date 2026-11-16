@@ -33,13 +33,10 @@ const statusFilters: { value: 'all' | ApplicationStatus; label: string }[] = [
 const PAGE_SIZE = 10;
 
 type RentalApplicationsBoardProps = {
-  /** Where an approved applicant's draft lease is reviewed in this portal. */
   leasesHref: string;
-  /** The portal's section nav, if it has one. */
   nav?: ReactNode;
 };
 
-/** Rental applications for every home the signed-in person controls: landlords and owners alike. */
 export function RentalApplicationsBoard({ leasesHref, nav }: RentalApplicationsBoardProps) {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -84,7 +81,6 @@ export function RentalApplicationsBoard({ leasesHref, nav }: RentalApplicationsB
 
   const openDraftLeases = () => router.push(`${leasesHref}?status=draft`);
 
-  // A notification links here with ?application=<id>; open that one once it is on the page.
   const searchParams = useSearchParams();
   const linkedId = searchParams.get('application');
   const [linkedDismissed, setLinkedDismissed] = useState(false);

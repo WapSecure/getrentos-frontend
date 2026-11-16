@@ -83,7 +83,6 @@ export const ApplicationCard = ({
         ]}
       />
 
-      {/* Two even rows so the buttons always fit inside the card, whatever its width. */}
       <RecordActions className="flex-col items-stretch">
         <div className="flex w-full items-center gap-2">
           <Button

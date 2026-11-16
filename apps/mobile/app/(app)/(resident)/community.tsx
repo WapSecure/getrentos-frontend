@@ -77,7 +77,6 @@ const ROWS = [
 
 type Row = (typeof ROWS)[number];
 
-/** Grouped the way residents think about them; every row in ROWS appears in exactly one group. */
 const GROUPS: { title: string; hrefs: Row['href'][] }[] = [
   { title: 'Your home', hrefs: ['/(app)/dues', '/(app)/maintenance', '/(app)/violations'] },
   { title: 'At the gate', hrefs: ['/(app)/visitor-passes', '/(app)/deliveries'] },

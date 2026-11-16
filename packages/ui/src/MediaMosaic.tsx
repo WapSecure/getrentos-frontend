@@ -23,17 +23,11 @@ interface MediaMosaicProps {
   emptyLabel?: string;
   className?: string;
   onMediaEvent?: (event: MediaEvent) => void;
-  /**
-   * Optional control of the viewer, so a button elsewhere on the page (the floor plans shortcut)
-   * can open it. Index into `items`; null is closed. Without these the mosaic keeps its own state.
-   */
   openIndex?: number | null;
   onOpenIndexChange?: (index: number | null) => void;
-  /** Structured floor plans for the viewer's Floor plans tab; see `MediaViewer`. */
   floorPlans?: ShowroomFloorPlan[];
 }
 
-// Fills the 4×2 grid whatever the photo count, so no empty slot shows.
 const tileSpan = (index: number, count: number) => {
   if (count < 2) return '';
   if (index === 0) return 'sm:col-span-2 sm:row-span-2';
@@ -46,7 +40,6 @@ const tileSpan = (index: number, count: number) => {
 const chip =
   'inline-flex min-h-9 items-center gap-1.5 rounded-full bg-black/65 px-3.5 py-2 text-xs font-semibold text-white ring-1 ring-white/25 transition-colors hover:bg-black/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white';
 
-/** Cover plus four photos; every tile and chip opens the full-screen viewer at that item. */
 export function MediaMosaic({
   items,
   title,
@@ -104,7 +97,6 @@ export function MediaMosaic({
           className
         )}
       >
-        {/* Phones swipe through the photos in place; larger screens get the mosaic. */}
         <div
           className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] sm:hidden [&::-webkit-scrollbar]:hidden"
           onScroll={(event) => {
@@ -219,7 +211,6 @@ export function MediaMosaic({
   );
 }
 
-// A phone slide not loaded yet still shows its blurred placeholder, when there is one.
 const placeholderStyle = (item: MediaItem) => {
   const blur = item.kind === 'image' ? placeholderOf(item.placeholder) : undefined;
   return blur ? { backgroundImage: `url("${blur}")` } : undefined;
@@ -269,7 +260,6 @@ function Tile({
       onError={() => setBroken(true)}
       className={cn(
         'h-full w-full',
-        // A plan is shown whole on a light background, never cropped.
         isFloorPlan(item)
           ? 'bg-white object-contain'
           : 'object-cover transition-transform duration-500 group-hover:scale-[1.02] motion-reduce:transition-none'

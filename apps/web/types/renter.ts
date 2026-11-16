@@ -95,7 +95,6 @@ export interface TravelModeResult {
 }
 
 export interface TravelTimes {
-  /** Who estimated the times; absent from older API responses. */
   source?: TravelTimesSource;
   destination: string;
   destinationCoords: { latitude: number; longitude: number };

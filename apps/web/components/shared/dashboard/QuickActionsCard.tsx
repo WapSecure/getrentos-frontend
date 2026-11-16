@@ -43,7 +43,6 @@ function ActionRow({ action }: { action: QuickAction }) {
   );
 }
 
-/** The dashboard's shortcuts for every role: an icon tile, what it does, and where it goes. */
 export function QuickActionsCard({
   actions,
   description = 'Your everyday tasks, close at hand.',

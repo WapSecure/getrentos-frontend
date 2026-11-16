@@ -44,7 +44,6 @@ interface CreateSaleListingModalProps {
     listing: Omit<SaleListing, 'id' | 'createdAt'>,
     publishNow: boolean
   ) => Promise<unknown>;
-  /** Opens with this property already chosen, e.g. from a land parcel's "Create sale listing". */
   initialPropertyId?: string;
 }
 
@@ -66,7 +65,6 @@ const featureOptions = [
   'Solar Power',
 ];
 
-// A parcel has no rooms or building services, so it gets the features a land buyer checks.
 const landFeatureOptions = [
   'Fenced',
   'Dry land',

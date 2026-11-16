@@ -37,7 +37,6 @@ export interface DepositHold {
 export interface TenantDeposit {
   leaseId: string;
   leaseStatus: string;
-  /** Older API responses may leave it out. */
   leaseEnd?: string;
   propertyTitle: string;
   unitName: string;

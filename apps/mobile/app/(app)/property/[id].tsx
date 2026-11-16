@@ -74,7 +74,6 @@ export default function PropertyDetail() {
   const [viewingSheetOpen, setViewingSheetOpen] = useState(false);
   const [descriptionOpen, setDescriptionOpen] = useState(false);
   const [touring, setTouring] = useState(false);
-  // Past the gallery the back and share buttons get a solid bar, so they never sit on text.
   const [scrolled, setScrolled] = useState(false);
 
   const query = useQuery({
@@ -110,10 +109,8 @@ export default function PropertyDetail() {
 
   const saved = savedIds.has(id);
   const p = query.data;
-  // The same facts, fees and media as the web showroom.
   const showroom = useMemo(() => (p ? fromRental(p) : undefined), [p]);
   useTrackDetailView(p?.id, 'rent');
-  // Only asked when the home is let: it might be the one this renter lives in.
   const lease = useQuery({
     queryKey: qk.renter.lease,
     queryFn: leaseApi.getLease,
@@ -233,7 +230,6 @@ export default function PropertyDetail() {
                   />
                 ) : null}
 
-                {/* Commercial: the lease and the space come before the description, as on the web. */}
                 {showroom?.commercial ? (
                   <ShowroomCommercial commercial={showroom.commercial} market="rent" />
                 ) : null}
@@ -277,7 +273,6 @@ export default function PropertyDetail() {
                 {showroom ? (
                   <ShowroomQuestions
                     listing={showroom}
-                    // The same conversation as the message button up top.
                     onAskLister={p.landlordId ? () => messageMutation.mutate() : undefined}
                   />
                 ) : null}
@@ -519,7 +514,6 @@ export default function PropertyDetail() {
           }
           action={
             accepting ? (
-              // A let unit is no longer available, so don't invite a viewing of it.
               <Button
                 label="Request viewing"
                 fullWidth={false}
@@ -581,7 +575,6 @@ export default function PropertyDetail() {
   );
 }
 
-/** The Sureground Verified mark: the brand blue, solid, with the shield. */
 function VerifiedPill({ label }: { label: string }) {
   const { colors, radius } = useTheme();
   return (

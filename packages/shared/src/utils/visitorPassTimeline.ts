@@ -6,10 +6,6 @@ export interface TimelinePass {
   respondedAt?: string;
 }
 
-/**
- * The one time that matters for a pass in the estate log: when the visitor came and went once they
- * have, the expiry only while the pass can still be used.
- */
 export const passTimeline = (
   pass: TimelinePass,
   formatDateTime: (iso: string) => string,

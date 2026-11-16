@@ -36,7 +36,6 @@ export interface AdminDevelopmentCheck {
   checkedByName?: string;
   checklist: { key: string; label: string; required: boolean }[];
   confirmedItems: string[];
-  /** Why it cannot pass yet: the evidence is not on file. */
   evidenceGap?: string;
 }
 
@@ -127,7 +126,6 @@ export const adminDevelopmentQuestionsService = {
       authFetch<UnansweredDevelopmentQuestions>('/admin/development-enquiries/unanswered')
     );
   },
-  /** Reminds the firm's editing seats now; audit-logged. */
   remind(developmentId: string): Promise<ApiResponse<DevelopmentReminderResult>> {
     return safeCall(() =>
       authFetch<DevelopmentReminderResult>(
@@ -149,7 +147,6 @@ export const adminDevelopmentsService = {
   get(id: string): Promise<ApiResponse<AdminDevelopment>> {
     return safeCall(() => authFetch<AdminDevelopment>(at(id)));
   },
-  /** Short-lived link; every opening is audit-logged. */
   documentUrl(
     id: string,
     documentId: string
@@ -160,7 +157,7 @@ export const adminDevelopmentsService = {
       )
     );
   },
-  /** Needs step-up; `reviewVersion` makes a developer's edit in between a conflict, not a check. */
+  /** `reviewVersion` makes a developer's edit in between a conflict, not a check. */
   recordCheck(
     d: Pick<AdminDevelopment, 'id' | 'reviewVersion'>,
     kind: DevelopmentCheckKind,
@@ -180,7 +177,6 @@ export const adminDevelopmentsService = {
       })
     );
   },
-  /** Needs step-up. */
   publish(
     d: Pick<AdminDevelopment, 'id' | 'reviewVersion'>
   ): Promise<ApiResponse<AdminDevelopment>> {

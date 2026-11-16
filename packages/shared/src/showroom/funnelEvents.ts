@@ -1,8 +1,4 @@
-/**
- * Funnel and site-health events, sent through the same anonymous transport as the showroom events.
- * Must match the backend allow-list on POST /analytics/events; until it does, the API drops these
- * events one by one and keeps the rest of the batch.
- */
+/** Must match the backend allow-list on POST /analytics/events; until it does, the API drops these one by one. */
 export const FUNNEL_EVENT_NAMES = [
   'session_start',
   'search_submit',
@@ -91,7 +87,6 @@ export interface FunnelEventProps {
 const isFilterKey = (key: string): key is SearchFilterKey =>
   (SEARCH_FILTER_KEYS as readonly string[]).includes(key);
 
-/** Props for `search_submit` from the filter keys in use; unknown keys are left out. */
 export function searchFilterProps(
   keys: Iterable<string>
 ): Pick<FunnelEventProps, 'filters' | 'filterCount'> {
@@ -99,7 +94,6 @@ export function searchFilterProps(
   return used.length ? { filters: used.join(','), filterCount: used.length } : { filterCount: 0 };
 }
 
-/** Lowercase, safe characters only, capped: a campaign tag, never free text. Null when nothing usable is left. */
 export function coarseUtmValue(raw: string | null | undefined): string | null {
   if (!raw) return null;
   // Capped before any pattern runs, so a crafted link cannot make the clean-up slow.
@@ -112,7 +106,6 @@ export function coarseUtmValue(raw: string | null | undefined): string | null {
   return value && !/\d{7,}/.test(value) ? value : null;
 }
 
-/** The referrer's host without `www.`, or null when it is missing, malformed or this site. */
 export function referrerHostOf(referrer: string, ownHost: string): string | null {
   try {
     const host = new URL(referrer).hostname.toLowerCase().replace(/^www\./, '');

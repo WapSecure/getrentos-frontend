@@ -19,7 +19,6 @@ import { InviteToSignUp } from '@/components/shared/representatives/InviteToSign
 interface InviteRoommateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** `contact` is their phone number or email, as typed. Rejects with the server's message. */
   onInvite: (data: { contact: string; message: string }) => Promise<void>;
 }
 

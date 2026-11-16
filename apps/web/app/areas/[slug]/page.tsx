@@ -32,7 +32,6 @@ interface AreaPageProps {
 
 type Loaded = { kind: 'ok'; inventory: AreaInventory } | { kind: 'missing' };
 
-/** Unknown area, or too few live listings to be worth a page: both are a 404. */
 async function load(slug: string): Promise<Loaded> {
   const area = findBySlug(AREAS, slug);
   if (!area) return { kind: 'missing' };
@@ -181,7 +180,6 @@ export default async function AreaPage({ params }: AreaPageProps) {
                 </CtaLink>
               ) : null}
             </div>
-            {/* Live counts from the same search the page is built from; nothing estimated. */}
             <ul className="mt-12 grid max-w-2xl grid-cols-1 gap-4 border-t border-border pt-8 sm:grid-cols-2">
               {inventory.rentTotal > 0 ? (
                 <li className="flex items-center gap-4">

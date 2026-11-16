@@ -4,7 +4,6 @@ import { ApiError, apiUpload } from '../src/auth/apiClient.ts';
 
 type Listener = (event: { lengthComputable: boolean; loaded: number; total: number }) => void;
 
-/** Just enough XMLHttpRequest for apiUpload; each test drives `last` by hand. */
 class FakeXhr {
   static last: FakeXhr;
   status = 0;

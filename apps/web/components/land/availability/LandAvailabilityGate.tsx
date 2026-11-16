@@ -11,7 +11,6 @@ export const LandAvailabilityGate = ({
   initial,
 }: {
   audience: 'marketplace' | 'owners';
-  /** Fetched on the server, so the first HTML already holds the page instead of nothing. */
   initial?: LandAvailability | null;
   children: ReactNode;
   shell?: (notice: ReactNode) => ReactNode;

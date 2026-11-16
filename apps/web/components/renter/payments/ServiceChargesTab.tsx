@@ -29,7 +29,6 @@ export function formatDay(day: string): string {
   });
 }
 
-/** The tenant's service charges, each opening its statement. */
 export function ServiceChargesTab({
   charges,
   hrefFor = (id) => `/renter/payments/service-charges/${id}`,

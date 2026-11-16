@@ -138,7 +138,6 @@ interface HomeAssetRegistryProps {
   selectedPropertyId: string;
   onPageChange: (page: number) => void;
   onSelectedPropertyChange: (propertyId: string) => void;
-  /** Set by the page header's Add menu; see useCreateRequest. */
   createRequest?: number;
   onCreateRequestHandled?: () => void;
 }

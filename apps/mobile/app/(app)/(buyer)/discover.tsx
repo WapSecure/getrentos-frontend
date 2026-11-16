@@ -42,8 +42,6 @@ const PROPERTY_TYPES = [
   { value: 'SHARED_APARTMENT', label: 'Shared apartment' },
 ] as const;
 
-// The shared listing card, as on the renter's Discover. The badge speaks to the owner, the only
-// verification a sale listing carries here.
 function toCard(item: BuyerListing): PropertyCardData {
   return {
     id: item.id,
@@ -62,7 +60,6 @@ export default function BuyerDiscover() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const { savedIds, toggle } = useBuyerSaved();
-  // The signed-in browse, as the renter's: `discover`, told apart by market.
   const cards = useCardAnalytics('sale', 'discover');
   const [searchText, setSearchText] = useState('');
   const [filters, setFilters] = useState<ListingFilters>({});

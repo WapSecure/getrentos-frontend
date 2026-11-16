@@ -21,8 +21,7 @@ const baseMetadata: Metadata = {
   },
 };
 
-// Filtered and searched views share the unfiltered page's canonical and stay out of the index,
-// so query strings can't multiply into thin duplicate pages; links on them are still followed.
+// Query-string views share the unfiltered canonical and stay noindex, so they can't multiply into thin duplicates.
 export async function generateMetadata({
   searchParams,
 }: {
@@ -38,7 +37,6 @@ export default async function BuyMarketplacePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  // The browser only uses it for the unfiltered view; the item list is only for the indexable page.
   const [filtered, initialData] = await Promise.all([
     searchParams.then(isFilteredView),
     fetchFirstPage(firstPagePath('sale'), saleToCard),

@@ -79,7 +79,6 @@ const ASSIGNEE_FIGURES: {
   { assignee: 'me', label: 'Assigned to me', field: 'mine' },
 ];
 
-/** Shaped like the loaded page: summary strip, filter bar, then the table. */
 function QueueSkeleton() {
   return (
     <div className="space-y-4">
@@ -184,7 +183,6 @@ export default function DiasporaOperationsPage() {
     );
   };
 
-  // A dash, never a guess, while the figures are unknown (first load, or an older server).
   const figure = (field: keyof DiasporaQueueSummary) => summary?.[field] ?? '–';
   const workload: StatGroupItem[] = [
     ...DUE_FIGURES.map((entry) => ({

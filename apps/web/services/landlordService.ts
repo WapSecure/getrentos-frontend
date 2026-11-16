@@ -263,7 +263,6 @@ export interface TenantReview {
   tenantName: string;
   propertyName: string;
   rating: number;
-  /** LANDLORD: how the tenant rated you. PROPERTY: how they rated the home. */
   category: string;
   comment: string;
   createdAt: string;
@@ -272,7 +271,6 @@ export interface TenantReview {
 export interface LandlordReviewSummary {
   averageRating: number;
   reviewCount: number;
-  /** Null until a tenant has rated that. */
   averageAsLandlord: number | null;
   averagePropertyCondition: number | null;
   landlordReviewCount: number;
@@ -432,13 +430,11 @@ export const landlordService = {
     );
   },
 
-  /** With `upload` options it goes over XHR so it can report progress and be cancelled. */
   async uploadPropertyMedia(
     kind: 'image' | 'video',
     file: File,
     upload?: UploadOptions
   ): Promise<ApiResponse<{ key: string; kind: 'image' | 'video' }>> {
-    // Videos go straight to storage, so a large tour never passes through the API.
     if (kind === 'video')
       return safeCall(() => uploadVideoDirect('/landlord/properties', file, upload));
     const form = new FormData();
@@ -1336,7 +1332,6 @@ export const landlordService = {
     return safeCall(() => authFetch('/landlord/reviews/summary'));
   },
 
-  /** Ended tenancies to review and the tenant reviews already written (owners use the same endpoints). */
   async getTenantReviews(): Promise<ApiResponse<TenantReviewsResponse>> {
     return safeCall(() => authFetch('/landlord/reviews/tenants'));
   },

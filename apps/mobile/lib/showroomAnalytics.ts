@@ -1,5 +1,4 @@
-// The same anonymous showroom events as the web (apps/web/lib/analytics.ts), sent to POST /analytics/events.
-// No token, user id or device id: a random session id per app launch, so we measure journeys, not people.
+// Anonymous by design, like the web's apps/web/lib/analytics.ts: no token, user id or device id, just a session id per launch.
 
 import { AppState, Dimensions } from 'react-native';
 import { randomUUID } from 'expo-crypto';
@@ -16,7 +15,6 @@ let session: string | null = null;
 
 const sessionId = () => (session ??= randomUUID());
 
-// Shortest side, so a phone held sideways is still a phone.
 const device = (): ShowroomEvent['device'] => {
   const { width, height } = Dimensions.get('window');
   return Math.min(width, height) < 600 ? 'phone' : 'tablet';
@@ -41,7 +39,6 @@ function flush() {
   }
 }
 
-/** Fire and forget. */
 export function trackShowroom(event: ShowroomEventInput) {
   try {
     queue.push({

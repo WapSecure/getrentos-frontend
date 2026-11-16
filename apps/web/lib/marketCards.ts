@@ -1,6 +1,6 @@
 import { formatLocation, isListingVerified } from '@sureground/shared';
 import type { PropertyTrustChain } from '@/types/renter';
-// Pure: maps each market's public card from the API into one shape for ListingCard. Server-safe.
+// Pure and server-safe: no client imports.
 import type { ListingPriceUnit } from '@sureground/ui/ListingCard';
 import {
   imagePreviewOf,
@@ -28,9 +28,7 @@ export interface MarketCard {
   image?: string;
   imageSrcSet?: string;
   imagePreview?: ImagePreview;
-  /** The backend's flag only. */
   verified?: boolean;
-  /** The owner, ownership and property checks: cards show these, not a bare tick, like the browse grid. */
   trustChain?: PropertyTrustChain;
   beds?: number;
   baths?: number;
@@ -77,7 +75,6 @@ export interface ShortletCardApi {
   bathrooms?: number;
 }
 
-/** Rent and sale cards already mapped by publicListingMap. */
 export const fromPublicCard = (c: PublicListingCard): MarketCard => ({
   id: c.id,
   title: c.title,
@@ -124,7 +121,6 @@ export const fromShortletCard = (s: ShortletCardApi): MarketCard => ({
   baths: s.bathrooms,
 });
 
-/** Any market's raw public card, as the API returns it from browse, similar or collection endpoints. */
 export function toMarketCard(market: CardMarket, raw: unknown): MarketCard {
   switch (market) {
     case 'rent':

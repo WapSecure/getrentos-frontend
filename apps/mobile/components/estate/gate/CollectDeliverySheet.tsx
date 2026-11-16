@@ -12,14 +12,12 @@ interface CollectableLog {
 }
 
 interface CollectDeliverySheetProps {
-  /** The parcel being handed over; null keeps the sheet closed. */
   log: CollectableLog | null;
   busy?: boolean;
   onClose: () => void;
   onConfirm: (collectedBy?: string) => void;
 }
 
-/** Confirms a hand-over and records who took the parcel. The form remounts per parcel so the name starts at that household's resident. */
 export function CollectDeliverySheet({ log, busy, onClose, onConfirm }: CollectDeliverySheetProps) {
   return (
     <Sheet open={!!log} onClose={() => !busy && onClose()} title="Hand over parcel">

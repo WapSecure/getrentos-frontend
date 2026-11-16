@@ -70,7 +70,6 @@ export default function LandlordReviews() {
                       </View>
                     </View>
 
-                    {/* Tenants rate you and the home separately; an unrated one is left out, not shown as 0. */}
                     {s?.averageAsLandlord != null || s?.averagePropertyCondition != null ? (
                       <View style={{ gap: 6 }}>
                         {s?.averageAsLandlord != null ? (

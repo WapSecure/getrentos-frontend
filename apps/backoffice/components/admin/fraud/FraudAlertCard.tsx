@@ -56,8 +56,7 @@ export const FraudAlertCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      // A click anywhere opens the alert for pointer users; keyboard and screen-reader users get the
-      // Details button below, because a role="button" card cannot contain the decision buttons.
+      // A role="button" card cannot contain the decision buttons, so keyboard users get the Details button below.
       onClick={onOpen}
       className={cn(
         'flex flex-col rounded-xl border border-border bg-card p-5 shadow-xs transition-[border-color,box-shadow] duration-200',

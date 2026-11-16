@@ -42,7 +42,6 @@ test('a verified property names what is still to come', () => {
 });
 
 test('a verified property with owner ID and ownership both open is still in progress', () => {
-  // The demo listing: web read the bare flag (Verified listing), mobile the chain (Verifying).
   assert.deepEqual(trustChainLabel(chain({ property: true })), {
     label: 'Verification in progress',
     tone: 'pending',
@@ -74,7 +73,6 @@ test('approval with conditions is never verified, whatever the chain or flag say
   for (const listing of [
     { isVerified: true, diligence: { status: 'CONDITIONAL' } },
     { verified: true, verificationSummary: { status: 'CONDITIONALLY_APPROVED' } },
-    // A stale chain that still shows every link met.
     { trustChain: fullChain, verificationSummary: { status: 'CONDITIONALLY_APPROVED' } },
     { trustChain: fullChain, diligence: { status: 'conditional' } },
   ]) {

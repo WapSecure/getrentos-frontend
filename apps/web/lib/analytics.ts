@@ -80,10 +80,7 @@ export function track(event: ShowroomEventInput) {
   else if (!timer) timer = setTimeout(() => flush(), FLUSH_MS);
 }
 
-/**
- * Records a funnel event only when the API call it describes succeeded, and hands the response back.
- * The API drops event names it does not know yet, so this never affects the call.
- */
+/** Records a funnel event only after the API call succeeded; the API drops event names it does not know. */
 export function trackOnSuccess<T extends { success: boolean }>(
   response: T,
   event: ShowroomEventInput

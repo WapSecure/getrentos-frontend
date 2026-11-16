@@ -64,7 +64,6 @@ export default function LandlordTenantsPage() {
             {isPending ? (
               <Skeleton className="inline-block h-4 w-56 max-w-full align-middle" />
             ) : (
-              // A tenant renting two homes has two cards, so this counts tenancies, not people.
               `${total} tenanc${total === 1 ? 'y' : 'ies'} across your portfolio`
             )}
           </>

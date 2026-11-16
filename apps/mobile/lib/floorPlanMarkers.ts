@@ -1,8 +1,4 @@
-/**
- * Where a floor plan's numbered room markers sit on screen. The plan is drawn with
- * `contentFit="contain"`, so it can be letterboxed inside its box: a room's x/y (0-100 % of the
- * plan image) is placed against the drawn image, never against the box.
- */
+/** Plans are drawn `contain`, so markers are placed against the drawn image, never the letterboxed box. */
 
 export interface Size {
   width: number;
@@ -14,7 +10,6 @@ export interface Rect extends Size {
   top: number;
 }
 
-/** The rect a `contain`-fitted image fills inside `box`, centred. Null until both sizes are known. */
 export function containedRect(box: Size | null, natural: Size | null): Rect | null {
   if (!box || !natural) return null;
   if (!(box.width > 0 && box.height > 0 && natural.width > 0 && natural.height > 0)) return null;
@@ -26,7 +21,6 @@ export function containedRect(box: Size | null, natural: Size | null): Rect | nu
 
 const clampPercent = (n: number) => Math.min(100, Math.max(0, n));
 
-/** A point given as percentages of the image, in the box's coordinates. */
 export function pointInRect(rect: Rect, xPercent: number, yPercent: number) {
   return {
     x: rect.left + (rect.width * clampPercent(xPercent)) / 100,
@@ -34,10 +28,6 @@ export function pointInRect(rect: Rect, xPercent: number, yPercent: number) {
   };
 }
 
-/**
- * The rooms that have a place on the plan, numbered as in the room list (1-based, by list order,
- * so a room without a place still uses up its number).
- */
 export function numberedMarkers<R extends { x?: number; y?: number }>(rooms: readonly R[]) {
   return rooms
     .map((room, i) => ({ room, number: i + 1 }))
@@ -47,6 +37,5 @@ export function numberedMarkers<R extends { x?: number; y?: number }>(rooms: rea
     );
 }
 
-/** The marker's screen-reader label, matching the room list's wording. */
 export const markerLabel = (number: number, name: string, hasPhoto: boolean) =>
   `${number}. ${name}${hasPhoto ? ', open its photo' : ''}`;

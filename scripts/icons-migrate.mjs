@@ -1,7 +1,5 @@
 #!/usr/bin/env node
-// Moves imports from Lucide to the Sureground icon set. Safe to re-run: a branch that still
-// imports Lucide after rebasing onto dev runs `pnpm icons:migrate` and is done.
-// Icon names are unchanged; LucideIcon / LucideProps become SgIcon / SgIconProps.
+// Safe to re-run: a branch still importing Lucide after a rebase runs `pnpm icons:migrate` again.
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 

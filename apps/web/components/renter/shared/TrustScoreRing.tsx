@@ -10,8 +10,6 @@ interface TrustScoreRingProps {
 }
 
 export const TrustScoreRing = ({ score, size = 120, strokeWidth = 8 }: TrustScoreRingProps) => {
-  // Only the ring animates. The number is the real score from the first frame: a count-up showed
-  // passing values like "2" that read as the person's score.
   const scored = hasTrustScore(score);
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;

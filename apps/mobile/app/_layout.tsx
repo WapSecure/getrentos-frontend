@@ -75,7 +75,6 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
         if (group !== 'portal-unavailable') target = '/(app)/portal-unavailable';
       } else if (usablePortal && group?.startsWith('(') && group !== `(${usablePortal})`) {
         // Group segments are invisible in URLs, so a deep link can resolve into another portal's same-named screen; only re-route on a portal group marker.
-        // Open that screen in the user's own portal when it has one, else its home.
         target =
           samePortalScreenHref(usablePortal, (segments as string[])[2]) ?? portalHref(usablePortal);
       }
@@ -87,7 +86,6 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
       // Signed in from a public listing: land on it, with the portal home
       // underneath so Back goes somewhere sensible.
       if (status === 'authenticated' && portalReady && !inApp) {
-        // Or back on the development they wanted to ask about: any signed-in user may ask.
         const askHref = takeAskIntent();
         const { href, blockedKind } = takeListingIntent(usablePortal);
         if (askHref) router.push(askHref as never);

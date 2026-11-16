@@ -27,7 +27,6 @@ interface ListingCardProps {
   onTogglePause: (id: string) => void;
   onPreview: (listing: Listing) => void;
   onEditFees?: (listing: Listing) => void;
-  /** Shown on commercial listings only. */
   onEditCommercial?: (listing: Listing) => void;
   isUpdating?: boolean;
 }
@@ -41,7 +40,6 @@ export const ListingCard = ({
   isUpdating = false,
 }: ListingCardProps) => {
   const status = statusConfig[listing.status];
-  // A published advert for a unit a lease now holds: renters no longer see it, so say so rather than "Published".
   const isLet = Boolean(listing.isLet) && listing.status === 'published';
   // Signed URLs expire, so fall back to the placeholder.
   const [coverFailed, setCoverFailed] = useState(false);

@@ -10,7 +10,6 @@ const post = <T>(path: string, body?: unknown) =>
 
 export type TourSide = 'buyer' | 'owner';
 
-/** `land`: the land routes, behind the land rollout. `all`: the general routes, built homes too. */
 const base = (scope: TourScope, side: TourSide) =>
   scope === 'land' ? `/${side}/land/tours` : `/${side}/tours`;
 
@@ -74,7 +73,6 @@ export const siteTourService = {
 
   hosting: (scope: TourScope) => safeCall(() => authFetch<SiteTour[]>(base(scope, 'owner'))),
 
-  /** Either a pasted https link or the built-in call. */
   propose: (
     scope: TourScope,
     tourId: string,
@@ -114,10 +112,7 @@ export const siteTourService = {
     safeCall(() => post<TourJoin>(`/land/representing/tours/${encodeURIComponent(tourId)}/join`)),
 };
 
-/**
- * A "YYYY-MM-DDTHH:mm" value typed as Lagos wall-clock time, as an ISO
- * instant. Lagos is UTC+1 all year (no daylight saving).
- */
+/** A "YYYY-MM-DDTHH:mm" Lagos wall-clock value as an ISO instant; Lagos is UTC+1 all year. */
 export const lagosLocalToIso = (value: string): string | null => {
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return null;
   const at = new Date(`${value}:00+01:00`);

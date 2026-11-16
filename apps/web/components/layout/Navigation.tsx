@@ -28,8 +28,6 @@ interface NavLink {
   hint?: string;
 }
 
-// Audience-led: the top bar names each kind of visitor's job (find, sell, manage, invest from abroad). Every other
-// marketplace stays one tap away in More, and Short stays and Land are also tabs in the homepage search. D13.
 const FIND_LINKS: NavLink[] = [
   { label: 'Buy', href: '/buy', hint: 'Homes for sale' },
   { label: 'Rent', href: '/rent', hint: 'Homes to rent' },
@@ -75,14 +73,10 @@ const isCurrent = (pathname: string, href: string) => pathname === href;
 
 const FOCUSABLE = 'a[href], button:not([disabled])';
 
-// Availability is read in the browser, so with land off the "Land" link shows until the call
-// returns (except under /land, whose layout seeds the cache from the server). Seeding it for every
-// page would mean the root layout awaiting two API calls on every route, signed-in ones included,
-// since the ~45 pages rendering this have no shared public layout to do it in.
+// Read in the browser: seeding it server-side would make the root layout await two API calls on every route.
 export const Navigation = () => {
   const land = useLandAvailability();
   const diaspora = useDiasporaAvailability();
-  // Diaspora is a top-level journey only while the service is on (D10).
   const findLinks = diaspora.enabled ? [...FIND_LINKS, DIASPORA_LINK] : FIND_LINKS;
   const moreLinks = land.marketplace
     ? MORE_LINKS
@@ -127,7 +121,6 @@ export const Navigation = () => {
     };
   }, [menuOpen]);
 
-  // Keeps Tab inside the open menu and its toggle.
   const trapFocus = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Tab' || !panel.current) return;
     const items = [

@@ -4,14 +4,11 @@ import type { MarketingPhoto } from './photos';
 
 interface PhotoFrameProps {
   photo: MarketingPhoto;
-  /** Tailwind aspect class for the frame, e.g. `aspect-[4/3]`. */
   aspect?: string;
   sizes: string;
-  /** Only for the one image that is the page's largest paint. */
   priority?: boolean;
   className?: string;
   imageClassName?: string;
-  /** Decorative copies (a collage) hide from screen readers. */
   decorative?: boolean;
 }
 

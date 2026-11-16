@@ -176,11 +176,6 @@ function distinctLabels(
   return labels;
 }
 
-/**
- * The owner's side of every management agreement on their own properties: Sureground Managed and a firm.
- * Shared by landlords (`/landlord/managed`) and property owners (`/owner/management`), so both can view, sign and
- * answer a fee change in one place. `changeManagerHref` is null where that flow does not exist.
- */
 export const SuregroundManagedView = ({
   changeManagerHref = '/landlord/change-manager',
 }: { changeManagerHref?: string | null } = {}) => {
@@ -234,7 +229,6 @@ export const SuregroundManagedView = ({
     onError: (err: Error) => setError(err.message || 'Could not appoint the firm.'),
   });
 
-  // The owner's signature on a firm's agreement; the API infers the side from who is calling.
   const signAgreement = useMutation({
     mutationFn: (id: string) => unwrap(signMandate(id)),
     onSuccess: () => {
