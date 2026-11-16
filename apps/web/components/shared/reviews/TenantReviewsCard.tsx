@@ -71,7 +71,7 @@ export function TenantReviewsCard() {
     <section className="mb-6 rounded-2xl border border-border bg-card p-6">
       <h2 className="text-base font-semibold text-foreground">Review your tenants</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Rate a tenant once their tenancy ends. Other landlords see these when the tenant applies to
+        Rate a tenant once they have moved out. Other landlords see these when the tenant applies to
         rent again, and the tenant can read what you wrote.
       </p>
 
@@ -85,7 +85,7 @@ export function TenantReviewsCard() {
               <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">{p.tenantName}</p>
                 <p className="text-xs text-muted-foreground">
-                  {p.propertyName} · Tenancy ended {formatDate(p.leaseEnd)}
+                  {p.propertyName} · Lease ended {formatDate(p.leaseEnd)}
                 </p>
               </div>
               <Button size="sm" variant="primary" onClick={() => open(p)}>
