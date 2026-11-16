@@ -77,6 +77,7 @@ interface SignupContextValue {
   resend: () => Promise<void>;
   toggleRole: (id: SignupRoleId) => void;
   setMultiRole: (v: boolean) => void;
+  setPrimaryRole: (id: SignupRoleId) => void;
   createAccount: (password?: string) => Promise<void>;
   reset: () => void;
 }
@@ -99,7 +100,7 @@ export function SignupProvider({ children }: { children: ReactNode }) {
   const [values, setValues] = useState<StepOneValues>(EMPTY_VALUES);
   const [issue, setIssue] = useState<SignupIssue | null>(null);
   const [selectedRoles, setSelectedRoles] = useState<SignupRoleId[]>([]);
-  const [multiRole, setMultiRole] = useState(false);
+  const [multiRole, setMultiRole] = useState(true);
 
   useEffect(() => {
     let alive = true;
@@ -213,6 +214,11 @@ export function SignupProvider({ children }: { children: ReactNode }) {
     if (!v) setSelectedRoles((prev) => prev.slice(0, 1));
   }, []);
 
+  // The first role is the one the account starts in.
+  const setPrimaryRole = useCallback((id: SignupRoleId) => {
+    setSelectedRoles((prev) => (prev.includes(id) ? [id, ...prev.filter((r) => r !== id)] : prev));
+  }, []);
+
   const createAccount = useCallback(
     async (password?: string) => {
       if (!draft || !otpReference) {
@@ -244,7 +250,7 @@ export function SignupProvider({ children }: { children: ReactNode }) {
     setIssue(null);
     setResumeAt(null);
     setSelectedRoles([]);
-    setMultiRole(false);
+    setMultiRole(true);
     void clearSignupDraft();
   }, []);
 
@@ -269,6 +275,7 @@ export function SignupProvider({ children }: { children: ReactNode }) {
       resend,
       toggleRole,
       setMultiRole: handleSetMultiRole,
+      setPrimaryRole,
       createAccount,
       reset,
     }),
@@ -289,6 +296,7 @@ export function SignupProvider({ children }: { children: ReactNode }) {
       resend,
       toggleRole,
       handleSetMultiRole,
+      setPrimaryRole,
       createAccount,
       reset,
     ]

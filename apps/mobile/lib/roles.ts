@@ -161,8 +161,7 @@ export const SIGNUP_ROLES: SignupRole[] = Object.values(ROLES)
     requires: [...r.requiresVerification] as VerificationReq[],
   }));
 
-export const REALTOR_VS_AGENT =
-  'Realtors find clients and close deals. Agents act for one landlord or owner, with the permissions they give.';
+export { REALTOR_VS_AGENT } from '@sureground/shared';
 
 /** Group segments are not in URLs, so open the screen in the user's own portal. Keep in step with app/(app)/(<portal>)/<screen>.tsx. */
 const SHARED_TAB_SCREENS: Record<string, readonly Portal[]> = {

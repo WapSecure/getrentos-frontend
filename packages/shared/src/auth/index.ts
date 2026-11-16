@@ -1,4 +1,5 @@
 export * from './constants';
+export * from './signupRoles';
 export * from './apiClient';
 export * from './apiHelpers';
 export * from './authStorage';

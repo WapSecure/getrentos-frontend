@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, {
+  FadeOut,
+  ZoomIn,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import {
   Home,
   Building2,
@@ -19,19 +25,26 @@ import {
   FormAlert,
   LinkButton,
   PasswordField,
-  PressableScale,
+  RadioGroup,
   Text,
   useReducedMotion,
   useTheme,
   useToast,
+  withAlpha,
 } from '@sureground/ui-native';
-import { AUTH_CONSTANTS } from '@sureground/shared';
+import {
+  AUTH_CONSTANTS,
+  ONE_ID_CHECK,
+  SIGNUP_ROLE_GROUPS,
+  needsSharedIdNote,
+  signupRequirementLines,
+} from '@sureground/shared';
 import { errorMessage } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useSignup } from '@/lib/auth/SignupContext';
 import { signupFieldIssue } from '@/lib/auth/signupErrors';
 import { haptics } from '@/lib/haptics';
-import { REALTOR_VS_AGENT, SIGNUP_ROLES, VERIFICATION_LABEL, type SignupRoleId } from '@/lib/roles';
+import { REALTOR_VS_AGENT, SIGNUP_ROLES, type SignupRole, type SignupRoleId } from '@/lib/roles';
 import { goBack } from '@/lib/goBack';
 
 const ICONS: Record<string, SgIcon> = {
@@ -44,9 +57,164 @@ const ICONS: Record<string, SgIcon> = {
   Briefcase,
 };
 
-export default function SignUpRoles() {
+const roleName = (id: string) => SIGNUP_ROLES.find((r) => r.id === id)?.name ?? id;
+
+function RoleRow({
+  role,
+  selected,
+  multiRole,
+  onPress,
+}: {
+  role: SignupRole;
+  selected: boolean;
+  multiRole: boolean;
+  onPress: () => void;
+}) {
   const { colors, spacing, radius } = useTheme();
   const reduceMotion = useReducedMotion();
+  const Icon = ICONS[role.icon] ?? Home;
+  const tint = useSharedValue(selected ? 1 : 0);
+
+  useEffect(() => {
+    tint.value = reduceMotion
+      ? selected
+        ? 1
+        : 0
+      : withTiming(selected ? 1 : 0, { duration: 150 });
+  }, [selected, reduceMotion, tint]);
+
+  const tintStyle = useAnimatedStyle(() => ({ opacity: tint.value }));
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole={multiRole ? 'checkbox' : 'radio'}
+      accessibilityLabel={`${role.name}, ${role.tagline}`}
+      accessibilityState={{ checked: selected }}
+      aria-checked={selected}
+      style={({ pressed }) => ({
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.md,
+        minHeight: 64,
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.lg,
+        backgroundColor: pressed ? colors.secondary : colors.card,
+      })}
+    >
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          StyleSheet.absoluteFill,
+          { backgroundColor: withAlpha(colors.primary, 0.05) },
+          tintStyle,
+        ]}
+      />
+      {selected ? (
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: spacing.md,
+            bottom: spacing.md,
+            width: 3,
+            borderTopRightRadius: 3,
+            borderBottomRightRadius: 3,
+            backgroundColor: colors.primary,
+          }}
+        />
+      ) : null}
+      <View
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: radius.lg,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: selected ? withAlpha(colors.primary, 0.1) : colors.secondary,
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: selected ? withAlpha(colors.primary, 0.25) : 'transparent',
+        }}
+      >
+        <Icon size={18} color={selected ? colors.primary : colors.mutedForeground} />
+      </View>
+      <View style={{ flex: 1, gap: spacing.xxs }}>
+        <Text variant="callout" style={{ fontWeight: '600' }}>
+          {role.name}
+        </Text>
+        <Text variant="caption" color="mutedForeground">
+          {role.tagline}
+        </Text>
+      </View>
+      <View
+        style={{
+          width: 22,
+          height: 22,
+          borderRadius: radius.md,
+          borderWidth: 1.5,
+          borderColor: selected ? colors.primary : colors.border,
+          backgroundColor: selected ? colors.primary : 'transparent',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {selected ? (
+          <Animated.View
+            entering={reduceMotion ? undefined : ZoomIn.duration(140)}
+            exiting={reduceMotion ? undefined : FadeOut.duration(100)}
+          >
+            <Check size={13} color={colors.primaryForeground} strokeWidth={3} />
+          </Animated.View>
+        ) : null}
+      </View>
+    </Pressable>
+  );
+}
+
+function PickSummary({ selected }: { selected: readonly SignupRoleId[] }) {
+  const { spacing } = useTheme();
+  return (
+    <View accessibilityLiveRegion="polite" style={{ marginBottom: spacing.sm }}>
+      {selected.length === 0 ? (
+        <Text variant="caption" color="mutedForeground">
+          Pick everything that fits. You can add more later.
+        </Text>
+      ) : (
+        <Text variant="caption" style={{ fontWeight: '600' }}>
+          {selected.map(roleName).join(', ')}
+          {selected.length > 1 ? `. You start as ${roleName(selected[0])}.` : ''}
+        </Text>
+      )}
+    </View>
+  );
+}
+
+function PickRequirements({ selected }: { selected: readonly SignupRoleId[] }) {
+  const { spacing } = useTheme();
+  const lines = signupRequirementLines(selected);
+  if (lines.length === 0) return null;
+  return (
+    <View style={{ gap: spacing.xxs }}>
+      <Text variant="callout" style={{ fontWeight: '600' }} headingLevel={2}>
+        Checks we ask for later
+      </Text>
+      {lines.map((line) => (
+        <Text key={line.groupId} variant="caption" color="mutedForeground">
+          {line.text}.
+        </Text>
+      ))}
+      {needsSharedIdNote(lines) ? (
+        <Text variant="caption" color="mutedForeground">
+          {ONE_ID_CHECK}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+export default function SignUpRoles() {
+  const { colors, spacing, radius, shadows } = useTheme();
   const toast = useToast();
   const { initialRolesPending, chooseInitialRoles, skipInitialRoles } = useAuth();
   const {
@@ -54,7 +222,7 @@ export default function SignUpRoles() {
     selectedRoles,
     multiRole,
     toggleRole,
-    setMultiRole,
+    setPrimaryRole,
     createAccount,
     reset,
     setIssue,
@@ -117,48 +285,13 @@ export default function SignUpRoles() {
     <AuthScaffold
       kicker={social ? 'Almost there' : 'Step 3 of 3'}
       title="How will you use Sureground?"
-      subtitle="Pick what fits today. You can add more later, with supporting documents."
+      subtitle="Pick all that apply. Each one gets its own space."
       progress={social ? undefined : 1}
       progressLabel="Sign-up step 3 of 3"
       onBack={social ? undefined : () => goBack()}
       footer={
         <>
-          <PressableScale
-            haptic
-            onPress={() => setMultiRole(!multiRole)}
-            accessibilityRole="switch"
-            accessibilityLabel="I’ll use it in more than one way"
-            accessibilityState={{ checked: multiRole }}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              minHeight: 44,
-            }}
-          >
-            <Text variant="callout" color="mutedForeground">
-              I’ll use it in more than one way
-            </Text>
-            <View
-              style={{
-                width: 46,
-                height: 28,
-                borderRadius: 14,
-                padding: 3,
-                backgroundColor: multiRole ? colors.primary : colors.border,
-                alignItems: multiRole ? 'flex-end' : 'flex-start',
-              }}
-            >
-              <View
-                style={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: 11,
-                  backgroundColor: colors.card,
-                }}
-              />
-            </View>
-          </PressableScale>
+          <PickSummary selected={selectedRoles} />
           <Button label={social ? 'Continue' : 'Create account'} loading={busy} onPress={submit} />
           <FormAlert message={error} />
         </>
@@ -180,7 +313,7 @@ export default function SignUpRoles() {
         </View>
       }
     >
-      <View style={{ gap: spacing.md }}>
+      <View style={{ gap: spacing.xl }}>
         {needsPassword ? (
           <PasswordField
             label="Password"
@@ -195,99 +328,76 @@ export default function SignUpRoles() {
             error={passwordError}
           />
         ) : null}
-        {SIGNUP_ROLES.map((role, i) => {
-          const Icon = ICONS[role.icon] ?? Home;
-          const selected = selectedRoles.includes(role.id as SignupRoleId);
-          return (
-            <Animated.View
-              key={role.id}
-              entering={reduceMotion ? undefined : FadeInDown.duration(280).delay(i * 45)}
+        {SIGNUP_ROLE_GROUPS.map((group) => (
+          <View key={group.id} role="group" aria-label={group.title} style={{ gap: spacing.sm }}>
+            <Text
+              headingLevel={2}
+              variant="callout"
+              color="mutedForeground"
+              style={{ marginLeft: spacing.xs, fontWeight: '600' }}
             >
-              <PressableScale
-                onPress={() => {
-                  toggleRole(role.id);
-                  if (error) setError(null);
-                }}
-                accessibilityRole={multiRole ? 'checkbox' : 'radio'}
-                accessibilityLabel={`${role.name}. ${role.tagline}`}
-                accessibilityHint={
-                  role.requires.length
-                    ? role.requires.map((req) => VERIFICATION_LABEL[req]).join(', ')
-                    : undefined
-                }
-                accessibilityState={{ checked: selected }}
+              {group.title}
+            </Text>
+            <View style={[{ borderRadius: radius.xl, backgroundColor: colors.card }, shadows.xs]}>
+              <View
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: spacing.md,
-                  padding: spacing.lg,
-                  borderRadius: radius.lg,
-                  borderWidth: 1.5,
-                  borderColor: selected ? colors.primary : colors.border,
-                  backgroundColor: selected ? colors.accent : colors.card,
+                  borderRadius: radius.xl,
+                  borderWidth: StyleSheet.hairlineWidth,
+                  borderColor: colors.border,
+                  backgroundColor: colors.card,
+                  overflow: 'hidden',
                 }}
               >
-                <View
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: radius.md,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: selected ? colors.primary : colors.secondary,
-                  }}
-                >
-                  <Icon
-                    size={20}
-                    color={selected ? colors.primaryForeground : colors.mutedForeground}
-                  />
-                </View>
-                <View style={{ flex: 1, gap: 5 }}>
-                  <Text variant="bodyStrong">{role.name}</Text>
-                  <Text variant="caption" color="mutedForeground">
-                    {role.tagline}
-                  </Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
-                    {role.requires.map((req) => (
-                      <View
-                        key={req}
-                        style={{
-                          paddingVertical: 2,
-                          paddingHorizontal: 7,
-                          borderRadius: radius.full,
-                          backgroundColor: colors.secondary,
+                {group.roles.map((id, index) => {
+                  const role = SIGNUP_ROLES.find((r) => r.id === id);
+                  if (!role) return null;
+                  return (
+                    <View
+                      key={id}
+                      style={
+                        index > 0
+                          ? {
+                              borderTopWidth: StyleSheet.hairlineWidth,
+                              borderTopColor: colors.border,
+                            }
+                          : undefined
+                      }
+                    >
+                      <RoleRow
+                        role={role}
+                        selected={selectedRoles.includes(role.id)}
+                        multiRole={multiRole}
+                        onPress={() => {
+                          void haptics.tap();
+                          toggleRole(role.id);
+                          if (error) setError(null);
                         }}
-                      >
-                        <Text variant="caption" color="mutedForeground">
-                          {VERIFICATION_LABEL[req]}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-                <View
-                  style={{
-                    width: 22,
-                    height: 22,
-                    borderRadius: 11,
-                    borderWidth: 1.5,
-                    borderColor: selected ? colors.primary : colors.border,
-                    backgroundColor: selected ? colors.primary : 'transparent',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {selected ? (
-                    <Check size={13} color={colors.primaryForeground} strokeWidth={3} />
-                  ) : null}
-                </View>
-              </PressableScale>
-            </Animated.View>
-          );
-        })}
-        <Text variant="caption" color="mutedForeground">
-          {REALTOR_VS_AGENT}
-        </Text>
+                      />
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+            {group.id === 'work' ? (
+              <Text
+                variant="caption"
+                color="mutedForeground"
+                style={{ marginHorizontal: spacing.xs }}
+              >
+                {REALTOR_VS_AGENT}
+              </Text>
+            ) : null}
+          </View>
+        ))}
+        {selectedRoles.length > 1 ? (
+          <RadioGroup
+            label="Which do you want to start with?"
+            value={selectedRoles[0]}
+            onChange={(id) => setPrimaryRole(id)}
+            options={selectedRoles.map((id) => ({ value: id, label: roleName(id) }))}
+          />
+        ) : null}
+        <PickRequirements selected={selectedRoles} />
       </View>
     </AuthScaffold>
   );
