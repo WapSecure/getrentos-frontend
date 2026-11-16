@@ -238,7 +238,7 @@ export default function EstateLeadsPage() {
                 title={total === 0 ? 'No enquiries yet' : 'No matches'}
                 description={
                   total === 0
-                    ? 'When someone books a viewing, applies, offers or books a shortlet on a property you market, they appear here. Enquiries on properties that are simply inside the estate: and not marketed by you: stay with the owner.'
+                    ? 'When someone books a viewing, applies, offers or books a shortlet on a property you market, they appear here. Enquiries on properties that are simply inside the estate, and not marketed by you, stay with the owner.'
                     : 'No enquiry matches that search on this page.'
                 }
               />
