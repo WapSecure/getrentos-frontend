@@ -1,31 +1,18 @@
 'use client';
 
-import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight } from '@sureground/icons';
-import { Alert, Button, Field, RadioGroup, ThemeToggle } from '@sureground/ui';
-import { RoleCard } from '@/components/auth/RoleSelection/RoleCard';
+import { Alert, Button, ThemeToggle } from '@sureground/ui';
+import { RoleList, RoleSummary, roleName } from '@/components/auth/RoleSelection/RoleList';
 import { Logo } from '@/components/ui/Logo';
 import { useSignup } from '@/hooks/useSignup';
 import { useSignupStore } from '@/lib/store/signupStore';
 import { getStoredUser, isAuthenticated } from '@/lib/authStorage';
-import { ROLES, ROUTES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';
+import { ROUTES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';
 import { isSocialSignupPending } from '@/lib/socialSignup';
 
 const noSubscribe = () => () => {};
-
-// Admin, gateman, resident and property manager are provisioned out of band, never offered at self-serve signup.
-const ROLE_LIST = Object.values(ROLES)
-  .filter(
-    (role) =>
-      role.id !== 'admin' &&
-      role.id !== 'gateman' &&
-      role.id !== 'resident' &&
-      role.id !== 'manager'
-  )
-  .sort((a, b) => a.order - b.order);
-
-const roleName = (id: string) => ROLE_LIST.find((role) => role.id === id)?.name ?? id;
 
 function signedInDashboard(): string {
   const user = getStoredUser<{ roles?: string[] }>();
@@ -34,7 +21,6 @@ function signedInDashboard(): string {
 
 export default function RoleSelectionPage() {
   const router = useRouter();
-  const headingId = useId();
   const gridRef = useRef<HTMLDivElement>(null);
   const [pickError, setPickError] = useState<string | null>(null);
   const {
@@ -120,7 +106,7 @@ export default function RoleSelectionPage() {
       </div>
 
       <main className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl px-4 pb-8 pt-24 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl px-4 pb-8 pt-24 sm:px-6 lg:px-8">
           <div className="mb-8 text-center">
             <div className="mb-6 flex justify-center">
               <Logo size="lg" />
@@ -128,49 +114,27 @@ export default function RoleSelectionPage() {
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-primary">
               {social ? 'One last thing' : 'Step 3 of 3'}
             </p>
-            <h1 id={headingId} className="mb-2 text-3xl font-bold text-foreground">
+            <h1 className="mb-2 text-3xl font-bold text-foreground">
               How will you use Sureground?
             </h1>
             <p className="text-lg text-muted-foreground">
-              Pick all that apply. Each one gets a personalised space.
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              We don&rsquo;t ask for documents now, only when you list, pay or sign. You can add
-              roles later in settings.
+              Pick all that apply. Each one gets its own space.
             </p>
           </div>
 
-          <div
-            ref={gridRef}
-            role="group"
-            aria-labelledby={headingId}
-            className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3"
-          >
-            {ROLE_LIST.map((role) => (
-              <RoleCard
-                key={role.id}
-                role={role}
-                isSelected={selected.includes(role.id)}
-                onToggle={() => toggle(role.id)}
-              />
-            ))}
+          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-8">
+            <RoleList ref={gridRef} selected={selected} onToggle={toggle} />
+            <RoleSummary
+              selected={selected}
+              onPrimaryChange={setPrimaryRole}
+              className="lg:sticky lg:top-6"
+            />
           </div>
-
-          {selected.length > 1 && (
-            <Field label="Which do you want to start with?" className="mt-8">
-              <RadioGroup
-                value={selected[0]}
-                onValueChange={setPrimaryRole}
-                orientation="horizontal"
-                options={selected.map((id) => ({ value: id, label: roleName(id) }))}
-              />
-            </Field>
-          )}
         </div>
       </main>
 
       <div className="relative z-20 border-t border-border/70 bg-background/90 shadow-[0_-10px_30px_-18px_rgba(20,24,31,0.2)] backdrop-blur-xl">
-        <div className="mx-auto max-w-6xl space-y-3 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl space-y-3 px-4 py-4 sm:px-6 lg:px-8">
           {(error || pickError) && (
             <Alert variant="danger" action={pickError ? undefined : errorAction}>
               {pickError ?? error?.message}
