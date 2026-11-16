@@ -4,7 +4,9 @@ import { homeCareApi } from '@/lib/api/homeCare';
 import { landBuyerExtrasApi } from '@/lib/api/landBuyerExtras';
 import { ownerLandApi } from '@/lib/api/ownerLand';
 import { purchaseWorkspaceApi } from '@/lib/api/purchaseWorkspace';
-import { purchaseWorkspaceHref } from '@/components/purchases/purchaseHref';
+import { depositDisputesApi } from '@/lib/api/depositDisputes';
+import { foreignIdentityApi } from '@/lib/api/foreignIdentity';
+import { depositDisputeHref, purchaseWorkspaceHref } from '@/components/purchases/purchaseHref';
 
 jest.mock('@/lib/api/client', () => ({ apiFetch: jest.fn(), apiUpload: jest.fn() }));
 
@@ -85,5 +87,36 @@ describe('Diaspora Invest routes', () => {
   it('reads the indicative rates', async () => {
     await fxApi.indicative();
     expect(lastPath()).toBe('/fx/indicative');
+  });
+
+  it('opens a deposit dispute thread and adds a file to it', async () => {
+    expect(depositDisputeHref('d 1')).toBe('/(app)/dispute/d%201');
+    await depositDisputesApi.get('d 1');
+    expect(lastPath()).toBe('/marketplace/disputes/d%201');
+    await depositDisputesApi.send('d1', '  Photos attached  ');
+    expect(fetchMock.mock.calls.at(-1)).toEqual([
+      '/marketplace/disputes/d1/messages',
+      { method: 'POST', body: { text: 'Photos attached' } },
+    ]);
+    uploadMock.mockReset().mockResolvedValue({} as never);
+    const file = { uri: 'file:///crack.jpg', name: 'crack.jpg', mimeType: 'image/jpeg' };
+    await depositDisputesApi.addFile('d1', file, 'The crack');
+    expect(uploadMock.mock.calls.at(-1)?.[0]).toBe('/marketplace/disputes/d1/evidence');
+  });
+
+  it('sends every source of funds file under its field', async () => {
+    uploadMock.mockReset().mockResolvedValue({} as never);
+    const append = jest.spyOn(FormData.prototype, 'append');
+    const pdf = (name: string) => ({ uri: `file:///${name}`, name, mimeType: 'application/pdf' });
+    await foreignIdentityApi.submitSourceOfFunds({
+      bankStatements: [pdf('jan.pdf'), pdf('feb.pdf')],
+      supportingKind: 'PAYSLIPS',
+      supporting: [pdf('p1.pdf'), pdf('p2.pdf'), pdf('p3.pdf')],
+    });
+    expect(uploadMock.mock.calls.at(-1)?.[0]).toBe('/trust/foreign-identity/source-of-funds');
+    const fields = append.mock.calls.map(([field]) => field);
+    expect(fields.filter((f) => f === 'bankStatements')).toHaveLength(2);
+    expect(fields.filter((f) => f === 'supporting')).toHaveLength(3);
+    append.mockRestore();
   });
 });

@@ -39,7 +39,7 @@ import { qk } from '@/lib/query/keys';
 import { liveSelfieSupported } from '@/lib/smileid/liveSelfie';
 import { useForeignIdentityStatus } from '@/hooks/useForeignIdentityStatus';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
-import { FilePickRow } from '@/components/forms/FilePickRow';
+import { FilePickList, FilePickRow } from '@/components/forms/FilePickRow';
 import { SelectField } from '@/components/forms/SelectField';
 import { ConsentGate } from '@/components/trust/ConsentGate';
 import { LiveSelfieCheck } from '@/components/trust/LiveSelfieCheck';
@@ -468,28 +468,31 @@ const SUPPORTING_OPTIONS = (
   Object.keys(SOURCE_OF_FUNDS_SUPPORTING_LABELS) as SourceOfFundsSupportingKind[]
 ).map((value) => ({ value, label: SOURCE_OF_FUNDS_SUPPORTING_LABELS[value] }));
 
+const MAX_BANK_STATEMENTS = 6;
+const MAX_SUPPORTING = 5;
+
 function SourceOfFundsCard({ status }: { status: SourceOfFundsStatus }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
-  const [statement, setStatement] = useState<PickedFile | null>(null);
+  const [statements, setStatements] = useState<PickedFile[]>([]);
   const [kind, setKind] = useState<SourceOfFundsSupportingKind>('PAYSLIPS');
-  const [supporting, setSupporting] = useState<PickedFile | null>(null);
+  const [supporting, setSupporting] = useState<PickedFile[]>([]);
   const [donor, setDonor] = useState<PickedFile | null>(null);
   const [note, setNote] = useState('');
   const needsDonor = kind === 'INHERITANCE_OR_GIFT_LETTER';
   const submit = useMutation({
     mutationFn: () =>
       foreignIdentityApi.submitSourceOfFunds({
-        bankStatement: statement!,
+        bankStatements: statements,
         supportingKind: kind,
-        supporting: supporting!,
+        supporting,
         donorIdentity: needsDonor ? donor : null,
         note: note.trim() || undefined,
       }),
     onSuccess: () => {
-      setStatement(null);
-      setSupporting(null);
+      setStatements([]);
+      setSupporting([]);
       setDonor(null);
       setNote('');
       void qc.invalidateQueries({ queryKey: qk.investor.identity });
@@ -524,12 +527,14 @@ function SourceOfFundsCard({ status }: { status: SourceOfFundsStatus }) {
           }}
         >
           <View style={{ gap: spacing.md }}>
-            <FilePickRow
+            <FilePickList
               label={`Bank statements for the last ${status.bankStatementMonths} months`}
-              file={statement}
-              emptyText="One PDF from the account the money will come from"
-              onPick={async () => setStatement(await pickDocument())}
-              onClear={() => setStatement(null)}
+              files={statements}
+              max={MAX_BANK_STATEMENTS}
+              onChange={setStatements}
+              pick={pickDocument}
+              emptyText="PDF or photo, from the account the money will come from"
+              addText="Add another statement"
             />
             <SelectField
               label="Supporting document"
@@ -537,12 +542,13 @@ function SourceOfFundsCard({ status }: { status: SourceOfFundsStatus }) {
               options={SUPPORTING_OPTIONS}
               onChange={(value) => setKind(value as SourceOfFundsSupportingKind)}
             />
-            <FilePickRow
+            <FilePickList
               label={SOURCE_OF_FUNDS_SUPPORTING_LABELS[kind]}
-              file={supporting}
+              files={supporting}
+              max={MAX_SUPPORTING}
+              onChange={setSupporting}
+              pick={pickDocument}
               emptyText="PDF or photo"
-              onPick={async () => setSupporting(await pickDocument())}
-              onClear={() => setSupporting(null)}
             />
             {needsDonor ? (
               <FilePickRow
@@ -565,7 +571,7 @@ function SourceOfFundsCard({ status }: { status: SourceOfFundsStatus }) {
               label="Send to our team"
               loading={submit.isPending}
               loadingLabel="Sending…"
-              disabled={!statement || !supporting || (needsDonor && !donor)}
+              disabled={!statements.length || !supporting.length || (needsDonor && !donor)}
               onPress={() => submit.mutate()}
             />
           </View>

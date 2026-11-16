@@ -62,6 +62,18 @@ export const transactionWorkspaceService = {
       })
     ),
 
+  addSaleDisputeEvidence: (id: string, file: File, note?: string) => {
+    const form = new FormData();
+    form.append('file', file);
+    if (note?.trim()) form.append('note', note.trim());
+    return safeCall(() =>
+      authFetch<SaleDispute>(`/marketplace/disputes/${encodeURIComponent(id)}/evidence`, {
+        method: 'POST',
+        body: form,
+      })
+    );
+  },
+
   disputeDeposit: (txId: string, input: { title: string; description: string }) =>
     safeCall(() =>
       post<SaleDispute>(`/marketplace/transactions/${encodeURIComponent(txId)}/dispute`, {

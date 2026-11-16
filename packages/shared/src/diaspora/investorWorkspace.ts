@@ -55,7 +55,7 @@ export interface AttentionLinks {
   tours?: string;
   approvals?: string;
   identity: string;
-  dispute?: (dispute: Pick<PurchaseDispute, 'id' | 'kind'>) => string;
+  dispute?: (dispute: Pick<PurchaseDispute, 'id' | 'kind'>) => string | undefined;
 }
 
 export interface AttentionInput {
@@ -236,7 +236,7 @@ export const buildAttentionQueue = (input: AttentionInput): InvestorAttentionIte
             : 'A land case Sureground is looking into.',
         dueAt: dispute.respondBy ?? undefined,
         dueLabel: dispute.respondBy ? 'Sureground replies by' : undefined,
-        link: { path: links.dispute ? links.dispute(dispute) : path, label: 'View' },
+        link: { path: links.dispute?.(dispute) ?? path, label: 'View' },
       });
     }
   }
