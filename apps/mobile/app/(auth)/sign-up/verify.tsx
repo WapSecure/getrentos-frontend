@@ -147,6 +147,9 @@ export default function SignUpVerify() {
         <Text variant="callout" color="mutedForeground" center>
           {`Code expires in ${CODE_LIFETIME_MINUTES} minutes.${isEmail ? ' Check spam.' : ''}`}
         </Text>
+        <Text variant="caption" color="mutedForeground" center>
+          {`Already have an account with this ${isEmail ? 'email' : 'number'}? We’ll send sign-in help instead of a code.`}
+        </Text>
 
         <View style={{ alignSelf: 'stretch' }}>
           <FormAlert message={error} />

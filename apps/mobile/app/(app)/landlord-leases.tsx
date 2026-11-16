@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -38,7 +39,8 @@ import { goBack } from '@/lib/goBack';
 export default function LandlordLeases() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
-  const [creating, setCreating] = useState(false);
+  const params = useLocalSearchParams<{ create?: string }>();
+  const [creating, setCreating] = useState(params.create === '1');
   const qc = useQueryClient();
   const toast = useToast();
   const [signing, setSigning] = useState<LandlordLease | null>(null);
@@ -215,8 +217,8 @@ function LeaseCard({
 
         {isHoldingOver(l) ? (
           <Text variant="caption" color="warning">
-            The term ended on {formatDate(l.leaseEnd, 'short')}. The tenant is holding over until you
-            renew or serve notice.
+            The term ended on {formatDate(l.leaseEnd, 'short')}. The tenant is holding over until
+            you renew or serve notice.
           </Text>
         ) : null}
 

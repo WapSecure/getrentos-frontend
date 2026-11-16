@@ -23,6 +23,11 @@ import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import type { EstateMicrositeSettings } from '@/types/estate';
 import { useEstatePlan } from '@/hooks/useEstatePlan';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
+import {
+  VerificationRequiredNotice,
+  isVerificationGateError,
+} from '@/components/shared/verification/VerificationRequiredNotice';
+import { ROUTES } from '@/lib/constants/auth';
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -54,6 +59,11 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
       invalidateSettings();
     },
     onError: (err: Error) => {
+      if (isVerificationGateError(err)) {
+        // Refused before anything was published, so the switch goes back to what is live.
+        setEnabled(settings.enabled);
+        return;
+      }
       toast.error(err.message || 'Unable to save these settings.');
     },
   });
@@ -101,12 +111,16 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
       <Card className="p-6 space-y-6">
         <Switch
           checked={enabled}
-          onCheckedChange={setEnabled}
+          onCheckedChange={(next) => {
+            setEnabled(next);
+            if (isVerificationGateError(saveSettings.error)) saveSettings.reset();
+          }}
           label="Publish microsite"
           description={
             enabled ? 'Live: visible to anyone with the link' : 'Draft: not publicly visible yet'
           }
         />
+        <VerificationRequiredNotice error={saveSettings.error} href={ROUTES.ESTATE_VERIFICATION} />
 
         <div>
           <p className="block text-sm font-medium text-foreground mb-1">Banner image</p>

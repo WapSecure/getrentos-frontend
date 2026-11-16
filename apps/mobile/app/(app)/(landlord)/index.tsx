@@ -42,7 +42,7 @@ import {
   QuickActions,
   dashboardGreeting,
 } from '@/components/dashboard/DashboardParts';
-import { IdentityNudge } from '@/components/trust/IdentityNudge';
+import { LandlordGetStarted } from '@/components/landlord/LandlordGetStarted';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
 const ACTIVITY_ICON: Record<LandlordActivity['type'], SgIcon> = {
@@ -211,7 +211,7 @@ export default function LandlordOverview() {
         errorTitle="We couldn't load your dashboard"
         errorDescription="Your property and payment data is safe. Check your connection and try again."
       >
-        <IdentityNudge unlocks="listings, leases and payouts" />
+        <LandlordGetStarted stats={s} onAddProperty={() => setAdding(true)} />
         {s && s.outstandingPayments > 0 ? (
           <AttentionCard
             Icon={TriangleAlert}
