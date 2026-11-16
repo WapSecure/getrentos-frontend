@@ -316,7 +316,7 @@ export function OwnerStatementsView() {
               Generate statement
             </DialogTitle>
             <DialogDescription className="mt-1 text-sm text-muted-foreground">
-              Computed from real PAID rent payments and recorded expenses in the period.
+              Uses the rent payments and expenses recorded in this period.
             </DialogDescription>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">

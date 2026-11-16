@@ -195,8 +195,8 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
         <div>
           <h2 className="text-xl font-semibold text-foreground">Dues statements</h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            Generate a per-period statement from real collected dues, and pay it out to the
-            estate&apos;s account
+            Bundle the dues residents paid online in a period into a statement, then pay it out to
+            the estate&apos;s account.
           </p>
         </div>
         <Button
@@ -214,7 +214,7 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
         <EmptyState
           icon={FileBarChart}
           title="No statements yet"
-          description="Generate your first statement to see a real dues-collected breakdown for a period."
+          description="Generate your first statement to see what residents paid online in a period."
         />
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
@@ -268,7 +268,8 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
               Generate statement
             </DialogTitle>
             <DialogDescription className="mt-1 text-sm text-muted-foreground">
-              Computed from real PAID dues collected in the period.
+              Includes the dues residents paid online in this period. Cash or bank transfers you
+              recorded are left out, because that money never came through Sureground.
             </DialogDescription>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
