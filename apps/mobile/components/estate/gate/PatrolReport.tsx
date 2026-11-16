@@ -128,7 +128,7 @@ function RoundCard({ round: r }: { round: PatrolRound }) {
           <StatusPill label={r.statusLabel} tone={ROUND_STATUS_TONE[r.status] ?? 'neutral'} />
         </View>
         <Text variant="caption" color="mutedForeground">
-          Due {when(r.scheduledFor)} · window closed {formatTime(r.windowEndsAt)}
+          Due {when(r.scheduledFor)} · finish by {formatTime(r.windowEndsAt)}
         </Text>
         {outOfOrder || r.late || r.reportedAt ? (
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
