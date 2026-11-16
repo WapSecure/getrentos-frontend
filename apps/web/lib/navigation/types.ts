@@ -11,6 +11,7 @@ export type NavItem<Id extends string = string> = NavLabel & {
   id: Id;
   href: string;
   icon: ElementType;
+  phoneBarLabel?: string;
   /** Shown with a lock badge below this plan; the page itself still enforces it. */
   plan?: NavPlan;
   flag?: NavFlag;
@@ -33,6 +34,7 @@ export interface RoleNavigationConfig<Id extends string = string> {
 
 export interface GroupedSidebarItem {
   label?: ReactNode;
+  phoneBarLabel?: string;
   href: string;
   icon: ElementType;
   locked?: boolean;

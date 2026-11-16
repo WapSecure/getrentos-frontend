@@ -54,7 +54,7 @@ export const ROLES = {
   },
   OWNER: {
     id: 'owner',
-    name: 'Property Owner',
+    name: 'Property owner',
     description: 'List for sale, accept offers, track property value.',
     icon: 'TrendingUp',
     requiresVerification: ['identity', 'property'],
@@ -64,7 +64,7 @@ export const ROLES = {
   },
   BUYER: {
     id: 'buyer',
-    name: 'Property Buyer',
+    name: 'Property buyer',
     description: 'Save, compare, tour properties, make offers securely.',
     icon: 'Search',
     requiresVerification: ['identity'],
@@ -94,7 +94,7 @@ export const ROLES = {
   },
   ESTATE: {
     id: 'estate',
-    name: 'Estate Manager',
+    name: 'Estate manager',
     description: 'Manage a gated community: households, dues, and access.',
     icon: 'Briefcase',
     requiresVerification: ['identity'],
@@ -124,7 +124,7 @@ export const ROLES = {
   },
   MANAGER: {
     id: 'manager',
-    name: 'Property Manager',
+    name: 'Property manager',
     description: 'Run properties for owners under a management mandate.',
     icon: 'Briefcase',
     requiresVerification: ['identity'],
