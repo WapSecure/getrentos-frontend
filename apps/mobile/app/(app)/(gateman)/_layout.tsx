@@ -21,7 +21,7 @@ export default function GatemanTabsLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Check-In',
+            title: 'Check-in',
             tabBarIcon: tabIcon(KeyRound),
           }}
         />
