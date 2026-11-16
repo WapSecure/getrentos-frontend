@@ -145,7 +145,8 @@ export const RenterReviews = () => {
                           ))}
                         </div>
                       </div>
-                      {review.propertyTitle && (
+                      {/* A property review already names the home as its title. */}
+                      {review.propertyTitle && review.category !== 'PROPERTY' && (
                         <span className="flex items-center gap-1 text-xs text-muted-foreground">
                           <MapPin className="w-3 h-3" />
                           {review.propertyTitle}
