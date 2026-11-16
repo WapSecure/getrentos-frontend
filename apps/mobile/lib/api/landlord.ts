@@ -322,8 +322,11 @@ export interface LandlordMaintenance {
   propertyId: string;
   propertyName: string;
   unitName?: string;
-  vendorId?: string;
-  vendorName?: string;
+  // The API names these assignedVendor*; reading vendorName meant an assigned vendor never showed.
+  assignedVendorId?: string;
+  assignedVendorName?: string;
+  /** The booked repair visit, when there is one. */
+  scheduledFor?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -1014,10 +1017,10 @@ export const landlordApi = {
       body: { reason },
     }),
 
-  assignVendor: (id: string, vendorId: string) =>
+  assignVendor: (id: string, vendorId: string, scheduledFor?: string) =>
     apiFetch<LandlordMaintenance>(`/landlord/maintenance/${id}/assign-vendor`, {
       method: 'PATCH',
-      body: { vendorId },
+      body: { vendorId, ...(scheduledFor ? { scheduledFor } : {}) },
     }),
 
   payments: (page = 1, pageSize = 20) =>

@@ -6,9 +6,12 @@ import { HardHat } from '@sureground/icons/native';
 import {
   Badge,
   Button,
+  DateField,
   QueryState,
   Skeleton,
   Text,
+  TimeField,
+  toISODate,
   useTheme,
   useToast,
 } from '@sureground/ui-native';
@@ -52,12 +55,18 @@ function AssignVendorBody({
     queryFn: () => landlordApi.vendors(),
   });
 
+  // Optional visit; both parts are needed. Lagos is UTC+1 all year, matching the web's visit time.
+  const [visitDate, setVisitDate] = useState('');
+  const [visitTime, setVisitTime] = useState('');
+  const visitIso =
+    visitDate && visitTime ? new Date(`${visitDate}T${visitTime}:00+01:00`).toISOString() : undefined;
+
   const assign = useMutation({
-    mutationFn: (vendorId: string) => landlordApi.assignVendor(request.id, vendorId),
+    mutationFn: (vendorId: string) => landlordApi.assignVendor(request.id, vendorId, visitIso),
     onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'maintenance'] });
-      toast.show('Vendor assigned.', 'success');
+      toast.show(visitIso ? 'Vendor assigned and visit booked.' : 'Vendor assigned.', 'success');
       onClose();
     },
     onError: (e) => toast.show(errorMessage(e, 'Could not assign that vendor.'), 'error'),
@@ -71,6 +80,27 @@ function AssignVendorBody({
       <Text variant="body" color="mutedForeground">
         Who should handle <Text variant="bodyStrong">{request.issueTitle}</Text>?
       </Text>
+
+      <View style={{ gap: spacing.sm }}>
+        <Text variant="callout" color="mutedForeground">
+          Visit (optional): the tenant is told when to expect them
+        </Text>
+        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+          <DateField
+            label="Date"
+            value={visitDate}
+            onChange={setVisitDate}
+            min={toISODate(new Date())}
+            containerStyle={{ flex: 1 }}
+          />
+          <TimeField label="Time" value={visitTime} onChange={setVisitTime} containerStyle={{ flex: 1 }} />
+        </View>
+        {visitDate && !visitTime ? (
+          <Text variant="caption" color="mutedForeground">
+            Pick a time too, or the visit will not be booked.
+          </Text>
+        ) : null}
+      </View>
 
       <QueryState
         query={vendors}
