@@ -95,7 +95,6 @@ export function ServiceChargeBudgetView({
 }: {
   budgetId: string;
   onBack: () => void;
-  /** Opens another budget, such as the next period's draft. */
   onOpenBudget: (id: string) => void;
 }) {
   const toast = useToast();
@@ -324,7 +323,6 @@ export function ServiceChargeBudgetView({
         </div>
       </div>
 
-      {/* Lines */}
       <Card className="space-y-4 rounded-2xl p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
@@ -457,7 +455,6 @@ export function ServiceChargeBudgetView({
         )}
       </Card>
 
-      {/* Units */}
       {isDraft && (
         <Card className="space-y-4 rounded-2xl p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -537,7 +534,6 @@ export function ServiceChargeBudgetView({
         </Card>
       )}
 
-      {/* Preview and publish */}
       {isDraft && (
         <Card className="space-y-4 rounded-2xl p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -819,7 +815,6 @@ function ChargesTable({ budgetId }: { budgetId: string }) {
   );
 }
 
-/** "Service charge 2027" becomes "Service charge 2028"; otherwise "(next period)" is added. */
 function nextPeriodTitle(title: string): string {
   const match = title.match(/(19|20)\d{2}(?!.*(19|20)\d{2})/);
   if (match && match.index !== undefined) {

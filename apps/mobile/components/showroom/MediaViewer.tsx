@@ -47,7 +47,6 @@ import {
   type Size,
 } from '@/lib/floorPlanMarkers';
 
-/** The same events as the web viewer (packages/ui MediaViewer). */
 export interface MediaEvent {
   type: 'gallery_open' | 'media_category_select' | 'video_start' | 'video_complete' | 'tour_start';
   mediaIndex?: number;
@@ -64,7 +63,6 @@ const INK = {
   paper: '#fff',
 };
 const MAX_ZOOM = 4;
-/** A room marker: a 44pt hit area around a 28pt numbered dot. */
 const MARKER_HIT = 44;
 const MARKER_DOT = 28;
 const THUMB = 56;
@@ -95,7 +93,6 @@ export function MediaViewer({
   onMediaEvent?: (event: MediaEvent) => void;
   /** A signed video link has lapsed: the caller fetches the listing again. */
   onVideoExpired?: () => void;
-  /** Structured floor plans from `floorPlansOf`: a plan page then lists its rooms and sizes. */
   floorPlans?: ShowroomFloorPlan[];
 }) {
   return (
@@ -172,7 +169,6 @@ function ViewerBody({
     return [...seen.entries()];
   }, [items]);
 
-  // Floor plans are a tab of their own, one level per plan, named by the lister's caption.
   const levels = useMemo(() => floorPlanLevels(items), [items]);
   const levelAt = levels.findIndex((l) => l.index === index);
   const onPlan = levelAt >= 0;
@@ -184,7 +180,6 @@ function ViewerBody({
   const photoNumber = items.slice(0, index + 1).filter((m) => m.kind === 'image').length;
   const position = item.kind === 'image' ? `${photoNumber} / ${photoCount}` : kindLabel(item);
 
-  // The active thumbnail sits in the middle of the strip, or at its padded start.
   useEffect(() => {
     if (items.length < 2) return;
     const centre = THUMB_PAD + index * (THUMB + THUMB_GAP) + THUMB / 2;
@@ -221,11 +216,9 @@ function ViewerBody({
     }
   };
 
-  // The room shown is the current photo's, or the last tagged room before it.
   const currentRoom =
     item.room ?? [...items.slice(0, index + 1)].reverse().find((m) => m.room)?.room;
 
-  // The plan's numbered rooms, as in the room list; one with a linked photo opens it, as its row does.
   const planMarkers = (p: ShowroomFloorPlan | undefined): PlanMarker[] | undefined => {
     if (!p) return undefined;
     const marks = numberedMarkers(p.rooms).map(({ room, number }) => {
@@ -668,7 +661,6 @@ function StartCard({
   );
 }
 
-/** Pinch or double-tap to zoom; drag to look around once zoomed. The pager stops swiping while zoomed. */
 const thumbPlaceholder = (m: MediaItem) => {
   const uri = m.kind === 'image' ? placeholderOf(m.placeholder) : undefined;
   return uri ? { uri } : undefined;
@@ -686,7 +678,6 @@ function ZoomableImage({
   markers,
 }: {
   uri: string;
-  /** A tiny blurred `data:` URI shown until the photo loads. */
   placeholder?: string;
   alt: string;
   reduced: boolean;
@@ -696,7 +687,6 @@ function ZoomableImage({
   onZoomChange: (zoomed: boolean) => void;
   /** The image's own size, when the API sent it; otherwise read when it loads. */
   natural?: Size;
-  /** A floor plan's numbered rooms, drawn on the image and zoomed with it. */
   markers?: PlanMarker[];
 }) {
   const [failed, setFailed] = useState(false);
@@ -841,10 +831,7 @@ interface PlanMarker {
   onPress?: () => void;
 }
 
-/**
- * One numbered room on the plan. It sits inside the zoomed view, so it moves with the plan, and is
- * scaled back by the zoom so the dot and its 44pt hit area stay the same size on screen.
- */
+/** Inside the zoomed view so it moves with the plan; scaled back by the zoom so the dot and its hit area keep their size. */
 function PlanMarkerView({
   marker,
   x,

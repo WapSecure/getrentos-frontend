@@ -2,11 +2,7 @@ import type { ShowroomFact, ShowroomListing } from './types';
 import { roomSizeLabel, type ShowroomFloorPlanRoom } from './floorPlans';
 import { VERIFICATION_SUMMARY_STATUS } from '../utils/landTrust';
 
-/**
- * Questions about a listing, answered only from what the listing itself states. Nothing here
- * guesses, estimates or works anything out: an answer quotes the listing's own data and says who
- * stated it, and anything the data does not cover is "Not stated by the lister."
- */
+// Answers only quote what the listing states and who stated it: nothing is guessed, estimated or worked out.
 
 export const LISTING_QUESTION_TOPICS = [
   'parking',
@@ -32,7 +28,6 @@ export const LISTING_QUESTION_TOPICS = [
 
 export type ListingQuestionTopic = (typeof LISTING_QUESTION_TOPICS)[number];
 
-/** For analytics only: a question that matched no topic. */
 export const UNMATCHED_QUESTION_TOPIC = 'unmatched';
 
 /** `stated`: the lister's own words. `checked`: Sureground checked it. `not_stated`: the data is silent. */
@@ -54,7 +49,6 @@ export interface ListingAnswer {
   topic: ListingQuestionTopic;
   text: string;
   source: ListingAnswerSource;
-  /** The listing data the answer rests on, as label and value. Empty when nothing is stated. */
   facts: ShowroomFact[];
   /** Parts of the question the listing leaves out, so the reader knows to ask. */
   gaps: string[];
@@ -62,7 +56,6 @@ export interface ListingAnswer {
 
 export const NOT_STATED_BY_LISTER = 'Not stated by the lister.';
 
-/** A short label and an example question per topic, for suggestion chips. */
 export const LISTING_QUESTION_TOPIC_INFO: Record<
   ListingQuestionTopic,
   { label: string; question: string }
@@ -88,14 +81,7 @@ export const LISTING_QUESTION_TOPIC_INFO: Record<
   amenities: { label: 'Amenities', question: 'What amenities are there?' },
 };
 
-// ---------------------------------------------------------------------------------------------
-// Matching a question to topics
-// ---------------------------------------------------------------------------------------------
-
-/**
- * Lowercase words and digits only, single spaces, padded with a space at each end so a phrase
- * can be found whole. "C of O", "C-of-O" and "C.of.O" all become " c of o ".
- */
+/** Padded with a space at each end so a phrase can be found whole: "C-of-O" becomes " c of o ". */
 export function normaliseQuestion(question: string): string {
   const words = question
     .toLowerCase()
@@ -105,10 +91,7 @@ export function normaliseQuestion(question: string): string {
   return words ? ` ${words} ` : '';
 }
 
-/**
- * Per topic: phrases with a weight. A phrase ending in `*` matches any word starting with it
- * ("furnish*" matches "furnished"). Longer, more specific phrases carry more weight.
- */
+/** A phrase ending in `*` matches any word starting with it; longer, more specific phrases weigh more. */
 type Synonyms = [phrase: string, weight: number][];
 
 const SYNONYMS: Record<ListingQuestionTopic, Synonyms> = {
@@ -402,10 +385,7 @@ export interface TopicMatch {
   score: number;
 }
 
-/**
- * The topics a question is about, best first. Deterministic: ties keep the catalogue's order.
- * An empty list means the question matched nothing in the catalogue.
- */
+/** Best first; ties keep the catalogue's order. */
 export function matchTopics(question: string): TopicMatch[] {
   const norm = normaliseQuestion(question);
   if (!norm) return [];
@@ -430,7 +410,6 @@ export function matchTopics(question: string): TopicMatch[] {
     .sort((a, b) => b.score - a.score);
 }
 
-/** The topics worth answering for a question: the best, and a close second. At most two. */
 export function topicsToAnswer(question: string): ListingQuestionTopic[] {
   const [first, second] = matchTopics(question);
   if (!first) return [];
@@ -438,10 +417,6 @@ export function topicsToAnswer(question: string): ListingQuestionTopic[] {
     ? [first.topic, second.topic]
     : [first.topic];
 }
-
-// ---------------------------------------------------------------------------------------------
-// Answering from the listing's data
-// ---------------------------------------------------------------------------------------------
 
 // The amount as stated, never rounded.
 const naira = (n: number) => `₦${n.toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
@@ -469,7 +444,6 @@ const factValue = (listing: ShowroomListing, label: string) =>
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
-/** Amenities the lister ticked that match a topic, exactly as written. */
 const AMENITY_PATTERNS: Partial<Record<ListingQuestionTopic, RegExp>> = {
   parking: /\b(parking|car ?park|garage|carport)\b/i,
   power:
@@ -481,7 +455,6 @@ const AMENITY_PATTERNS: Partial<Record<ListingQuestionTopic, RegExp>> = {
   amenities: /./,
 };
 
-/** Description sentences that mention a topic, quoted as written. */
 const DESCRIPTION_PATTERNS: Partial<Record<ListingQuestionTopic, RegExp>> = {
   parking: /\b(parking|car ?park|garage|carport|parking space)\b/i,
   power: /\b(power|light|nepa|phcn|electric\w*|generator|inverter|solar|prepaid|transformer)\b/i,
@@ -522,7 +495,6 @@ function matchingAmenities(listing: ShowroomListing, topic: ListingQuestionTopic
   return pattern ? listing.amenities.filter((a) => a.trim() && pattern.test(a)) : [];
 }
 
-/** Builds an answer from statements: lister lines first, then Sureground's checked lines. */
 class Builder {
   stated: string[] = [];
   checked: string[] = [];
@@ -971,7 +943,6 @@ const ANSWERS: Record<ListingQuestionTopic, (b: Builder) => Builder> = {
           b.check(`Open issues: ${list(summary.openIssues.map(lowerFirst))}.`);
         }
       } else {
-        // Not checked, still in review, refused or lapsed: say so plainly, in the status's own words.
         b.note(status.description, fact);
       }
     }
@@ -982,7 +953,6 @@ const ANSWERS: Record<ListingQuestionTopic, (b: Builder) => Builder> = {
         ...steps.map((s) => ({ label: 'Sureground check', value: s.label }))
       );
     }
-    // Steps not met yet are gaps, never claims.
     b.gap(
       ...(listing.trustChain?.steps.filter((s) => !s.met && s.id !== 'payment') ?? []).map(
         (s) => s.label
@@ -1101,7 +1071,6 @@ const ROOM_ALIASES: Record<string, string[]> = {
   bq: ['bq', 'boys', 'quarters'],
 };
 
-/** The rooms whose names the question mentions ("main bedroom" finds "Master bedroom"). */
 function roomsAskedAbout(
   question: string | undefined,
   rooms: ShowroomFloorPlanRoom[]
@@ -1128,10 +1097,7 @@ function roomsAskedAbout(
   return best > 0 ? scored.filter((s) => s.score === best).map((s) => s.room) : [];
 }
 
-/**
- * The answer to one topic, from this listing's data only. `question` narrows a room-size answer
- * to the rooms it names; it never adds anything the listing does not state.
- */
+/** `question` narrows a room-size answer to the rooms it names; it never adds anything the listing does not state. */
 export function answerFor(
   listing: ShowroomListing,
   topic: ListingQuestionTopic,
@@ -1140,11 +1106,9 @@ export function answerFor(
   return ANSWERS[topic](new Builder(listing, topic, question)).build();
 }
 
-/** The answer when a question matches no topic: nothing to quote, so ask the lister. */
 export const UNMATCHED_ANSWER_TEXT =
   'This listing does not say. Ask the lister, or try one of the suggested questions.';
 
-/** Answers for a free-text question: one or two topics, or none when nothing matched. */
 export function answerQuestion(listing: ShowroomListing, question: string): ListingAnswer[] {
   return topicsToAnswer(question).map((topic) => answerFor(listing, topic, question));
 }
@@ -1188,10 +1152,6 @@ const COMMON: Record<ShowroomListing['market'], ListingQuestionTopic[]> = {
   land: ['title', 'location'],
 };
 
-/**
- * Topics for suggestion chips: those the listing has data on, in the order that matters most for
- * its market, then a couple of common questions. At most `max`.
- */
 export function suggestedTopics(listing: ShowroomListing, max = 6): ListingQuestionTopic[] {
   const answered = SUGGESTION_ORDER[listing.market].filter(
     (t) => answerFor(listing, t).source !== 'not_stated'

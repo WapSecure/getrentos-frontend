@@ -1,6 +1,6 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 
-/** A lister's floor plan level (showroom M8b). Sizes are metres; both sides or neither. */
+/** Sizes are metres; both sides or neither. */
 export interface FloorPlanRoom {
   id?: string;
   name: string;

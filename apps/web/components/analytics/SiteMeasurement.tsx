@@ -59,10 +59,6 @@ function vitalsSampled(): boolean {
   return inSample;
 }
 
-/**
- * Anonymous site measurement, mounted once in the root layout: one `session_start` per tab with the
- * landing route pattern and first-touch campaign fields, and Core Web Vitals for a sample of sessions.
- */
 export function SiteMeasurement() {
   const pathname = usePathname();
   const params = useParams();

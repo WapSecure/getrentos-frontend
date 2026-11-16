@@ -51,8 +51,7 @@ export default function LandRepresented() {
     },
     enabled: !!id,
   });
-  // The sale's workspace names the property, its deposit and what happens next. Same key as the
-  // full purchase screen, so opening that afterwards is instant.
+  // Same key as the full purchase screen, so opening that afterwards is instant.
   const workspace = useQuery({
     queryKey: qk.purchaseWorkspace.detail('REPRESENTATIVE', id),
     queryFn: () => purchaseWorkspaceApi.get('REPRESENTATIVE', id),

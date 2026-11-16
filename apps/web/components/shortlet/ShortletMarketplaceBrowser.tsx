@@ -58,7 +58,6 @@ export const ShortletMarketplaceBrowser = ({
   initialCheckIn?: string;
   initialCheckOut?: string;
   hideHeader?: boolean;
-  /** The server-rendered unfiltered first page. */
   initialData?: Paginated<ShortletListing>;
 } = {}) => {
   const router = useRouter();

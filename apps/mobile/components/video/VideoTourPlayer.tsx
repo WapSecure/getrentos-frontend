@@ -19,7 +19,6 @@ export function VideoTourPlayer({
   stream?: VideoStream | null;
   title: string;
   onExpired?: () => void;
-  /** Once per play-through, for measurement. */
   onEnded?: () => void;
 }) {
   // A stream that fails falls back to the original upload for this viewing.

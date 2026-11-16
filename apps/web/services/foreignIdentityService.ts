@@ -58,7 +58,7 @@ export const foreignIdentityService = {
     return foreignIdentityService.submitDocument('bank-statement', document, note);
   },
 
-  /** DIA-07: would a purchase at this price need source of funds approved first? */
+  /** Would a purchase at this price need source of funds approved first? */
   checkSourceOfFunds(amount: number): Promise<ApiResponse<SourceOfFundsCheck>> {
     return safeCall(() =>
       authFetch<SourceOfFundsCheck>(
@@ -74,7 +74,7 @@ export const foreignIdentityService = {
     return res.success ? sourceOfFundsHoldMessage(res.data) : null;
   },
 
-  /** DIA-07: six months of statements, one or more supporting documents, and the donor's ID with a gift letter. */
+  /** Six months of statements, one or more supporting documents, and the donor's ID with a gift letter. */
   submitSourceOfFunds(params: {
     bankStatements: File[];
     supportingKind: SourceOfFundsSupportingKind;

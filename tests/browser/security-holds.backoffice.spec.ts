@@ -1,21 +1,8 @@
 import { createHmac } from 'crypto';
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 
-/**
- * Payout holds end to end: a rule holds a payout, the owner appeals, staff release or confirm.
- *
- * Needs an API started with RISK_ENFORCE_PAYOUT_RULES=true and, outside production only,
- * TRUST_TIER_GATE_DISABLED_CAPS=payouts (seeded accounts are below the payout trust tier).
- * Against an API without enforcement the tests skip.
- *
- *   E2E_API_URL, E2E_WEB_URL, E2E_BACKOFFICE_URL, E2E_MAILHOG_URL
- *   E2E_PASSWORD                     shared seeded password
- *   E2E_HOLD_RELEASE_EMAIL           a host-role account (e.g. seed-realtor) for the release path
- *   E2E_HOLD_CONFIRM_EMAIL           a different host-role account (e.g. seed-owner) for the confirm path
- *   E2E_ADMIN_EMAIL, E2E_ADMIN_TOTP_SECRET
- *
- * Seeded test accounts only: each run sets their transaction PIN to a known test value.
- */
+// Needs an API with RISK_ENFORCE_PAYOUT_RULES=true and (non-production) TRUST_TIER_GATE_DISABLED_CAPS=payouts;
+// skips otherwise. Seeded accounts only: each run sets their transaction PIN to a known test value.
 
 const api = process.env.E2E_API_URL;
 const web = process.env.E2E_WEB_URL;
@@ -93,7 +80,6 @@ async function signInApi(request: APIRequestContext, email: string): Promise<str
   return ((await res.json()) as { accessToken: string }).accessToken;
 }
 
-/** Sets a known PIN the way a person would: password plus a code sent to them. */
 async function ensurePin(request: APIRequestContext, email: string): Promise<string> {
   const token = await signInApi(request, email);
   const auth = { Authorization: `Bearer ${token}` };
@@ -108,7 +94,7 @@ async function ensurePin(request: APIRequestContext, email: string): Promise<str
   return token;
 }
 
-/** Up to four confirmed payout requests; the velocity rule holds the one after three in a day. */
+/** The velocity rule holds the fourth payout request in a day. */
 async function requestUntilHeld(request: APIRequestContext, token: string): Promise<boolean> {
   const auth = { Authorization: `Bearer ${token}` };
   for (let i = 0; i < 4; i++) {
@@ -166,7 +152,6 @@ test.describe('payout holds: appeal and staff review', () => {
       'No hold produced: the API is not enforcing holds, or this account was released in the last 72 hours'
     );
 
-    // The held person tells their side from the Security Centre.
     const userContext = await browser.newContext({ baseURL: web });
     const user = await userContext.newPage();
     await user.goto('/login');
@@ -187,7 +172,6 @@ test.describe('payout holds: appeal and staff review', () => {
     await expect(user.getByText(/You told us:/).first()).toBeVisible();
     await userContext.close();
 
-    // Staff see the appeal and release.
     await staffSignIn(page);
     await page.goto('/admin/fraud/risk');
     await page.getByRole('tab', { name: 'Needs review' }).click();
@@ -245,7 +229,6 @@ test.describe('payout holds: appeal and staff review', () => {
     const card = newestCase(page);
     await expect(card.release).toBeVisible();
 
-    // A reason is required before either action.
     await expect(card.release).toBeDisabled();
     await expect(card.confirm).toBeDisabled();
     await card.note.fill('too short');

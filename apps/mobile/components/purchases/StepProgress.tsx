@@ -1,7 +1,6 @@
 import { View } from 'react-native';
 import { Progress, Text, useTheme } from '@sureground/ui-native';
 
-/** "Purchase steps 3/8" over a bar: how far along a path something is. */
 export function StepProgress({
   label,
   done,

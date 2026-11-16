@@ -51,7 +51,7 @@ export const formatLagosDate = (dateString: string, style: 'short' | 'long' = 's
   });
 };
 
-// Moved to @sureground/shared so the mobile app shows the same Lagos and local times.
+// Lives in @sureground/shared so the mobile app shows the same Lagos and local times.
 export { formatDualTime, isValidTimeZone, timeZoneCity } from '@sureground/shared';
 
 export const formatRelativeTime = (dateString: string): string => {

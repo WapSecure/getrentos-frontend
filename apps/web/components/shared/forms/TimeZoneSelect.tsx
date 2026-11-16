@@ -23,7 +23,6 @@ const supportedZones = (): string[] => {
   return FALLBACK_ZONES;
 };
 
-/** This device's IANA zone, or `fallback` when the browser does not say. */
 export const browserTimeZone = (fallback = ''): string => {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone || fallback;

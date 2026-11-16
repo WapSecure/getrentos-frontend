@@ -30,7 +30,6 @@ export function ShowroomTrust({ listing }: { listing: ShowroomListing }) {
           What has been checked
         </h2>
       </div>
-      {/* The chain is what the header badge and the browse card read from, step by step. */}
       {chain && (
         <div className="mt-4">
           <PropertyTrustChain property={{ trustChain: chain }} />
@@ -67,7 +66,7 @@ export function ShowroomTrust({ listing }: { listing: ShowroomListing }) {
             </div>
           </li>
         )}
-        {/* DIA-30: a value only from an accredited valuer's dated report, never an estimate. */}
+        {/* A value only from an accredited valuer's dated report, never an estimate. */}
         {valuation && (
           <li className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
             {valuation.outOfDate ? (

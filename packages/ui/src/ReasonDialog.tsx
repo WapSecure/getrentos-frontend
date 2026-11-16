@@ -11,13 +11,11 @@ import { RadioGroup } from './RadioGroup';
 import { Select } from './Select';
 import { Textarea } from './Textarea';
 
-// One dialog for "tell us what is wrong": disputes, problem reports, objections. Each caller
-// keeps its own copy, limits and API call; the layout and the submit/close rules are shared.
+// Callers keep their own copy, limits and API call; the layout and submit/close rules are shared.
 
 export interface ReasonCategory<C extends string = string> {
   value: C;
   label: string;
-  /** Shown under the control once this category is chosen. */
   hint?: string;
 }
 
@@ -35,7 +33,6 @@ interface ReasonDialogProps<C extends string = string> {
   onOpenChange: (open: boolean) => void;
   title: ReactNode;
   description: ReactNode;
-  /** A short one-line summary above the categories, e.g. a dispute title. */
   subject?: { label: string; placeholder?: string; minLength?: number; maxLength?: number };
   categories?: {
     options: readonly ReasonCategory<C>[];
@@ -61,7 +58,6 @@ interface ReasonDialogProps<C extends string = string> {
    */
   validateOn?: 'change' | 'submit';
   tooShortMessage?: string;
-  /** Optional supporting files, handed to `onSubmit` as `evidence`. */
   evidence?: {
     label?: string;
     hint?: string;

@@ -37,7 +37,6 @@ const subscribeToNothing = () => () => {};
 // Tours and inspections are booked through the buyer portal's API; other roles would only meet an error.
 const viewerIsBuyer = () => viewerHasRole('buyer');
 
-/** For a home for sale: see it on a video call, or send an inspector, before making an offer. */
 function SaleVisitActions({ id, title }: { id: string; title: string }) {
   const [open, setOpen] = useState<'tour' | 'inspection' | null>(null);
   return (
@@ -94,12 +93,9 @@ export function ListingCallToAction({
   id: string;
   returnPath: string;
   underOffer?: boolean;
-  /** Rent only: the home is let, so there is nothing to enquire about or apply for. */
   notAcceptingApplications?: boolean;
   compact?: boolean;
-  /** The listing's name, for the tour and inspection dialogs. */
   title?: string;
-  /** A commercial property: a rental leads with an inspection request. */
   commercial?: boolean;
 }) {
   const commercialRent = commercial && market === 'rent';
@@ -169,10 +165,6 @@ export function ListingCallToAction({
   );
 }
 
-/**
- * "Ask the lister" for a question the listing does not answer. The same enquiry flow and sign-in
- * rule as the main button: signed in, it opens the enquiry; signed out, sign in first.
- */
 export function AskListerLink({
   market,
   id,

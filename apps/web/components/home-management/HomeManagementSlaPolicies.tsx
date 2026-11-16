@@ -178,7 +178,6 @@ const policyFormError = (form: SlaPolicyForm) => {
 interface HomeManagementSlaPoliciesProps {
   properties: HomeManagementProperty[];
   isPropertiesLoading?: boolean;
-  /** Set by the page header's Add menu; see useCreateRequest. */
   createRequest?: number;
   onCreateRequestHandled?: () => void;
 }

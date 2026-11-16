@@ -37,23 +37,19 @@ export interface ListingCardProps {
   image?: string | null;
   /** `srcset` of resized copies; the browser picks one for the card's width. */
   imageSrcSet?: string;
-  /** The cover's real size and blurred placeholder, when the API sends them. */
   imagePreview?: { width: number; height: number; placeholder?: string };
   imageAlt?: string;
   /** For the first row above the fold. */
   eager?: boolean;
   status?: string;
   statusVariant?: BadgeVariant;
-  /** Extra badges after the status, e.g. a trust-chain badge. */
   badges?: ReactNode;
   /** Pass the backend's flag only; never infer it. */
   verified?: boolean;
   facts?: ListingCardFacts;
   /** Save, compare or share buttons owned by the caller; they never trigger navigation. */
   actions?: ReactNode;
-  /** Quiet extra line(s) under the facts, e.g. "Listed 3 days ago". */
   meta?: ReactNode;
-  /** Buttons under the card body. */
   footer?: ReactNode;
   variant?: ListingCardVariant;
   selected?: boolean;
@@ -65,7 +61,6 @@ export interface ListingCardProps {
 export const listingCardActionClass =
   'rounded-full border border-border/60 bg-card text-foreground shadow-sm backdrop-blur-none hover:scale-100 hover:bg-card hover:text-foreground focus-visible:ring-primary aria-pressed:text-destructive pointer-coarse:h-11 pointer-coarse:w-11';
 
-/** A save, share or compare button sized and styled to sit on the card photo. */
 export const ListingCardAction = forwardRef<HTMLButtonElement, IconButtonProps>(
   ({ className, size = 'md', ...props }, ref) => (
     <IconButton

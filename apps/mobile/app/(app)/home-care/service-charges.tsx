@@ -17,7 +17,6 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 import { STATUS_TONE, formatDay } from '@/lib/serviceCharge';
 
-/** Service-charge budgets. They are set up on the web; here they can be checked and published. */
 export default function ServiceCharges() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

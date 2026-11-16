@@ -402,7 +402,6 @@ const fullChain = {
 const summaryOf = (status: string) => ({ status, limits: ['x'] });
 
 test('sale: the trust chain never claims more than the verification summary on the same page', () => {
-  // The reported case: an approved ownership proof, but the checks have not started.
   const sale = fromSale({
     id: 's',
     title: 'House',

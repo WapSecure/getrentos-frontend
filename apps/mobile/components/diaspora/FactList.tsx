@@ -9,7 +9,6 @@ export interface Fact {
   hint?: string;
 }
 
-/** Label and value rows, the native form of the web's DescriptionList "rows" layout. */
 export function FactList({ facts }: { facts: Fact[] }) {
   const { spacing } = useTheme();
   const shown = facts.filter((f) => f.value !== null && f.value !== undefined && f.value !== '');

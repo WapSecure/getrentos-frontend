@@ -34,10 +34,6 @@ const blurSource = (m: MediaItem) => {
   return uri ? { uri } : undefined;
 };
 
-/**
- * The phone hero: swipe through the photos with a "3 / 8" counter; a tap opens the viewer there.
- * Video and 360 tour entries appear only when the listing has them.
- */
 export function ShowroomHero({
   items,
   height = 300,
@@ -48,7 +44,6 @@ export function ShowroomHero({
   items: MediaItem[];
   height?: number;
   emptyLabel?: string;
-  /** Neighbourhood named on the no-photo placeholder. */
   area?: string | null;
   /** Index into `items`; `room` is set when a room shortcut (floor plans) opened it. */
   onOpen: (index: number, room?: 'floor_plan') => void;

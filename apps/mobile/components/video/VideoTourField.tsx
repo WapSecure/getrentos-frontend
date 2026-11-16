@@ -40,13 +40,11 @@ export function VideoTourField({
   const toast = useToast();
   const [removing, setRemoving] = useState(false);
   const [watching, setWatching] = useState(false);
-  // The upload in flight or the one that failed, kept for Retry; null when there is none.
   const [upload, setUpload] = useState<UploadState | null>(null);
   const pending = useRef<{ file: PickedVideo; onSite: VideoOnSiteReport | null } | null>(null);
   const controller = useRef<AbortController | null>(null);
   const busy = removing || upload != null;
 
-  // Leaving the screen stops the upload.
   useEffect(() => () => controller.current?.abort(), []);
 
   const fail = (e: unknown, fallback: string) =>
@@ -82,7 +80,6 @@ export function VideoTourField({
     }
   };
 
-  /** Cancel while sending, or Remove after a failure: either way the picked video is dropped. */
   const discard = () => {
     controller.current?.abort();
     controller.current = null;

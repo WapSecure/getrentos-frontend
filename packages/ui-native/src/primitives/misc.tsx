@@ -18,11 +18,7 @@ export type IconTileTone = 'primary' | 'success' | 'warning' | 'danger' | 'neutr
 
 const ICON_TILE_SIZE = { sm: 28, md: 36, lg: 44, xl: 56 } as const;
 
-/**
- * A glyph on a soft tinted square: the brand blue by default, the status colours for figures and
- * notices that need them. Decorative, so it is hidden from screen readers; the row it sits in
- * carries the name.
- */
+/** Decorative, so hidden from screen readers; the row it sits in carries the name. */
 export function IconTile({
   Icon,
   tone = 'primary',

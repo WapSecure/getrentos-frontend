@@ -96,7 +96,6 @@ export function HomeManagementEscalationQueue({
   isPropertiesLoading = false,
 }: HomeManagementEscalationQueueProps) {
   const queryClient = useQueryClient();
-  // '' is every property, the default.
   const [selectedPropertyId, setSelectedPropertyId] = useState(ALL_PROPERTIES);
   const [page, setPage] = useState(1);
   const [escalationConfirmation, setEscalationConfirmation] =

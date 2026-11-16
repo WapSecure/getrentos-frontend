@@ -11,10 +11,7 @@ interface PanicHoldButtonProps {
   isPending: boolean;
 }
 
-/**
- * The panic alert fires only after a deliberate one-second press and hold (pointer, touch, or Space/Enter held down).
- * Letting go early cancels it, so a pocket tap or a slip of the finger never sends a critical alert.
- */
+// Letting go before the hold completes cancels, so a pocket tap never sends a critical alert.
 export const PanicHoldButton = ({ onConfirm, isPending }: PanicHoldButtonProps) => {
   const [holding, setHolding] = useState(false);
   const timer = useRef<number | null>(null);
@@ -64,7 +61,6 @@ export const PanicHoldButton = ({ onConfirm, isPending }: PanicHoldButtonProps) 
       onBlur={cancel}
       className="group relative flex w-full touch-none select-none flex-col items-center gap-2 overflow-hidden rounded-2xl bg-destructive px-4 py-7 text-destructive-foreground shadow-md shadow-destructive/25 transition hover:brightness-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-destructive/40 focus-visible:ring-offset-2 focus-visible:ring-offset-card"
     >
-      {/* Fills left to right while held; resets instantly on release. */}
       <span
         aria-hidden="true"
         className="pointer-events-none absolute inset-y-0 left-0 bg-black/20 ease-linear motion-reduce:transition-none"

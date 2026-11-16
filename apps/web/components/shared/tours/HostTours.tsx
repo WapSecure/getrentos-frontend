@@ -307,7 +307,6 @@ const HostTourRow = ({
   );
 };
 
-/** `land`: land tours only (land routes). `all`: every tour, homes and land. */
 export const HostTours = ({ scope }: { scope: TourScope }) => {
   const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
     null

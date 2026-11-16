@@ -100,7 +100,6 @@ const num = (v: string) => (v.trim() === '' ? undefined : Number(v));
 
 type Result = { success: boolean; data?: DeveloperDevelopment; error?: string };
 
-/** One editor for a firm's development: details, evidence for the four checks, media, units and payment plan. */
 export function DevelopmentEditorView({ id }: { id: string }) {
   const queryClient = useQueryClient();
   const toast = useToast();

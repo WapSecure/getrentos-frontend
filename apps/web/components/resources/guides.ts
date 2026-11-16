@@ -25,7 +25,6 @@ export interface Guide {
   summary: string;
   sections: GuideSection[];
   faqs: { question: string; answer: string }[];
-  /** Shown only while the service it describes is available. */
   requiresDiaspora?: boolean;
 }
 

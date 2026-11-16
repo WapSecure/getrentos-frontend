@@ -20,7 +20,7 @@ import { goBack } from '@/lib/goBack';
 
 const RANGES = [6, 12, 24] as const;
 
-/** Recorded utility spend by Lagos month. Only what was logged is counted, and gaps are shown as gaps. */
+/** Only what was logged is counted, and gaps are shown as gaps. */
 export default function UtilitySpend() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

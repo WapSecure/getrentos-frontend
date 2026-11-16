@@ -1,9 +1,4 @@
-// Sureground Diaspora Invest: the shapes the investor, purchase and Managed endpoints return, shared
-// by web and mobile. Pure data: no framework, no service. Sureground holds only deposits (D11).
-
 import type { PropertyValuation } from './valuation';
-
-// ── Attention queue ──────────────────────────────────────────────────────────
 
 export interface AttentionItem {
   key: string;
@@ -12,8 +7,6 @@ export interface AttentionItem {
   detail?: string;
   link: { path: string; label: string };
 }
-
-// ── Purchases: three separate statuses (DIA-15, DIA-16) ──────────────────────
 
 export const OPERATIONAL_STAGES = [
   'INTERESTED',
@@ -87,12 +80,10 @@ export interface WorkspaceDocument {
   id: string;
   documentType: string;
   linkedTo: 'MILESTONE' | 'CONDITION' | 'LEGAL_STEP';
-  /** The milestone, condition or legal step key. */
   key: string;
   uploadedAt: string;
 }
 
-/** The outcome of the buyer's deposit release (`POST buyer/transactions/:id/release`). */
 export interface DepositReleaseOutcome {
   state: 'RELEASED' | 'WAITING_FOR_CO_APPROVAL';
   waitingFor?: 'REPRESENTATIVE' | 'BUYER';
@@ -103,26 +94,18 @@ export interface CoApprovalPendingStep {
   milestoneKey: string;
   /** This approval also releases the held deposit (a built home's handover). */
   releasesDeposit?: boolean;
-  /**
-   * The seller has delivered the step. A handover cannot be approved before it is delivered; false
-   * means not yet. Missing on older responses.
-   */
+  /** A handover cannot be approved before it is delivered. Missing on older responses. */
   stepDelivered?: boolean;
   buyerApproved: boolean;
   representativeApproved: boolean;
 }
 
-/** What a representative's second approval to a deposit release did. */
 export type DepositReleaseApprovalOutcome =
   | 'APPROVED'
   | 'WAITING_FOR_BUYER'
   | 'WAITING_FOR_REPRESENTATIVE';
 
-/**
- * The active dispute on a purchase (`PurchaseDisputeSummaryDto`): the deposit dispute, else a live
- * land case on the plot. `respondBy` is the deadline staff work to, null while staff are already
- * on it; the only turn the model records is Sureground's.
- */
+/** `respondBy` is the deadline staff work to, null while staff are already on it. */
 export interface PurchaseDispute {
   id: string;
   kind: 'DEPOSIT' | 'LAND';
@@ -131,7 +114,6 @@ export interface PurchaseDispute {
   respondByParty: 'SUREGROUND' | null;
 }
 
-/** One purchase on the investor overview, from the same functions as the workspace. */
 export interface PurchaseSummary {
   transactionId: string;
   title: string;
@@ -145,13 +127,10 @@ export interface PurchaseSummary {
   nextAction: string | null;
   /** Something is waiting for me, including a two-person approval. */
   waitingForYou: boolean;
-  /** Two-person approvals waiting for me on this purchase. */
   pendingApprovals: number;
   /** The active dispute; not set for purchases seen as a representative. */
   dispute?: PurchaseDispute | null;
 }
-
-// ── Investor profile and overview ────────────────────────────────────────────
 
 export const DISPLAY_CURRENCIES = ['NGN', 'GBP', 'USD', 'EUR', 'CAD'] as const;
 export type DisplayCurrency = (typeof DISPLAY_CURRENCIES)[number];
@@ -181,7 +160,7 @@ export type InvestmentHorizon = (typeof INVESTMENT_HORIZONS)[number];
 export const OWNERSHIP_STRUCTURES = ['INDIVIDUAL', 'JOINT', 'COMPANY'] as const;
 export type OwnershipStructure = (typeof OWNERSHIP_STRUCTURES)[number];
 
-/** DIA-32: a summary at 08:00 in the investor's own zone, Monday (weekly) or the 1st (monthly). */
+/** Sent at 08:00 in the investor's own zone, Monday (weekly) or the 1st (monthly). */
 export const SUMMARY_FREQUENCIES = ['NONE', 'WEEKLY', 'MONTHLY'] as const;
 export type SummaryFrequency = (typeof SUMMARY_FREQUENCIES)[number];
 
@@ -234,7 +213,6 @@ export interface InvestorProfile {
   /** Older API builds leave these out: read as NONE and EMAIL. */
   summaryFrequency?: SummaryFrequency;
   summaryChannels?: SummaryChannel[];
-  /** Required fields still empty. */
   missingFields: string[];
   /** Set once the profile is complete and the current risk statement is accepted. */
   onboardingCompletedAt: string | null;
@@ -292,10 +270,7 @@ export interface InvestorOverview {
   portfolio?: InvestorPortfolio;
 }
 
-/**
- * Portfolio figures from records Sureground holds; each is null when there is no record behind it.
- * The only value is the sum of in-date reports by accredited valuers (DIA-30).
- */
+/** Each figure is null when no record backs it; the only value is the sum of in-date accredited valuer reports. */
 export interface InvestorPortfolio {
   properties: number | null;
   /** Whole naira, as a string: recorded prices of completed purchases. */
@@ -315,8 +290,6 @@ export interface InvestorPortfolio {
   valuations?: PropertyValuation[];
   asOf: string;
 }
-
-// ── Identity abroad (decision D3) ────────────────────────────────────────────
 
 export type ForeignCheckState = 'NOT_STARTED' | 'CHECKING' | 'IN_REVIEW' | 'APPROVED' | 'REJECTED';
 
@@ -341,11 +314,9 @@ export interface ForeignIdentityStatus {
   };
   address: ForeignDocumentStatus;
   bankStatement: ForeignDocumentStatus;
-  /** DIA-07; absent from older API versions. */
+  /** Absent from older API versions. */
   sourceOfFunds?: SourceOfFundsStatus;
 }
-
-// ── Source of funds (DIA-07, decision D4) ────────────────────────────────────
 
 export type SourceOfFundsSupportingKind =
   | 'PAYSLIPS'
@@ -362,13 +333,11 @@ export interface SourceOfFundsStatus extends ForeignDocumentStatus {
   committedNaira: number;
   /** Whole naira: asked at or above `singlePurchaseNaira` for one purchase, or past `totalCommittedNaira` in total. */
   thresholds: { singlePurchaseNaira: number; totalCommittedNaira: number };
-  /** The one line that says why we ask. */
   why: string;
   bankStatementMonths: number;
   supportingKinds: SourceOfFundsSupportingKind[];
   /** Why an earlier approval no longer counts: it ran out (12 months) or purchases outgrew it. */
   renewal?: SourceOfFundsRenewal | null;
-  /** While an approval counts. */
   approvedAt?: string | null;
   validUntil?: string | null;
 }
@@ -393,8 +362,6 @@ export interface ForeignSubmission {
   reviewDueAt: string | null;
 }
 
-// ── Sureground Managed (DIA-20, DIA-21, DIA-22) ──────────────────────────────
-
 /** Whole naira. Some reads send money as a string (from a bigint); `Number()` both. */
 export type MoneyValue = number | string;
 
@@ -414,10 +381,7 @@ export type SpendBand = (typeof SPEND_BANDS)[number];
 /** EXPENSE posts an expense when approved; WORK_ORDER authorises a job the manager then carries out. */
 export type SpendApprovalKind = 'EXPENSE' | 'WORK_ORDER';
 
-/**
- * Work-order or quote approval above the routine limit: nothing is approved yet. Once the owner
- * approves, the manager repeats the same call.
- */
+/** Nothing is approved yet; once the owner approves, the manager repeats the same call. */
 export interface AwaitingOwnerApproval {
   state: 'AWAITING_OWNER_APPROVAL';
   approvalId: string;
@@ -438,7 +402,6 @@ export const EVIDENCE_STAGE_KEYS = [
 export type EvidenceStageKey = (typeof EVIDENCE_STAGE_KEYS)[number];
 export type EvidenceStageStatus = 'DONE' | 'PENDING' | 'NOT_APPLICABLE' | 'FLAGGED';
 
-/** How a stage reads on a timeline; the same states as the web and native timelines. */
 export type EvidenceTimelineState = 'done' | 'current' | 'pending' | 'blocked' | 'skipped';
 
 export type EvidenceActorRole = 'OWNER' | 'MANAGER' | 'FIELD_AGENT' | 'TENANT';
@@ -479,7 +442,6 @@ export interface MaintenancePhoto {
   legacy: boolean;
 }
 
-/** A quote or invoice document (the shared evidence item). */
 export interface EvidenceDocument {
   id: string;
   kind: 'STORED' | 'EXTERNAL';
@@ -557,10 +519,7 @@ export interface WorkOrderFeedback {
   at: string;
 }
 
-/**
- * Body that lets an invoice through after the 409 `INVOICE_POSSIBLE_DUPLICATE`. An empty reason
- * is a 400. An acknowledgement at approval also covers paying it.
- */
+/** An empty reason is a 400. An acknowledgement at approval also covers paying it. */
 export interface DuplicateAcknowledgement {
   acknowledgeDuplicate: true;
   reason: string;
@@ -599,7 +558,6 @@ export interface InvestorManagedProperty {
 export interface InvestorManagedPendingApproval {
   id: string;
   propertyId: string;
-  /** The property's title. */
   title: string;
   amount: MoneyValue;
   band: SpendBand;

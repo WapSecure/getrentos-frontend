@@ -8,7 +8,6 @@ import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { renterKeys } from '@/lib/queryKeys';
 
-/** What past landlords wrote about this renter: the same reviews landlords see when the renter applies. */
 export function RenterReviewsAboutYou() {
   const { data, isLoading } = useQuery({
     queryKey: renterKeys.reviewsReceived,

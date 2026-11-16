@@ -6,7 +6,6 @@ export interface SegmentOption<T extends string> {
   value: T;
   label: string;
   icon?: React.ReactNode;
-  /** A count beside the label, such as how many items the segment holds. */
   count?: number;
   /** `warning` when something in the segment needs the viewer. */
   countTone?: 'neutral' | 'warning';

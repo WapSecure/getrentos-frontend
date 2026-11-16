@@ -43,7 +43,6 @@ const STATUS: Record<AssetStatus, { label: string; tone: Tone }> = {
   NEEDS_SERVICE: { label: 'Needs service', tone: 'warning' },
   RETIRED: { label: 'Retired', tone: 'neutral' },
 };
-// The shared suggestions first, then the other common kinds; always ending with Other.
 const ASSET_KINDS = [
   ...HOME_ASSET_CATEGORY_SUGGESTIONS,
   'Fridge',

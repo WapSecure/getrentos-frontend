@@ -21,7 +21,6 @@ const VARIANTS = {
     'border border-primary-foreground/70 text-primary-foreground hover:bg-primary-foreground hover:text-primary',
 } as const;
 
-/** A link styled as a Brik button: sharp, 48px tall, tracked capitals, Sureground blue. Server-rendered, no JS. */
 export const CtaLink = ({
   href,
   children,

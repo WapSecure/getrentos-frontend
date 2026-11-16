@@ -25,7 +25,6 @@ const newItem = (): ClaimDraftItem => ({
   files: [],
 });
 
-/** Itemised deductions, each with a reason and evidence; uploads the evidence, then files the claim. */
 export function ClaimDeductionsForm({
   view,
   onDone,

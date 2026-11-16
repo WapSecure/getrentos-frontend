@@ -79,7 +79,6 @@ test('a release waiting for the representative says nothing moved and the buyer 
   });
   // Older responses carry no outcome: the release went through.
   assert.equal(releaseOutcome(undefined).waiting, false);
-  // Without a name, it still says who is awaited.
   assert.match(
     releaseOutcome({ state: 'WAITING_FOR_CO_APPROVAL', waitingFor: 'REPRESENTATIVE' }).message,
     /Once your representative approves/
@@ -351,7 +350,6 @@ test('a land sale cannot be released until every required step and condition is 
     'You can release the deposit once you have confirmed: Deed of assignment executed.'
   );
   assert.equal(releaseBlockedNote(land('CONFIRMED', 'WAIVED')), null);
-  // Built homes keep the handover rule.
   assert.equal(
     releaseBlockedNote({ plan: 'BUILT_HOME', milestones: [], conditions: [] }),
     RELEASE_BLOCKED_NOTE

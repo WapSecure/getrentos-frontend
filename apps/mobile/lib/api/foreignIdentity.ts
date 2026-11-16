@@ -8,8 +8,7 @@ import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { SmileLivenessSession } from './trust';
 
-// Identity checks abroad for Diaspora Invest (decision D3), the same routes as web's
-// foreignIdentityService. The status itself is `investorApi.identityAbroad`.
+// The status itself is `investorApi.identityAbroad`.
 
 export interface PassportSession extends SmileLivenessSession {
   automatedAttemptsUsed: number;
@@ -37,7 +36,7 @@ export const foreignIdentityApi = {
     appendFile(form, 'selfie', selfie);
     return apiUpload<ForeignSubmission>('/trust/foreign-identity/passport/review', form);
   },
-  /** DIA-07: would a purchase at this price need source of funds approved first? */
+  /** Would a purchase at this price need source of funds approved first? */
   checkSourceOfFunds: (amount: number) =>
     apiFetch<SourceOfFundsCheck>(
       `/trust/foreign-identity/source-of-funds/check?amount=${Math.round(amount)}`
@@ -51,7 +50,7 @@ export const foreignIdentityApi = {
       return null;
     }
   },
-  /** DIA-07: bank statements, a supporting document, and the donor's ID with a gift or inheritance letter. */
+  /** Bank statements, a supporting document, and the donor's ID with a gift or inheritance letter. */
   submitSourceOfFunds: (input: {
     bankStatement: PickedFile;
     supportingKind: SourceOfFundsSupportingKind;

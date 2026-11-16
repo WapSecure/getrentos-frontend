@@ -8,22 +8,13 @@ import {
 } from '@sureground/shared/showroom';
 import { developmentRoute } from './askDeveloper';
 
-/**
- * Pure helpers for "Questions to developers", the buyer's questions across every development, as on
- * the web's /buyer/developer-questions. Copy and mappers come from the shared `developmentEnquiries.ts`.
- */
-
 export const DEVELOPER_QUESTIONS_ROUTE = '/(app)/developer-questions';
 export const DEVELOPER_QUESTIONS_PAGE_SIZE = 10;
 
-/** "Waiting for an answer", "Answered" or "Closed", the buyer's wording on the web. */
 export const questionStatusLabel = (status: DevelopmentEnquiryStatus) =>
   DEVELOPMENT_ENQUIRY_STATUS_LABEL[status].buyer;
 
-/**
- * Every loaded page as one list, newest first. A question asked while paging shifts the later pages
- * by one, so the same question can come back twice; it is shown once.
- */
+/** A question asked while paging shifts the later pages by one, so a repeat is shown once. */
 export function mergeQuestionPages(
   pages: Pick<BuyerDevelopmentEnquiryPage, 'items'>[] | undefined
 ): BuyerDevelopmentEnquiry[] {

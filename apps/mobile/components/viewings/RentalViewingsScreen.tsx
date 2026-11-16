@@ -44,10 +44,7 @@ const FILTERS: { value: LandlordViewingStatus | undefined; label: string }[] = [
 
 const when = (iso: string) => `${formatDate(iso, 'short')}, ${formatTime(iso)}`;
 
-/**
- * Renters' requests to view a property for rent. The landlord's viewings screen, and the renters
- * tab of the owner's: the backend lets any property controller confirm, decline and host these.
- */
+/** The backend lets any property controller confirm, decline and host these, so the owner's renters tab reuses it. */
 export function RentalViewingsScreen({
   eyebrow,
   subtitle,
@@ -291,7 +288,6 @@ function ViewingCard({
 function ConfirmForm({ viewing, onDone }: { viewing: LandlordViewingRequest; onDone: () => void }) {
   const { spacing } = useTheme();
   const toast = useToast();
-  // Start from the renter's slot, in local time, when they gave one.
   const asked = viewing.preferredAt ? new Date(viewing.preferredAt) : null;
   const [date, setDate] = useState(asked ? toISODate(asked) : '');
   const [time, setTime] = useState(

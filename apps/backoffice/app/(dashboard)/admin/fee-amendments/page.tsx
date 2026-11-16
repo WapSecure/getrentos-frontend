@@ -30,10 +30,7 @@ import {
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { useAdminUser } from '../layout';
 
-/**
- * BD-2: every fee change across management agreements, and the only place a Sureground Managed fee
- * is proposed. The owner (and every co-owner) must accept before it applies.
- */
+/** The only place a Sureground Managed fee is proposed; every co-owner must accept before it applies. */
 
 const REASON_MIN = 10;
 const MONTHS_AHEAD = 12;
@@ -217,7 +214,7 @@ function ProposeManagedFee() {
   );
 
   const data = overview.data;
-  // Rule 5: only the published tier rates, as the API sends them (read from the fee card).
+  // Only the published tier rates, as the API sends them (read from the fee card).
   const rates = data?.allowedPercentages ?? [];
   const rateOptions = rates
     .filter((rate) => !(data?.currentFee?.type === 'PERCENTAGE' && data.currentFee.value === rate))

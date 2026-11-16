@@ -27,7 +27,6 @@ interface ListingCardProps {
   onTogglePause: (id: string) => void;
   onPreview: (listing: Listing) => void;
   onEditFees?: (listing: Listing) => void;
-  /** Shown on commercial listings only. */
   onEditCommercial?: (listing: Listing) => void;
   isUpdating?: boolean;
 }

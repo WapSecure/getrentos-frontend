@@ -315,7 +315,6 @@ function ProfileForm({ generator, onDone }: { generator: UtilityGenerator; onDon
   );
 }
 
-/** Record a service and restart the running-hours count. Owner or agency only. */
 export function GeneratorServiceDialog({ generator, onOpenChange }: GeneratorDialogProps) {
   return (
     <Dialog open={!!generator} onOpenChange={onOpenChange}>

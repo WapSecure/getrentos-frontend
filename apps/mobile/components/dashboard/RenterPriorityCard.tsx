@@ -33,7 +33,6 @@ export interface RenterPriority {
   href: string;
 }
 
-/** The single most useful next step for a renter, most urgent first. */
 export function pickRenterPriority(i: RenterPriorityInput): RenterPriority | null {
   const s = i.summary;
   if (s && s.openCount > 0 && s.amountOwedNaira > 0) {

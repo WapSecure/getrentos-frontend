@@ -59,7 +59,6 @@ interface ServiceChargePanelProps {
   properties: HomeManagementProperty[];
 }
 
-/** Service-charge budgets: set one up, check every unit's share, publish it, then follow what was billed. */
 export function ServiceChargePanel({ propertyId, properties }: ServiceChargePanelProps) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);

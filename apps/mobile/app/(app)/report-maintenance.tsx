@@ -44,7 +44,6 @@ export default function ReportMaintenance() {
   const [isEmergency, setIsEmergency] = useState(false);
   const [photos, setPhotos] = useState<PickedFile[]>([]);
   const [draft, setDraft] = useState<RepairDraft | null>(null);
-  // Someone renting more than one home says which one; with one home there is nothing to ask.
   const homes = useQuery({ queryKey: qk.renter.maintenanceHomes, queryFn: maintenanceApi.homes });
   const [chosenHome, setChosenHome] = useState<string | null>(null);
   const homeList = homes.data ?? [];

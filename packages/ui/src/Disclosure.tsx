@@ -51,7 +51,6 @@ interface DisclosureListProps {
   items: readonly DisclosureListItem[];
   /** Makes the list single-open. */
   name?: string;
-  /** Index of the item open on first render. */
   defaultOpenIndex?: number;
   className?: string;
 }

@@ -9,8 +9,6 @@ import { formatDate } from '@/lib/format';
 import type { LandDispute } from '@/types/landDispute';
 import type { SaleDispute } from '@/types/transactionWorkspace';
 
-// The pieces a dispute page is built from, shared by the land case page and the deposit dispute thread.
-
 export const SALE_DISPUTE_STATUS: Record<SaleDispute['status'], string> = {
   OPEN: 'Open',
   UNDER_REVIEW: 'Under review',
@@ -26,10 +24,7 @@ export const LAND_DISPUTE_STATUS: Record<LandDispute['status'], string> = {
   CLOSED: 'Closed',
 };
 
-/**
- * "Sureground replies by 11 Nov 2026, 23:59 Lagos · 22:59 London". The deadline is the one staff
- * work to; the only turn the dispute records is Sureground's.
- */
+/** The deadline staff work to; the only turn the dispute records is Sureground's. */
 export const respondByText = (respondBy: string, viewerTimeZone?: string | null) =>
   `Sureground replies by ${formatDate(respondBy)}, ${formatDualTime(respondBy, viewerTimeZone)}`;
 

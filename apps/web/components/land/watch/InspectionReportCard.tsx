@@ -16,10 +16,6 @@ interface InspectionReportCardProps {
   inspection: LandWatchInspection;
   actions?: ReactNode;
   className?: string;
-  /**
-   * Inside a card that already names the inspection, its inspector and status: drops the border
-   * and the header, leaving the report itself.
-   */
   embedded?: boolean;
 }
 

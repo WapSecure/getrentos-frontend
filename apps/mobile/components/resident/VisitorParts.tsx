@@ -53,7 +53,6 @@ export function VisitorInitials({
   );
 }
 
-/** A small uppercase label above a group of cards, with an optional count. */
 export function GroupLabel({
   label,
   count,
@@ -105,7 +104,6 @@ export function GroupLabel({
   );
 }
 
-/** Laid out like a ticket: who it is for, the QR code, a tear line, then the PIN in large spaced digits. */
 export function PassTicket({
   pass,
 }: {
@@ -156,7 +154,6 @@ export function PassTicket({
         </View>
       </View>
 
-      {/* Tear line with a notch cut from each side. */}
       <View style={{ height: notch, justifyContent: 'center' }}>
         <View
           style={{
@@ -233,7 +230,6 @@ export function PassTicket({
   );
 }
 
-/** Equal segments in a track, for picking how long a pass lasts. Small phones get two rows of two. */
 export function DurationChoice({
   label,
   options,

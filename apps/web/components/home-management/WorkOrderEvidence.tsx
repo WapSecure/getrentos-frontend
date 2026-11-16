@@ -79,14 +79,10 @@ const humanise = (value: string) =>
 
 interface WorkOrderEvidenceProps {
   workOrder: HomeManagementWorkOrder;
-  /** Only the owner rates the job. */
   viewerRole?: 'owner' | 'landlord' | 'manager';
 }
 
-/**
- * The job's record from problem to payment (DIA-22). Loads when opened, so a long queue doesn't
- * fetch every job's evidence up front.
- */
+// Loads when opened, so a long queue doesn't fetch every job's evidence up front.
 export function WorkOrderEvidence({ workOrder, viewerRole }: WorkOrderEvidenceProps) {
   const [open, setOpen] = useState(false);
 
@@ -176,7 +172,6 @@ function EvidenceBody({ workOrder, viewerRole }: WorkOrderEvidenceProps) {
   );
 }
 
-/** Quotes and invoices on the job that a document can be attached to. */
 function documentTargets(stage: EvidenceStage): { id: string; label: string }[] | null {
   if (stage.key === 'QUOTE') {
     const quotes = (stage.items ?? []) as EvidenceQuote[];
@@ -311,7 +306,6 @@ function StageDetail({ stage }: { stage: EvidenceStage }) {
   );
 }
 
-/** Owner or manager adds the paper behind a quote or an invoice. */
 function AttachDocumentForm({
   workOrderId,
   stageKey,

@@ -69,7 +69,6 @@ const STEPS: { id: Step; title: string }[] = [
   { id: 'risk', title: 'Risk statement' },
 ];
 
-/** The side panel: what the answers are for, in plain words. */
 const WHY_WE_ASK: { icon: SgIcon; title: string; body: string }[] = [
   {
     icon: Globe,
@@ -128,7 +127,6 @@ const PLANS_FIELDS: readonly InvestorProfileField[] = [
   'ownershipStructure',
 ];
 
-/** Where to start: the first step with a required field still empty, else the statement if it is still owed. */
 const firstStep = (profile: InvestorProfile | null, wantsRisk: boolean): Step => {
   if (!profile) return 'about';
   const missing = new Set(profile.missingFields ?? []);

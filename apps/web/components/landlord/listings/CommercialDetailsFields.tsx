@@ -52,7 +52,6 @@ const fitOutOptions = (
 interface CommercialDetailsFieldsProps {
   value: CommercialValues;
   onChange: (next: CommercialValues) => void;
-  /** A sale talks about the price and buyers; a let about the rent and renters. */
   deal?: CommercialDeal;
 }
 

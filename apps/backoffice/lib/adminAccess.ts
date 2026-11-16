@@ -41,7 +41,6 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   'ai.observe',
   // Curating showroom collections across owners, and marking one sponsored.
   'collections.manage',
-  // The Diaspora operations queue (DIA-41).
   'diaspora.ops',
 ];
 

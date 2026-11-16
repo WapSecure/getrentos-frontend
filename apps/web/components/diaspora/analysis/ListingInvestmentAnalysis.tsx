@@ -70,11 +70,6 @@ const SCENARIO_ROWS: ScenarioRow[] = [
   { label: 'Net income over 5 years', pick: (s) => s.cashFlowNet },
 ];
 
-/**
- * DIA-19: investment analysis in naira on an investment-eligible listing. Every figure carries
- * its source; the investor's own figures replace the defaults. Hidden while Diaspora Invest is
- * off, and when the API has no analysis for the listing.
- */
 export function ListingInvestmentAnalysis({ listingId }: { listingId: string }) {
   const { enabled } = useDiasporaAvailability();
   const [edits, setEdits] = useState<AnalysisEdits>({});

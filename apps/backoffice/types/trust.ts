@@ -147,10 +147,7 @@ export interface TrustAppeal {
   targetLabel?: string | null;
 }
 
-/**
- * Staff-reviewed Diaspora Invest uploads on the same review endpoints: identity (decision D3) and
- * source of funds (DIA-07, decision D4).
- */
+/** Staff-reviewed Diaspora Invest uploads (identity, source of funds) on the same review endpoints. */
 export type ForeignPurpose =
   | 'FOREIGN_IDENTITY'
   | 'FOREIGN_ADDRESS'

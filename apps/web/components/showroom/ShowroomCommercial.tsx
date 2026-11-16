@@ -31,10 +31,7 @@ function Rows({ rows }: { rows: CommercialRow[] }) {
   );
 }
 
-/**
- * The commercial journey: the lease first, then the space, then what it takes to run a business
- * there. Everything is the lister's own statement; a section with nothing stated is left out.
- */
+// Everything is the lister's own statement; a section with nothing stated is left out.
 export function ShowroomCommercial({
   commercial,
   market,

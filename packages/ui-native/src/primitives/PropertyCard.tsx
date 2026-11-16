@@ -42,7 +42,6 @@ const SPOKEN_PERIOD = {
   total: 'in total',
 } as const;
 
-/** The neighbourhood for a no-photo placeholder: "2-Bed · Lekki Phase 1" gives "Lekki Phase 1". */
 export function listingArea(p: Pick<PropertyCardData, 'title' | 'location'>): string | null {
   const fromTitle = p.title.split('·').slice(1).join('·').trim();
   if (fromTitle) return fromTitle;

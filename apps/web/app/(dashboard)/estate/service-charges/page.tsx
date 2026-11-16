@@ -68,7 +68,6 @@ const formatDay = (day: string) =>
     year: 'numeric',
   });
 
-/** Service-charge budgets for the estate, billed to households as dues. */
 export default function EstateServiceChargesPage() {
   const { estate, isLoading } = useSelectedEstate();
   const [openId, setOpenId] = useState<string | null>(null);

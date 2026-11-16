@@ -50,11 +50,7 @@ function Notice({
   );
 }
 
-/**
- * The server refuses a deposit from a buyer whose identity is not verified (the same rule as
- * making an offer). Returns the notice to pass to PaySheet's `blocked`, or null to let them pay.
- * A loading or failed status never blocks; the server still has the final say.
- */
+/** A loading or failed status never blocks; the server still has the final say. */
 export function useDepositIdentityNotice(enabled: boolean, onNavigate?: () => void): ReactNode | null {
   const kyc = useQuery({ queryKey: ['kyc-status'], queryFn: kycApi.getStatus, enabled });
   const notice = enabled ? depositIdentityNotice(kyc.data) : null;

@@ -32,7 +32,6 @@ import { goBack } from '@/lib/goBack';
 import { ReconciliationSection } from '@/components/service-charge/ReconciliationSection';
 import { COLLECTION_TONE, STATUS_TONE, formatDay } from '@/lib/serviceCharge';
 
-/** One budget: its lines and every unit's share; publish, close or void with Face ID or the PIN. */
 export default function ServiceChargeDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();

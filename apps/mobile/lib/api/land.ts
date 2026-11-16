@@ -128,7 +128,6 @@ export interface LandListing {
   locationPrecision?: 'exact' | 'approximate';
   coverImageUrl?: string;
   galleryImageUrls?: string[];
-  /** Photos (with rooms, captions and resized copies), in display order. */
   media?: MediaItem[];
   description: string;
   amenities?: string[];

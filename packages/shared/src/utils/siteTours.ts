@@ -1,8 +1,3 @@
-/**
- * Video tours (land and built homes): which list a tour sits in, and what happens next. Used by
- * the web and mobile tours screens. Works on any tour shape that carries the fields it reads.
- */
-
 export type SiteTourStatus =
   | 'REQUESTED'
   | 'PROPOSED'
@@ -23,24 +18,20 @@ export interface SiteTourRecording {
   hasRecording: boolean;
 }
 
-/** The fields the grouping reads. */
 export interface GroupableTour {
   status: SiteTourStatus;
   scheduledAt?: string | null;
   createdAt?: string | null;
 }
 
-/** Which list a tour sits in on the tours screens. */
 export type TourGroup = 'upcoming' | 'waiting' | 'past';
 export type TourViewer = 'buyer' | 'host';
 
 export const TOUR_GROUPS: readonly TourGroup[] = ['upcoming', 'waiting', 'past'];
 
 const GROUP: Record<SiteTourStatus, TourGroup> = {
-  // Times are on the table or fixed: there is something to do or attend.
   PROPOSED: 'upcoming',
   SCHEDULED: 'upcoming',
-  // No times yet.
   REQUESTED: 'waiting',
   COMPLETED: 'past',
   CANCELLED: 'past',
@@ -56,10 +47,6 @@ export const TOUR_GROUP_LABELS: Record<TourViewer, Record<TourGroup, string>> = 
 
 const time = (value?: string | null) => (value ? new Date(value).getTime() : Number.NaN);
 
-/**
- * Splits tours into the three lists. Upcoming puts booked tours first, soonest first, then tours
- * with times offered; the other lists show the newest request first.
- */
 export const groupTours = <T extends GroupableTour>(
   tours: readonly T[]
 ): Record<TourGroup, T[]> => {
@@ -80,11 +67,9 @@ export const groupTours = <T extends GroupableTour>(
   return groups;
 };
 
-/** The list to open on: the first one with something in it. */
 export const firstGroupWithTours = (groups: Record<TourGroup, readonly unknown[]>): TourGroup =>
   TOUR_GROUPS.find((group) => groups[group].length > 0) ?? 'upcoming';
 
-/** The booked tour that starts soonest, from now on. */
 export const nextBookedTour = <T extends GroupableTour>(
   tours: readonly T[],
   now: number
@@ -93,10 +78,7 @@ export const nextBookedTour = <T extends GroupableTour>(
     .filter((t) => t.status === 'SCHEDULED' && time(t.scheduledAt) >= now)
     .sort((a, b) => time(a.scheduledAt) - time(b.scheduledAt))[0];
 
-/**
- * What happens next, in one plain sentence, for the person looking at the tour. `started` is true
- * once a booked tour's start time has passed.
- */
+/** `started` is true once a booked tour's start time has passed. */
 export const tourNextStep = (
   tour: { status: SiteTourStatus; buyerRating?: number | null },
   viewer: TourViewer,

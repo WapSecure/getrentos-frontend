@@ -328,7 +328,6 @@ export const homeCareApi = {
       ...(acknowledge ? { body: acknowledge } : {}),
     }),
 
-  /** Each stage of the job, from the problem reported to the owner's feedback. */
   evidence: (workOrderId: string) =>
     apiFetch<WorkOrderEvidence>(`/home-management/work-orders/${workOrderId}/evidence`),
   /** Stamped with the time it is added; the stage says what the photo shows. */
@@ -338,7 +337,6 @@ export const homeCareApi = {
     form.append('stage', stage);
     return apiUpload<MaintenancePhoto>(`/home-management/work-orders/${workOrderId}/photos`, form);
   },
-  /** Owner or manager attaches the paperwork behind a quote or an invoice on the job. */
   addDocument: (
     workOrderId: string,
     target: { quoteId: string } | { invoiceId: string },

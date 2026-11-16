@@ -37,7 +37,6 @@ const COLLECTION_LABEL = {
   VOIDED: 'Voided',
 } as const;
 
-/** One estate budget: lines, each household's share; publish, close or void with Face ID or the PIN. */
 export default function EstateServiceChargeDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { estateId } = useEstate();

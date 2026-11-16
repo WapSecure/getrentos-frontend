@@ -15,10 +15,6 @@ interface ListingTileProps {
 const PRICE_BASIS: Record<string, string> = { year: 'per year', month: 'per month' };
 const MARKET_LABEL: Record<PublicMarket, string> = { rent: 'To rent', sale: 'For sale' };
 
-/**
- * Brik-style listing: a 4:3 photo with the market and verified mark on it, a serif name, the area,
- * a prominent price and one line of facts.
- */
 export const ListingTile = ({ listing, market, eager = false }: ListingTileProps) => {
   const facts = [
     listing.bedrooms

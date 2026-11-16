@@ -2,12 +2,10 @@
 
 import { useEffect, type ReactNode, type RefObject } from 'react';
 
-/** Hairline between the icon buttons and the account menu. */
 export function TopBarDivider({ className = '' }: { className?: string }) {
   return <span aria-hidden="true" className={`h-6 w-px shrink-0 bg-border ${className}`} />;
 }
 
-/** The workspace the top bar belongs to, with a small blue dot. */
 export function WorkspacePill({ label, className = '' }: { label: string; className?: string }) {
   return (
     <span
@@ -19,12 +17,10 @@ export function WorkspacePill({ label, className = '' }: { label: string; classN
   );
 }
 
-/** Wraps the account menu so its avatar picks up the blue halo from the shared styles. */
 export function TopBarAccount({ children }: { children: ReactNode }) {
   return <div className="shell-account flex shrink-0 items-center">{children}</div>;
 }
 
-/** The "/" key hint inside the search field. Hidden while the field has focus or text. */
 export function SearchShortcutHint() {
   return (
     <kbd
@@ -40,10 +36,7 @@ const isEditable = (el: Element | null) =>
   el instanceof HTMLElement &&
   (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName));
 
-/**
- * Pressing "/" anywhere outside a field focuses the first visible search box inside `scope`.
- * Skipped while a dialog or menu has focus, so it never pulls focus out of an overlay.
- */
+/** Skipped while a dialog or menu has focus, so "/" never pulls focus out of an overlay. */
 export function useSlashToSearch(scope: RefObject<HTMLElement | null>) {
   useEffect(() => {
     const visibleInput = () =>

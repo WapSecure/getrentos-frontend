@@ -105,7 +105,7 @@ export interface ManagementMandateDto {
   managerName?: string | null;
   /** The most a manager may spend without owner sign-off (whole naira); null = no cap. */
   maintenanceApprovalCap: number | null;
-  /** Spending bands (M4). Absent until the API sends them; fall back to `maintenanceApprovalCap`. */
+  /** Absent until the API sends them; fall back to `maintenanceApprovalCap`. */
   bands?: SpendBands | null;
   scope: MandateScope[];
   capabilities: MandateCapabilities;
@@ -365,8 +365,6 @@ export function cancelTermination(
     )
   );
 }
-
-/* ── Fee changes (BD-2) ───────────────────────────────────────────────────────────────────────── */
 
 export type ManagementFeeType = 'PERCENTAGE' | 'FLAT';
 export type FeeAmendmentSide = 'OWNER' | 'MANAGER' | 'SUREGROUND';

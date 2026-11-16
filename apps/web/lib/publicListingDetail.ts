@@ -62,11 +62,7 @@ export const MARKET_PATH: Record<PublicDetailMarket, string> = {
 export const publicListingPath = (listing: Pick<PublicListingDetail, 'market' | 'id' | 'title'>) =>
   listingPath(listing.market, listing.id, listing.title);
 
-/**
- * Load the listing a URL segment points at (`<slug>-<uuid>` or a bare id) and send any
- * non-canonical address (old bare-id links, a renamed title) to the canonical one with a 308,
- * so search engines index a single URL per listing.
- */
+/** Any non-canonical address (bare id, renamed title) gets a 308, so search engines index one URL per listing. */
 export async function resolvePublicListing(
   market: PublicDetailMarket,
   segment: string

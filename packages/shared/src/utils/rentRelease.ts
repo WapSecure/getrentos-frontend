@@ -12,10 +12,7 @@ export interface RentReleasePayment {
   moveInConfirmed?: boolean;
 }
 
-/**
- * Per held payment: before move-in, only the oldest held rent of each home asks the tenant to confirm move-in (the
- * others release on schedule); after move-in, every held rent offers an early release instead.
- */
+/** Before move-in only each home's oldest held rent asks to confirm move-in; after it, every held rent offers early release. */
 export function rentReleaseActions(
   payments: readonly RentReleasePayment[]
 ): Map<string, RentReleaseAction> {

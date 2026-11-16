@@ -16,7 +16,6 @@ import { enquiryBody } from '../askDeveloper';
 const anon = { anonymous: true } as const;
 
 export const developmentsApi = {
-  /** Live developments only, each read through the shared mapper. */
   async list(page = 1, pageSize = 12): Promise<DevelopmentsPage> {
     const raw = await apiFetch<unknown>(`/developments${toQuery({ page, pageSize })}`, anon);
     return developmentsPageOf(raw);
@@ -35,14 +34,12 @@ export const developmentsApi = {
     }
   },
 
-  /** The signed-in user's own questions about one development, newest first. */
   async myEnquiries(developmentId: string): Promise<BuyerDevelopmentEnquiry[]> {
     if (!isDevelopmentId(developmentId)) return [];
     const raw = await apiFetch<unknown>(`/development-enquiries${toQuery({ developmentId })}`);
     return buyerDevelopmentEnquiriesOf(raw);
   },
 
-  /** The signed-in user's questions across every development, newest first, one page at a time. */
   async history(page: number, pageSize: number): Promise<BuyerDevelopmentEnquiryPage> {
     const raw = await apiFetch<unknown>(
       `/development-enquiries/history${toQuery({ page, pageSize })}`

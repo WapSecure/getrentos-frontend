@@ -20,11 +20,7 @@ function Line({ off = false, children }: { off?: boolean; children: string }) {
   );
 }
 
-/**
- * One party's say on recording, kept to a line as on web. Recording needs both, and either may
- * withdraw at any time. The switch shows only when the call can actually be recorded; otherwise a
- * line says recording is off, with a way to withdraw an agreement already given.
- */
+/** Recording needs both parties, and either may withdraw at any time. */
 export function TourRecordingConsent<T extends { recording?: SiteTourRecording }>({
   tour,
   side,

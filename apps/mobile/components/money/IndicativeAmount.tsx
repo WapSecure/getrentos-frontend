@@ -5,12 +5,7 @@ import { indicativeAmount, indicativeRateLabel } from '@sureground/shared';
 import { IconButton, Text, useTheme } from '@sureground/ui-native';
 import { useIndicativeRates } from '@/hooks/useIndicativeRates';
 
-/**
- * "about £82,000" beside a naira price, as on web. Display only: naira stays the price and the
- * payment currency. Renders nothing when the rate is unavailable or over 24 hours old (the API
- * reports both as unavailable). `popover` keeps the source line behind an info button for tight
- * spaces such as figures; `inline` shows it under the amount.
- */
+/** Display only: naira stays the price and payment currency. Renders nothing when the rate is unavailable or stale. */
 export function IndicativeAmount({
   naira,
   currency,

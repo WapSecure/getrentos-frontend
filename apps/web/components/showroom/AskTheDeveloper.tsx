@@ -36,7 +36,6 @@ const keyOf = (developmentId: string) => ['development-enquiries', 'mine', devel
 const loginHref = (developmentId: string) =>
   `/login?next=${encodeURIComponent(`${developmentPath(developmentId)}#ask`)}`;
 
-/** The sidebar's link down to the form, or to sign in first. */
 export function AskTheDeveloperLink({ developmentId }: { developmentId: string }) {
   const signedIn = useSyncExternalStore(subscribeToNothing, viewerIsSignedIn, () => false);
   return (
@@ -56,10 +55,7 @@ export function AskTheDeveloperLink({ developmentId }: { developmentId: string }
   );
 }
 
-/**
- * "Ask the developer": signed in only (owner decision 2026-11-10). The question and the answer are kept,
- * so one that goes unanswered can be followed up. Sureground takes no payment for a development.
- */
+// Signed in only; questions and answers are kept so an unanswered one can be followed up.
 export function AskTheDeveloper({
   developmentId,
   developerName,

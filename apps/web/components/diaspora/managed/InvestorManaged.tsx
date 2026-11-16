@@ -46,11 +46,6 @@ const SEGMENTED_MAX = 3;
 const isSet = (value: number | null | undefined): value is number =>
   value !== null && value !== undefined;
 
-/**
- * Sureground Managed for an investor (DIA-20): one property at a time, with its agreement, the
- * spending waiting for them, its repairs and the latest statement. Actions on the agreement stay
- * on the management page; this page links there.
- */
 export function InvestorManaged() {
   const managed = useQuery({
     queryKey: investorKeys.managed,
@@ -339,7 +334,6 @@ function StatementCard({
   );
 }
 
-/** The ledger lines behind the statement, read when opened. */
 function StatementDetail({
   statementId,
   defaultOpen = false,

@@ -190,7 +190,7 @@ const CO_APPROVAL_COPY = {
     representative:
       'The buyer asked that money is only released with your approval too. Approve a step only once you have seen the document or been on site yourself.',
   },
-  // Built homes (D11): Sureground holds only the deposit, never the rest of the price.
+  // Built homes: Sureground holds only the deposit, never the rest of the price.
   deposit: {
     on: (name: string) =>
       `The deposit held under Payment Protection is only released to the seller once you and ${name} have both approved the handover. Sureground does not hold the rest of the price.`,
@@ -205,11 +205,7 @@ const humaniseKey = (key: string) => {
   return words.charAt(0).toUpperCase() + words.slice(1);
 };
 
-/**
- * Two-person approval on a deal. The buyer turns it on or off (switching off takes 48 hours); the
- * representative it names gives the second approval here. Once on, money is released to the
- * seller only when both have approved.
- */
+/** Under two-person approval money reaches the seller only once both have approved; switching it off takes 48 hours. */
 export function CoApprovalCard({
   deal,
   viewer = 'buyer',
@@ -222,7 +218,6 @@ export function CoApprovalCard({
   /** `deposit` for a built home, where only the held deposit is released. */
   moneyScope?: 'steps' | 'deposit';
   labelFor?: (milestoneKey: string) => string;
-  /** After the representative approves, so the caller can refresh what depends on it. */
   onApproved?: () => void;
 }) {
   const { spacing } = useTheme();

@@ -10,12 +10,8 @@ export interface ListingPlaceholderProps {
   size?: ListingPlaceholderSize;
   /** Area to name under the mark, e.g. "Ikoyi". Shown on card and hero sizes only; on cards it replaces the caption. */
   area?: string | null;
-  /** Line under the mark. Defaults to "Photos coming soon". */
   caption?: string;
-  /**
-   * "onDark" draws a fixed deep slate in both themes, for cards that lay white text
-   * over the image area. Captions are left out; the card supplies its own text.
-   */
+  /** "onDark" draws a fixed deep slate in both themes, for cards with white text over the image; no caption. */
   tone?: 'theme' | 'onDark';
   /** Leaves room at the top for badges that sit over the image area. */
   topInset?: number;
@@ -27,10 +23,6 @@ const ON_DARK_SURFACE = '#1b2433';
 const TILE = { thumb: 30, card: 32, hero: 64 } as const;
 const ICON = { thumb: 15, card: 16, hero: 28 } as const;
 
-/**
- * Stands in for a listing photo. A tinted dot grid with the house mark in the icon
- * set's cut-corner tile, so a listing without photos still looks deliberate.
- */
 export function ListingPlaceholder({
   size = 'card',
   area,

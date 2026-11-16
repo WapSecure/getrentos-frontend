@@ -230,7 +230,6 @@ export default function AdminFraudPage() {
       <PageHeader
         eyebrow="Risk"
         title="Fraud and risk review"
-        // The open-alert counts live in the strip below; the header only says what the page is for.
         description="Triage new alerts, investigate them and record a decision."
         actions={
           <div className="flex flex-wrap gap-2">

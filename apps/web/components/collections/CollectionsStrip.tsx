@@ -7,10 +7,7 @@ import type { CardMarket } from '@/lib/marketCards';
 import { collectionsService } from '@/services/collectionsService';
 import { CollectionTile } from './CollectionTile';
 
-/**
- * Published collections for a market or an estate. Renders nothing until there is at least one,
- * and nothing at all if the request fails: the page works the same without it.
- */
+/** Renders nothing when empty or if the request fails: the page works the same without it. */
 export function CollectionsStrip({
   market,
   estate,
@@ -19,7 +16,6 @@ export function CollectionsStrip({
   className,
 }: {
   market?: CardMarket;
-  /** An estate storefront slug: only that estate's own collections. */
   estate?: string;
   title?: string;
   description?: string;

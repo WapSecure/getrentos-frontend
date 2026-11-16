@@ -19,7 +19,6 @@ import {
 } from '@/services/renterDepositService';
 import { ClaimItems } from '@/components/landlord/deposits/EndOfTenancyPanel';
 
-/** D-6 end of tenancy, tenant side: say you have moved out, then accept or dispute the landlord's claim within 7 days. */
 export const DepositEndOfTenancy = ({
   holdId,
   leaseStatus,

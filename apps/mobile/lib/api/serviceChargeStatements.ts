@@ -33,7 +33,6 @@ const BASE: Record<StatementKind, string> = {
   resident: '/estate/resident/service-charges',
 };
 
-/** Service-charge statements and queries for tenants and estate residents. Paying stays in Payments or Dues. */
 export const statementsApi = {
   list: async (kind: StatementKind) => {
     const rows = await apiFetch<StatementListItem[]>(BASE[kind]);

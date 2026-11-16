@@ -3,7 +3,7 @@ export type InvestorPortal = 'buyer' | 'owner';
 
 export const DIASPORA_ROUTES = {
   PUBLIC: '/diaspora',
-  /** Public: Sureground's role, third parties, fees, refunds, complaints and limits (DIA-02). */
+  /** Public: Sureground's role, third parties, fees, refunds, complaints and limits. */
   TRANSPARENCY: '/diaspora/transparency',
   BUYER_WORKSPACE: '/buyer/invest',
   BUYER_ONBOARDING: '/buyer/invest/onboarding',

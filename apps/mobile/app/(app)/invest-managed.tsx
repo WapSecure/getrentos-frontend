@@ -49,11 +49,7 @@ const STATEMENT_STATUS_LABELS: Record<string, string> = { DRAFT: 'Draft', ISSUED
 const isSet = (value: number | null | undefined): value is number =>
   value !== null && value !== undefined;
 
-/**
- * Sureground Managed for an investor (DIA-20): one property at a time, with its agreement, the
- * spending waiting for them, its repairs and the latest statement. Changes to the agreement stay
- * on the management screens; this one links there.
- */
+/** Changes to the agreement stay on the management screens; this one only links there. */
 export default function InvestManaged() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -296,7 +292,6 @@ function StatementCard({ property }: { property: InvestorManagedProperty }) {
   );
 }
 
-/** The ledger lines behind the statement, read when opened, as on web. */
 function StatementBreakdown({ statementId }: { statementId: string }) {
   const { colors, spacing } = useTheme();
   const [open, setOpen] = useState(false);

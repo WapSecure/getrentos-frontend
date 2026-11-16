@@ -12,7 +12,6 @@ export interface SgIconProps extends Omit<SVGProps<SVGSVGElement>, 'ref'> {
   color?: string;
   /** Default 1.75. */
   strokeWidth?: number | string;
-  /** Keep the stroke the same pixel width at any size. */
   absoluteStrokeWidth?: boolean;
   /** Any colour other than "none" paints the tinted body solid (filled star, saved heart). */
   fill?: string;

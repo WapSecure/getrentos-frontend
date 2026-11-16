@@ -1,10 +1,7 @@
 import type { MediaItem } from './types';
 
-/**
- * Showroom M8d, first step: off-plan developments are listed only. Sureground takes and holds no money
- * for them; buyers pay the developer. A development is public only after staff passed four checks.
- * Everything here is read through `developmentOf` / `developmentSummaryOf`, which drop anything malformed.
- */
+// Sureground takes and holds no money for developments: buyers pay the developer. Everything is read
+// through `developmentOf` / `developmentSummaryOf`, which drop anything malformed.
 
 export type DevelopmentStage = 'PLANNED' | 'APPROVED' | 'UNDER_CONSTRUCTION' | 'COMPLETED';
 export type DevelopmentCheckKind =
@@ -35,7 +32,6 @@ export const DEVELOPMENT_STAGE_LABEL: Record<DevelopmentStage, string> = {
   COMPLETED: 'Completed',
 };
 
-/** What each staff check covered, in plain words. */
 export const DEVELOPMENT_CHECK_COPY: Record<
   DevelopmentCheckKind,
   { label: string; detail: string }
@@ -177,7 +173,6 @@ const stageOf = (v: unknown) =>
   DEVELOPMENT_STAGES.includes(v as DevelopmentStage) ? (v as DevelopmentStage) : undefined;
 const httpsUrl = (v: unknown) => (typeof v === 'string' && /^https?:\/\//i.test(v) ? v : undefined);
 
-/** "June 2027" from "2027-06". */
 export function completionLabel(value: string | undefined): string | undefined {
   if (!value || !month(value)) return undefined;
   const [y, m] = value.split('-').map(Number) as [number, number];
@@ -191,10 +186,7 @@ export function completionLabel(value: string | undefined): string | undefined {
 const takenLabel = (iso: string) =>
   `Taken ${new Date(iso).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })}`;
 
-/**
- * One photo from the API. A site photo without a capture date is dropped (the gallery is dated); an
- * impression is captioned as one whatever the developer wrote.
- */
+/** A site photo without a capture date is dropped: the gallery is dated. */
 function mediaItemOf(raw: unknown, order: number): MediaItem | undefined {
   if (!isRecord(raw) || raw.kind !== 'image') return undefined;
   const id = text(raw.id, 80);
@@ -299,10 +291,7 @@ function instalmentsOf(raw: unknown, unitTypes: ShowroomUnitType[]): ShowroomIns
   return out;
 }
 
-/**
- * A public development, or undefined when it cannot be shown honestly: it must name all four checks with
- * a date, and its payment must go to the developer. Never anything else.
- */
+/** Undefined unless it names all four checks with a date and its payment goes to the developer. */
 export function developmentOf(raw: unknown): ShowroomDevelopment | undefined {
   if (!isRecord(raw)) return undefined;
   const id = text(raw.id, 80);
@@ -426,10 +415,7 @@ export function developmentSummaryOf(raw: unknown): ShowroomDevelopmentSummary |
   };
 }
 
-/**
- * One instalment's amount as stated: "₦50,000,000", "30% of the price", or the timing only. Never a
- * total, and a percentage is never turned into naira.
- */
+/** Never a total, and a percentage is never turned into naira. */
 export function instalmentAmountLabel(
   i: Pick<ShowroomInstalment, 'amountNaira' | 'percent'>,
   formatNaira: (n: number) => string

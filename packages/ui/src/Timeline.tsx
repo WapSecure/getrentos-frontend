@@ -15,7 +15,6 @@ export interface TimelineItem {
   /** Shown beside the title; pass a `<time>` when there is a machine-readable date. */
   date?: ReactNode;
   state: TimelineState;
-  /** Replaces the default glyph inside the marker (a check, the step number, a dot). */
   icon?: ReactNode;
   badge?: ReactNode;
   actions?: ReactNode;

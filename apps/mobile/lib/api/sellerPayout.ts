@@ -43,8 +43,7 @@ export const sellerPayoutApi = {
     ),
 };
 
-// Where statement payouts go: the Nigerian account, or an account abroad once a licensed partner is
-// live (web's ownerPayoutService). Every change goes through step-up.
+// Every payout destination change goes through step-up.
 
 export type PayoutMethod = 'NG_ACCOUNT' | 'FOREIGN_ACCOUNT';
 

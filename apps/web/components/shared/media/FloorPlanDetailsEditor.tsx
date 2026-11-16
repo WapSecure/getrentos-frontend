@@ -54,7 +54,6 @@ const parseMetres = (value: string): number | null | undefined => {
   return n >= 0.3 && n <= 999.99 ? n : undefined;
 };
 
-/** A plain-language problem with the draft, or null when it can be saved. */
 function draftProblem(draft: LevelDraft): string | null {
   if (!draft.levelName.trim()) return 'Give this level a name, such as "Ground floor".';
   if (!draft.imageKey) return 'Choose the floor plan image for this level.';
@@ -102,14 +101,10 @@ const photoLabel = (photo: EditablePhoto, index: number) => {
 
 interface FloorPlanDetailsEditorProps {
   propertyId: string;
-  /** The property's photos as the photo editor holds them; only uploaded ones (with a key) are offered. */
   photos: EditablePhoto[];
 }
 
-/**
- * Rooms and sizes for each floor plan level (showroom M8b). Saves level by level, apart from the
- * property form. Sizes always show as "Estimated" on the listing until Sureground checks them.
- */
+// Sizes always show as "Estimated" on the listing until Sureground checks them.
 export function FloorPlanDetailsEditor({ propertyId, photos }: FloorPlanDetailsEditorProps) {
   const queryClient = useQueryClient();
   const queryKey = ['floor-plans', propertyId];
@@ -320,7 +315,6 @@ function LevelEditor({
         />
       </div>
 
-      {/* On wide screens the room list sits beside the plan, so both stay in view while placing rooms. */}
       <div
         className={
           image
@@ -516,7 +510,6 @@ function LevelEditor({
   );
 }
 
-/** Numbered markers over the editor's plan preview, matching the room list. */
 function PlanMarkers({ rooms }: { rooms: RoomDraft[] }) {
   return (
     <>

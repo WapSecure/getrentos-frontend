@@ -8,7 +8,6 @@ import { areaSlug } from '@/lib/areaSlug';
 import { AREAS, CITIES } from './areas';
 import { searchHref } from './searchRoutes';
 
-/** Plain links to area pages (where an area has enough listings) or searches: useful for people, and crawlable. */
 export const AreaIndex = async () => {
   const published = new Set((await publishedAreas()).map((area) => area.slug));
   const hrefFor = (name: string) => {

@@ -3,7 +3,6 @@ export interface Area {
   city: string;
 }
 
-// Real, commonly searched areas. Used for search suggestions and the crawlable area index.
 export const AREAS: Area[] = [
   { name: 'Lekki Phase 1', city: 'Lagos' },
   { name: 'Lekki', city: 'Lagos' },

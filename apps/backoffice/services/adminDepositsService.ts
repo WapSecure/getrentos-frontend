@@ -1,6 +1,6 @@
 import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
-/** Mirrors the backend's `DepositEndStage` (D-6). */
+/** Mirrors the backend's `DepositEndStage`. */
 export type DepositEndStage =
   | 'TENANCY'
   | 'AWAITING_CLAIM'

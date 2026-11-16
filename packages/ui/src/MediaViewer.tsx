@@ -48,15 +48,11 @@ interface MediaViewerProps {
   items: MediaItem[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Index into `items` to show first. */
   startIndex?: number;
   title: string;
   /** For measurement; the viewer itself never sends anything. */
   onMediaEvent?: (event: MediaEvent) => void;
-  /**
-   * Structured floor plans, from `floorPlansOf`. A plan photo with one shows its rooms, sizes and
-   * tap targets; without, the Floor plans tab shows the image alone, as before.
-   */
+  /** From `floorPlansOf`; without one, the Floor plans tab shows the plan image alone. */
   floorPlans?: ShowroomFloorPlan[];
 }
 
@@ -144,11 +140,9 @@ function ViewerBody({
     return [...seen.entries()];
   }, [items]);
 
-  // Floor plans are a tab of their own, one level per plan, named by the lister's caption.
   const levels = useMemo(() => floorPlanLevels(items), [items]);
   const levelAt = levels.findIndex((l) => l.index === index);
   const onPlan = levelAt >= 0;
-  // The lister's rooms and sizes for this level, when they added them.
   const plan = onPlan ? floorPlanFor(floorPlans, item.id) : undefined;
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const indexById = useMemo(() => new Map(items.map((m, i) => [m.id, i])), [items]);
@@ -160,7 +154,6 @@ function ViewerBody({
     setActiveRoom(null);
   };
 
-  // A room with a photo opens it; one without is highlighted on the plan and in the list.
   const openRoom = (room: ShowroomFloorPlanRoom) => {
     const at = room.photoMediaId ? indexById.get(room.photoMediaId) : undefined;
     if (at === undefined) {
@@ -288,7 +281,6 @@ function ViewerBody({
     onMediaEvent?.({ type: 'media_category_select', room: 'floor_plan', mediaIndex: first });
   };
 
-  // A plan is named by its level ("Ground floor"), as the lister wrote it.
   const roomName = onPlan
     ? levels[levelAt]!.label
     : item.room && item.room !== 'other'
@@ -726,10 +718,7 @@ const PLAN_NOTE = {
   checked: 'Sizes measured, checked by Sureground.',
 } as const;
 
-/**
- * A plan image with its rooms' tap targets. The box is sized to the drawing itself (not the
- * stage), so a target at 30% across sits 30% across the plan whatever the screen.
- */
+/** Sized to the drawing itself (not the stage), so a target at 30% across sits 30% across the plan. */
 function PlanStage({
   item,
   plan,
@@ -832,7 +821,7 @@ function PlanStage({
   );
 }
 
-/** The level's rooms. Every size carries its label; there is no total area. */
+/** Every size carries its label; there is no total area. */
 function PlanRooms({
   plan,
   activeRoom,

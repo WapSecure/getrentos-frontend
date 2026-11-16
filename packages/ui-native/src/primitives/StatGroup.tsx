@@ -12,11 +12,9 @@ export interface StatGroupItem {
   subtitle?: string;
   /** A change against an earlier period; `tone` says whether it is good news, not its direction. */
   trend?: { label: string; tone: 'positive' | 'negative' | 'neutral' };
-  /** Makes the figure the way into its screen. */
   onPress?: () => void;
   /** Draws attention to a figure that needs action (overdue rent), without colouring the value. */
   attention?: boolean;
-  /** Extra content under the subtitle, such as an indicative foreign-currency amount. */
   supplement?: ReactNode;
   /** A glyph on a soft blue tile beside the label; it turns red when the figure needs attention. */
   Icon?: SgIcon;
@@ -25,7 +23,6 @@ export interface StatGroupItem {
 export interface StatGroupProps {
   title: string;
   items: StatGroupItem[];
-  /** Content under the figures, such as a SegmentedBar. */
   footer?: ReactNode;
   style?: StyleProp<ViewStyle>;
 }

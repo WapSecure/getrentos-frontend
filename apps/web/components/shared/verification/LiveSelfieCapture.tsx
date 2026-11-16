@@ -135,7 +135,6 @@ export function LiveSelfieCapture({
         if (mode === 'document') {
           element.setAttribute('capture-id', '');
           element.setAttribute('document-type', session.idInfo?.idType ?? 'PASSPORT');
-          // A passport has one photo page.
           element.setAttribute('hide-back-of-id', '');
         }
         element.addEventListener('smart-camera-web.publish', (event) => {

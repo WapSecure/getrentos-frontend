@@ -45,7 +45,7 @@ const nextConfig: NextConfig = {
   async redirects() {
     // Old renter URLs redirect to the tab of the hub they were merged into.
     return [
-      // Representatives cover every purchase now, not only land, so they left /land (which LAND_MODE can switch off).
+      // Representatives cover every purchase, not only land, so they live outside /land (which LAND_MODE can switch off).
       {
         source: '/buyer/land/representatives',
         destination: '/buyer/representatives',
@@ -69,7 +69,7 @@ const nextConfig: NextConfig = {
         destination: '/renter/trust-score?tab=verification',
         permanent: true,
       },
-      // Every role's verification now lives in a tab of its trust page.
+      // Every role's verification lives in a tab of its trust page.
       ...(['buyer', 'owner', 'realtor', 'agent', 'landlord', 'estate'] as const).map((role) => ({
         source: `/${role}/verification`,
         destination: `/${role}/trust-profile?tab=verification`,

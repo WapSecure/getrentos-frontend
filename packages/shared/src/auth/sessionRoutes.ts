@@ -1,10 +1,6 @@
-// Which pages count as public is app-specific: the web app passes its own `isPublicPath`
-// (apps/web/lib/sessionRoutes.ts).
+// Public pages are app-specific: the web app passes its own `isPublicPath`.
 
-/**
- * Where to send the visitor once their session has ended, or null to stay on the page.
- * Public pages stay put (the stale session is simply dropped), as does the sign-in page itself.
- */
+/** Null means stay: public pages just drop the stale session, as does the sign-in page itself. */
 export function sessionExpiredRedirect(
   location: { pathname: string; search: string },
   loginPath: string,

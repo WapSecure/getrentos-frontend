@@ -53,18 +53,15 @@ const day = (iso?: string) => {
     : d.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-/** `srcset` for an image's resized copies; undefined when there are none, so the original is used. */
 export const srcSetOf = (variants?: ImageVariant[]) =>
   variants?.length ? variants.map((v) => `${v.url} ${v.width}w`).join(', ') : undefined;
 
 // Inline base64 images only, so a bad value can never fetch anything or break out of a CSS `url()`.
 const PLACEHOLDER_PATTERN = /^data:image\/(?:webp|png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$/;
 
-/** The API's blurred placeholder when it is a small inline image; undefined otherwise, so pages behave as before. */
 export const placeholderOf = (value?: string | null) =>
   value && value.length <= 2048 && PLACEHOLDER_PATTERN.test(value) ? value : undefined;
 
-/** A list card's cover size and placeholder, checked; undefined when missing or malformed (an older API). */
 export const imagePreviewOf = (value?: Partial<ImagePreview> | null): ImagePreview | undefined => {
   const { width, height } = value ?? {};
   if (!(typeof width === 'number' && width > 0 && typeof height === 'number' && height > 0))
@@ -73,7 +70,6 @@ export const imagePreviewOf = (value?: Partial<ImagePreview> | null): ImagePrevi
   return { width, height, ...(placeholder ? { placeholder } : {}) };
 };
 
-/** The smallest copy at least `min` px wide, or the largest there is, or the original. */
 export const variantAtLeast = (url: string, variants: ImageVariant[] | undefined, min: number) => {
   if (!variants?.length) return url;
   const sorted = [...variants].sort((a, b) => a.width - b.width);
@@ -92,7 +88,6 @@ export const MEDIA_ROOM_LABEL: Record<MediaRoom, string> = {
   other: 'Other',
 };
 
-/** One photo's room, for a label on that photo. */
 export const MEDIA_ROOM_NAME: Record<MediaRoom, string> = {
   living: 'Living room',
   bedroom: 'Bedroom',
@@ -105,20 +100,16 @@ export const MEDIA_ROOM_NAME: Record<MediaRoom, string> = {
   other: 'Other',
 };
 
-/** A photo the lister tagged as a floor plan: a line drawing, shown whole on a light background. */
+/** A line drawing, shown whole on a light background. */
 export const isFloorPlan = (m: MediaItem) => m.kind === 'image' && m.room === 'floor_plan';
 
 export interface FloorPlanLevel {
-  /** Index into the media list. */
   index: number;
   /** The lister's caption exactly as written ("Ground floor"), or a plain fallback. */
   label: string;
 }
 
-/**
- * Every floor plan in display order, one per level. The caption is the level name and is never
- * parsed: a plan is only an image, so nothing here reads or claims a measurement.
- */
+/** The caption is the level name and is never parsed: nothing here reads or claims a measurement. */
 export function floorPlanLevels(items: MediaItem[]): FloorPlanLevel[] {
   const plans = items.flatMap((m, index) => (isFloorPlan(m) ? [{ m, index }] : []));
   return plans.map(({ m, index }, i) => ({
@@ -127,10 +118,7 @@ export function floorPlanLevels(items: MediaItem[]): FloorPlanLevel[] {
   }));
 }
 
-/**
- * Photos for a hero or mosaic, cover first. Floor plans go after every other photo, so a line
- * drawing never becomes the cover; they lead only when the listing has nothing else.
- */
+/** Floor plans go after every other photo so a line drawing never becomes the cover, unless nothing else exists. */
 export function heroPhotos(items: MediaItem[]): MediaItem[] {
   const photos = items.filter((m) => m.kind === 'image');
   return [...photos.filter((m) => !isFloorPlan(m)), ...photos.filter(isFloorPlan)];
@@ -162,10 +150,7 @@ const bool = (v: unknown) => (typeof v === 'boolean' ? v : undefined);
 const oneOf = <T extends string>(labels: Record<T, string>, v: unknown) =>
   typeof v === 'string' && Object.prototype.hasOwnProperty.call(labels, v) ? (v as T) : undefined;
 
-/**
- * The API's commercial block, checked field by field: anything malformed or out of range is
- * dropped, so the page never shows a value the lister did not state. Undefined when nothing is left.
- */
+/** Anything malformed or out of range is dropped, so the page never shows a value the lister did not state. */
 export function commercialDetailsOf(value: unknown): CommercialDetails | undefined {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
   const v = value as Record<string, unknown>;
@@ -239,7 +224,7 @@ export function showroomMedia(
 // The first URL is the page's share and search image, so a floor plan never leads.
 const imageUrls = (media: MediaItem[]) => heroPhotos(media).map((m) => m.url);
 
-// Only when there is at least one level, so a listing without structured plans keeps the M8a shape.
+// Only with at least one level, so a listing without structured plans keeps its earlier shape.
 const withFloorPlans = (raw: unknown, media: MediaItem[]) => {
   const floorPlans = floorPlansOf(raw, media);
   return floorPlans.length ? { floorPlans } : {};
@@ -292,10 +277,8 @@ const HELD_BY_SUMMARY: Partial<Record<ShowroomTrustStepId, string>> = {
 };
 
 /**
- * A for-sale listing's trust chain, read against its verification summary. The summary is the stricter
- * record, so the ownership and property links hold only once it says the evidence passed: the badge then
- * never claims more than the verification panel on the same page. The API applies the same rule; this
- * keeps an older API honest too. The payment link speaks of the deposit, not rent.
+ * The verification summary is the stricter record, so the ownership and property links hold only once it
+ * says the evidence passed (as the API does): the badge never claims more than the verification panel.
  */
 export function saleTrustChain(
   chain: ShowroomTrustChain | undefined,
@@ -474,7 +457,6 @@ export interface ShortletMediaSource {
   tourUrl?: string;
 }
 
-/** Photos, then the video tour, then the 360 tour, from the shortlet response's own fields. */
 export function shortletMedia(s: ShortletMediaSource): MediaItem[] {
   if (s.media?.length) return showroomMedia(s.title, s.media, []);
   const photos = showroomMedia(s.title, undefined, [s.coverImageUrl, ...(s.images ?? [])]);

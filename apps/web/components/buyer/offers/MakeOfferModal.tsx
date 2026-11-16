@@ -78,7 +78,7 @@ export const MakeOfferModal = ({
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  // DIA-07: asked before sending, so a large offer is not refused with a 403.
+  // Asked before sending, so a large offer is not refused with a 403.
   const [fundsHold, setFundsHold] = useState<string | null>(null);
   const [acceptedRisks, setAcceptedRisks] = useState(false);
 

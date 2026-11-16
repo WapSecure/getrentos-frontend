@@ -7,7 +7,6 @@ interface IconTileProps {
   className?: string;
 }
 
-/** A small blue-tinted square holding one icon; decorative, so hidden from screen readers. */
 export const IconTile = ({ icon: Icon, size = 'md', className }: IconTileProps) => (
   <span
     aria-hidden="true"

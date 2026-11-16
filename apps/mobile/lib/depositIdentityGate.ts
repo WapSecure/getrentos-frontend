@@ -6,11 +6,7 @@ export interface DepositIdentityNotice {
   verifyLink: boolean;
 }
 
-/**
- * What the pay deposit sheet says to a buyer the server will refuse (403 IDENTITY_REQUIRED, the
- * same rule as making an offer). Same verified rule as useIdentityVerified. `null` when they can
- * pay, or while the status has not loaded or failed: the server stays the source of truth.
- */
+/** `null` while the status is loading or failed: the server stays the source of truth. */
 export function depositIdentityNotice(
   status: Pick<KycStatusResponse, 'identityVerified' | 'identity'> | undefined
 ): DepositIdentityNotice | null {

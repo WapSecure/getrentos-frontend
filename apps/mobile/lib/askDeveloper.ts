@@ -5,15 +5,9 @@ import {
 } from '@sureground/shared/showroom';
 import { isDevelopmentId } from './developments';
 
-/**
- * Pure helpers for "Ask the developer" on the development screen. The copy, limits, form check and
- * mappers come from the shared `developmentEnquiries.ts`, so the app says exactly what the web says.
- */
-
 /** The development screen. It sits in `(public)`, so signed-in people can open it too. */
 export const developmentRoute = (id: string) => `/(public)/development/${encodeURIComponent(id)}`;
 
-/** `/developments/<id>`, with or without host, query or `#your-questions`, to the development screen. */
 export function developmentRouteForPath(url?: string | null): string | null {
   if (!url) return null;
   const path = url
@@ -35,7 +29,6 @@ export function developmentRouteForPath(url?: string | null): string | null {
 const TTL_MS = 30 * 60 * 1000;
 let pending: { id: string; at: number } | null = null;
 
-/** Signed out, "Sign in to ask the developer" remembers where to come back to. */
 export function rememberAskIntent(id: string, now = Date.now()) {
   pending = isDevelopmentId(id) ? { id, at: now } : null;
 }
@@ -60,7 +53,6 @@ export function unitTypeChoices(
   ];
 }
 
-/** The body for `POST /developments/:id/enquiries`. */
 export function enquiryBody(message: string, unitTypeId?: string) {
   return { message: message.trim(), ...(unitTypeId ? { unitTypeId } : {}) };
 }

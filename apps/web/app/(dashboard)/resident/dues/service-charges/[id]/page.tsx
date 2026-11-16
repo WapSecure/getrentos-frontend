@@ -6,7 +6,6 @@ import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
 import { residentServiceChargesService } from '@/services/residentServiceChargesService';
 
-/** An estate resident's service charge as a statement. */
 export default function ResidentServiceChargeStatementPage() {
   const { id } = useParams<{ id: string }>();
   return (

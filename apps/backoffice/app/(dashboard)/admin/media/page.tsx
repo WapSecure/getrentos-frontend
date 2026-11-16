@@ -73,7 +73,6 @@ function budgetNote(used: number, budget: number): string | undefined {
     : undefined;
 }
 
-/** Storage, uploads, backlog and holds from the hourly media health check, with any alerts on top. */
 function MediaHealthStrip({ health }: { health: AdminMediaHealth }) {
   const { stats, limits, alerts } = health;
   return (

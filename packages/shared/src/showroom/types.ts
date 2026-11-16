@@ -21,7 +21,6 @@ export interface ImageVariant {
   url: string;
 }
 
-/** A list card's cover: its shape and a tiny blurred stand-in to show while it loads. */
 export interface ImagePreview {
   width: number;
   height: number;
@@ -77,7 +76,6 @@ export interface ShowroomHost {
 
 export type ShowroomTrustStepId = 'owner' | 'authority' | 'property' | 'payment';
 
-/** The same chain the browse cards show: owner ID, ownership, property check, payment protection. */
 export interface ShowroomTrustChain {
   steps: { id: ShowroomTrustStepId; label: string; met: boolean; detail: string }[];
   metCount: number;
@@ -87,10 +85,7 @@ export interface ShowroomTrustChain {
 export type CommercialPermittedUse = 'SHOP' | 'OFFICE' | 'WAREHOUSE' | 'MIXED' | 'OTHER';
 export type CommercialFitOutCondition = 'SHELL' | 'SEMI_FITTED' | 'FITTED';
 
-/**
- * What the lister states about a commercial property. An absent field was not stated. Sureground
- * never computes VAT, a rent review or an escalation from these, and never measures the power hours.
- */
+/** An absent field was not stated. Sureground never computes VAT, a rent review or an escalation from these. */
 export interface CommercialDetails {
   permittedUse?: CommercialPermittedUse;
   permittedUseNote?: string;
@@ -104,9 +99,7 @@ export interface CommercialDetails {
   solar?: boolean;
   loadingAccess?: boolean;
   loadingAccessNote?: string;
-  /** Whole years, ascending. */
   leaseTermOptionsYears?: number[];
-  /** As written in the lease. */
   rentReviewNote?: string;
   escalationNote?: string;
   /** The rate the landlord states, e.g. 7.5. Show as stated; never apply it to an amount. */
@@ -140,9 +133,8 @@ export interface ShowroomListing {
   availableFrom?: string;
   /** Sale and land detail routes only; undefined from an older API. */
   verificationSummary?: VerificationSummary;
-  /** Sale detail only (DIA-30): the latest accredited valuer report; undefined when none. */
+  /** Sale detail only: the latest accredited valuer report. */
   valuation?: PropertyValuation;
-  /** Structured floor plans (rooms and sizes); absent when the lister added none. */
   floorPlans?: ShowroomFloorPlan[];
   /** Rent and sale only; undefined where the API sends no chain. */
   trustChain?: ShowroomTrustChain;
@@ -211,11 +203,11 @@ export interface PublicSaleDto {
   /** Read through `trustChainOf`, never trusted as is. */
   trustChain?: unknown;
   underOffer?: boolean;
-  /** Detail route only (DIA-11). Read through `verificationSummaryOf`, never trusted as is. */
+  /** Detail route only. Read through `verificationSummaryOf`, never trusted as is. */
   verificationSummary?: unknown;
   /** Detail route only. Read through `floorPlansOf`, never trusted as is. */
   floorPlans?: unknown;
-  /** Detail route only (DIA-30). Read through `valuationOf`, never trusted as is. */
+  /** Detail route only. Read through `valuationOf`, never trusted as is. */
   valuation?: unknown;
   /** Commercial properties only. Read through `commercialDetailsOf`, never trusted as is. */
   commercial?: unknown;
@@ -252,6 +244,6 @@ export interface PublicLandDto {
     tenure?: string;
   };
   diligence?: { status: LandDiligenceStatus };
-  /** Detail route only (DIA-11). Read through `verificationSummaryOf`, never trusted as is. */
+  /** Detail route only. Read through `verificationSummaryOf`, never trusted as is. */
   verificationSummary?: unknown;
 }

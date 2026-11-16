@@ -34,7 +34,6 @@ const COLLECTION_BADGE: Record<keyof typeof COLLECTION_LABEL, BadgeTone> = {
   WAIVED: 'neutral',
 };
 
-/** A tenant's or resident's service charges, each opening its statement. */
 export default function ServiceChargeStatements() {
   const { kind: raw } = useLocalSearchParams<{ kind?: string }>();
   const kind: StatementKind = raw === 'resident' ? 'resident' : 'renter';

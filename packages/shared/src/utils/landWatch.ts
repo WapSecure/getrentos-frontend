@@ -287,19 +287,13 @@ export interface PhotoLocationSummary {
   level: PhotoLocationLevel;
   /** Captures with a location within the tolerance. */
   onSite: number;
-  /** Captures in all. */
   total: number;
-  /** Captures that carried no location. */
   unlocated: number;
   tone: LandWatchTone;
-  /** A short label, e.g. "All 12 photos on site". */
   label: string;
 }
 
-/**
- * How many of a report's photos were taken where the place is, from each capture's distance. It
- * describes where the photos were taken; it does not judge the property.
- */
+/** Describes where the photos were taken; it does not judge the property. */
 export const photoLocationSummary = (
   evidence: readonly Pick<LandInspectionEvidence, 'distanceM' | 'mimeType'>[]
 ): PhotoLocationSummary => {

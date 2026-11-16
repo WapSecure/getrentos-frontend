@@ -51,7 +51,6 @@ interface UtilityPurchaseDialogProps {
   onOpenChange: (open: boolean) => void;
   properties: HomeManagementProperty[];
   defaultPropertyId?: string;
-  /** The kinds this dialog offers; the first is selected. */
   kinds: UtilityPurchaseKind[];
   defaultGeneratorId?: string;
   defaultMeterId?: string;
@@ -59,7 +58,7 @@ interface UtilityPurchaseDialogProps {
 
 const PAID_BY_ORDER: UtilityPaidBy[] = ['OWNER', 'MANAGER', 'TENANT', 'RESIDENT', 'OTHER'];
 
-/** One form for fuel, tokens, bills and tankers. A token is cut to its last 4 digits as it is typed. */
+/** A token is cut to its last 4 digits as it is typed. */
 export function UtilityPurchaseDialog({
   open,
   onOpenChange,

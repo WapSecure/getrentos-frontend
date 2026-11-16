@@ -1,8 +1,7 @@
-// Business times are Lagos times (D2); an investor abroad also sees their own. Web and mobile.
+// Business times are Lagos times; an investor abroad also sees their own.
 
 const LAGOS = 'Africa/Lagos';
 
-/** "America/New_York" → "New York": the place a zone is named after, for labels. */
 export const timeZoneCity = (timeZone: string): string =>
   (timeZone.split('/').pop() ?? timeZone).replace(/_/g, ' ');
 
@@ -29,10 +28,7 @@ const clockParts = (date: Date, timeZone: string) => {
   return { time: `${part('hour')}:${part('minute')}`, day: part('day'), weekday: part('weekday') };
 };
 
-/**
- * Lagos time next to the viewer's own, e.g. "10:00 Lagos · 09:00 London". The weekday is added to
- * both when they fall on different days. A viewer in Lagos, or with an unknown zone, sees Lagos only.
- */
+/** A viewer in Lagos, or with an unknown zone, sees Lagos only. */
 export const formatDualTime = (date: Date | string, viewerTimeZone?: string | null): string => {
   const value = typeof date === 'string' ? new Date(date) : date;
   if (Number.isNaN(value.getTime())) return '—';

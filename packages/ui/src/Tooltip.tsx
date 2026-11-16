@@ -28,11 +28,7 @@ export interface TooltipProps {
 
 const GAP = 8;
 
-/**
- * Shown on hover and keyboard focus, hoverable, and dismissed with Escape (WCAG 1.4.13).
- * Rendered in a portal so card overflow never clips it. Not a substitute for a visible label
- * on controls that change data; those need text and, when consequential, a confirmation.
- */
+/** In a portal so card overflow never clips it. Not a substitute for a visible label on controls that change data. */
 export function Tooltip({ content, children, side = 'top', delay = 250, className }: TooltipProps) {
   const id = useId();
   const triggerRef = useRef<HTMLElement | null>(null);

@@ -17,11 +17,7 @@ export interface PendingPhoto {
 
 let nextId = 0;
 
-/**
- * New photos for a property: each uploads as soon as it is picked, up to 3 at a time, with progress,
- * cancel and retry. Once nothing is left sending, the photos that made it are attached in one go, in the
- * order they were picked; failed ones wait for Retry or Remove without holding the others back.
- */
+/** Once nothing is sending, the photos that made it are attached in one go, in the order picked. */
 export function usePhotoUploads({
   upload,
   attach,

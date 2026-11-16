@@ -24,7 +24,6 @@ import {
 } from '@sureground/shared';
 import { Chip, Text, useTheme } from '@sureground/ui-native';
 
-/** The shared icon names mapped to the native icon components. */
 const ICONS: Record<MaintenanceCategoryIconName, typeof Wrench> = {
   Droplets,
   Gauge,
@@ -50,10 +49,7 @@ export function MaintenanceCategoryIcon({
   return createElement(ICONS[maintenanceCategoryIconName(category)], props);
 }
 
-/**
- * Grouped category chips with icons. `lowercase` returns the renter routes' lowercase codes;
- * otherwise the UPPERCASE home-management codes. Chip names stay the plain labels.
- */
+/** `lowercase` returns the renter routes' lowercase codes; otherwise the UPPERCASE home-management codes. */
 export function CategoryPicker<T extends string>({
   value,
   onChange,

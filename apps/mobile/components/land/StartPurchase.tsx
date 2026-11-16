@@ -55,7 +55,7 @@ export function StartPurchase({
   const notVerified = e?.notVerified ?? [];
   const plan = plans.find((p) => p.id === planId);
   const ready = !!plan && (notVerified.length === 0 || acknowledged);
-  // DIA-07: asked before starting, so a large purchase is not refused with a 403.
+  // Asked before starting, so a large purchase is not refused with a 403.
   const [fundsHold, setFundsHold] = useState<string | null>(null);
 
   const start = useMutation({

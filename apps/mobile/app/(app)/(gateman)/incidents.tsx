@@ -63,7 +63,6 @@ const PRIORITY_TONE: Record<IncidentPriority, BadgeTone> = {
   critical: 'danger',
 };
 
-/** How long the guard holds the panic button before it fires. */
 const PANIC_HOLD_MS = 1000;
 
 export default function GatemanIncidents() {

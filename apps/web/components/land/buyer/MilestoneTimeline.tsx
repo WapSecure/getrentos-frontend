@@ -46,7 +46,6 @@ export const MilestoneTimeline = ({
   ariaLabel?: string;
   empty?: { title: string; description: string };
   disputeDescription?: string;
-  /** The badge on a delivered step, when the viewer is not the one to confirm it. */
   awaitingLabel?: string;
 }) => {
   const canAct = Boolean(onConfirm && onDispute);

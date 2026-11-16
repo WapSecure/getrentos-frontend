@@ -45,7 +45,6 @@ const COPY = {
   },
 } as const;
 
-/** The left panel shared by sign-in, sign-up and password reset. Server-rendered, no motion. */
 export const AuthAside = ({ variant }: { variant: keyof typeof COPY }) => {
   const copy = COPY[variant];
   return (

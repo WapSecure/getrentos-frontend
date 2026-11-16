@@ -23,7 +23,6 @@ import {
   type MaintenanceCategoryIconName,
 } from '@sureground/shared';
 
-/** The shared icon names mapped to this app's icon components. */
 const ICONS: Record<MaintenanceCategoryIconName, typeof Wrench> = {
   Droplets,
   Gauge,
@@ -41,11 +40,9 @@ const ICONS: Record<MaintenanceCategoryIconName, typeof Wrench> = {
   Zap,
 };
 
-/** App icon for a category code in either case; unknown categories use the generic tag. */
 export const maintenanceCategoryIcon = (category: string | null | undefined) =>
   ICONS[maintenanceCategoryIconName(category)];
 
-/** Decorative: the category name always sits next to it. */
 export const MaintenanceCategoryIcon = ({
   category,
   className,
@@ -59,10 +56,7 @@ export const MaintenanceCategoryIcon = ({
   });
 };
 
-/**
- * Grouped picker options with icons. `lowercase` suits the renter routes, which take lowercase
- * codes; home management and the triage review take the UPPERCASE codes.
- */
+/** `lowercase` suits the renter routes; home management and the triage review take UPPERCASE codes. */
 export function maintenanceCategorySelectOptions({
   lowercase = false,
 }: { lowercase?: boolean } = {}): SelectOption[] {

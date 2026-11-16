@@ -101,7 +101,6 @@ export default function LandlordTenants() {
 function TenantRow({ tenant: t }: { tenant: LandlordTenant }) {
   const { colors, spacing } = useTheme();
   const toast = useToast();
-  // Opens the existing conversation with this tenant, or starts one about their home.
   const message = useMutation({
     mutationFn: () => landlordApi.startConversation(t.tenantUserId as string, t.propertyId),
     onSuccess: (conversation) =>

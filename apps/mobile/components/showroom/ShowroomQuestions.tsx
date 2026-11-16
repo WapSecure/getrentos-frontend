@@ -45,10 +45,7 @@ interface Asked {
 const list = (items: string[]) =>
   items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`;
 
-/**
- * Questions about a listing, answered only from its own data and always attributed, with the same
- * shared functions as the web page. Only the topic and the answer's source are ever recorded.
- */
+/** Answers only from the listing's own data; only the topic and the answer's source are ever recorded. */
 export function ShowroomQuestions({
   listing,
   onAskLister,

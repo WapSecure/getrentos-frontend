@@ -9,10 +9,6 @@ const SIZES = {
   md: { box: 'h-16 w-16 rounded-lg sm:h-20 sm:w-20 sm:rounded-xl', icon: 'h-6 w-6', px: '80px' },
 } as const;
 
-/**
- * The small square photo beside a property in a list. Without a photo, or when it fails to load,
- * it shows the kind of place (a house or a plot) so the row still reads at a glance.
- */
 export const PropertyThumb = ({
   src,
   alt,
@@ -24,7 +20,6 @@ export const PropertyThumb = ({
   src?: string | null;
   alt: string;
   place?: 'home' | 'land';
-  /** Overrides the place icon in the empty state. */
   icon?: SgIcon;
   size?: keyof typeof SIZES;
   className?: string;

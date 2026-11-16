@@ -26,7 +26,6 @@ import {
   type TransparencySection,
 } from './content';
 
-/** A ticked, crossed or noted list of short statements. */
 const PointList = ({ points, tone }: { points: string[]; tone: 'yes' | 'no' | 'info' }) => {
   const Icon = tone === 'yes' ? CheckCircle2 : tone === 'no' ? XCircle : Info;
   const colour =
@@ -50,7 +49,6 @@ const PointList = ({ points, tone }: { points: string[]; tone: 'yes' | 'no' | 'i
 
 const linkClass = 'font-medium text-foreground underline underline-offset-4';
 
-/** One ruled section: the title on the left, its content on the right on wide screens. */
 const SectionCard = ({
   section,
   children,
@@ -95,7 +93,6 @@ const ORDER: TransparencySection[] = [
   S.undecided,
 ];
 
-/** DIA-02: how Sureground works, who is responsible for what, and what is still open. */
 export const TransparencyCentre = () => (
   <>
     <PageHero

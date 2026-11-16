@@ -85,11 +85,7 @@ const CTA_LABEL: Record<WorkspaceSection, string> = {
 /** History shown before "Show all": the workspace is a glance, the record is on request. */
 const HISTORY_INITIAL = 5;
 
-/**
- * The workspace's lean condition, in the shape the shared conditions list reads. The list shows
- * the shared remedy once below it, so a condition repeats it only when its own differs, and never
- * once it is met or waived.
- */
+/** The list shows the shared remedy once below it, so a condition repeats it only when its own differs. */
 const toClosingCondition = (
   c: WorkspaceCondition,
   _index: number,
@@ -114,12 +110,7 @@ const toClosingCondition = (
   };
 };
 
-/**
- * One purchase as its buyer or the buyer's representative sees it (DIA-15): three separate
- * statuses, the next action, the steps, the legal transfer, approvals, people, documents and
- * history. Sureground holds only the deposit under Payment Protection, never the rest of the
- * price (D11), so nothing here says the price is held.
- */
+/** Sureground holds only the deposit, never the rest of the price, so nothing here says the price is held. */
 export default function PurchaseWorkspace() {
   const { txId, role: roleParam } = useLocalSearchParams<{ txId: string; role?: string }>();
   const role: WorkspaceViewer = roleParam === 'representative' ? 'REPRESENTATIVE' : 'BUYER';
@@ -288,7 +279,6 @@ export default function PurchaseWorkspace() {
               />
             }
           >
-            {/* The three statuses and what happens next. */}
             <Card style={{ gap: spacing.md }}>
               <AcquisitionStatusBadges statuses={data.statuses} />
               {data.nextAction ? (
@@ -659,7 +649,6 @@ function Summary({ title, detail }: { title: string; detail: string }) {
   );
 }
 
-/** A name, a line under it and a badge or action on the right. */
 function Rows({
   rows,
 }: {
@@ -690,7 +679,6 @@ function Rows({
   );
 }
 
-/** Everything recorded on the purchase, newest first, with Lagos time next to the viewer's. */
 function History({
   items,
   viewerTimeZone,

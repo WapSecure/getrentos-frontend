@@ -129,7 +129,7 @@ export default function LandlordOverview() {
             Icon: UserCheck,
             onPress: () => router.push('/(app)/(landlord)/tenants'),
           },
-          // Only while a unit is actually held: a permanent "Reserved 0" was the one tile you couldn't tap.
+          // Only while a unit is held: a permanent "Reserved 0" would be a tile with nothing to open.
           ...(s.reservedUnits > 0
             ? [
                 {

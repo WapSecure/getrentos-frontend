@@ -28,11 +28,7 @@ type AttentionTone = 'info' | 'warning' | 'danger';
 
 const ATTENTION_TILE = { info: 'primary', warning: 'warning', danger: 'danger' } as const;
 
-/**
- * A notice that needs the user. Plain, the whole card opens the screen. Given an `actionLabel`, it is
- * the page's lead item: a larger card with one blue button, and the card itself is not pressable,
- * since a button inside a button breaks web and screen readers.
- */
+/** Given an `actionLabel` the card is not pressable: a button inside a button breaks web and screen readers. */
 export function AttentionCard({
   Icon,
   title,
@@ -49,9 +45,7 @@ export function AttentionCard({
   tone?: AttentionTone;
   onPress: () => void;
   accessibilityLabel?: string;
-  /** Makes this the lead card, with a primary button of this label. */
   actionLabel?: string;
-  /** A short kicker above the title on the lead card, such as "Overdue". */
   eyebrow?: string;
 }) {
   const { colors, spacing } = useTheme();
@@ -142,7 +136,6 @@ export function PortfolioCard({
   visible: boolean;
   onToggle: () => void;
   spokenLabel?: string;
-  /** A glyph on a blue tile beside the label. */
   Icon?: SgIcon;
   children?: ReactNode;
 }) {

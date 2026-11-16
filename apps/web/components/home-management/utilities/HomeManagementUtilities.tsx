@@ -22,16 +22,13 @@ import { propertyName } from './utilityForm';
 
 interface HomeManagementUtilitiesProps {
   properties: HomeManagementProperty[];
-  /** Narrowed to one client's property in the agency custody view. */
   scopePropertyId?: string;
-  /** A field agent: records readings and purchases, never set-up. */
   recordOnly?: boolean;
   createRequest?: { kind: UtilitiesCreateKind; id: number };
   onCreateRequestHandled?: () => void;
   onRaiseWorkOrder?: (from: WaterWorkOrderSeed) => void;
 }
 
-/** Power and water records for the homes in view. */
 export function HomeManagementUtilities({
   properties,
   scopePropertyId,

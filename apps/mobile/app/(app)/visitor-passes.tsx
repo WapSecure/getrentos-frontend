@@ -67,7 +67,6 @@ const EXPIRY_PRESETS = [
 ] as const;
 const DEFAULT_EXPIRY_HOURS = 24;
 
-/** Passes that can still be used at the gate. */
 const ACTIVE_STATUSES = new Set<VisitorPassStatus>(['pending', 'approved', 'checked_in']);
 
 export default function ResidentVisitorPasses() {
@@ -339,7 +338,6 @@ function GateArrivalCard({
   );
 }
 
-/** Active passes are raised cards; finished ones sit flat and quiet so the live ones stand out. */
 function PassCard({
   pass,
   revoking = false,
@@ -392,7 +390,6 @@ function PassCard({
             flexDirection: 'row',
             alignItems: 'center',
             gap: spacing.sm,
-            // Lines the text up under the name rather than under the initials.
             paddingLeft: isActive ? 0 : 36 + spacing.md,
           }}
         >

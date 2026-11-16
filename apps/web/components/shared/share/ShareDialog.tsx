@@ -9,7 +9,6 @@ interface ShareDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  /** Path on this site, e.g. `/rent/abc`; made absolute when shared. */
   path: string;
   heading?: string;
 }

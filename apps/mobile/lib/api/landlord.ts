@@ -301,7 +301,6 @@ export type MaintenancePriority = 'low' | 'medium' | 'high' | 'urgent';
 /** Mirrors the backend's `MaintenanceRequestStatus`, lowercased. */
 export type MaintenanceStatus = 'submitted' | 'assigned' | 'in_progress' | 'resolved' | 'cancelled';
 
-/** Still waiting on the landlord or a vendor. */
 export const OPEN_MAINTENANCE_STATUSES: readonly MaintenanceStatus[] = [
   'submitted',
   'assigned',
@@ -322,10 +321,9 @@ export interface LandlordMaintenance {
   propertyId: string;
   propertyName: string;
   unitName?: string;
-  // The API names these assignedVendor*; reading vendorName meant an assigned vendor never showed.
+  // The API names these assignedVendor*, not vendorName.
   assignedVendorId?: string;
   assignedVendorName?: string;
-  /** The booked repair visit, when there is one. */
   scheduledFor?: string;
   createdAt: string;
   updatedAt: string;
@@ -548,7 +546,6 @@ export interface LandlordListing {
   coverImage?: string;
   galleryImages?: string[];
   videoTourUrl?: string;
-  /** The API enum (e.g. 'COMMERCIAL'). */
   propertyType?: string;
   /** Commercial properties only. Read through `commercialDetailsOf`, never trusted as is. */
   commercial?: unknown;
@@ -921,7 +918,6 @@ export interface LandlordConversation {
   id: string;
   participantName: string;
   participantRole: string;
-  /** The home the conversation is about. */
   propertyTitle?: string;
   lastMessage: string;
   lastMessageTime: string;
@@ -1079,7 +1075,6 @@ export const landlordApi = {
     apiFetch<MicrositeSettings>('/landlord/microsite', { method: 'PATCH', body: patch }),
 
   reviewsSummary: () => apiFetch<LandlordReviewSummary>('/landlord/reviews/summary'),
-  /** Ended tenancies to review and tenant reviews already written (owners use the same endpoints). */
   tenantReviews: () => apiFetch<TenantReviews>('/landlord/reviews/tenants'),
   reviewTenant: (input: { leaseId: string; rating: number; comment?: string }) =>
     apiFetch<WrittenTenantReview>('/landlord/reviews/tenants', { method: 'POST', body: input }),
@@ -1314,11 +1309,9 @@ export const landlordApi = {
     );
   },
 
-  /** A video tour, straight to storage, with progress and cancel. Returns the storage key. */
   uploadPropertyVideo: (file: PickedFile, options: UploadProgressOptions = {}) =>
     uploadVideoDirect('/landlord/properties', file, options).then((r) => r.key),
 
-  /** A photo for `uploadPropertyMedia`'s staging, with progress and cancel. Returns the storage key. */
   uploadPropertyPhoto: (file: PickedFile, options: UploadProgressOptions = {}) => {
     const form = new FormData();
     appendFile(form, 'file', file);

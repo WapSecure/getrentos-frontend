@@ -36,7 +36,6 @@ export default function EstateNotifications() {
     queryFn: estateManagerApi.notifications,
   });
 
-  // Reading is instant; a refused change is rolled back with a toast.
   const readOne = useOptimisticMutation({
     mutationFn: (id: string) => estateManagerApi.markNotificationRead(id),
     patches: (id) => [

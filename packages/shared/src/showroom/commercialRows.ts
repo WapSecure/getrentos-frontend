@@ -1,9 +1,7 @@
 import type { CommercialDetails, CommercialFitOutCondition, ShowroomMarket } from './types';
 import { COMMERCIAL_PERMITTED_USE_LABEL as PERMITTED_USE } from './map';
 
-// The commercial block on a listing page, shared by the web showroom and the mobile listing screens.
-
-/** One row on the showroom page. Only what the lister stated ever becomes a row. */
+/** Only what the lister stated ever becomes a row. */
 export interface CommercialRow {
   key: string;
   label: string;
@@ -41,7 +39,6 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 const number = (n: number) =>
   new Intl.NumberFormat('en-NG', { maximumFractionDigits: 2 }).format(n);
 
-/** "1 year", "1 or 2 years", "1, 2 or 3 years". */
 export function formatLeaseTerms(years: readonly number[]): string {
   if (years.length === 0) return '';
   const unit = years.length === 1 && years[0] === 1 ? 'year' : 'years';
@@ -52,7 +49,6 @@ export function formatLeaseTerms(years: readonly number[]): string {
   return `${list} ${unit}`;
 }
 
-/** The rate exactly as stated: 7.5 is "7.5%", 7 is "7%". */
 export const formatStatedPct = (pct: number) => `${number(pct)}%`;
 
 export function publicSupplyLine(hours: number): string {
@@ -62,7 +58,7 @@ export function publicSupplyLine(hours: number): string {
 
 const yesNo = (v: boolean) => (v ? 'Yes' : 'No');
 
-/** The VAT row, only from what the landlord states. Nothing is ever worked out from the rate. */
+/** Nothing is ever worked out from the rate. */
 export function vatRow(
   c: Pick<CommercialDetails, 'vatStatedPct' | 'vatIncluded'>,
   market: ShowroomMarket
@@ -85,13 +81,11 @@ export function vatRow(
   return null;
 }
 
-/** True when the landlord says anything about VAT. */
 export const vatStated = (c?: CommercialDetails) =>
   !!c && (c.vatStatedPct !== undefined || c.vatIncluded !== undefined);
 
 const present = (rows: (CommercialRow | null)[]) => rows.filter((r): r is CommercialRow => !!r);
 
-/** The commercial journey on the page: lease and terms, the space, then running the business. */
 export function commercialSections(
   c: CommercialDetails,
   market: ShowroomMarket

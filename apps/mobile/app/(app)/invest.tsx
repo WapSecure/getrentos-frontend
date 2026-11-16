@@ -104,11 +104,10 @@ const ROUTES = {
 
 const go = (path: string) => () => router.push(path as Href);
 
-/** "12 Nov 2026 · 10:00 Lagos · 09:00 London": business dates stay Lagos (D2). */
+/** "12 Nov 2026 · 10:00 Lagos · 09:00 London": business dates stay Lagos. */
 const dualMoment = (iso: string, timeZone?: string | null) =>
   `${formatDate(iso, 'short')} · ${formatDualTime(iso, timeZone)}`;
 
-/** Re-reads the clock every 30 seconds, so the times stay current while the screen is open. */
 function useNow() {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -118,10 +117,6 @@ function useNow() {
   return now;
 }
 
-/**
- * Sureground Diaspora Invest: the investor's one place for what needs them, their portfolio,
- * purchases, property care, profile and identity checks. The same sections as the web workspace.
- */
 export default function InvestorWorkspace() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -220,7 +215,7 @@ export default function InvestorWorkspace() {
       onPress: owner ? go(ROUTES.managedArea) : undefined,
     });
   }
-  // DIA-30: only in-date reports by accredited valuers, always with the valuer and date.
+  // Only in-date reports by accredited valuers, always with the valuer and date.
   const valued = portfolioValuationView(data?.portfolio);
   if (valued && (valued.valuedCount > 0 || valued.notValuedCount > 0)) {
     portfolio.push({
@@ -394,7 +389,6 @@ function Meta({ Icon, label }: { Icon: SgIcon; label: string }) {
   );
 }
 
-/** Managed property: agreements, spending waiting for approval and the latest statement. */
 function PropertyCare({ data, owner }: { data: InvestorOverview; owner: boolean }) {
   const { colors, spacing } = useTheme();
   const managed = data.activeManagedProperties ?? 0;
@@ -477,7 +471,6 @@ function PropertyCare({ data, owner }: { data: InvestorOverview; owner: boolean 
   );
 }
 
-/** Compact profile: who, where and what they are after; everything else behind a toggle. */
 function ProfileSummary({
   summary,
   risk,
@@ -570,7 +563,6 @@ function ProfileSummary({
   );
 }
 
-/** Passport, address abroad and bank statement, with how far along they are and what is next. */
 function IdentityChecks({ status }: { status: ForeignIdentityStatus }) {
   const { colors, spacing } = useTheme();
   const { steps, approved, next } = identityProgress(status);

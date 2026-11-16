@@ -9,9 +9,8 @@ import type { LandPerfectionStep } from './landClosing';
 import type { CoApprovalView } from './landRepresentative';
 
 /**
- * Mirrors the backend's `land/dto/transaction-workspace.dto.ts` (DIA-15, DIA-16). One purchase,
- * seen by its buyer, its seller or the buyer's representative. Sureground holds only the deposit
- * under Payment Protection, never the rest of the price (D11).
+ * Mirrors the backend's `land/dto/transaction-workspace.dto.ts`. Sureground holds only the deposit
+ * under Payment Protection, never the rest of the price.
  */
 
 export {

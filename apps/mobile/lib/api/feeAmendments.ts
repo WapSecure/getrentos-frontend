@@ -2,10 +2,7 @@ import type { BadgeTone } from '@sureground/ui-native';
 import { apiFetch } from './client';
 import { APP_TIME_ZONE } from '../format';
 
-/**
- * BD-2: a fee in a signed agreement changes only by a proposal the other side accepts. Who may do what
- * comes from the API; never derive it here.
- */
+/** Who may do what comes from the API; never derive it here. */
 
 export type ManagementFeeType = 'PERCENTAGE' | 'FLAT';
 export type FeeAmendmentSide = 'OWNER' | 'MANAGER' | 'SUREGROUND';
@@ -93,7 +90,6 @@ export interface ProposeFeeAmendmentInput {
 export const FEE_REASON_MIN = 10;
 const MONTHS_AHEAD = 12;
 
-/** A Lagos calendar day, "1 December 2026". */
 export function formatLagosDay(value: string | null | undefined): string {
   if (!value) return '';
   const date = /^\d{4}-\d{2}-\d{2}$/.test(value)
@@ -108,7 +104,6 @@ export function formatLagosDay(value: string | null | undefined): string {
   });
 }
 
-/** Today as a Lagos date, YYYY-MM-DD. */
 export function lagosToday(now = new Date()): string {
   return now.toLocaleDateString('en-CA', { timeZone: APP_TIME_ZONE });
 }
@@ -119,10 +114,7 @@ function dayBefore(day: string): string {
   return formatLagosDay(date.toISOString());
 }
 
-/**
- * The fee in force today, and an agreed change that has not started yet. The agreement's fee moves on
- * acceptance, so `currentFee` alone would announce the new fee early; the versions say what applies when.
- */
+/** The agreement's fee moves on acceptance, so `currentFee` alone would announce a new fee early. */
 export function feeHeadline(
   data: Pick<FeeAmendmentOverview, 'currentFee' | 'versions'>,
   today = lagosToday()

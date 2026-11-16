@@ -62,8 +62,6 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { SelectField } from '@/components/forms/SelectField';
 import { goBack } from '@/lib/goBack';
 
-// Sureground Diaspora Invest onboarding, as on web: about you, your plans, then the risk statement.
-
 type Step = 'about' | 'plans' | 'risk';
 const STEPS: { id: Step; title: string }[] = [
   { id: 'about', title: 'About you' },

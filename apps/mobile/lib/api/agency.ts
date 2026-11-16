@@ -403,7 +403,6 @@ export const agencyApi = {
       method: 'POST',
       body: { ...contactBody(contact), ...input },
     }),
-  /** What an owner sees before accepting: the firm, and who it was sent to (email, or masked phone). */
   ownerInviteClaimInfo: (token: string) =>
     apiFetch<OwnerInviteClaimInfo>(`/agency/owner-invites/claim/${encodeURIComponent(token)}`),
   /** Accept as the signed-in owner; a phone-only owner accepts as the account the invite names. */

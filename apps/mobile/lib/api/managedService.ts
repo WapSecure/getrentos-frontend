@@ -88,7 +88,6 @@ export interface Mandate {
   permissions?: { canSign: boolean };
 }
 
-/** A signed agreement whose fee can be shown and changed (BD-2). */
 export const hasFeeTerms = (m: Mandate) => m.status === 'ACTIVE' || m.status === 'SUSPENDED';
 
 export type IntakeStatus =

@@ -18,7 +18,6 @@ interface LandDocumentUploadFieldsProps {
   file: File | null;
   onFileChange: (file: File | null) => void;
   disabled?: boolean;
-  /** Label of the file field. */
   fileLabel?: string;
 }
 

@@ -25,7 +25,6 @@ import {
   type CommercialValues,
 } from './CommercialDetailsFields';
 
-/** The listing being edited: enough to title the dialog and prefill it. */
 export interface CommercialDetailsTarget {
   id: string;
   title: string;
@@ -35,14 +34,11 @@ export interface CommercialDetailsTarget {
 interface CommercialDetailsDialogProps {
   target: CommercialDetailsTarget | null;
   onClose: () => void;
-  /** Sends every field, with null for "not stated", to the route for this kind of listing. */
   save: (id: string, details: CommercialUpdatePayload) => Promise<ApiResponse<unknown>>;
-  /** The list to refresh once saved. */
   invalidate: QueryKey;
   deal?: CommercialDeal;
 }
 
-/** Edits a commercial listing's stated details; landlord, owner and realtor listings share it. */
 export function CommercialDetailsDialog({
   target,
   onClose,

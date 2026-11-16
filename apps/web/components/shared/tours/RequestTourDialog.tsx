@@ -21,7 +21,6 @@ const COPY: Record<TourPlace, { where: string; route: string }> = {
   home: { where: 'at the property', route: VISIT_ROUTES.BUYER_TOURS },
 };
 
-/** Ask for a live video tour of land (land routes) or a built home for sale (general routes). */
 export const RequestTourDialog = ({
   open,
   onClose,

@@ -112,8 +112,6 @@ const STEP_TYPE_LABEL: Record<string, string> = {
   SOURCE_OF_FUNDS_CHECK: 'Source of funds',
 };
 
-// ---- Diaspora identity and source-of-funds cases: uploads through GET :id/documents, decision through POST :id/decision.
-
 const FOREIGN_DOCUMENT_LABEL: Record<ForeignPurpose, string> = {
   FOREIGN_IDENTITY: 'Passport photo page',
   FOREIGN_ADDRESS: 'Proof of address',
@@ -121,7 +119,6 @@ const FOREIGN_DOCUMENT_LABEL: Record<ForeignPurpose, string> = {
   SOURCE_OF_FUNDS: 'Source of funds document',
 };
 
-/** Source-of-funds uploads say which document each file is. */
 const SOURCE_OF_FUNDS_DOCUMENT_LABEL: Record<string, string> = {
   ...SOURCE_OF_FUNDS_SUPPORTING_LABELS,
   BANK_STATEMENTS: 'Bank statement',

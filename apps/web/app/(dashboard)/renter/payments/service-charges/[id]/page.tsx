@@ -6,7 +6,6 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { renterServiceChargesService } from '@/services/renterServiceChargesService';
 
-/** A tenant's service charge as a statement. */
 export default function RenterServiceChargeStatementPage() {
   const { id } = useParams<{ id: string }>();
   return (

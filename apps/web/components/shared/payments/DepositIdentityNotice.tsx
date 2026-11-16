@@ -10,11 +10,8 @@ import { ROUTES } from '@/lib/constants/auth';
 import { depositIdentityNotice, identityGate } from '@/lib/identityGate';
 import { kycService } from '@/services/kycService';
 
-/**
- * The server refuses a deposit from a buyer whose identity is not verified (the same rule as
- * making an offer). Returns the notice to pass to PayDialog's `blocked`, or null to let them pay.
- * A loading or failed status never blocks; the server still has the final say.
- */
+// The server refuses a deposit from an unverified buyer; a loading or failed status never blocks,
+// since the server has the final say.
 export function useDepositIdentityNotice(enabled: boolean): ReactNode | null {
   const { data: kycStatus } = useQuery({
     queryKey: ['kyc-status'],

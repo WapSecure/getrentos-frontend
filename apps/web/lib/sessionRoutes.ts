@@ -1,6 +1,4 @@
-// Signed-in areas of the web app: each has its own auth guard (the role layouts, ReviewerAuthGate,
-// the billing and payment return pages), so an ended session there goes to sign-in. Every other
-// page works signed out, so an ended session on it is dropped quietly and the page shows signed out.
+// An ended session goes to sign-in only on these guarded areas; elsewhere it is dropped quietly.
 // Keep in step with the guarded layouts under app/ (and robots.ts, which hides the same areas).
 const SIGNED_IN_SECTIONS = [
   // Role dashboards: app/(dashboard)/<role>/layout.tsx

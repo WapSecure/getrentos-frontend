@@ -45,10 +45,6 @@ export function foreignAccountLabel(account: ForeignBankAccount): string {
   return [account.bankName || country, number].filter(Boolean).join(' · ');
 }
 
-/**
- * Where statement payouts go: the Nigerian account, or an account abroad once a licensed partner
- * is live. Sits under the existing payout account; every change goes through step-up.
- */
 export function PayoutDestinationSettings() {
   const queryClient = useQueryClient();
   const toast = useToast();

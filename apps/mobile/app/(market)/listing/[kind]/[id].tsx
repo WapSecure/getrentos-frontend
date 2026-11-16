@@ -67,7 +67,6 @@ import {
   RulesBlock,
 } from '@/components/shortlet/StaySections';
 
-// One primary action per market; each signs in first and comes back to this listing.
 const CTA: Record<MarketKind, { label: string; a11y: string }> = {
   rent: { label: 'Request viewing', a11y: 'Sign in to request a viewing' },
   sale: { label: 'Request inspection', a11y: 'Sign in to request an inspection' },
@@ -353,7 +352,6 @@ function Body({
         </Card>
       ) : null}
 
-      {/* Commercial: the lease and the space come before the description, as on the web. */}
       {p.commercial && (p.kind === 'rent' || p.kind === 'sale') ? (
         <ShowroomCommercial commercial={p.commercial} market={p.kind} />
       ) : null}
@@ -599,7 +597,6 @@ function Footer({ listing, kind }: { listing: MarketDetail; kind: MarketKind }) 
               surface: 'app_sticky_bar',
               props: { variant: 'signed_out' },
             });
-            // Come back to this listing once signed in.
             rememberListing(kind, listing.id);
             router.push('/(auth)/sign-in');
           }}

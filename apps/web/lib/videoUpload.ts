@@ -20,9 +20,8 @@ export interface UploadedVideo {
 }
 
 /**
- * Uploads a video straight to storage. Big files go up in resumable 8 MB parts (a dropped connection loses one part;
- * after a reload the same file picks up where it stopped); small ones in one request. `basePath` is the owning
- * route, e.g. `/landlord/properties`. Falls back to older routes when the API does not offer the newer ones.
+ * Big files go up in resumable 8 MB parts, so a dropped connection or reload loses one part at most.
+ * Falls back to older routes when the API does not offer the newer ones.
  */
 export async function uploadVideoDirect(
   basePath: string,

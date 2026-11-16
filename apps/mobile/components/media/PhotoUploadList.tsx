@@ -6,7 +6,6 @@ import { Button, Progress, Text, useTheme } from '@sureground/ui-native';
 import type { PendingPhoto } from '@/lib/usePhotoUploads';
 import type { UploadState } from '@/lib/uploadQueue';
 
-/** One row per new photo: progress with Cancel, then Processing; or the failure with Retry and Remove. */
 export function PhotoUploadList({
   pending,
   states,
@@ -77,10 +76,6 @@ function PhotoUploadRow({
   );
 }
 
-/**
- * One file's upload: progress with Cancel, then Processing; or the failure with its reason, Retry and Remove.
- * Shared by photos and the video tour.
- */
 export function UploadRow({
   name,
   preview,
@@ -90,7 +85,6 @@ export function UploadRow({
 }: {
   /** Read out with the buttons, e.g. "new photo 2". */
   name: string;
-  /** A 56pt square: the photo, or an icon for a video. */
   preview: ReactNode;
   /** None once the file is up and waiting to be added with the others. */
   state?: UploadState;

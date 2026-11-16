@@ -22,7 +22,6 @@ export interface CommercialDetailsTarget {
   commercial?: unknown;
 }
 
-/** Edits a commercial listing's stated details; landlord, owner and realtor listings share it. */
 export function CommercialDetailsSheet({
   target,
   onClose,

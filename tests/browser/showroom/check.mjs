@@ -14,7 +14,6 @@ const browser = await chromium.launch();
 // Test runs must not count as real traffic in the listing funnel.
 const blockAnalytics = (ctx) => ctx.route('**/analytics/events', (route) => route.abort());
 try {
-  // Desktop
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await blockAnalytics(ctx);
   const page = await ctx.newPage();
@@ -78,13 +77,11 @@ try {
   );
   await page.locator('[aria-label="All media"] li button').nth(3).click();
   check('viewer: grid pick -> photo 4', (await desc(page)) === 'Photo 4 of 9');
-  // Tab stays inside the dialog and shows a ring
   await page.keyboard.press('Tab');
   const focusInside = await page.evaluate(
     () => !!document.activeElement?.closest('[role="dialog"]')
   );
   check('viewer: focus stays in dialog', focusInside);
-  // Drag left = next (mouse drives pointer events)
   const stage = page.locator('[role="dialog"] img[draggable="false"]');
   const box = await stage.boundingBox();
   await page.mouse.move(box.x + box.width * 0.7, box.y + box.height / 2);
@@ -92,7 +89,6 @@ try {
   await page.mouse.move(box.x + box.width * 0.2, box.y + box.height / 2, { steps: 6 });
   await page.mouse.up();
   check('viewer: swipe left -> next', (await desc(page)) === 'Photo 5 of 9', await desc(page));
-  // Video plays through hls.js (Chromium has no native HLS)
   await page.locator('[aria-label="Thumbnails"] button[aria-label="Video tour 9"]').click();
   check('viewer: thumbnail -> video', (await desc(page)) === 'Video tour 9 of 9', await desc(page));
   await page.locator('[role="dialog"] button[aria-label$="video tour"]').click({ timeout: 8000 });
@@ -120,7 +116,6 @@ try {
   check('viewer: Escape closes', (await page.locator('[role="dialog"]').count()) === 0);
   const back = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
   check('viewer: focus returns to the cover', /^Open gallery/.test(back ?? ''), back);
-  // Share dialog (desktop has no coarse pointer, so our dialog)
   await page.getByRole('button', { name: 'Share' }).click();
   const wa = await page.locator('[role="dialog"] a', { hasText: 'WhatsApp' }).getAttribute('href');
   check(
@@ -135,7 +130,6 @@ try {
     consoleErrors.join(' | ')
   );
 
-  // Edge fixtures
   await page.goto(`${BASE}/rent/fx-rent-broken`, { waitUntil: 'networkidle' });
   await page.locator('main button[aria-label^="Open gallery"]').click();
   await page.keyboard.press('ArrowRight');
@@ -258,7 +252,6 @@ try {
   check('land: ownership-verified wording', /Ownership verified by Sureground/.test(landText));
   await ctx.close();
 
-  // Phone, reduced motion, layout shift
   const phone = await browser.newContext({
     viewport: { width: 390, height: 844 },
     deviceScaleFactor: 2,

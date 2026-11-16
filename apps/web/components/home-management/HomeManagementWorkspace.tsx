@@ -113,14 +113,9 @@ interface HomeManagementWorkspaceProps {
   /** Narrows everything to the client's property, so pickers, lists and history can't reach another client's home. */
   scopePropertyId?: string;
   eyebrow?: string;
-  /** One plain line of context under the title; each role has a default. */
   description?: ReactNode;
-  /**
-   * The query parameter that holds the open tab. The landlord hub already uses `tab` for its own
-   * Requests / Home Management switch, so it passes another name.
-   */
+  // The landlord hub already uses `tab` for its own switch, so it passes another name.
   tabParam?: string;
-  /** A field agent records readings and purchases; set-up actions such as adding a meter are hidden. */
   recordOnly?: boolean;
 }
 
@@ -175,7 +170,6 @@ export function HomeManagementWorkspace({
       homeManagementTabHref(pathname, searchParams.toString(), tab, tabParam),
     [pathname, searchParams, tabParam]
   );
-  // Each utility tile opens the sub-view it summarises, whatever sub-view is open now.
   const utilitiesHref = useCallback(
     (view: UtilitiesView) => {
       const tabUrl = new URL(tabHref('utilities'), 'http://local');
@@ -189,7 +183,6 @@ export function HomeManagementWorkspace({
   const clearCreateRequest = useCallback(() => setCreateRequest(null), []);
   // Never reused, so a section that stays mounted still sees the next click as a new request.
   const requestSequence = useRef(0);
-  // A failed water test opens the work order already on its property, as a water job.
   const [workOrderPrefill, setWorkOrderPrefill] = useState<Partial<WorkOrderForm> | undefined>();
   const requestCreate = (kind: CreateKind, prefill?: Partial<WorkOrderForm>) => {
     setWorkOrderPrefill(kind === 'work-order' ? prefill : undefined);

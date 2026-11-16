@@ -101,10 +101,8 @@ const placeKey = (part: string) =>
     .replace(/\s+/g, ' ');
 
 /**
- * One display line for a place, smallest part first: formatLocation('Surulere', 'Lagos', 'Lagos')
- * gives "Surulere, Lagos". Parts may themselves hold commas ("12 Admiralty Way, Lekki"). Blank parts
- * go, and a part that repeats another (ignoring case and a trailing "State") is shown once, at its
- * last place, since the broader parts come last: "Lagos, Ikeja, Lagos" reads "Ikeja, Lagos".
+ * Parts may hold commas. Blanks go, and a repeated part (ignoring case and a trailing "State") is shown
+ * once, at its last place, since broader parts come last: "Lagos, Ikeja, Lagos" reads "Ikeja, Lagos".
  */
 export function formatLocation(...parts: (string | null | undefined)[]): string {
   const all = parts

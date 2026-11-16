@@ -1,9 +1,8 @@
 // Server-safe (no client imports).
 export const PUBLIC_REVALIDATE = 60;
 
-// Photo links in public responses are signed for 2 hours. Next serves a stale fetch whatever its
-// age while it refreshes, so the cache key rotates every 30 minutes: with pages capped at an hour
-// (next.config expireTime) no cached page can hold a link older than 90 minutes.
+// Public photo links are signed for 2 hours and Next serves stale fetches while refreshing, so the key
+// rotates every 30 minutes: with pages capped at an hour (expireTime) no link is over 90 minutes old.
 const WINDOW_MS = 30 * 60 * 1000;
 
 // Marketing pages render on every request (the CSP nonce), so an uncached fetch holds back the

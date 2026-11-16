@@ -11,9 +11,8 @@ export type UploadState =
 const isAbort = (error: unknown) => error instanceof Error && error.name === 'AbortError';
 
 /**
- * Uploads files one request each, at most `concurrency` at a time, with progress, cancel and retry per file.
- * A failure only stops its own file: the rest carry on. Everything still running is cancelled on unmount.
- * Only files in the queue have a state; a finished upload leaves it and goes to `onSuccess`.
+ * A failure only stops its own file; everything still running is cancelled on unmount. A finished
+ * upload leaves the queue and goes to `onSuccess`.
  */
 export function useUploadQueue<R>({
   upload,

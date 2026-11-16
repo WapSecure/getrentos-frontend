@@ -56,7 +56,6 @@ function HeroWithViewer({
   );
 }
 
-/** Hero plus full-screen viewer, with the same media events as the web showroom. */
 export function ShowroomMedia({
   listingId,
   market,
@@ -72,10 +71,7 @@ export function ShowroomMedia({
   return <HeroWithViewer {...rest} onMediaEvent={onMediaEvent} />;
 }
 
-/**
- * The same hero and viewer for an owner or host looking at their own listing. Sends no events:
- * the showroom funnel counts renters and buyers, not listers checking their photos.
- */
+/** Sends no events: the showroom funnel counts renters and buyers, not listers checking their photos. */
 export function ShowroomPreview(props: HeroViewerProps) {
   return <HeroWithViewer {...props} />;
 }

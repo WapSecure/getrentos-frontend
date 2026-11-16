@@ -49,11 +49,9 @@ interface WaterPanelProps {
   onOpenPurchaseChange: (value: { kinds: UtilityPurchaseKind[] } | null) => void;
   waterTestOpen: boolean;
   onWaterTestChange: (open: boolean) => void;
-  /** Opens a work order for the failed test's property and water source. */
   onRaiseWorkOrder?: (from: WaterWorkOrderSeed) => void;
 }
 
-/** What a work order raised from a failed water test starts with. */
 export interface WaterWorkOrderSeed {
   propertyId: string;
   assetId?: string;

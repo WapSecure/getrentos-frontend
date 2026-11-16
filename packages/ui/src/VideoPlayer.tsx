@@ -7,7 +7,6 @@ import { cn, embeddedVideo } from '@sureground/shared';
 type HlsInstance = { destroy: () => void };
 
 interface VideoPlayerProps {
-  /** An HLS stream (.m3u8), an uploaded file, or a YouTube/Vimeo link. */
   src: string;
   poster?: string;
   title: string;

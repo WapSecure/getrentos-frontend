@@ -1,4 +1,4 @@
-/** Mirrors GET /admin/diaspora/queue (DIA-41). */
+/** Mirrors GET /admin/diaspora/queue. */
 export type DiasporaQueueKind =
   | 'FOREIGN_IDENTITY_REVIEW'
   | 'RISK_OR_PROFILE_FLAG'
@@ -31,10 +31,7 @@ export interface DiasporaQueueItem {
 /** Deadline windows in Lagos days; `today` and `week` leave out overdue items. */
 export type DiasporaQueueDue = 'overdue' | 'today' | 'week';
 
-/**
- * The workload in the current scope (kind, investor, search). Each figure is what its filter would
- * list with the other filters as they are.
- */
+/** Each figure is what its filter would list in the current scope, with the other filters as they are. */
 export interface DiasporaQueueSummary {
   overdue: number;
   dueToday: number;

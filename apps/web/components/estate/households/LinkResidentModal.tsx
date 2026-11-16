@@ -10,7 +10,6 @@ import type { Household } from '@/types/estate';
 interface LinkResidentModalProps {
   household: Household | null;
   onClose: () => void;
-  /** Their phone number or email, as typed. */
   onSubmit: (contact: string) => void;
   isSubmitting?: boolean;
   error?: string | null;

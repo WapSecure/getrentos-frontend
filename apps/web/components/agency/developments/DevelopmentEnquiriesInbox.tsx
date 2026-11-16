@@ -41,7 +41,6 @@ const FILTERS: { value: 'ALL' | DevelopmentEnquiryStatus; label: string }[] = [
   { value: 'CLOSED', label: 'Closed' },
 ];
 
-/** Buyers' questions about one development, for the firm's editing seats. */
 export function DevelopmentEnquiriesInbox({ developmentId }: { developmentId: string }) {
   const [filter, setFilter] = useState<'ALL' | DevelopmentEnquiryStatus>('ALL');
   const query = useQuery({

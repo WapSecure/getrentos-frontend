@@ -71,7 +71,7 @@ const lagosDue = new Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
 });
 
-/** Business dates are Lagos dates (decision D2): "11 Nov 2026". */
+/** Business dates are Lagos dates: "11 Nov 2026". */
 export function formatLagosDate(iso: string): string {
   const date = new Date(iso);
   return Number.isNaN(date.getTime()) ? '' : lagosDue.format(date);

@@ -41,10 +41,7 @@ function linkedWarningId(): string | null {
   return new URLSearchParams(window.location.search).get('warning');
 }
 
-/**
- * Automated listing warnings nobody has decided yet. A property cannot be verified while one is open,
- * and one that arrives after verification is shown here rather than sitting silently beside "verified".
- */
+/** A property cannot be verified while one is open; one arriving after verification shows here, not silently. */
 export function ListingWarningsQueue({ onOpenAlert }: { onOpenAlert: (alertId: string) => void }) {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -80,7 +77,6 @@ export function ListingWarningsQueue({ onOpenAlert }: { onOpenAlert: (alertId: s
     },
   });
 
-  // Nothing to decide and nothing went wrong: the section stays out of the way.
   if (!isLoading && !isError && items.length === 0) return null;
 
   return (

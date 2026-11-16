@@ -1,9 +1,8 @@
 import { trustChainLabel, type TrustChainLike, type TrustLabelTone } from '@sureground/shared';
 
 /**
- * The compare table's verification cell. It reads the trust chain, as the browse card and the listing
- * page do, so it can never say "verified" next to "verification in progress". The bare flag is only the
- * fallback for a listing the API sends no chain for.
+ * Reads the trust chain like the browse card, so it never says "verified" next to "verification in
+ * progress". The bare flag is only for a listing the API sends no chain for.
  */
 export function compareVerification(property: { trustChain?: TrustChainLike; verified: boolean }): {
   label: string;

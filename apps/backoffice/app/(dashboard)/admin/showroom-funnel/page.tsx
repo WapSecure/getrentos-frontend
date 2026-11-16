@@ -67,7 +67,6 @@ const OUTCOME_LABEL: Record<string, string> = {
   bookingsConfirmed: 'Bookings confirmed',
 };
 
-// Next action that matters for each market; "all" shows every one.
 const NEXT_STEPS: Record<MarketChoice, (keyof FunnelMarketReport['funnel'])[]> = {
   all: [
     'detailViewToInquiry',

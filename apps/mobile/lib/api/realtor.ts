@@ -319,13 +319,11 @@ export const realtorApi = {
     apiFetch<Paginated<RealtorClient>>(
       `/realtor/clients${toQuery({ page: opts.page ?? 1, pageSize: 100, status: opts.status, search: opts.search })}`
     ),
-  /** Whether a phone number or email belongs to an owner or landlord account. */
   checkClient: (contact: string) =>
     apiFetch<ClientEligibility>('/realtor/clients/check', {
       method: 'POST',
       body: contactBody(contact),
     }),
-  /** By the client's phone number or email; they hear in their app. */
   inviteClient: (contact: string) =>
     apiFetch<RealtorClient>('/realtor/clients', { method: 'POST', body: contactBody(contact) }),
   assignedProperties: (relationshipId: string) =>

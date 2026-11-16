@@ -34,7 +34,6 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
 import { goBack } from '@/lib/goBack';
 
-/** Meters (last 4 digits only) and the day's grid supply, logged from site. */
 export default function Meters() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

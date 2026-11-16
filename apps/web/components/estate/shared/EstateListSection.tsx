@@ -3,17 +3,11 @@ import type { SgIcon } from '@sureground/icons';
 import { ListSkeleton } from '@sureground/ui';
 import { cn } from '@sureground/shared';
 
-/**
- * The estate workspace list pattern (same as the gate console's Inside now panel): a card with a
- * title, a count and one line saying what is listed, then filters, rows and paging.
- */
 interface EstateListSectionProps {
-  /** Used for the heading id the section is labelled by. */
   id: string;
   title: string;
   /** Hidden while undefined, so a loading list never shows 0. */
   count?: number;
-  /** Read out instead of the bare number, such as "12 passes". */
   countLabel?: string;
   description?: ReactNode;
   action?: ReactNode;
@@ -73,7 +67,6 @@ export function EstateListSection({
   );
 }
 
-/** Filter chips: one scrolling line on a phone, wrapping from small screens up. */
 export function EstateFilterChips({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div
@@ -106,7 +99,6 @@ export const initials = (name: string) =>
     .map((part) => part[0]!.toUpperCase())
     .join('');
 
-/** Leading mark for a row: a person's initials in a circle, or an icon in a rounded square. */
 export function RowAvatar({
   name,
   icon: Icon,
@@ -146,10 +138,6 @@ export function RowAvatar({
   );
 }
 
-/**
- * One row: leading mark, a title line (with any badges), meta lines, actions on the right. On a
- * phone the actions drop under the text, lined up with it.
- */
 export function EstateRow({
   leading,
   title,
@@ -161,7 +149,6 @@ export function EstateRow({
   leading: ReactNode;
   title: ReactNode;
   meta?: ReactNode;
-  /** Block content under the meta lines, such as a message body. */
   children?: ReactNode;
   actions?: ReactNode;
   align?: 'center' | 'start';

@@ -29,7 +29,6 @@ export function TrackDetailView({
 type GalleryState = { openIndex: number | null; setOpenIndex: (index: number | null) => void };
 const GalleryContext = createContext<GalleryState | null>(null);
 
-/** Shares the viewer between the mosaic and buttons further down the page (the floor plans shortcut). */
 export function ShowroomGallery({ children }: { children: ReactNode }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   return (
@@ -48,7 +47,6 @@ export function FloorPlansShortcut({
 }: {
   listingId: string;
   market: ShowroomEventMarket;
-  /** Index into the listing's media of its first floor plan. */
   firstIndex: number;
   count: number;
 }) {

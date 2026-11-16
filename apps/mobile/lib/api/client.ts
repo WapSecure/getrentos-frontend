@@ -250,10 +250,7 @@ export function abortError(): Error {
   return error;
 }
 
-/**
- * An upload over XHR, which (unlike fetch) reports upload progress: a multipart POST to the API, or a
- * PUT of a file to a signed storage link. Resolves with a `Response` so `readJson` reads it as it reads fetch results.
- */
+/** XHR rather than fetch, because it reports upload progress. */
 export function sendWithProgress(
   method: 'POST' | 'PUT',
   url: string,
@@ -321,10 +318,7 @@ export function sendWithProgress(
   });
 }
 
-/**
- * `apiUpload` with progress and cancel. Same headers, errors and one refresh-and-retry on a 401
- * (progress restarts from 0). A cancel rejects with an `AbortError`.
- */
+/** One refresh-and-retry on a 401 (progress restarts from 0); a cancel rejects with an `AbortError`. */
 export async function apiUploadWithProgress<T>(
   path: string,
   form: FormData,

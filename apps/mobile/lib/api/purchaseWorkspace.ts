@@ -10,12 +10,10 @@ import type { Milestone, Perfection } from './landSales';
 import type { BuyerTransaction } from './buyerTransactions';
 import { withStepUpSummary } from '../stepUp';
 
-// One purchase (built home or land resale) as its buyer or the buyer's representative sees it
-// (DIA-15, DIA-16). Mirrors the backend's `land/dto/transaction-workspace.dto.ts` and web's
-// transactionWorkspaceService. Sureground holds only the deposit, never the rest of the price (D11).
+// Mirrors the backend's `land/dto/transaction-workspace.dto.ts`. Sureground holds only the
+// deposit, never the rest of the price.
 
 export interface WorkspaceMilestone extends Milestone {
-  /** The professional who checked it. */
   verifiedBy?: { name: string; role?: string };
 }
 
@@ -123,7 +121,6 @@ export const purchaseWorkspaceApi = {
   get: (role: WorkspaceViewer, txId: string) =>
     apiFetch<TransactionWorkspace>(`${tx(role, txId)}/workspace`),
 
-  /** Same access as the workspace. */
   document: (role: WorkspaceViewer, txId: string, documentId: string) =>
     apiFetch<WorkspaceDocumentLink>(
       `${tx(role, txId)}/documents/${encodeURIComponent(documentId)}`

@@ -1,6 +1,5 @@
-// A plain-React stand-in for react-native-reanimated (and react-native-worklets), registered in
-// jest.setup.js. The real packages need native runtimes that Jest does not have. Animations
-// resolve to their end value at once; layout animations (FadeIn.duration(120)…) are dropped.
+// The real packages need native runtimes Jest does not have. Animations resolve to their end
+// value at once; layout animations are dropped.
 const React = require('react');
 const RN = require('react-native');
 

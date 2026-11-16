@@ -17,7 +17,6 @@ const RATING_HINT: Record<number, string> = {
   5: 'Excellent',
 };
 
-/** Landlords and owners rate a tenant once they have moved out; screening shows these to the next landlord. */
 export function TenantReviewsSection() {
   const { spacing } = useTheme();
   const [target, setTarget] = useState<PendingTenantReview | null>(null);

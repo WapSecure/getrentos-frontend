@@ -237,7 +237,6 @@ export default function RealtorHome() {
     <Screen refreshing={dashboard.isRefetching} onRefresh={refresh}>
       {header}
 
-      {/* The first nudge leads with a blue button; the rest stay as compact cards. */}
       {nudges.map((n, i) => (
         <AttentionCard
           key={n.key}

@@ -34,7 +34,6 @@ import { formatDay } from '@/lib/serviceCharge';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
-/** One service charge as a statement, with queries. */
 export default function ServiceChargeStatement() {
   const { id, kind: raw } = useLocalSearchParams<{ id: string; kind?: string }>();
   const kind: StatementKind = raw === 'resident' ? 'resident' : 'renter';

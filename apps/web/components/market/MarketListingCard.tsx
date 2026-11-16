@@ -8,7 +8,6 @@ import { SaveListingButton } from './SaveListingButton';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
 import { listingPath } from '@/lib/listingSlug';
 
-/** One public listing card in any market, counted under `surface` (e.g. "rent_similar"). */
 export function MarketListingCard({
   listing,
   market,

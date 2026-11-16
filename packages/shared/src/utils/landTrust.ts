@@ -83,7 +83,6 @@ export type LandTitleType =
 /** A status's badge colour; the same names as `BadgeVariant` in @sureground/ui, which this package cannot import. */
 export type StatusTone = 'success' | 'warning' | 'danger' | 'neutral' | 'info';
 
-/** One map for the diligence badge on web (owner screens) and backoffice (staff queue and case). */
 export const LAND_DILIGENCE_STATUS: Record<
   LandDiligenceStatus,
   { label: string; tone: StatusTone }
@@ -104,7 +103,6 @@ export const LAND_DILIGENCE_LABELS = Object.fromEntries(
   Object.entries(LAND_DILIGENCE_STATUS).map(([status, { label }]) => [status, label])
 ) as Record<LandDiligenceStatus, string>;
 
-/** Any casing or separator the API sends (`in-review`, `In review`); unknown values read as not started. */
 export function normalizeLandDiligenceStatus(
   value: string | undefined | null
 ): LandDiligenceStatus {
@@ -115,7 +113,6 @@ export function normalizeLandDiligenceStatus(
   return normalized in LAND_DILIGENCE_STATUS ? normalized : 'NOT_STARTED';
 }
 
-/** The investor-facing verification summary on a listing's detail route (Diaspora Invest DIA-10/11). */
 export const VERIFICATION_SUMMARY_STATUSES = [
   'NOT_STARTED',
   'SUBMITTED',
@@ -130,7 +127,6 @@ export type VerificationSummaryStatus = (typeof VERIFICATION_SUMMARY_STATUSES)[n
 
 export interface VerificationSummary {
   status: VerificationSummaryStatus;
-  /** The checks that passed, in their checklist wording. */
   scope: string[];
   checkedAt: string | null;
   /** Roles, never names, e.g. "Accredited surveyor". */
@@ -209,7 +205,7 @@ export const VERIFICATION_LIMITS_FALLBACK = [
   'Take independent legal advice before you commit money.',
 ];
 
-/** The API's summary, checked; undefined when missing or the status is unknown (an older API), so pages behave as before. */
+/** Undefined when missing or the status is unknown (an older API). */
 export function verificationSummaryOf(value: unknown): VerificationSummary | undefined {
   if (!value || typeof value !== 'object') return undefined;
   const v = value as Record<string, unknown>;

@@ -41,7 +41,6 @@ function flush() {
   }
 }
 
-/** Fire and forget. */
 export function trackShowroom(event: ShowroomEventInput) {
   try {
     queue.push({

@@ -79,7 +79,6 @@ export default function BuyerListingDetail() {
     enabled: !!id,
     retry: false,
   });
-  // Shared with the web showroom, so both show the same facts, costs and media.
   const showroom = useMemo(
     () =>
       listing
@@ -238,7 +237,6 @@ export default function BuyerListingDetail() {
                   />
                 ) : null}
 
-                {/* Commercial: the lease and the space come before the description, as on the web. */}
                 {showroom?.commercial ? (
                   <ShowroomCommercial commercial={showroom.commercial} market="sale" />
                 ) : null}

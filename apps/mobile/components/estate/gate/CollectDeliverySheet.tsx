@@ -19,7 +19,7 @@ interface CollectDeliverySheetProps {
   onConfirm: (collectedBy?: string) => void;
 }
 
-/** Confirms a hand-over and records who took the parcel. The form remounts per parcel so the name starts at that household's resident. */
+/** The form remounts per parcel so the name starts at that household's resident. */
 export function CollectDeliverySheet({ log, busy, onClose, onConfirm }: CollectDeliverySheetProps) {
   return (
     <Sheet open={!!log} onClose={() => !busy && onClose()} title="Hand over parcel">

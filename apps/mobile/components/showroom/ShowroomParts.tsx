@@ -5,7 +5,6 @@ import { Bath, BedDouble, Ruler } from '@sureground/icons/native';
 import { Card, Price, SectionHeader, Text, useTheme } from '@sureground/ui-native';
 import type { ShowroomCosts, ShowroomFact, ShowroomListing } from '@sureground/shared/showroom';
 
-/** Beds, baths and floor area in one divided row, as on the web showroom. */
 export function KeyFactsRow({
   bedrooms,
   bathrooms,
@@ -77,7 +76,6 @@ function Row({
   );
 }
 
-/** The listing's stated facts, from the shared mapper, in the same order as the web page. */
 export function ShowroomFacts({
   facts,
   title = 'Details',
@@ -125,7 +123,6 @@ export function ShowroomFacts({
 const list = (items: string[]) =>
   items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`;
 
-/** Price lines, the stated total and the fees the listing leaves out, as on the web page. */
 export function ShowroomCostsCard({
   market,
   costs,
@@ -206,7 +203,6 @@ export function ShowroomCostsCard({
   );
 }
 
-/** The sticky phone bar: the price and one primary action for the listing type. */
 export function ShowroomPriceBar({
   price,
   period,
@@ -218,7 +214,6 @@ export function ShowroomPriceBar({
   period?: 'month' | 'year' | 'night' | 'total';
   /** A short line under the price, such as an offer in progress. */
   caption?: ReactNode;
-  /** The one primary button. */
   action: ReactNode;
   /** Small icon actions before the price, such as save. */
   leading?: ReactNode;

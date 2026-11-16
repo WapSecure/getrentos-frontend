@@ -39,7 +39,6 @@ export const qk = {
     firms: ['management-transfers', 'firms'] as const,
     handover: (id: string) => ['management-transfers', 'handover', id] as const,
   },
-  // Sureground Diaspora Invest: the investor workspace, onboarding, identity abroad and Managed.
   fx: { indicative: ['fx', 'indicative'] as const },
   investor: {
     all: ['investor'] as const,
@@ -51,7 +50,6 @@ export const qk = {
     identity: ['investor', 'identity-abroad'] as const,
     transactions: ['investor', 'buyer-transactions'] as const,
   },
-  // One purchase as its buyer or the buyer's representative sees it.
   purchaseWorkspace: {
     all: ['purchase-workspace'] as const,
     detail: (role: string, txId: string) => ['purchase-workspace', role, txId] as const,

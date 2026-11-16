@@ -106,11 +106,7 @@ const CONDITION_STATUSES = new Set<LandClosingCondition['status']>([
   'FAILED',
 ]);
 
-/**
- * The workspace's lean condition, in the shape the shared conditions panel reads. The panel shows
- * the shared remedy once below the list, so a condition repeats it only when its own differs, and
- * never once it is met or waived.
- */
+// The panel shows the shared remedy once, so a condition repeats it only when its own differs.
 const toClosingCondition = (
   condition: WorkspaceCondition,
   _index: number,
@@ -178,7 +174,6 @@ const SectionCard = ({
   </section>
 );
 
-/** A compact row for the summary rail: a name, a line under it and a badge on the right. */
 const RailList = ({
   items,
 }: {
@@ -187,7 +182,6 @@ const RailList = ({
     title: string;
     detail?: string;
     badge?: React.ReactNode;
-    /** Makes the name a link, e.g. to the case it summarises. */
     href?: string;
   }[];
 }) => (
@@ -216,17 +210,11 @@ const RailList = ({
   </ul>
 );
 
-/** The representative who gives the second approval, by name where the workspace knows it. */
 const approvingRepresentativeName = (data: TransactionWorkspace): string | undefined =>
   data.coApproval.representative?.name ??
   data.representatives.find((r) => r.approvesPayments)?.name;
 
-/**
- * One purchase as its buyer, its seller or the buyer's representative sees it (DIA-15): three
- * separate statuses, the next action, the steps, the legal transfer, approvals, people, documents
- * and history. Sureground holds only the deposit under Payment Protection, never the rest of the
- * price (D11), so nothing here says the price is held.
- */
+// Sureground holds only the deposit, never the rest of the price, so nothing here says the price is held.
 export const TransactionWorkspaceView = ({
   role,
   txId,
@@ -383,7 +371,6 @@ export const TransactionWorkspaceView = ({
         <Breadcrumbs className="mb-0" items={[breadcrumb, { label: data.propertyTitle }]} />
       )}
 
-      {/* Header: the property, its three statuses and what happens next. */}
       <Card>
         <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-start sm:p-6">
           {/* The workspace carries no property image, so the tile shows the kind of property. */}
@@ -431,7 +418,6 @@ export const TransactionWorkspaceView = ({
             )}
           </div>
         </div>
-        {/* Progress at a glance: steps and legal transfer as bars, the deposit as its own status. */}
         <div className="grid gap-5 border-t border-border bg-secondary/40 p-5 sm:grid-cols-3 sm:p-6">
           {progress.steps.total > 0 ? (
             <Progress
@@ -499,7 +485,6 @@ export const TransactionWorkspaceView = ({
       )}
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main column: what is happening. */}
         <div className="space-y-6 lg:col-span-2">
           <SectionCard
             id={SECTION_ID.steps}
@@ -601,7 +586,6 @@ export const TransactionWorkspaceView = ({
           </SectionCard>
         </div>
 
-        {/* Summary rail: money, approvals, people and documents. */}
         <aside className="space-y-6" aria-label="Summary">
           <SectionCard
             id={SECTION_ID.deposit}

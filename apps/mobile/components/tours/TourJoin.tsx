@@ -4,10 +4,6 @@ import { Button, useTheme } from '@sureground/ui-native';
 import type { SiteTourStatus, VideoCallJoin } from '@sureground/shared';
 import { VideoCallAction } from '@/components/viewings/VideoCallAction';
 
-/**
- * Joining a booked tour, as on web: the built-in call opens through `join` within its window;
- * otherwise the seller's own link opens.
- */
 export function TourJoin({
   tour,
   join,

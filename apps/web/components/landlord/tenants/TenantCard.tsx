@@ -46,7 +46,6 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
   const moveInLabel = moveInTense(tenant.moveInDate);
   const router = useRouter();
   const toast = useToast();
-  // Opens the existing conversation with this tenant, or starts one about their home.
   const openChat = useMutation({
     mutationFn: () =>
       unwrap(landlordService.startConversation(tenant.tenantUserId as string, tenant.propertyId)),

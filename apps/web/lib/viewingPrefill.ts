@@ -1,6 +1,4 @@
-// The renter's requested viewing slot as a `YYYY-MM-DDTHH:mm` value (the visitor's own timezone),
-// ready to prefill the landlord's confirm-time field. Empty when there is no usable request or the
-// slot has already passed, so the landlord picks a fresh time instead of fixing a stale one.
+// Empty when the requested slot has passed, so the landlord picks a fresh time instead of fixing a stale one.
 export function preferredSlotValue(
   preferredAt: string | undefined,
   now: number = Date.now()

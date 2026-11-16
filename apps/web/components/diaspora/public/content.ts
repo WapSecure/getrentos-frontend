@@ -13,8 +13,7 @@ import {
 import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 import { LAND_PROTECTION } from '@/lib/paymentCopy';
 
-// Public copy for Sureground Diaspora Invest. Every claim here describes something the product does
-// today (docs/diaspora/README.md §2); anything still being built is said to be so. No figures, no
+// Every claim describes what the product does today (docs/diaspora/README.md §2): no figures, no
 // promises of returns, title or price, and "Payment Protection", never "escrow".
 
 export interface IconCopy {
@@ -73,7 +72,6 @@ export interface JourneyStep extends IconCopy {
   points: string[];
 }
 
-/** Four stages, from sign-up to looking after the property. */
 export const JOURNEY: JourneyStep[] = [
   {
     icon: UserCheck,
@@ -181,7 +179,6 @@ export const TRANSPARENCY: TransparencyItem[] = [
 export interface Faq {
   question: string;
   answer: string;
-  /** A page that answers it in full, linked under the answer. */
   link?: { label: string; href: string };
 }
 
@@ -234,9 +231,7 @@ export const FAQS: Faq[] = [
   },
 ];
 
-// Transparency centre (DIA-02). Draft copy for legal review. Each line restates what the product
-// does today, with its source in the code or a recorded decision (docs/diaspora/README.md §9);
-// anything not yet decided is listed as such rather than filled in.
+// Draft copy for legal review: each line matches what the product does today (docs/diaspora/README.md §9).
 
 export interface TransparencySection {
   id: string;
@@ -250,7 +245,6 @@ export const ROLE_POINTS: string[] = [
   'Sureground is not a bank, and Payment Protection is not insurance.',
 ];
 
-/** Who else is involved in a purchase, and what each is responsible for. */
 export const THIRD_PARTIES: TransparencyItem[] = [
   {
     title: 'The seller',

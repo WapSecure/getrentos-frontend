@@ -166,10 +166,7 @@ export interface CoApproval {
   releaseApproved?: boolean;
 }
 
-/**
- * A plot purchase, a land resale under the land routes, or any sale (built home or land resale)
- * under the neutral routes, which work wherever land is switched off.
- */
+/** The neutral routes cover any sale and work wherever land is switched off. */
 export type Deal =
   | { kind: 'purchase'; id: string }
   | { kind: 'transaction'; id: string }

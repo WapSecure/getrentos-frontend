@@ -13,10 +13,6 @@ function Line({ label, amount }: { label: string; amount: number }) {
   );
 }
 
-/**
- * A statement's money: gross income, expenses, the management fee and the net payout, with the
- * ledger lines above them when `withLines` is set. Used by the owner statements and Managed screens.
- */
 export function OwnerStatementTotals({
   statement: s,
   withLines = false,

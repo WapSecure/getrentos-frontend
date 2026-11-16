@@ -6,7 +6,6 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
-/** How the renter's score has changed over time; nothing while there is no history. */
 export function RenterTrustHistory() {
   const history = useQuery({
     queryKey: renterKeys.trustScore,

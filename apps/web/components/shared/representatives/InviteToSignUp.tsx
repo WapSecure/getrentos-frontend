@@ -5,17 +5,13 @@ import { Alert, Button } from '@sureground/ui';
 import { Check, Copy, MessageCircle, Share2 } from '@sureground/icons';
 import { ROUTES, signupInviteMessage, whatsappShareUrl } from '@sureground/shared';
 
-/**
- * Shown when nobody on Sureground has the phone number or email typed. The link is the plain
- * signup page: no tracking parameters and nothing about either person.
- */
+// The plain signup page: no tracking parameters and nothing about either person.
 export function InviteToSignUp({
   message,
   reason,
   footnote = 'Once they have signed up, appoint them here with the same phone number or email.',
 }: {
   message: string;
-  /** Finishes "Join me on Sureground so I can …" in the shared message. */
   reason?: string;
   footnote?: string;
 }) {

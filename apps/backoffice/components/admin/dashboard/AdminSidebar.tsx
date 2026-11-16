@@ -664,7 +664,6 @@ const writeAdminNavPreference = (key: string, value: boolean) => {
   adminNavListeners.forEach((listener) => listener());
 };
 
-/** The Operations workspace as a small blue tile, as a workspace switcher shows it. */
 function WorkspaceMark({ size = 'md' }: { size?: 'sm' | 'md' }) {
   return (
     <span

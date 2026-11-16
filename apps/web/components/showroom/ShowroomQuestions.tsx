@@ -39,10 +39,7 @@ interface Asked {
 const list = (items: string[]) =>
   items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`;
 
-/**
- * Questions about a listing, answered only from its own data and always attributed. Nothing is
- * sent anywhere except an anonymous event with the topic and the answer's source.
- */
+// Answered only from the listing's own data; nothing is sent except an anonymous event with the topic and source.
 export function ShowroomQuestions({
   listing,
   returnPath,
@@ -176,7 +173,6 @@ function AnswerBlock({
   answer: ListingAnswer;
   listing: ShowroomListing;
   returnPath: string;
-  /** Two topics answered: name each one. */
   labelled: boolean;
 }) {
   const ask = answer.source === 'not_stated' || answer.gaps.length > 0;

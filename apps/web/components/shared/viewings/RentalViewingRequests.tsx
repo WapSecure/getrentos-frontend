@@ -43,11 +43,7 @@ const formatWhen = (iso?: string) =>
 // Every status filter and page, so a confirm or cancel refreshes all of them.
 const VIEWING_REQUESTS_ROOT = ['landlord', 'viewingRequests'] as const;
 
-/**
- * Renters' requests to view a property for rent. Shared by the landlord's lettings page and the
- * owner's viewings page: the backend lets any property controller (landlord, owner, manager)
- * confirm, decline, complete and host these.
- */
+// The backend lets any property controller (landlord, owner, manager) act on these.
 export function RentalViewingRequests({
   emptyDescription = 'Requests to view your properties will appear here.',
   initialStatus = 'all',

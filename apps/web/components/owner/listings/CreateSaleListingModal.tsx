@@ -44,7 +44,6 @@ interface CreateSaleListingModalProps {
     listing: Omit<SaleListing, 'id' | 'createdAt'>,
     publishNow: boolean
   ) => Promise<unknown>;
-  /** Opens with this property already chosen, e.g. from a land parcel's "Create sale listing". */
   initialPropertyId?: string;
 }
 

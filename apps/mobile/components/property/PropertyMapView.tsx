@@ -6,7 +6,6 @@ import { buildMapHtml, readBoundaryMessage, type PropertyMapViewProps } from './
 
 export type { PropertyMapMarker, PropertyMapViewProps } from './propertyMapHtml';
 
-// The part of the WebView handle this map uses.
 interface MapWebViewHandle {
   postMessage: (message: string) => void;
 }

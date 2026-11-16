@@ -1,5 +1,4 @@
 export type NudgeRequirement = 'identity' | 'licence';
-/** Where the person's own submission stands: none sent yet, being reviewed, or sent back. */
 export type NudgeState = 'missing' | 'pending' | 'rejected';
 
 export function identityNudgeCopy({

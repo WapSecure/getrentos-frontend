@@ -100,7 +100,7 @@ export function orderLine(c: Pick<PublicCollectionSummary, 'kind' | 'order'>): s
   return 'Listings match a saved search and are shown newest first.';
 }
 
-/** A lister's view of the Sureground collections showing their listings (decided 2026-11-12). */
+/** A lister's view of the Sureground collections showing their listings. */
 export interface ListingCollectionFeature {
   collectionId: string;
   collectionTitle: string;

@@ -33,7 +33,7 @@ export const adminLandProfessionalService = {
   reject: (id: string, note: string) => decision(`${base(id)}/reject`, note),
   suspend: (id: string, note: string) => decision(`${base(id)}/suspend`, note),
   reinstate: (id: string, note: string) => decision(`${base(id)}/reinstate`, note),
-  /** DIA-30: a valuer's signed report, recorded by staff on their behalf (neutral route; not land-only). */
+  /** A valuer's signed report, recorded by staff on their behalf (neutral route; not land-only). */
   recordValuation: (
     id: string,
     input: {

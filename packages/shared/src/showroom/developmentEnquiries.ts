@@ -1,9 +1,5 @@
-/**
- * Showroom M8d follow-up: "Ask the developer". A signed-in buyer's question about a live development is
- * recorded, and the developer's firm answers it. Sureground is not a party to the sale and takes no
- * payment for a development. Everything from the API is read through the mappers below, which drop
- * anything malformed.
- */
+// Sureground is not a party to a development sale and takes no payment for it. Everything from the
+// API goes through the mappers below, which drop anything malformed.
 
 export type DevelopmentEnquiryStatus = 'NEW' | 'ANSWERED' | 'CLOSED';
 
@@ -61,7 +57,6 @@ export interface DevelopmentEnquiryDevelopment {
   live: boolean;
 }
 
-/** A buyer's own question. */
 export interface BuyerDevelopmentEnquiry {
   id: string;
   development: DevelopmentEnquiryDevelopment;
@@ -191,7 +186,6 @@ export const buyerDevelopmentEnquiriesOf = (raw: unknown) => listOf(raw, buyerDe
 export const developerDevelopmentEnquiriesOf = (raw: unknown) =>
   listOf(raw, developerDevelopmentEnquiryOf);
 
-/** Why the form cannot be sent yet, or undefined when it can. */
 export function enquiryMessageProblem(message: string): string | undefined {
   const n = message.trim().length;
   if (n < DEVELOPMENT_ENQUIRY_LIMITS.messageMin)
@@ -201,7 +195,6 @@ export function enquiryMessageProblem(message: string): string | undefined {
   return undefined;
 }
 
-/** True while the buyer may ask this development another question. */
 export function canAskAgain(enquiries: Pick<BuyerDevelopmentEnquiry, 'status'>[]): boolean {
   return (
     enquiries.filter((e) => e.status === 'NEW').length <
@@ -209,7 +202,6 @@ export function canAskAgain(enquiries: Pick<BuyerDevelopmentEnquiry, 'status'>[]
   );
 }
 
-/** One page of the buyer's questions across all developments. */
 export interface BuyerDevelopmentEnquiryPage {
   items: BuyerDevelopmentEnquiry[];
   total: number;

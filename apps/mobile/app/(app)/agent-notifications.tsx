@@ -21,7 +21,6 @@ export default function AgentNotifications() {
     queryFn: agentApi.notifications,
   });
 
-  // Reading is instant; a refused change is rolled back with a toast.
   const readOne = useOptimisticMutation({
     mutationFn: (id: string) => agentApi.markNotificationRead(id),
     patches: (id) => [

@@ -13,8 +13,6 @@ import type {
 } from './types';
 import type { StatusTone } from '../utils/landTrust';
 
-// Investor labels for web and mobile. Users never see "escrow".
-
 export const INTENDED_USE_LABELS: Record<IntendedUse, string> = {
   HOME: 'A home for me or my family',
   RENTAL_INCOME: 'Rental income',
@@ -108,7 +106,6 @@ export const STATEMENT_PAYOUT_LABELS: Record<string, string> = {
   REJECTED: 'Payout not sent',
 };
 
-/** "SOME_NEW_STATUS" → "Some new status": the fallback for a status without a label. */
 export const humaniseStatus = (status: string): string => {
   const words = status.toLowerCase().replace(/_/g, ' ');
   return words.charAt(0).toUpperCase() + words.slice(1);
@@ -119,7 +116,7 @@ export const listLabels = <K extends string>(
   labels: Record<K, string>
 ): string => (values ?? []).map((value) => labels[value] ?? value).join(', ');
 
-/** Passport, address and bank statement checks. "Approved" by staff or Smile ID, never "verified property". */
+/** Says "Approved", never "verified property". */
 export const FOREIGN_CHECK_STATUS: Record<ForeignCheckState, { label: string; tone: StatusTone }> =
   {
     NOT_STARTED: { label: 'Not started', tone: 'neutral' },
@@ -129,7 +126,7 @@ export const FOREIGN_CHECK_STATUS: Record<ForeignCheckState, { label: string; to
     REJECTED: { label: 'Not approved', tone: 'danger' },
   };
 
-/** DIA-07: what can go with the bank statements. A gift or inheritance letter also needs the donor's ID. */
+/** A gift or inheritance letter also needs the donor's ID. */
 export const SOURCE_OF_FUNDS_SUPPORTING_LABELS: Record<SourceOfFundsSupportingKind, string> = {
   PAYSLIPS: 'Payslips',
   TAX_RETURN: 'Tax return',
@@ -142,7 +139,6 @@ export const SOURCE_OF_FUNDS_SUPPORTING_LABELS: Record<SourceOfFundsSupportingKi
 export const SOURCE_OF_FUNDS_WHY =
   'Nigerian and international anti-money-laundering rules require us to confirm where larger sums come from.';
 
-/** What to show before an offer or estate deposit that needs source of funds first; null when nothing stops it. */
 export const sourceOfFundsHoldMessage = (
   check: SourceOfFundsCheck | null | undefined
 ): string | null => {

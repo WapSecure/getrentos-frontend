@@ -22,11 +22,7 @@ export const UPLOAD_FALLBACK_ERROR =
 
 const isAbort = (error: unknown) => error instanceof Error && error.name === 'AbortError';
 
-/**
- * Uploads files one request each, at most `concurrency` at a time, with progress, cancel and retry per file.
- * A failure only stops its own file: the rest carry on. Only files in the queue have a state; a finished
- * upload leaves it and goes to `onSuccess`. Plain TypeScript so the rules can be tested without React.
- */
+/** A failure only stops its own file. Plain TypeScript so the rules can be tested without React. */
 export function createUploadQueue<F, R>({
   upload,
   onSuccess,
@@ -106,7 +102,6 @@ export function createUploadQueue<F, R>({
       });
       pump();
     },
-    /** Stops the file and forgets it. */
     cancel(id: string) {
       running.get(id)?.abort();
       running.delete(id);
@@ -115,7 +110,6 @@ export function createUploadQueue<F, R>({
       setState(id, null);
       pump();
     },
-    /** Sends a failed file again. */
     retry(id: string) {
       if (!files.has(id) || running.has(id) || waiting.includes(id)) return;
       waiting.push(id);
@@ -140,7 +134,6 @@ export function createUploadQueue<F, R>({
 
 export type UploadQueue<F, R> = ReturnType<typeof createUploadQueue<F, R>>;
 
-/** Files still queued or sending. */
 export const uploadsBusy = (states: Record<string, UploadState>) =>
   Object.values(states).some((s) => s.status !== 'failed');
 

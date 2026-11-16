@@ -14,10 +14,6 @@ export interface AttentionListItem extends AttentionItem {
 
 const SEVERITY_LABEL = { urgent: 'Urgent', soon: 'Due soon', info: 'For information' } as const;
 
-/**
- * "Needs your attention": one row per thing waiting, each with what it is, when it is due and a
- * single action. The same rows and order as the web list.
- */
 export function AttentionList({
   items,
   title = 'Needs your attention',

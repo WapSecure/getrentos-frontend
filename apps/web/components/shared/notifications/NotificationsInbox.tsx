@@ -21,7 +21,6 @@ interface NotificationsInboxProps {
   markAllRead: () => Promise<unknown>;
 }
 
-/** Every notification for a role, newest first, the full-page view behind the bell's "View all". */
 export function NotificationsInbox({
   portal,
   queryKey,

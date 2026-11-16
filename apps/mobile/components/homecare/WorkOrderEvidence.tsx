@@ -83,10 +83,7 @@ const viewerTimeZone = () => {
   }
 };
 
-/**
- * The job's record from problem to payment (DIA-22). Loads when opened, so the screen doesn't fetch
- * it until someone wants it.
- */
+/** Loads when opened, so the screen doesn't fetch the record until someone wants it. */
 export function WorkOrderEvidence({ w, canRate }: { w: WorkOrder; canRate: boolean }) {
   const { colors, spacing } = useTheme();
   const [open, setOpen] = useState(false);
@@ -207,7 +204,6 @@ function StageRow({
   );
 }
 
-/** What a document can be attached to on this stage: its quotes or its invoices. */
 function documentTargets(stage: EvidenceStage): { value: string; label: string }[] {
   if (stage.key === 'QUOTE') {
     return ((stage.items ?? []) as EvidenceQuote[]).map((q) => ({
@@ -224,7 +220,6 @@ function documentTargets(stage: EvidenceStage): { value: string; label: string }
   return [];
 }
 
-/** Owner or manager adds the paper behind a quote or an invoice, as on web. */
 function AttachDocumentForm({ workOrderId, stage }: { workOrderId: string; stage: EvidenceStage }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();

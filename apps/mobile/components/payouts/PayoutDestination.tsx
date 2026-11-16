@@ -35,10 +35,6 @@ export function foreignAccountLabel(account: ForeignBankAccount): string {
   return [account.bankName || country, number].filter(Boolean).join(' · ');
 }
 
-/**
- * Where statement payouts go, as on web: the Nigerian account, or an account abroad once a licensed
- * partner is live. Only owners have a preference; anyone else sees nothing. Changes go through step-up.
- */
 export function PayoutDestination() {
   const { spacing } = useTheme();
   const qc = useQueryClient();
@@ -111,7 +107,6 @@ export function PayoutDestination() {
     },
   });
 
-  // Not an owner (or not offered yet): nothing to choose.
   const hidden =
     preference.error instanceof ApiError && [403, 404].includes(preference.error.status);
   if (hidden || preference.isPending) return null;
@@ -275,7 +270,6 @@ function ForeignAccountForm({
     onSuccess: (account) => onAdded(account),
   });
 
-  // Digit-only fields use the numeric code input; the shared validator checks each scheme's rules.
   const digits = (field: ForeignAccountField, label: string, maxLength: number) => (
     <NumberField
       code

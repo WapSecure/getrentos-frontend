@@ -39,9 +39,8 @@ const FILTER_OF: Record<string, SearchFilterKey> = {
 };
 
 /**
- * Sends `search_submit` with the names of the filters in use, never their values, whenever the set of
- * filters changes. The view a page opens with is not counted, and neither is clearing every filter.
- * Takes the same state and defaults as `useSyncUrlState`.
+ * Sends `search_submit` with filter names, never values, when the set changes. The opening view and
+ * clearing every filter are not counted.
  */
 export function useTrackSearch(
   market: ShowroomEventMarket,

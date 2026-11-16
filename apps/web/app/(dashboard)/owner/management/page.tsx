@@ -2,7 +2,7 @@
 
 import { SuregroundManagedView } from '@/components/landlord/managed/SuregroundManagedView';
 
-/** An owner's own management agreements: the same view landlords use. No change-manager flow exists for owners yet. */
+/** The same view landlords use; owners have no change-manager flow yet. */
 export default function OwnerManagementPage() {
   return <SuregroundManagedView changeManagerHref={null} />;
 }

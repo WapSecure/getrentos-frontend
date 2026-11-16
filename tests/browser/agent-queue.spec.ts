@@ -4,7 +4,6 @@ import { fulfillSessionRefresh, isSessionRefresh } from './helpers/session';
 test.setTimeout(90_000);
 const textQueueKey = 'sureground.agent.offline-queue';
 
-// Plays the refresh cookie (see helpers/session): whose session /auth/refresh restores.
 const session = { userId: 'agent-queue-test', refreshes: 0 };
 
 async function mockApi(target: Page | BrowserContext, handler: (route: Route) => unknown) {
@@ -225,7 +224,6 @@ test('reconnect and manual retry share one upload', async ({ page }) => {
   expect(saved).toBe(1);
 });
 
-// Another agent signs in on this device: a new profile, and the refresh cookie is now theirs.
 async function switchAccount(page: Page, id: string) {
   session.userId = id;
   await page.evaluate((id) => {

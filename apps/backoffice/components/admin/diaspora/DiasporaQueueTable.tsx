@@ -120,7 +120,6 @@ export const DiasporaQueueTable = ({
       return next;
     });
 
-  /** Take when nobody has it yet; everything else sits in one overflow menu. */
   const itemActions = (item: DiasporaQueueItem) => {
     const mine = item.assignedTo?.id === currentUserId;
     return (

@@ -6,10 +6,6 @@ export const TAB_ICON_SIZE = 22;
 /** The blue pill behind the active tab's icon. 52 wide still fits five tabs on a 320pt phone. */
 export const TAB_PILL = { width: 52, height: 28 } as const;
 
-/**
- * One tab bar for every role: an elevated card bar with a soft lift off the canvas, the active
- * tab in Sureground blue on a tinted pill (see `tabIcon`), and the rest in muted ink.
- */
 export function premiumTabBarOptions(colors: Palette, bottomInset: number) {
   return {
     headerShown: false,
@@ -25,7 +21,6 @@ export function premiumTabBarOptions(colors: Palette, bottomInset: number) {
       paddingTop: 6,
       paddingBottom: Math.max(bottomInset, 8),
       paddingHorizontal: 4,
-      // A soft lift so the bar reads as a surface above the canvas rather than a ruled-off strip.
       ...shadows.sm,
       shadowOpacity: 0.06,
       shadowRadius: 16,

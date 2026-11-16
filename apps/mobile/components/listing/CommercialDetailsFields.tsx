@@ -70,10 +70,7 @@ function StatedChoice({
   );
 }
 
-/**
- * The commercial block on the landlord, owner and realtor listing forms, as on the web. Everything
- * is optional and is the lister's own statement; renters or buyers see it exactly as stated.
- */
+/** Everything is optional and is the lister's own statement; renters or buyers see it exactly as stated. */
 export function CommercialDetailsFields({
   value,
   onChange,
@@ -84,7 +81,6 @@ export function CommercialDetailsFields({
   onChange: (next: CommercialValues) => void;
   /** A sale talks about the price and buyers; a let about the rent and renters. */
   deal?: CommercialDeal;
-  /** The first problem from `commercialError`, shown under the fields. */
   error?: string | null;
 }) {
   const { spacing } = useTheme();

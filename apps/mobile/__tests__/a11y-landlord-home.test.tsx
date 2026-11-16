@@ -19,7 +19,6 @@ import {
 const noop = () => undefined;
 const root = () => screen.container as HostElement;
 
-// The landlord home's building blocks, with the landlord's own quick actions.
 function LandlordHome() {
   const [showMoney, setShowMoney] = useState(true);
   return (

@@ -169,10 +169,6 @@ const empty: ShowroomListing = {
 
 const FORBIDDEN = /\b(ai|assistant|smart|escrow)\b/i;
 
-// ---------------------------------------------------------------------------------------------
-// Matching
-// ---------------------------------------------------------------------------------------------
-
 const top = (q: string) => matchTopics(q)[0]?.topic;
 
 test('normalises punctuation and case, so C of O is found however it is written', () => {
@@ -234,10 +230,6 @@ test('ranking is deterministic and answers at most two topics', () => {
   // "How much" alone must not drag the price into a service charge question.
   assert.deepEqual(topicsToAnswer('How much is service charge?'), ['service_charge']);
 });
-
-// ---------------------------------------------------------------------------------------------
-// Answers: stated and not stated, topic by topic
-// ---------------------------------------------------------------------------------------------
 
 test('parking: amenities and commercial spaces are stated; nothing otherwise', () => {
   const a = answerFor(richRental, 'parking');
@@ -465,10 +457,6 @@ test('amenities: the list as written', () => {
   assert.match(answerFor(richRental, 'amenities').text, /"Comes with a BQ\."/);
   assert.equal(answerFor(bareRental, 'amenities').source, 'not_stated');
 });
-
-// ---------------------------------------------------------------------------------------------
-// Guarantees across every topic
-// ---------------------------------------------------------------------------------------------
 
 test('nothing is answered without data: an empty listing is not stated on every topic', () => {
   for (const topic of LISTING_QUESTION_TOPICS) {

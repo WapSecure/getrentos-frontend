@@ -7,10 +7,7 @@ import { SettingsGroup } from './SettingsList';
 
 const isCurrent = (a: Appointment) => a.status === 'INVITED' || a.status === 'ACTIVE';
 
-/**
- * Anyone a buyer appoints can be a renter, landlord or any other role, so every account screen
- * offers the desk once they have been asked. Shares the desk's own query, so it is fetched once.
- */
+/** Anyone a buyer appoints can hold any role, so every account screen offers the desk once asked. */
 export function RepresentingGroup() {
   const q = useQuery({
     queryKey: qk.buyerLand.representing,

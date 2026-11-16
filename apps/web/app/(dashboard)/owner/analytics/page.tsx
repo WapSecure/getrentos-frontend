@@ -35,7 +35,7 @@ const money = (amount: number | null | undefined) =>
 const percent = (value: number | null | undefined) =>
   typeof value === 'number' ? `${value.toFixed(1)}%` : '—';
 
-/** DIA-30: the figure only with its valuer and date; an old report is named as out of date, never counted. */
+/** The figure only with its valuer and date; an old report is named as out of date, never counted. */
 const ValuationCell = ({ metric: m }: { metric: InvestmentMetrics }) => {
   const v = m.valuation;
   if (!v) return <span className="text-muted-foreground">Not valued</span>;

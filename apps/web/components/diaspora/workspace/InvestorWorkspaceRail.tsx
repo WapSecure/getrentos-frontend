@@ -41,11 +41,10 @@ import { investorService } from '@/services/investorService';
 import type { ForeignIdentityStatus } from '@/types/foreignIdentity';
 import type { InvestorOverview, InvestorProfile } from '@/types/investor';
 
-/** "12 Nov 2026 · 10:00 Lagos · 09:00 London": business dates stay Lagos (D2). */
+/** "12 Nov 2026 · 10:00 Lagos · 09:00 London": business dates stay Lagos. */
 export const dualMoment = (iso: string, timeZone?: string | null) =>
   `${formatLagosDate(iso)} · ${formatDualTime(iso, timeZone)}`;
 
-/** Compact profile: who, where and what they are after; everything else behind a disclosure. */
 export const ProfileSummaryCard = ({
   summary,
   risk,
@@ -150,7 +149,6 @@ const STEP_STATE: Record<IdentityStep['state'], TimelineState> = {
   NOT_STARTED: 'pending',
 };
 
-/** Passport, address abroad and bank statement, with how far along they are and what is next. */
 export const IdentityProgressCard = ({
   status,
   href,

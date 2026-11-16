@@ -28,7 +28,7 @@ export {
   type SummaryFrequency,
 } from '@sureground/shared';
 
-// Investment analysis of an eligible listing (DIA-19), naira only.
+// Investment analysis of an eligible listing, naira only.
 
 export type FigureSource = 'VERIFIED' | 'THIRD_PARTY_ESTIMATE' | 'YOUR_ASSUMPTION';
 

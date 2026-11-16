@@ -510,8 +510,6 @@ export const adminPmKpiService = {
   },
 };
 
-/* ── Fee changes (BD-2) ───────────────────────────────────────────────────────────────────────── */
-
 export type ManagementFeeType = 'PERCENTAGE' | 'FLAT';
 export type FeeAmendmentSide = 'OWNER' | 'MANAGER' | 'SUREGROUND';
 export type FeeAmendmentStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'WITHDRAWN' | 'EXPIRED';

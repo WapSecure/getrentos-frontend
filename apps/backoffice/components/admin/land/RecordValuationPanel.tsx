@@ -26,10 +26,7 @@ import { LandCaseSection, PanelMessage } from './case/shared';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-/**
- * DIA-30: staff record an accredited valuer's signed report on their behalf. The API refuses anyone with an
- * interest in the property (valuer or staff) and anything without the report.
- */
+/** Staff file a valuer's signed report for them; the API refuses anyone with an interest in the property. */
 export function RecordValuationPanel({ professionalId }: { professionalId: string }) {
   const [property, setProperty] = useState('');
   const [amount, setAmount] = useState(0);

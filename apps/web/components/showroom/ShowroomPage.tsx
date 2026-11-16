@@ -189,7 +189,6 @@ export async function ShowroomPage({
                 )}
               </header>
 
-              {/* Commercial: the lease and the space come before the description. */}
               {listing.commercial && (
                 <ShowroomCommercial commercial={listing.commercial} market={market} />
               )}
@@ -239,7 +238,7 @@ export async function ShowroomPage({
 
               <ShowroomTrust listing={listing} />
 
-              {/* DIA-19: only where the checks make the listing investment eligible. */}
+              {/* Only where the checks make the listing investment eligible. */}
               {market !== 'rent' &&
                 listing.verificationSummary?.status === 'INVESTMENT_ELIGIBLE' && (
                   <ListingInvestmentAnalysis listingId={listing.id} />

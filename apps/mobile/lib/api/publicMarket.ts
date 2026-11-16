@@ -65,7 +65,6 @@ export interface MarketFact {
 
 export interface MarketDetail extends MarketCard {
   images: string[];
-  /** Photos, video and 360 tour from the shared showroom mappers, as on the web page. */
   media: MediaItem[];
   /** Rent, buy and land: price lines, stated total and fees not stated. Stays itemise their own. */
   costs?: ShowroomCosts;
@@ -165,7 +164,6 @@ export const MARKET_SORT_LABEL: Record<MarketSort, string> = {
   price_desc: 'Highest price',
 };
 
-/** The shared public shape plus the location and trust fields this app also reads. */
 interface RentalDto extends PublicRentalDto {
   trustChain?: TrustChainLike;
   addressHidden?: boolean;

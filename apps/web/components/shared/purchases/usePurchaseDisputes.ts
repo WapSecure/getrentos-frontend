@@ -13,26 +13,17 @@ import type {
 } from '@/types/transactionWorkspace';
 
 const ACTIVE_SALE_DISPUTE = new Set<SaleDispute['status']>(['OPEN', 'UNDER_REVIEW', 'ESCALATED']);
-/** The money statuses in which Sureground still holds a deposit that can be disputed. */
 const DISPUTABLE_MONEY = new Set(['PROTECTED', 'RELEASE_REQUESTED']);
 
 export interface PurchaseDisputes {
   /** Steps the buyer disputed with the seller (a step flag, not a case Sureground decides). */
   milestones: WorkspaceMilestone[];
-  /** Deposit disputes on this sale, decided by Sureground. */
   sale: SaleDispute[];
-  /** Land cases on this plot that the viewer raised or is party to (land resale only). */
   land: LandDispute[];
-  /** The buyer or seller can put the held deposit into dispute now. */
   canDisputeDeposit: boolean;
-  /** The buyer can open a land case on this plot. */
   canReportLand: boolean;
 }
 
-/**
- * Every dispute that touches one purchase, from the existing dispute routes: deposit disputes
- * (`/marketplace/disputes`), land cases (`/land/disputes`) and disputed steps on the workspace.
- */
 export const usePurchaseDisputes = (data: TransactionWorkspace | undefined): PurchaseDisputes => {
   const role = data?.viewer.role;
   const isParty = role === 'BUYER' || role === 'SELLER';

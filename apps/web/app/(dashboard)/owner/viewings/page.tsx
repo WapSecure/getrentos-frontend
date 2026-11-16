@@ -50,7 +50,6 @@ const badgeFor = (status: OwnerViewing['status']) =>
 
 const TAB_LABELS: Record<OwnerViewingTab, string> = { renters: 'Renters', buyers: 'Buyers' };
 
-/** Count of requests still waiting on the owner, shown on each tab. */
 function usePendingCounts() {
   const renters = useQuery({
     queryKey: [...landlordKeys.viewingRequests('requested'), { page: 1, pageSize: 1 }],

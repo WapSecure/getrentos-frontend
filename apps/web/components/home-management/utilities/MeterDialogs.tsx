@@ -291,7 +291,6 @@ export function MeterRevealButton({ meter }: { meter: ElectricityMeter }) {
   );
 }
 
-/** Log a day's grid supply and see the last 30 days against the band. */
 export function SupplyHoursDialog({
   meter,
   onOpenChange,

@@ -6,12 +6,10 @@ import { cn } from '@sureground/shared';
 interface ArrowLinkProps {
   href: string;
   children: ReactNode;
-  /** `brand` (default) is Sureground blue; `light` sits on a photo or a blue band. */
   tone?: 'brand' | 'light';
   className?: string;
 }
 
-/** Brik's text action: tracked capitals, an underline and a trailing arrow. */
 export const ArrowLink = ({ href, children, tone = 'brand', className }: ArrowLinkProps) => (
   <Link
     href={href}

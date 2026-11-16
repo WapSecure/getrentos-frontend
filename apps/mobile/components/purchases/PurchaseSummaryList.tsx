@@ -14,11 +14,7 @@ const TYPE_ICON: Record<string, SgIcon> = {
   BUNGALOW: Home,
 };
 
-/**
- * Purchases with their three separate statuses, how far along the usual path each is, and what
- * happens next. Rows open the buyer's or the representative's workspace. A released deposit never
- * reads as legal completion.
- */
+/** A released deposit never reads as legal completion. */
 export function PurchaseSummaryList({ purchases }: { purchases: readonly PurchaseSummary[] }) {
   const { colors, spacing, radius } = useTheme();
   return (

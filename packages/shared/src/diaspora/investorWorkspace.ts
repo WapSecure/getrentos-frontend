@@ -9,9 +9,7 @@ import type {
   PurchaseSummary,
 } from './types';
 
-// Pure helpers for the investor workspace (Diaspora Invest, DIA-30/31), for web and mobile.
-// Everything here is built from figures the API already returns: nothing is estimated, and
-// Sureground holds only deposits (D11).
+// Built only from figures the API returns: nothing is estimated, and Sureground holds only deposits.
 
 export type InvestorAttentionKind =
   | 'risk'
@@ -38,7 +36,6 @@ export interface DepositDue {
   depositAmount?: number;
 }
 
-/** A video tour, as far as the queue and the agenda need it. */
 export interface TourLike {
   id: string;
   status: string;
@@ -47,7 +44,6 @@ export interface TourLike {
   scheduledAt?: string | null;
 }
 
-/** A pre-purchase inspection, as far as the agenda needs it. */
 export interface InspectionLike {
   id: string;
   status: string;
@@ -132,7 +128,7 @@ const identityItems = (identity: ForeignIdentityStatus, href: string): InvestorA
   return items;
 };
 
-/** DIA-07: asked for once a purchase crosses the threshold; a row only while it is needed and not with our team. */
+/** A row only while it is needed and not already with our team. */
 const sourceOfFundsItems = (
   identity: ForeignIdentityStatus,
   href: string
@@ -173,10 +169,7 @@ const sourceOfFundsItems = (
   return [];
 };
 
-/**
- * "What needs me now": one row per thing waiting for the investor, most pressing first. A purchase
- * appears once, preferring the deposit row because it carries the amount.
- */
+/** Most pressing first; a purchase appears once, preferring the deposit row because it carries the amount. */
 export const buildAttentionQueue = (input: AttentionInput): InvestorAttentionItem[] => {
   const items: InvestorAttentionItem[] = [];
   const { links } = input;
@@ -316,17 +309,14 @@ const STAGE_PATH = [
   'HANDED_OVER',
 ] as const;
 
-/** Where a purchase is on its usual path ("3 of 8"), or null when paused, cancelled or unknown. */
 export const stageProgress = (code: string): { step: number; total: number } | null => {
   const index = (STAGE_PATH as readonly string[]).indexOf(code);
   return index < 0 ? null : { step: index + 1, total: STAGE_PATH.length };
 };
 
 const CLOSED_STAGES = new Set(['HANDED_OVER', 'CANCELLED']);
-// Sale statuses (EscrowStatus) that are over, and land purchase statuses that are over.
 const CLOSED_SALE = new Set(['RELEASED', 'REFUNDED']);
 const CLOSED_LAND = new Set(['COMPLETED', 'CANCELLED', 'REVOKED', 'DEFAULTED']);
-/** Payment Protection still holds the deposit in these sale statuses. */
 const HELD_SALE = [
   'FUNDS_HELD',
   'VERIFICATION_PENDING',
@@ -342,11 +332,9 @@ const openCount = (counts: InvestorStatusCounts | undefined, closed: Set<string>
   );
 
 export interface PortfolioFigures {
-  /** My own purchases still in progress (sales and land). */
   activePurchases: number | null;
   /** Purchases I follow as someone's representative. */
   representing: number;
-  /** Sales whose deposit Payment Protection still holds. */
   depositsHeldCount: number | null;
   /** Their total in whole naira, only when every held deposit's amount is known. */
   depositsHeldAmount: number | null;
@@ -363,7 +351,6 @@ export interface PortfolioFigures {
   occupancyRate: number | null;
 }
 
-/** A whole-naira string from the API as a number; null when absent or unreadable. */
 const nairaOrNull = (value: string | null | undefined): number | null => {
   if (value === null || value === undefined || value === '') return null;
   const n = Number(value);
@@ -376,10 +363,7 @@ export interface HeldDepositSource {
   depositAmount?: number;
 }
 
-/**
- * The portfolio row. Counts come from the overview; the naira total only from the buyer's own
- * transaction list, and only when that list is complete and every held deposit has an amount.
- */
+/** The naira total comes only from the buyer's own list, when complete and every held deposit has an amount. */
 export const portfolioFigures = (
   overview: InvestorOverview | undefined,
   transactions?: { items: HeldDepositSource[]; complete: boolean }
@@ -438,7 +422,6 @@ export interface IdentityStep {
   state: ForeignDocumentStatus['state'];
 }
 
-/** The three checks abroad, how many are approved, and the first one still to do. */
 export const identityProgress = (
   identity: ForeignIdentityStatus
 ): { steps: IdentityStep[]; approved: number; next: IdentityStep | null } => {
@@ -454,7 +437,6 @@ export const identityProgress = (
   };
 };
 
-/** "Good morning" in the investor's own zone; Lagos when the zone is unknown. */
 export const greetingFor = (now: Date, timeZone?: string | null): string => {
   let hour = now.getUTCHours() + 1; // Lagos is UTC+1 all year.
   if (timeZone) {
@@ -474,7 +456,6 @@ export const greetingFor = (now: Date, timeZone?: string | null): string => {
   return 'Good evening';
 };
 
-/** The trust chip by the greeting: how far the checks abroad have got. Null when not eligible. */
 export const identityHeadline = (
   status: ForeignIdentityStatus | null | undefined
 ): { label: string; tone: 'success' | 'danger' | 'info' | 'warning' | 'neutral' } | null => {

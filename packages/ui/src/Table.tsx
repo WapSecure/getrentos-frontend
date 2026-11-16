@@ -4,7 +4,6 @@ import { TableSkeleton } from './Skeleton';
 
 export interface Column<T> {
   key: string;
-  /** Usually text; a node allows a select-all checkbox. */
   header: ReactNode;
   render: (row: T, index: number) => ReactNode;
   className?: string;
@@ -21,11 +20,9 @@ interface DataTableProps<T> {
   getRowKey: (row: T, index: number) => string;
   onRowClick?: (row: T) => void;
   getRowClassName?: (row: T, index: number) => string | undefined;
-  /** Extra attributes for a row, such as aria-current on the next instalment. */
   getRowProps?: (row: T, index: number) => HTMLAttributes<HTMLTableRowElement>;
   /** Tints the row in brand blue and marks it `data-state="selected"`; pair with a checkbox that says so. */
   isRowSelected?: (row: T, index: number) => boolean;
-  /** A full-width panel under the row (payment history, line items); return null to show none. */
   renderExpanded?: (row: T, index: number) => ReactNode;
   /** A totals row aligned under its columns, keyed by column key. */
   totals?: Partial<Record<string, ReactNode>>;
@@ -40,10 +37,7 @@ interface DataTableProps<T> {
   minWidth?: string;
   /** `bare` sits inside a Card that already draws the frame. */
   variant?: 'card' | 'bare';
-  /**
-   * Caps the table's height (any CSS length) and scrolls its body inside the frame, so the
-   * header row stays in view on a long list. Left out, the table grows with its rows.
-   */
+  /** Scrolls the body inside the frame so the header stays in view; left out, the table grows with its rows. */
   maxHeight?: string;
 }
 

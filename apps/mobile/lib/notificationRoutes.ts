@@ -176,10 +176,7 @@ const ESTATE_FALLBACK: [prefix: string, route: string][] = [
   ['ESTATE_POLL_', '/(app)/estate-polls'],
 ];
 
-/**
- * Landlord screens the backend links anyone who controls a property to (landlord, owner, manager).
- * An owner reads them in their own portal. Mirrors PORTAL_LINKS in apps/web/lib/portalLinks.ts.
- */
+/** Screens the backend links any property controller to. Mirrors PORTAL_LINKS in apps/web/lib/portalLinks.ts. */
 const OWNER_LANDLORD_LINKS: Record<string, string> = {
   '/(app)/landlord-viewings': '/(app)/owner-viewings?tab=renters',
 };

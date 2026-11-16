@@ -30,12 +30,10 @@ const depositLabels: Record<BuyerEscrowStatus, string> = {
 
 interface BuyerEscrowTransactionCardProps {
   transaction: BuyerEscrowTransaction;
-  /** Shown while the deposit is owed; opens the payment dialog. */
   onPayDeposit?: () => void;
   delay?: number;
 }
 
-/** A purchase in the list; the whole card opens its workspace. */
 export const BuyerEscrowTransactionCard = ({
   transaction,
   onPayDeposit,

@@ -10,15 +10,11 @@ interface IndicativeAmountProps {
   naira: number | string | bigint;
   /** GBP, USD, EUR or CAD; NGN or anything else renders nothing. */
   currency: string;
-  /** `inline` shows the source line under the amount; `popover` puts it behind an info button for tight spaces such as cards. */
   labelDisplay?: 'inline' | 'popover';
   className?: string;
 }
 
-/**
- * "about £82,000" beside a naira price. Display only: naira stays the price and the payment
- * currency. Renders nothing when the rate is unavailable or over 24 hours old.
- */
+/** Display only: naira stays the price; renders nothing when the rate is unavailable or over 24 hours old. */
 export const IndicativeAmount = ({
   naira,
   currency,

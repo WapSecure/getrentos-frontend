@@ -194,7 +194,7 @@ export const landDiligenceBadges = withIcons(LAND_DILIGENCE_STATUS, {
   SUSPENDED: PauseCircle,
 });
 
-// A listing's verification summary (DIA-11). "Investment eligible" never stands alone: the card shows its limits.
+// "Investment eligible" never stands alone: the card shows its limits.
 export const verificationSummaryBadges = withIcons(VERIFICATION_SUMMARY_STATUS, {
   NOT_STARTED: CircleDashed,
   SUBMITTED: FileCheck,

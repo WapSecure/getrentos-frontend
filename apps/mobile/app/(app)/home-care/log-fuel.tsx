@@ -52,10 +52,7 @@ const PAID_BY: UtilityPaidBy[] = ['OWNER', 'MANAGER', 'TENANT', 'OTHER'];
 const isKind = (value: unknown): value is UtilityPurchaseKind =>
   typeof value === 'string' && (KINDS as string[]).includes(value);
 
-/**
- * Fuel, a token, a bill or a tanker, logged on site with a photo of the receipt.
- * A token is cut to its last 4 digits as it is typed, so the full token never leaves the phone.
- */
+/** A token is cut to its last 4 digits as it is typed, so the full token never leaves the phone. */
 export default function LogPurchase() {
   const params = useLocalSearchParams<{
     kind?: string;

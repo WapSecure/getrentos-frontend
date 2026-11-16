@@ -50,7 +50,6 @@ const SERVICE_TONE: Record<GeneratorServiceState, { label: string; tone: Tone }>
   NOT_SCHEDULED: { label: 'No interval set', tone: 'neutral' },
 };
 
-/** On-site capture first: the quick actions sit at the top, one tap from the camera. */
 export default function Utilities() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

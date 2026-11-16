@@ -1,6 +1,5 @@
-// Readable listing URLs: /buy/3-bedroom-duplex-in-lekki-<uuid>.
-// The trailing UUID is what identifies the listing; the words in front are
-// for people and search engines only, so an old or edited title still resolves.
+// The trailing UUID identifies the listing; the words in front are for people and search engines
+// only, so an old or edited title still resolves.
 
 const UUID_TAIL = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
 const MAX_SLUG = 60;

@@ -87,7 +87,6 @@ const SIGN_BATCH = 10;
 /** Wait before retry `attempt`: 1 s, 2 s, 4 s… capped at 8 s, so a weak network gets breathing room. */
 export const retryDelayMs = (attempt: number) => Math.min(8000, 1000 * 2 ** (attempt - 1));
 
-/** Part numbers 1..count that storage does not hold yet. */
 export function missingParts(count: number, uploaded: readonly number[]): number[] {
   const have = new Set(uploaded);
   return Array.from({ length: count }, (_, i) => i + 1).filter((n) => !have.has(n));
@@ -103,11 +102,7 @@ interface ResumeState {
 const resumeId = (basePath: string, file: PickedFile, size: number) =>
   `sg.video-upload:${basePath}:${file.uri}:${size}`;
 
-/**
- * Resumable upload in parts, read from disk one part at a time (never the whole video in memory). A dropped
- * connection loses one part; the next attempt with the same file asks which parts arrived and sends the rest.
- * Null when the API has no resumable uploads.
- */
+/** Read from disk one part at a time; a retry with the same file sends only the parts storage lacks. Null when the API has no resumable uploads. */
 async function uploadVideoInParts(
   basePath: string,
   file: PickedFile,
@@ -197,13 +192,7 @@ async function uploadVideoInParts(
   return result;
 }
 
-/**
- * Uploads a video straight to storage: big files in resumable parts (iOS and Android), others in one request:
- * the API signs a short-lived link for its own key, the file goes to storage, then the API checks it.
- * `basePath` is the owning route, e.g. `/landlord/properties`. Falls back to older routes when the API lacks them.
- * Progress is in whole percent, as for photos; 100 means sent, while storage and the API may still be checking it.
- * Cancelling rejects with an `AbortError`; a resumable upload keeps its sent parts for the next try.
- */
+/** 100 means sent while storage and the API may still be checking. Falls back to older routes when the API lacks them. */
 export async function uploadVideoDirect(
   basePath: string,
   file: PickedFile,

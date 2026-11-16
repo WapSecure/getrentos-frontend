@@ -35,7 +35,6 @@ export const DEVELOPMENTS_INTRO = {
   body: "Each one went live only after a Sureground staff member checked the developer's CAC registration, the directors' identities, the title to the site and the building plan approval.",
 } as const;
 
-/** The public off-plan developments, as on the web's /developments: listed only, paid to the developer. */
 export function DevelopmentsDirectory({ intro }: { intro: { title: string; body: string } }) {
   const { colors, spacing, radius } = useTheme();
   const query = useInfiniteQuery({

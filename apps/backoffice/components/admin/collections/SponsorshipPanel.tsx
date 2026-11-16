@@ -55,10 +55,7 @@ const SPONSOR_KINDS = [
   { value: 'person', label: 'Person' },
 ] as const;
 
-/**
- * Sponsored needs a record of who paid (decided 2026-11-12). Saving or removing it asks the staff member
- * to confirm it's them. The public page only ever shows the "Sponsored" label, never the amount.
- */
+/** Saving or removing asks for step-up; the public page shows only the "Sponsored" label, never the amount. */
 export function SponsorshipPanel({
   manager,
   collection,

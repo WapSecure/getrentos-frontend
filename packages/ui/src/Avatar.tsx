@@ -12,7 +12,6 @@ const TONES = {
 } as const;
 
 export interface AvatarProps {
-  /** The person's name; their initials are shown. */
   name: string;
   size?: keyof typeof SIZES;
   /** `neutral` for someone who is not the subject of the row, such as an assignee. */
@@ -20,7 +19,7 @@ export interface AvatarProps {
   className?: string;
 }
 
-/** A person's initials on a soft round tile. Decorative: show the name beside it. */
+/** Decorative: show the name beside it. */
 export function Avatar({ name, size = 'sm', tone = 'primary', className }: AvatarProps) {
   return (
     <span

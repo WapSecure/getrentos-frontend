@@ -35,10 +35,6 @@ import { withStepUpSummary } from '@/lib/stepUp';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 
-/**
- * BD-2 on a signed agreement, for the owner: the fee and any agreed change ahead, an open proposal to
- * answer, a new proposal (a firm's agreement only), and the history.
- */
 export function FeeChangePanel({ mandateId }: { mandateId: string }) {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();
