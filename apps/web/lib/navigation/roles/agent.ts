@@ -37,6 +37,7 @@ export const agentNavigation = defineRoleNavigation({
     {
       id: 'verifications',
       labelKey: 'sidebar.verifications',
+      phoneBarLabel: 'Checks',
       href: ROUTES.AGENT_VERIFICATIONS,
       icon: UserCheck,
     },

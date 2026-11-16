@@ -6,6 +6,7 @@ import { AccountMenu } from '@/components/shared/navigation/AccountMenu';
 
 interface LandlordProfileDropdownProps {
   user: { fullName: string; email: string; roles?: string[] } | null;
+  asManager?: boolean;
 }
 
 const LINKS = [
@@ -13,11 +14,14 @@ const LINKS = [
   { href: ROUTES.LANDLORD_HELP, label: 'Help centre', icon: HelpCircle },
 ];
 
-export const LandlordProfileDropdown = ({ user }: LandlordProfileDropdownProps) => {
-  // A firm's manager works in this same workspace for their clients.
-  const roleLabel =
-    user?.roles?.includes('PROPERTY_MANAGER') && !user.roles.includes('LANDLORD')
-      ? 'Property manager'
-      : 'Landlord';
-  return <AccountMenu user={user} roleId="landlord" roleLabel={roleLabel} links={LINKS} />;
-};
+export const LandlordProfileDropdown = ({
+  user,
+  asManager = false,
+}: LandlordProfileDropdownProps) => (
+  <AccountMenu
+    user={user}
+    roleId={asManager ? 'manager' : 'landlord'}
+    roleLabel={asManager ? 'Property manager' : 'Landlord'}
+    links={LINKS}
+  />
+);

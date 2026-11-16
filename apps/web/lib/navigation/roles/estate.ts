@@ -61,12 +61,14 @@ export const estateNavigation = defineRoleNavigation({
     {
       id: 'visitorPasses',
       label: 'Visitor passes',
+      phoneBarLabel: 'Passes',
       href: ROUTES.ESTATE_VISITOR_PASSES,
       icon: KeyRound,
     },
     {
       id: 'expected',
       label: 'Expected today',
+      phoneBarLabel: 'Expected',
       href: ROUTES.ESTATE_EXPECTED,
       icon: CalendarClock,
       plan: 'ENTERPRISE',

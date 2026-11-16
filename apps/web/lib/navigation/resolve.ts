@@ -28,6 +28,7 @@ export function resolveRoleNavigation(
     const locked = Boolean(item.plan && gates?.isLocked?.(item.plan));
     return {
       label: item.labelKey ? translate(item.labelKey) : item.label,
+      phoneBarLabel: item.phoneBarLabel,
       href: item.href,
       icon: item.icon,
       locked,

@@ -48,7 +48,7 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
           viewAllHref="/landlord/notifications"
         />
       }
-      profileMenu={<LandlordProfileDropdown user={user} />}
+      profileMenu={<LandlordProfileDropdown user={user} asManager={asManager} />}
       navigation={landlordNavigation}
       navigationGates={{ isLocked }}
     />

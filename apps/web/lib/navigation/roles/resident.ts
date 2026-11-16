@@ -25,6 +25,7 @@ export const residentNavigation = defineRoleNavigation({
     {
       id: 'announcements',
       label: 'Announcements',
+      phoneBarLabel: 'Notices',
       href: ROUTES.RESIDENT_ANNOUNCEMENTS,
       icon: Megaphone,
     },
@@ -32,6 +33,7 @@ export const residentNavigation = defineRoleNavigation({
     {
       id: 'visitorPasses',
       label: 'Visitor passes',
+      phoneBarLabel: 'Passes',
       href: ROUTES.RESIDENT_VISITOR_PASSES,
       icon: KeyRound,
     },
@@ -43,7 +45,13 @@ export const residentNavigation = defineRoleNavigation({
       icon: TriangleAlert,
     },
     { id: 'directory', label: 'Directory', href: ROUTES.RESIDENT_DIRECTORY, icon: Contact },
-    { id: 'maintenance', label: 'Maintenance', href: ROUTES.RESIDENT_MAINTENANCE, icon: Wrench },
+    {
+      id: 'maintenance',
+      label: 'Maintenance',
+      phoneBarLabel: 'Repairs',
+      href: ROUTES.RESIDENT_MAINTENANCE,
+      icon: Wrench,
+    },
     { id: 'polls', label: 'Polls', href: ROUTES.RESIDENT_POLLS, icon: Vote },
     { id: 'amenities', label: 'Amenities', href: ROUTES.RESIDENT_AMENITIES, icon: CalendarCheck },
     { id: 'committee', label: 'Committee', href: ROUTES.RESIDENT_COMMITTEE, icon: Landmark },
