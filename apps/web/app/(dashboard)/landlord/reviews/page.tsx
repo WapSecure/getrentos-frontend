@@ -8,6 +8,7 @@ import { getInitials, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService, type TenantReview } from '@/services/landlordService';
+import { TenantReviewsCard } from '@/components/shared/reviews/TenantReviewsCard';
 
 const PAGE_SIZE = 10;
 
@@ -98,6 +99,8 @@ export default function LandlordReviewsPage() {
           ))}
         </div>
       </div>
+
+      <TenantReviewsCard />
 
       {isLoading ? (
         <ListSkeleton rows={3} variant="cards" label="Loading reviews" />

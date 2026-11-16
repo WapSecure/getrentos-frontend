@@ -279,6 +279,28 @@ export interface LandlordReviewSummary {
   propertyReviewCount: number;
 }
 
+export interface PendingTenantReview {
+  leaseId: string;
+  tenantName: string;
+  propertyName: string;
+  leaseEnd: string;
+}
+
+export interface WrittenTenantReview {
+  id: string;
+  leaseId: string | null;
+  tenantName: string;
+  propertyName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
+export interface TenantReviewsResponse {
+  pending: PendingTenantReview[];
+  written: WrittenTenantReview[];
+}
+
 export interface LandlordMaintenanceSummary {
   openCount: number;
 }
@@ -1312,6 +1334,21 @@ export const landlordService = {
 
   async getReviewSummary(): Promise<ApiResponse<LandlordReviewSummary>> {
     return safeCall(() => authFetch('/landlord/reviews/summary'));
+  },
+
+  /** Ended tenancies to review and the tenant reviews already written (owners use the same endpoints). */
+  async getTenantReviews(): Promise<ApiResponse<TenantReviewsResponse>> {
+    return safeCall(() => authFetch('/landlord/reviews/tenants'));
+  },
+
+  async reviewTenant(input: {
+    leaseId: string;
+    rating: number;
+    comment?: string;
+  }): Promise<ApiResponse<WrittenTenantReview>> {
+    return safeCall(() =>
+      authFetch('/landlord/reviews/tenants', { method: 'POST', body: JSON.stringify(input) })
+    );
   },
 
   async listConversations(

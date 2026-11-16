@@ -1,5 +1,6 @@
 import {
   ShieldCheck,
+  Star,
   BedDouble,
   Calendar,
   CalendarCheck,
@@ -77,6 +78,7 @@ export const renterNavigation = defineRoleNavigation({
       href: ROUTES.RENTER_TRUST_SCORE,
       icon: ShieldCheck,
     },
+    { id: 'reviews', labelKey: 'sidebar.reviews', href: ROUTES.RENTER_REVIEWS, icon: Star },
     { id: 'referrals', labelKey: 'sidebar.referrals', href: ROUTES.RENTER_REFERRALS, icon: Gift },
     { id: 'settings', labelKey: 'sidebar.settings', href: ROUTES.RENTER_SETTINGS, icon: Settings },
     { id: 'help', labelKey: 'sidebar.help', href: ROUTES.RENTER_HELP, icon: HelpCircle },
@@ -86,7 +88,7 @@ export const renterNavigation = defineRoleNavigation({
     { label: 'Find a home', items: ['discover', 'saved', 'bookings', 'applications', 'viewings'] },
     { label: 'Your tenancy', items: ['home', 'payments', 'maintenance', 'roommates'] },
     { label: 'Communication', items: ['messages', 'calendar'] },
-    { label: 'Trust and support', items: ['trust', 'referrals', 'settings', 'help'] },
+    { label: 'Trust and support', items: ['trust', 'reviews', 'referrals', 'settings', 'help'] },
   ],
   primary: ['dashboard', 'discover', 'home', 'payments', 'maintenance', 'messages'],
   utility: ['settings', 'help'],

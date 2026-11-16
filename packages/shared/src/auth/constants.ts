@@ -285,6 +285,7 @@ export const ROUTES = {
   RENTER_LEGAL_RESOURCES: '/renter/legal-resources',
   RENTER_BOOKINGS: '/renter/bookings',
   RENTER_REFERRALS: '/renter/referrals',
+  RENTER_REVIEWS: '/renter/reviews',
 
   LANDLORD_PROPERTIES: '/landlord/properties',
   LANDLORD_UNITS: '/landlord/units',

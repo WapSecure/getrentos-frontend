@@ -8,6 +8,7 @@ import { getInitials, formatDate } from '@/lib/format';
 import { ownerService, type OwnerReview } from '@/services/ownerService';
 import { ownerKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
+import { TenantReviewsCard } from '@/components/shared/reviews/TenantReviewsCard';
 
 const StarRow = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
@@ -97,6 +98,8 @@ export default function OwnerReviewsPage() {
           )}
         </div>
       </div>
+
+      <TenantReviewsCard />
 
       {isLoading ? (
         <ListSkeleton rows={3} variant="cards" label="Loading reviews" />

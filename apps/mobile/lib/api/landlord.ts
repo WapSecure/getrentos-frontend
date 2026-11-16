@@ -613,6 +613,28 @@ export interface LandlordReviewSummary {
   propertyReviewCount: number;
 }
 
+export interface PendingTenantReview {
+  leaseId: string;
+  tenantName: string;
+  propertyName: string;
+  leaseEnd: string;
+}
+
+export interface WrittenTenantReview {
+  id: string;
+  leaseId: string | null;
+  tenantName: string;
+  propertyName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
+export interface TenantReviews {
+  pending: PendingTenantReview[];
+  written: WrittenTenantReview[];
+}
+
 export interface LandlordReview {
   id: string;
   tenantName: string;
@@ -1050,6 +1072,10 @@ export const landlordApi = {
     apiFetch<MicrositeSettings>('/landlord/microsite', { method: 'PATCH', body: patch }),
 
   reviewsSummary: () => apiFetch<LandlordReviewSummary>('/landlord/reviews/summary'),
+  /** Ended tenancies to review and tenant reviews already written (owners use the same endpoints). */
+  tenantReviews: () => apiFetch<TenantReviews>('/landlord/reviews/tenants'),
+  reviewTenant: (input: { leaseId: string; rating: number; comment?: string }) =>
+    apiFetch<WrittenTenantReview>('/landlord/reviews/tenants', { method: 'POST', body: input }),
 
   reviews: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<LandlordReview>>(`/landlord/reviews?page=${page}&pageSize=${pageSize}`),

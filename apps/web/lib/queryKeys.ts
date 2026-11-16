@@ -72,6 +72,7 @@ export const landlordKeys = {
   micrositeSettings: ['landlord', 'microsite'] as const,
   reviews: ['landlord', 'reviews'] as const,
   reviewSummary: ['landlord', 'reviews', 'summary'] as const,
+  tenantReviews: ['landlord', 'reviews', 'tenants'] as const,
   conversations: ['landlord', 'conversations'] as const,
   conversationMessages: (conversationId: string) =>
     ['landlord', 'conversations', conversationId, 'messages'] as const,
@@ -155,6 +156,7 @@ export const renterKeys = {
   notificationPreferences: ['renter', 'notificationPreferences'] as const,
   reviewsPending: ['renter', 'reviews', 'pending'] as const,
   reviewsSubmitted: ['renter', 'reviews', 'submitted'] as const,
+  reviewsReceived: ['renter', 'reviews', 'received'] as const,
   recentlyViewed: ['renter', 'recentlyViewed'] as const,
   wishlists: ['renter', 'wishlists'] as const,
   recommendations: ['renter', 'recommendations'] as const,

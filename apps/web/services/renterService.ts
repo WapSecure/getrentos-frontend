@@ -812,6 +812,15 @@ export const renterService = {
     );
   },
 
+  /** Reviews written about this renter by their past landlords. */
+  async getReceivedReviews(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<ReviewItem>>> {
+    return safeCall(() =>
+      authFetch<Paginated<ReviewItem>>(`/renter/reviews${toQuery(params)}`)
+    );
+  },
+
   async submitReview(data: {
     leaseId: string;
     category: 'LANDLORD' | 'PROPERTY';
