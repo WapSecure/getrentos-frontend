@@ -101,12 +101,11 @@ export default function AgentClients() {
                     tone={STATUS_TONE[item.status]}
                   />
                 </View>
-                {item.properties.length > 0 ? (
-                  <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-                    {item.properties.length}{' '}
-                    {item.properties.length === 1 ? 'property' : 'properties'} assigned
-                  </Text>
-                ) : null}
+                <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
+                  {item.properties.length === 0
+                    ? 'No properties assigned yet'
+                    : `${item.properties.length} ${item.properties.length === 1 ? 'property' : 'properties'} assigned`}
+                </Text>
               </Card>
             </View>
           )}
