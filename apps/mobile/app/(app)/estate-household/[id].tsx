@@ -213,7 +213,9 @@ export default function EstateHousehold() {
                     )}
                     <Text variant="bodyStrong" style={{ flex: 1 }}>
                       {h.residentLinked
-                        ? 'Sureground account linked'
+                        ? h.residentAccountName
+                          ? `Linked to ${h.residentAccountName}`
+                          : 'Sureground account linked'
                         : 'No Sureground account linked'}
                     </Text>
                   </View>
@@ -230,7 +232,7 @@ export default function EstateHousehold() {
                       onPress={() =>
                         Alert.alert(
                           'Unlink this account?',
-                          `${h.residentName} will stop seeing this home’s dues, passes and announcements.`,
+                          `${h.residentAccountName ?? h.residentName} will stop seeing this home’s dues, passes and announcements.`,
                           [
                             { text: 'Cancel', style: 'cancel' },
                             {
