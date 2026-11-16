@@ -56,7 +56,9 @@ export const GovernanceRecordRow = ({
                 <Badge variant={record.status === 'approved' ? 'success' : 'warning'}>
                   {record.status === 'approved'
                     ? 'Fully signed'
-                    : `${record.signatureProgress.signed} of ${record.signatureProgress.total} signed`}
+                    : record.signatureProgress.total === 0
+                      ? 'Needs a committee to sign'
+                      : `${record.signatureProgress.signed} of ${record.signatureProgress.total} signed`}
                 </Badge>
               </button>
             )}
