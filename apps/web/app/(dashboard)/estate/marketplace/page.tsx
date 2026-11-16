@@ -267,7 +267,7 @@ const NewListingPanel = ({
       <div className="border-t border-border pt-4">
         <p className="text-sm text-muted-foreground">
           This estate has no property it is cleared to market yet. Add a property and wait for the
-          owner to approve: then listings can be published here.
+          owner to approve, then listings can be published here.
         </p>
       </div>
     );

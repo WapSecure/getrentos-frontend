@@ -119,9 +119,6 @@ export default function LandRepresented() {
                   variant="callout"
                   color={ws.nextAction.waitingForYou ? 'foreground' : 'mutedForeground'}
                 >
-                  <Text variant="callout" color="mutedForeground">
-                    {ws.nextAction.waitingForYou ? 'Waiting for you: ' : 'Next: '}
-                  </Text>
                   {ws.nextAction.label}
                 </Text>
               ) : null}

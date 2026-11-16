@@ -72,7 +72,7 @@ function AddPaymentMethodForm({ onClose }: { onClose: () => void }) {
   return (
     <View style={{ gap: spacing.lg }}>
       <Text variant="body" color="mutedForeground">
-        We never store full card numbers: only the last four digits, so you can tell your methods
+        We never store full card numbers, only the last four digits, so you can tell your methods
         apart at checkout.
       </Text>
 

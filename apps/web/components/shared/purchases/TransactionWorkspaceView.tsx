@@ -413,9 +413,6 @@ export const TransactionWorkspaceView = ({
                       : 'text-sm text-muted-foreground'
                   }
                 >
-                  <span className="text-muted-foreground">
-                    {data.nextAction.waitingForYou ? 'Waiting for you: ' : 'Next: '}
-                  </span>
                   {data.nextAction.label}
                 </p>
                 {target ? (

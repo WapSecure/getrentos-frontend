@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
-import { cn } from '@sureground/shared';
+import { cn, sanitisePhoneInput } from '@sureground/shared';
 import { controlShell, innerInputClass, type ControlSize } from './controlStyles';
 import { useFieldControl } from './fieldContext';
 
@@ -29,6 +29,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       required,
       'aria-describedby': describedBy,
       'aria-invalid': ariaInvalid,
+      onChange,
       ...props
     },
     ref
@@ -72,7 +73,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           required={required}
           {...field.ariaProps}
           className={cn(innerInputClass, inputClassName)}
+          inputMode={props.type === 'tel' ? 'tel' : undefined}
           {...props}
+          onChange={(e) => {
+            if (props.type === 'tel') {
+              const clean = sanitisePhoneInput(e.target.value);
+              if (clean !== e.target.value) e.target.value = clean;
+            }
+            onChange?.(e);
+          }}
         />
         {trailingIcon && <span className="shrink-0 text-muted-foreground">{trailingIcon}</span>}
       </span>

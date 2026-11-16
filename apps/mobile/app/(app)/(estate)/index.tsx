@@ -115,7 +115,7 @@ export default function EstateHome() {
     <DashboardHeader
       eyebrow="Estate office"
       title={estate?.name ?? 'Estate management'}
-      roleBadge="EM"
+      roleBadge="Estate manager"
       subtitle={
         estate
           ? `${formatLocation(estate.city, estate.state)} · ${estate.householdCount} ${estate.householdCount === 1 ? 'household' : 'households'}`

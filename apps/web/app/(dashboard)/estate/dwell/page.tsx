@@ -93,8 +93,8 @@ export default function EstateDwellPage() {
         <section className="mb-10">
           <h2 className="text-lg font-semibold text-foreground mb-1">Still inside</h2>
           <p className="text-sm text-muted-foreground mb-4">
-            The gate console knows who went in. This is the other half of the same question: who
-            never came back out: and it is where a visit that has outstayed the estate&rsquo;s own
+            The gate console knows who went in. This is the other half of the same question (who
+            never came back out), and it is where a visit that has outstayed the estate&rsquo;s own
             authorisation shows up.
           </p>
           <OnSiteBoard board={boardQuery.data} isLoading={boardQuery.isLoading} />

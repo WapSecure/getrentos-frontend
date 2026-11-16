@@ -75,7 +75,7 @@ export function ProPriceCard({
       <p className="mt-1 text-xs text-muted-foreground">
         {pricing.currency}
         {pricing.vatInclusive
-          ? ' · VAT included: no surprises at checkout'
+          ? ' · VAT included, so no surprises at checkout'
           : ' · VAT added at checkout'}
       </p>
 

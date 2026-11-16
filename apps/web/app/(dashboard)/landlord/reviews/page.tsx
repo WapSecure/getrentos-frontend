@@ -63,42 +63,46 @@ export default function LandlordReviewsPage() {
         description="See how tenants rate their experience with you"
       />
 
-      <div className="grid lg:grid-cols-3 gap-6 mb-6">
-        <div className="bg-card rounded-2xl border border-border p-6 flex flex-col items-center justify-center text-center">
-          <p className="text-4xl font-bold text-foreground">{overallRating.toFixed(1)}</p>
-          <StarRow rating={Math.round(overallRating)} />
-          <p className="text-xs text-muted-foreground mt-2">
-            Based on {summary?.reviewCount ?? total} review
-            {summary?.reviewCount === 1 ? '' : 's'}
-          </p>
-        </div>
-
-        <div className="lg:col-span-2 bg-card rounded-2xl border border-border p-6 space-y-4">
-          {categories.length === 0 && (
-            <p className="text-sm text-muted-foreground">
-              When tenants rate you or your homes, the scores show here.
+      {(summary?.reviewCount ?? total) > 0 && (
+        <div className="grid lg:grid-cols-3 gap-6 mb-6">
+          <div className="bg-card rounded-2xl border border-border p-6 flex flex-col items-center justify-center text-center">
+            <p className="text-4xl font-bold text-foreground">{overallRating.toFixed(1)}</p>
+            <StarRow rating={Math.round(overallRating)} />
+            <p className="text-xs text-muted-foreground mt-2">
+              Based on {summary?.reviewCount ?? total} review
+              {summary?.reviewCount === 1 ? '' : 's'}
             </p>
-          )}
-          {categories.map((category) => (
-            <div key={category.label} className="flex items-center gap-3">
-              <category.icon className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span className="text-sm text-muted-foreground w-36 shrink-0">{category.label}</span>
-              <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-primary"
-                  style={{ width: `${(category.value / 5) * 100}%` }}
-                />
+          </div>
+
+          <div className="lg:col-span-2 bg-card rounded-2xl border border-border p-6 space-y-4">
+            {categories.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                When tenants rate you or your homes, the scores show here.
+              </p>
+            )}
+            {categories.map((category) => (
+              <div key={category.label} className="flex items-center gap-3">
+                <category.icon className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-sm text-muted-foreground w-36 shrink-0">
+                  {category.label}
+                </span>
+                <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-primary"
+                    style={{ width: `${(category.value / 5) * 100}%` }}
+                  />
+                </div>
+                <span className="text-sm font-medium text-foreground w-8 text-right">
+                  {category.value.toFixed(1)}
+                </span>
+                <span className="text-xs text-muted-foreground w-16 text-right shrink-0">
+                  {category.count} {category.count === 1 ? 'rating' : 'ratings'}
+                </span>
               </div>
-              <span className="text-sm font-medium text-foreground w-8 text-right">
-                {category.value.toFixed(1)}
-              </span>
-              <span className="text-xs text-muted-foreground w-16 text-right shrink-0">
-                {category.count} {category.count === 1 ? 'rating' : 'ratings'}
-              </span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <TenantReviewsCard />
 

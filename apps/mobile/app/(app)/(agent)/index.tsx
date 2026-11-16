@@ -68,7 +68,7 @@ export default function AgentHome() {
     <DashboardHeader
       eyebrow={dashboardGreeting()}
       title={firstName(profile?.legalName)}
-      roleBadge="AG"
+      roleBadge="Field agent"
       subtitle="Your tasks, clients and field work"
       accessory={
         <View style={{ flexDirection: 'row', gap: 4 }}>

@@ -172,7 +172,7 @@ export default function MessageTools() {
                   icon: <MessageSquareText size={30} color={colors.mutedForeground} />,
                   title: 'No templates yet',
                   description:
-                    'Save replies you send often: viewing requests, document follow-ups: and reuse them in one tap.',
+                    'Save replies you send often, such as viewing requests and document follow-ups, and reuse them in one tap.',
                 }
               : tab === 'quick-replies'
                 ? {

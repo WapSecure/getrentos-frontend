@@ -102,7 +102,7 @@ export const OnSiteBoard = ({ board, isLoading }: OnSiteBoardProps) => {
 
       <p className="text-xs text-muted-foreground">
         Counted at {new Date(board.asOf).toLocaleString()}. A visit leaves this board when the gate
-        logs the exit: so if somebody has left and is still listed, what is missing is the exit, not
+        logs the exit, so if somebody has left and is still listed, what is missing is the exit, not
         the person.
       </p>
     </div>

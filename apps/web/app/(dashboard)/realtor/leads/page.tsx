@@ -181,9 +181,9 @@ export default function RealtorLeadsPage() {
         eyebrow="Clients"
         title="Leads"
         description={
-          <>
-            {total} lead{total === 1 ? '' : 's'} across your listings
-          </>
+          data
+            ? `${total} lead${total === 1 ? '' : 's'} across your listings`
+            : 'Leads across your listings'
         }
         actions={
           <Button icon={<Plus className="h-4 w-4" />} onClick={() => setIsCreateOpen(true)}>

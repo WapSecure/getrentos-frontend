@@ -206,7 +206,7 @@ export default function RenterHome() {
       <DashboardHeader
         eyebrow={dashboardGreeting()}
         title={firstName(profile?.legalName)}
-        roleBadge="RT"
+        roleBadge="Renter"
         subtitle="Your home search, applications and rent"
         accessory={
           <View style={{ flexDirection: 'row', gap: 4 }}>

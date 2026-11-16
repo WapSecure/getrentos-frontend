@@ -4,7 +4,7 @@ describe('identity nudge copy', () => {
   it('names what verification unlocks when there is no deadline', () => {
     expect(identityNudgeCopy({ unlocks: 'publishing listings' })).toEqual({
       title: 'Verify your identity',
-      detail: 'Unlocks publishing listings: takes two minutes',
+      detail: 'Unlocks publishing listings. Takes two minutes',
       accessibilityLabel: 'Verify your identity. Unlocks publishing listings.',
     });
   });

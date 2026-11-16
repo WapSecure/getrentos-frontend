@@ -41,6 +41,11 @@ export function toE164Phone(raw: string | null | undefined): string | null {
   return national && NG_NATIONAL_RE.test(national) ? `+234${national}` : null;
 }
 
+/** Keeps only what `toE164Phone` accepts while someone types: digits, spaces, ( ) . - and one leading +. */
+export function sanitisePhoneInput(raw: string): string {
+  return raw.replace(/[^\d\s().+-]/g, '').replace(/(?!^)\+/g, '');
+}
+
 /**
  * A phone number laid out for reading: Nigerian numbers as "+234 803 555 0143". Shows the whole
  * number, so use it only for the person's own number; anything else comes back as given.

@@ -100,9 +100,9 @@ export default function RealtorClientsPage() {
         eyebrow="Clients"
         title="Clients"
         description={
-          <>
-            {total} client{total === 1 ? '' : 's'} you represent
-          </>
+          data
+            ? `${total} client${total === 1 ? '' : 's'} you represent`
+            : 'Clients you represent'
         }
         actions={
           <Button

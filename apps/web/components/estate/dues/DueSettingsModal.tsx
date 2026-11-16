@@ -66,7 +66,7 @@ export const DueSettingsModal = ({
             htmlFor="graceDays"
             hint={
               graceDays === 0
-                ? 'A due is flagged the moment its date passes: no grace at all.'
+                ? 'A due is flagged the moment its date passes, with no grace period.'
                 : `A due may run ${graceDays} day${graceDays === 1 ? '' : 's'} past its date before it is flagged overdue and the late fee applies.`
             }
             error={

@@ -6,6 +6,7 @@ import {
   isNoAccountMessage,
   personContactLabel,
   readContactInput,
+  sanitisePhoneInput,
   signupInviteMessage,
   toE164Phone,
   whatsappShareUrl,
@@ -94,4 +95,11 @@ test('lays out a Nigerian number for reading and leaves anything else as given',
   assert.equal(formatPhoneForDisplay('+447700900123'), '+447700900123');
   assert.equal(formatPhoneForDisplay('not a number'), 'not a number');
   assert.equal(formatPhoneForDisplay(null), '');
+});
+
+test('sanitisePhoneInput drops letters and stray plus signs but keeps spacing', () => {
+  assert.equal(sanitisePhoneInput('0803abc 123-4567'), '0803 123-4567');
+  assert.equal(sanitisePhoneInput('+234 (803) 555.0143'), '+234 (803) 555.0143');
+  assert.equal(sanitisePhoneInput('80+3+'), '803');
+  assert.equal(sanitisePhoneInput('call me'), ' ');
 });
