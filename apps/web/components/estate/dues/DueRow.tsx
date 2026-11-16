@@ -19,7 +19,7 @@ const categoryLabels: Record<Due['category'], string> = {
   levy: 'Levy',
 };
 
-const formatCurrency = (amount: number) =>
+export const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-NG', {
     style: 'currency',
     currency: 'NGN',

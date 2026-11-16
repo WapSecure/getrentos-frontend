@@ -8,6 +8,7 @@ import { ReceiptText, Plus, Settings } from '@sureground/icons';
 import {
   Button,
   CardSkeleton,
+  ConfirmDialog,
   EmptyState,
   ListSkeleton,
   Pagination,
@@ -20,10 +21,10 @@ import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { CreateDuesModal } from '@/components/estate/dues/CreateDuesModal';
-import { DueRow } from '@/components/estate/dues/DueRow';
+import { DueRow, formatCurrency } from '@/components/estate/dues/DueRow';
 import { DueSettingsModal } from '@/components/estate/dues/DueSettingsModal';
 import { CollectionPlanPanel } from '@/components/shared/collections/CollectionPlanPanel';
-import type { DueStatus } from '@/types/estate';
+import type { Due, DueStatus } from '@/types/estate';
 
 const statusFilters: { value: DueStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -106,11 +107,13 @@ export default function EstateDuesPage() {
     },
   });
 
+  const [confirmingPaid, setConfirmingPaid] = useState<Due | null>(null);
   const markPaid = useMutation({
     mutationFn: (dueId: string) => unwrap(estateService.markDuePaid(estate!.id, dueId)),
     onSuccess: () => {
       invalidateDues();
       setPage(1);
+      setConfirmingPaid(null);
     },
   });
 
@@ -212,7 +215,7 @@ export default function EstateDuesPage() {
             <DueRow
               key={due.id}
               due={due}
-              onMarkPaid={() => markPaid.mutate(due.id)}
+              onMarkPaid={() => setConfirmingPaid(due)}
               isMarkingPaid={markPaid.isPending}
             />
           ))}
@@ -249,6 +252,28 @@ export default function EstateDuesPage() {
         onClose={() => setIsSettingsOpen(false)}
         onSubmit={(data) => updateDueSettings.mutate(data)}
         isSubmitting={updateDueSettings.isPending}
+      />
+
+      <ConfirmDialog
+        open={confirmingPaid !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmingPaid(null);
+        }}
+        title={
+          confirmingPaid?.status === 'processing'
+            ? 'They started paying online'
+            : 'Record this payment?'
+        }
+        description={
+          confirmingPaid
+            ? confirmingPaid.status === 'processing'
+              ? `${confirmingPaid.residentName} opened an online payment for this due. Only mark it paid if you have confirmed they paid you another way, or they could be charged twice.`
+              : `${formatCurrency(confirmingPaid.amount)} from ${confirmingPaid.residentName} for ${confirmingPaid.unitLabel}. Use this for cash or a bank transfer. It can't be undone here.`
+            : ''
+        }
+        confirmLabel={confirmingPaid?.status === 'processing' ? 'Mark paid anyway' : 'Mark paid'}
+        onConfirm={() => confirmingPaid && markPaid.mutate(confirmingPaid.id)}
+        isLoading={markPaid.isPending}
       />
     </>
   );
