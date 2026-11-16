@@ -262,6 +262,8 @@ export interface VisitorPass {
   checkedOutAt?: string;
   respondedAt?: string;
   denialReason?: string;
+  gateName?: string;
+  exitGateName?: string;
   /**
    * Only on a write that screened somebody at a gate and matched without refusing; absent on passes
    * read from records.

@@ -37,3 +37,29 @@ test('expired, refused and revoked passes', () => {
   );
   assert.equal(passTimeline({ ...base, status: 'revoked' }, fmt, time), null);
 });
+
+test('names the gates when the guard chose them', () => {
+  assert.equal(
+    passTimeline(
+      {
+        ...base,
+        status: 'checked_out',
+        checkedInAt: 'in',
+        checkedOutAt: 'out',
+        gateName: 'Main gate',
+        exitGateName: 'Back gate',
+      },
+      fmt,
+      time
+    ),
+    'In D(in) at Main gate · out T(out) at Back gate'
+  );
+  assert.equal(
+    passTimeline(
+      { ...base, status: 'checked_in', checkedInAt: 'in', gateName: 'Main gate' },
+      fmt,
+      time
+    ),
+    'In since D(in) at Main gate'
+  );
+});
