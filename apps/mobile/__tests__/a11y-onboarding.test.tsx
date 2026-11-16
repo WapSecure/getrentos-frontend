@@ -39,4 +39,12 @@ describe('onboarding slides', () => {
     expect(screen.getByRole('button', { name: 'I already have an account' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Skip' })).toBeNull();
   });
+
+  it('Skip goes straight to the sign-up and sign-in actions', async () => {
+    await renderWithTheme(<Onboarding />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Skip' }));
+
+    expect(screen.getByRole('button', { name: 'Create your account' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'I already have an account' })).toBeTruthy();
+  });
 });

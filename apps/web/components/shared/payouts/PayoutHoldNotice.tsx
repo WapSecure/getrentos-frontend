@@ -1,6 +1,7 @@
 'use client';
 
 import { Clock } from '@sureground/icons';
+import { formatClock } from '@sureground/shared';
 
 // The backend refuses payouts to a recently changed account until `holdUntil`; saying so lets someone who didn't make the change act.
 export function PayoutHoldNotice({ holdUntil }: { holdUntil?: string | null }) {
@@ -11,14 +12,8 @@ export function PayoutHoldNotice({ holdUntil }: { holdUntil?: string | null }) {
       <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
       <span>
         This account was changed recently. To protect you, payouts to it start{' '}
-        {new Date(holdUntil).toLocaleString('en-NG', {
-          day: 'numeric',
-          month: 'short',
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true,
-        })}
-        . If you didn’t make this change, contact Sureground support now.
+        {formatClock(new Date(holdUntil), { day: 'numeric', month: 'short', minute: '2-digit' })}.
+        If you didn’t make this change, contact Sureground support now.
       </span>
     </p>
   );

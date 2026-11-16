@@ -9,6 +9,7 @@ import {
 
 jest.mock('expo-router', () => ({
   router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => false },
+  useLocalSearchParams: () => ({}),
 }));
 jest.mock('@/lib/auth/AuthProvider', () => ({
   useAuth: () => ({
@@ -52,10 +53,10 @@ describe('sign-in form', () => {
       ['tab', 'Password, 1 of 2'],
       ['tab', 'Magic link, 2 of 2'],
       ['button', 'Show password'],
-      ['checkbox', 'Remember me'],
+      ['checkbox', 'Remember my email'],
       ['button', 'Forgot password?'],
       ['button', 'Continue with Google'],
-      ['link', 'Terms'],
+      ['link', 'Terms of Service'],
       ['link', 'Privacy Policy'],
       ['button', 'Sign in'],
       ['button', 'Create an account'],

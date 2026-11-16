@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { type TextInputInstance, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -21,7 +21,6 @@ import {
 import { ApiError, errorMessage } from '@/lib/api/client';
 import { authApi } from '@/lib/api/auth';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { OAuthCancelled } from '@/lib/auth/oauth';
 import { consumeSessionExpired } from '@/lib/auth/sessionExpiry';
 import {
   forgetIdentifier,
@@ -30,44 +29,26 @@ import {
 } from '@/lib/auth/rememberedIdentifier';
 import { haptics } from '@/lib/haptics';
 import { openLegal } from '@/lib/links';
-import { GoogleMark } from '@/components/auth/GoogleMark';
-import * as AppleAuthentication from 'expo-apple-authentication';
-import { AppleSignInCancelled, appleSignInAvailable } from '@/lib/auth/apple';
+import { SocialSignIn } from '@/components/auth/SocialSignIn';
+import { announceFirstError } from '@/lib/formErrors';
 import { signInSchema, type SignInValues } from '@/lib/validation';
 
 type Method = 'password' | 'magic';
 
-// Mirrors the web client's soft lockout (backend enforces its own).
+// A soft lockout after wrong passwords only; the backend enforces its own and its 429 is shown as sent.
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60 * 1000;
 
 export default function SignIn() {
-  const { signIn, signInWithProvider, signInWithApple } = useAuth();
-  const [appleAvailable, setAppleAvailable] = useState(false);
-  useEffect(() => {
-    appleSignInAvailable().then(setAppleAvailable);
-  }, []);
-
-  const signInApple = async () => {
-    setFormError(null);
-    try {
-      const { requiresTwoFactor } = await signInWithApple();
-      await haptics.success();
-      if (requiresTwoFactor) router.push('/(auth)/two-factor');
-    } catch (err) {
-      if (err instanceof AppleSignInCancelled) return;
-      await haptics.error();
-      setFormError(errorMessage(err, 'Could not sign in with Apple. Try again.'));
-    }
-  };
-  const { colors, spacing, scheme } = useTheme();
+  const { signIn } = useAuth();
+  const params = useLocalSearchParams<{ identifier?: string }>();
+  const { colors, spacing } = useTheme();
   const reduceMotion = useReducedMotion();
   const toast = useToast();
   const passwordRef = useRef<TextInputInstance>(null);
   const [method, setMethod] = useState<Method>('password');
   const [formError, setFormError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
-  const [oauthBusy, setOauthBusy] = useState(false);
   const [magicEmail, setMagicEmail] = useState('');
   const [magicSent, setMagicSent] = useState(false);
   const [magicBusy, setMagicBusy] = useState(false);
@@ -90,12 +71,18 @@ export default function SignIn() {
   });
 
   useEffect(() => {
-    getRememberedIdentifier().then((v) => {
-      if (v) {
-        setValue('identifier', v, { shouldValidate: true });
-        setRememberMe(true);
-      }
-    });
+    // Sent here from sign-up when the email or number already has an account.
+    if (typeof params.identifier === 'string' && params.identifier) {
+      setValue('identifier', params.identifier, { shouldValidate: true });
+      passwordRef.current?.focus();
+    } else {
+      getRememberedIdentifier().then((v) => {
+        if (v) {
+          setValue('identifier', v, { shouldValidate: true });
+          setRememberMe(true);
+        }
+      });
+    }
     const ended = consumeSessionExpired();
     if (ended) toast.show(ended.message, ended.tone);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -119,60 +106,44 @@ export default function SignIn() {
   const locked = !!lockedUntil;
   const lockLabel = `${Math.floor(lockSecs / 60)}:${(lockSecs % 60).toString().padStart(2, '0')}`;
 
-  const onSubmit = handleSubmit(async ({ identifier, password }) => {
-    if (locked) return;
-    setFormError(null);
-    try {
-      const { requiresTwoFactor } = await signIn(identifier, password);
-      setAttempts(0);
-      if (rememberMe) rememberIdentifier(identifier);
-      else forgetIdentifier();
-      await haptics.success();
-      if (requiresTwoFactor) router.push('/(auth)/two-factor');
-    } catch (err) {
-      await haptics.error();
-      const nextAttempts = attempts + 1;
-      setAttempts(nextAttempts);
-      if (nextAttempts >= MAX_ATTEMPTS) {
-        // An event handler (RHF's handleSubmit), not render: the compiler can't see that through RHF.
-        // eslint-disable-next-line react-hooks/purity
-        setLockedUntil(Date.now() + LOCKOUT_MS);
-        setFormError(null);
-        toast.show('Too many attempts. Try again in 15 minutes.', 'error');
-        return;
-      }
-      setFormError(
-        err instanceof ApiError
-          ? err.isNetwork
-            ? 'Can’t reach Sureground. Check your connection.'
-            : err.message
-          : 'Sign-in failed. Please try again.'
-      );
-    }
-  });
-
-  const signInGoogle = async () => {
-    if (oauthBusy) return;
-    setOauthBusy(true);
-    setFormError(null);
-    try {
-      const { requiresTwoFactor } = await signInWithProvider('google');
-      await haptics.success();
-      if (requiresTwoFactor) router.push('/(auth)/two-factor');
-    } catch (err) {
-      if (!(err instanceof OAuthCancelled)) {
+  const onSubmit = handleSubmit(
+    async ({ identifier, password }) => {
+      if (locked) return;
+      setFormError(null);
+      try {
+        const { requiresTwoFactor } = await signIn(identifier, password);
+        setAttempts(0);
+        if (rememberMe) rememberIdentifier(identifier);
+        else forgetIdentifier();
+        await haptics.success();
+        if (requiresTwoFactor) router.push('/(auth)/two-factor');
+      } catch (err) {
         await haptics.error();
-        setFormError(
-          // Includes the API's own refusal (e.g. a suspended account), sent on the redirect.
-          err instanceof Error && err.message
-            ? err.message
-            : 'Could not sign in with Google. Try again.'
-        );
+        if (!(err instanceof ApiError && err.status === 401)) {
+          setFormError(
+            err instanceof ApiError
+              ? err.isNetwork
+                ? 'Can’t reach Sureground. Check your connection.'
+                : err.message
+              : 'Sign-in failed. Please try again.'
+          );
+          return;
+        }
+        const nextAttempts = attempts + 1;
+        setAttempts(nextAttempts);
+        if (nextAttempts >= MAX_ATTEMPTS) {
+          // An event handler (RHF's handleSubmit), not render: the compiler can't see that through RHF.
+          // eslint-disable-next-line react-hooks/purity
+          setLockedUntil(Date.now() + LOCKOUT_MS);
+          setFormError(null);
+          toast.show('Too many attempts. Try again in 15 minutes.', 'error');
+          return;
+        }
+        setFormError(err.message);
       }
-    } finally {
-      setOauthBusy(false);
-    }
-  };
+    },
+    (errors) => announceFirstError(errors, ['identifier', 'password'])
+  );
 
   const sendMagic = async () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(magicEmail.trim())) {
@@ -198,6 +169,19 @@ export default function SignIn() {
       title="Sign in"
       subtitle="Pick up where you left off."
       onBack={() => (router.canGoBack() ? router.back() : router.replace('/(auth)/welcome'))}
+      footerSecondary={
+        method === 'password' ? (
+          <Row>
+            <Text variant="callout" color="mutedForeground">
+              New to Sureground?{' '}
+            </Text>
+            <LinkButton
+              label="Create an account"
+              onPress={() => router.replace('/(auth)/sign-up')}
+            />
+          </Row>
+        ) : null
+      }
       footer={
         method === 'password' ? (
           <>
@@ -207,15 +191,6 @@ export default function SignIn() {
               disabled={locked}
               onPress={() => void onSubmit()}
             />
-            <Row>
-              <Text variant="callout" color="mutedForeground">
-                New to Sureground?{' '}
-              </Text>
-              <LinkButton
-                label="Create an account"
-                onPress={() => router.replace('/(auth)/sign-up')}
-              />
-            </Row>
           </>
         ) : magicSent ? (
           <Button
@@ -268,8 +243,9 @@ export default function SignIn() {
             <Controller
               control={control}
               name="identifier"
-              render={({ field: { onChange, onBlur, value } }) => (
+              render={({ field: { onChange, onBlur, value, ref } }) => (
                 <TextField
+                  ref={ref}
                   label="Email or phone"
                   placeholder="0803 123 4567 or you@example.com"
                   leftIcon={<AtSign size={18} color={colors.mutedForeground} />}
@@ -291,9 +267,12 @@ export default function SignIn() {
             <Controller
               control={control}
               name="password"
-              render={({ field: { onChange, onBlur, value } }) => (
+              render={({ field: { onChange, onBlur, value, ref } }) => (
                 <TextField
-                  ref={passwordRef}
+                  ref={(el) => {
+                    ref(el);
+                    passwordRef.current = el;
+                  }}
                   label="Password"
                   placeholder="Your password"
                   secure
@@ -310,7 +289,7 @@ export default function SignIn() {
               )}
             />
             <Row style={{ justifyContent: 'space-between' }}>
-              <Checkbox checked={rememberMe} onChange={setRememberMe} label="Remember me" />
+              <Checkbox checked={rememberMe} onChange={setRememberMe} label="Remember my email" />
               <LinkButton
                 label="Forgot password?"
                 onPress={() => router.push('/(auth)/forgot-password')}
@@ -351,40 +330,7 @@ export default function SignIn() {
 
         <FormAlert message={formError} />
 
-        <View
-          importantForAccessibility="no-hide-descendants"
-          accessibilityElementsHidden
-          style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
-        >
-          <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
-          <Text variant="caption" color="mutedForeground">
-            or
-          </Text>
-          <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
-        </View>
-
-        {appleAvailable ? (
-          // Apple's own button, as their guidelines require.
-          <AppleAuthentication.AppleAuthenticationButton
-            buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
-            buttonStyle={
-              scheme === 'dark'
-                ? AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
-                : AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
-            }
-            cornerRadius={14}
-            style={{ height: 50 }}
-            onPress={signInApple}
-          />
-        ) : null}
-
-        <Button
-          label="Continue with Google"
-          variant="outline"
-          icon={<GoogleMark />}
-          loading={oauthBusy}
-          onPress={signInGoogle}
-        />
+        <SocialSignIn onError={setFormError} />
 
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <ShieldCheck size={16} color={colors.success} />
@@ -412,10 +358,9 @@ function LegalNote() {
         By continuing you agree to our{' '}
       </Text>
       <LinkButton
-        label="Terms"
+        label="Terms of Service"
         accessibilityRole="link"
         onPress={() => openLegal('terms')}
-        style={{ minHeight: 32 }}
       />
       <Text variant="caption" color="mutedForeground">
         {' '}
@@ -425,7 +370,6 @@ function LegalNote() {
         label="Privacy Policy"
         accessibilityRole="link"
         onPress={() => openLegal('privacy')}
-        style={{ minHeight: 32 }}
       />
     </View>
   );

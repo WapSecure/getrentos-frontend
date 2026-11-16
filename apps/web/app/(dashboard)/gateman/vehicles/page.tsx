@@ -24,6 +24,7 @@ import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
 import { GateRowIcon, GateSection } from '@/components/gateman/GateSection';
 import { estateKeys } from '@/lib/queryKeys';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
+import { formatClock } from '@sureground/shared';
 
 const purposeOptions = [
   { value: 'VISITOR', label: 'Visitor' },
@@ -36,8 +37,7 @@ const purposeOptions = [
 const purposeLabel = (purpose: string) =>
   purposeOptions.find((option) => option.value === purpose.toUpperCase())?.label ?? 'Other';
 
-const formatTime = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', { hour: '2-digit', minute: '2-digit' }).format(new Date(value));
+const formatTime = (value: string) => formatClock(new Date(value), { minute: '2-digit' });
 
 export default function GatemanVehiclesPage() {
   const queryClient = useQueryClient();

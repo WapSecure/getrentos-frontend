@@ -17,6 +17,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import type { PatrolRound } from '@/types/estate';
+import { formatClock } from '@sureground/shared';
 
 const DAY_MS = 24 * 60 * 60_000;
 
@@ -157,11 +158,10 @@ const Stat = ({
 );
 
 const formatInstant = (iso: string) =>
-  new Date(iso).toLocaleString(undefined, {
+  formatClock(new Date(iso), {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
-    hour: '2-digit',
     minute: '2-digit',
   });
 

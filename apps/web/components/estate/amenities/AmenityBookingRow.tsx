@@ -4,14 +4,10 @@ import { CalendarCheck } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
 import { EstateRow, RowAvatar } from '@/components/estate/shared/EstateListSection';
 import type { AmenityBooking } from '@/types/estate';
+import { formatClock } from '@sureground/shared';
 
 const formatDateTime = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value));
+  formatClock(new Date(value), { day: 'numeric', month: 'short', minute: '2-digit' });
 
 interface AmenityBookingRowProps {
   booking: AmenityBooking;

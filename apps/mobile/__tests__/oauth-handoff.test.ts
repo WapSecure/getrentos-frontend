@@ -1,4 +1,4 @@
-import { startOAuth } from '@/lib/auth/oauth';
+import { OAuthCancelled, startOAuth } from '@/lib/auth/oauth';
 // The app's test types are Jest's only (no @types/node), so Node's crypto is typed here for the two calls used.
 type NodeCrypto = {
   createHash(alg: 'sha256'): {
@@ -78,11 +78,44 @@ describe('native Google sign-in handoff (AU-17)', () => {
     });
   });
 
-  it('shows the server’s message when an old flow is refused', async () => {
+  it('maps a refusal code to fixed copy and never shows text from the redirect', async () => {
     mockOpenAuthSessionAsync.mockResolvedValue({
       type: 'success',
-      url: 'sureground://oauth#error=Please+update+the+Sureground+app+to+sign+in+with+Google.',
+      url: 'sureground://oauth#error=ACCOUNT_SUSPENDED',
     });
-    await expect(startOAuth('google')).rejects.toThrow('Please update the Sureground app');
+    await expect(startOAuth('google')).rejects.toThrow('This account is suspended');
+
+    mockOpenAuthSessionAsync.mockResolvedValue({
+      type: 'success',
+      url: 'sureground://oauth#error=%3Cscript%3EClick+evil.example%3C%2Fscript%3E',
+    });
+    await expect(startOAuth('google')).rejects.toThrow('Could not sign you in. Try again.');
+  });
+
+  it('treats OAUTH_CANCELLED like closing the browser', async () => {
+    mockOpenAuthSessionAsync.mockResolvedValue({
+      type: 'success',
+      url: 'sureground://oauth#error=OAUTH_CANCELLED',
+    });
+    await expect(startOAuth('google')).rejects.toBeInstanceOf(OAuthCancelled);
+  });
+
+  it('passes on that the sign-in created the account', async () => {
+    mockOpenAuthSessionAsync.mockResolvedValue({
+      type: 'success',
+      url: `sureground://oauth#code=${'b'.repeat(43)}`,
+    });
+    (globalThis.fetch as jest.Mock).mockResolvedValue(
+      new Response(JSON.stringify({ access_token: 'at', refresh_token: 'rt', isNewUser: true }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      })
+    );
+    await expect(startOAuth('google')).resolves.toEqual({
+      kind: 'session',
+      accessToken: 'at',
+      refreshToken: 'rt',
+      isNewUser: true,
+    });
   });
 });

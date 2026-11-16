@@ -17,6 +17,7 @@ import { Badge, Button, type BadgeVariant } from '@sureground/ui';
 import type { MaintenanceRequest } from '@/types/maintenance';
 import { maintenanceCategoryLabel } from '@/lib/maintenanceCategory';
 import { MaintenanceCategoryIcon } from './MaintenanceCategoryIcon';
+import { formatClock } from '@sureground/shared';
 
 interface MaintenanceCardProps {
   request: MaintenanceRequest;
@@ -95,12 +96,7 @@ const formatDeadline = (value?: string | null) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
 
-  return new Intl.DateTimeFormat('en-NG', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
+  return formatClock(date, { day: 'numeric', month: 'short', minute: '2-digit' });
 };
 
 export const MaintenanceCard = ({
@@ -196,11 +192,10 @@ export const MaintenanceCard = ({
                   <Clock className="w-3 h-3" />
                   <span>
                     Visit{' '}
-                    {new Date(request.scheduledFor).toLocaleString('en-NG', {
+                    {formatClock(new Date(request.scheduledFor), {
                       weekday: 'short',
                       day: 'numeric',
                       month: 'short',
-                      hour: '2-digit',
                       minute: '2-digit',
                     })}
                   </span>

@@ -6,13 +6,13 @@ import { Badge, IconButton } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { StarRating } from '@/components/landlord/vendors/StarRating';
 import type { Vendor } from '@/types/landlord';
+import { formatClock } from '@sureground/shared';
 
 export const formatVisit = (iso: string) =>
-  new Date(iso).toLocaleString('en-NG', {
+  formatClock(new Date(iso), {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
-    hour: '2-digit',
     minute: '2-digit',
   });
 

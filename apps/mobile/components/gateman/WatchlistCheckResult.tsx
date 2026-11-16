@@ -26,7 +26,7 @@ export function WatchlistCheckResult({ screening }: { screening: WatchlistScreen
           <Text variant="caption">Nobody on this estate&apos;s watch list matches that.</Text>
           {/* Matching is exact, so a clearance is not a guarantee: a name spelt differently would not match. */}
           <Text variant="caption" color="mutedForeground">
-            Compared exactly against what the list holds, ignoring case, spacing and word order: so
+            Compared exactly against what the list holds, ignoring case, spacing and word order, so
             a genuinely different spelling would not show up.
           </Text>
         </View>

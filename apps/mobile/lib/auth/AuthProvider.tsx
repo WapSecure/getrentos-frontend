@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@sureground/ui-native';
 import { ACCOUNT_SUSPENDED, ApiError, configureApi } from '../api/client';
 import { authApi, isTwoFactorChallenge, type AuthProfile, type AuthSession } from '../api/auth';
 import {
@@ -16,6 +17,7 @@ import {
   switchablePortals,
   usablePortal as resolveUsablePortal,
   type Portal,
+  type SignupRoleId,
 } from '../roles';
 import { readPreferredPortal, writePreferredPortal } from '../preferredPortal';
 import { writeSelectedClient } from '../agency/selectedClient';
@@ -28,11 +30,21 @@ import { markSessionExpired } from './sessionExpiry';
 import { startOAuth } from './oauth';
 import { identify, reset as resetAnalytics } from '../analytics';
 import { persister } from '../query/client';
+import { secureStorage } from '../storage';
+import { apiErrorCode } from './signupErrors';
 
+// Holds the user id while a new social account still has to pick its roles.
+const INITIAL_ROLES_KEY = 'sureground.initialRolesPending';
+
+export interface SignInOutcome {
+  requiresTwoFactor: boolean;
+  /** The provider sign-in just created this account. */
+  isNewUser?: boolean;
+}
+
+// The API sends no profile before the second factor.
 interface PendingTwoFactor {
   challengeToken: string;
-  /** Absent for Google: its redirect carries only the token. */
-  profile?: AuthProfile;
 }
 
 interface AuthContextValue {
@@ -43,14 +55,19 @@ interface AuthContextValue {
   workspaces: Portal[];
   switchWorkspace: (portal: Portal) => void;
   pendingTwoFactor: PendingTwoFactor | null;
-  signIn: (identifier: string, password: string) => Promise<{ requiresTwoFactor: boolean }>;
+  signIn: (identifier: string, password: string) => Promise<SignInOutcome>;
   completeTwoFactor: (code: string) => Promise<void>;
   cancelTwoFactor: () => void;
   signInWithMagicLink: (token: string) => Promise<{ requiresTwoFactor: boolean }>;
   /** Throws `OAuthCancelled` if dismissed. */
-  signInWithProvider: (provider: 'google') => Promise<{ requiresTwoFactor: boolean }>;
-  signInWithApple: () => Promise<{ requiresTwoFactor: boolean }>;
-  applyExternalSession: (session: AuthSession) => void;
+  signInWithProvider: (provider: 'google') => Promise<SignInOutcome>;
+  signInWithApple: () => Promise<SignInOutcome>;
+  applyExternalSession: (session: AuthSession) => Promise<void>;
+  /** A social sign-in created the account and its roles are still to be picked. */
+  initialRolesPending: boolean;
+  /** Resolves `false` when the API no longer takes a first choice; the account keeps the renter role. */
+  chooseInitialRoles: (roles: SignupRoleId[]) => Promise<boolean>;
+  skipInitialRoles: () => void;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -69,28 +86,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<AuthProfile | null>(null);
   const [preferredPortal, setPreferredPortal] = useState<Portal | null>(null);
   const [pendingTwoFactor, setPendingTwoFactor] = useState<PendingTwoFactor | null>(null);
+  const [initialRolesPending, setInitialRolesPending] = useState(false);
+  const toast = useToast();
 
   // A ref, so the API client reads the latest token without a re-render and refresh stays single-flight across concurrent 401s.
   const accessTokenRef = useRef<string | null>(null);
   const refreshTokenRef = useRef<string | null>(null);
   const refreshInFlight = useRef<Promise<string | null> | null>(null);
 
-  const applySession = useCallback((session: AuthSession) => {
-    accessTokenRef.current = session.accessToken;
-    refreshTokenRef.current = session.refreshToken;
-    const { accessToken: _a, refreshToken: _r, expiresIn: _e, ...prof } = session;
-    setProfile(prof);
-    setStatus('authenticated');
-    void writeTokens({ accessToken: session.accessToken, refreshToken: session.refreshToken });
+  // The session still works in memory if the keychain refuses it; say so rather than sign them out silently next launch.
+  const saveTokens = useCallback(
+    async (tokens: { accessToken: string; refreshToken: string }) => {
+      try {
+        await writeTokens(tokens);
+      } catch {
+        toast.show(
+          'You’re signed in, but this phone couldn’t save your session. You may need to sign in again next time.',
+          'error'
+        );
+      }
+    },
+    [toast]
+  );
+
+  const markInitialRoles = useCallback(async (userId: string | null) => {
+    setInitialRolesPending(!!userId);
+    if (userId) await secureStorage.set(INITIAL_ROLES_KEY, userId).catch(() => undefined);
+    else await secureStorage.remove(INITIAL_ROLES_KEY).catch(() => undefined);
   }, []);
+
+  const applySession = useCallback(
+    async (session: AuthSession) => {
+      accessTokenRef.current = session.accessToken;
+      refreshTokenRef.current = session.refreshToken;
+      const { accessToken: _a, refreshToken: _r, expiresIn: _e, isNewUser, ...prof } = session;
+      await saveTokens({ accessToken: session.accessToken, refreshToken: session.refreshToken });
+      if (isNewUser) await markInitialRoles(prof.id);
+      setProfile(prof);
+      setStatus('authenticated');
+    },
+    [saveTokens, markInitialRoles]
+  );
 
   const teardown = useCallback(async () => {
     accessTokenRef.current = null;
     refreshTokenRef.current = null;
     setProfile(null);
     setPendingTwoFactor(null);
+    setInitialRolesPending(false);
     setStatus('unauthenticated');
     await clearTokens();
+    await secureStorage.remove(INITIAL_ROLES_KEY).catch(() => undefined);
     await clearCachedProfile();
     setPreferredPortal(null);
     await writePreferredPortal(null);
@@ -172,7 +218,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       try {
         const prof = await authApi.me();
+        const rolesPendingFor = await secureStorage.get(INITIAL_ROLES_KEY).catch(() => null);
         if (!cancelled) {
+          setInitialRolesPending(rolesPendingFor === prof.id);
           setProfile(prof);
           setStatus('authenticated');
         }
@@ -199,11 +247,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (identifier: string, password: string) => {
       const result = await authApi.login(identifier.trim(), password);
       if (isTwoFactorChallenge(result)) {
-        const { requiresTwoFactor: _r, challengeToken, expiresIn: _e, ...prof } = result;
-        setPendingTwoFactor({ challengeToken, profile: prof });
+        setPendingTwoFactor({ challengeToken: result.challengeToken });
         return { requiresTwoFactor: true };
       }
-      applySession(result);
+      await applySession(result);
       return { requiresTwoFactor: false };
     },
     [applySession]
@@ -213,12 +260,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { identityToken, nonce, fullName } = await requestAppleCredential();
     const result = await authApi.appleSignIn(identityToken, nonce, fullName);
     if (isTwoFactorChallenge(result)) {
-      const { requiresTwoFactor: _r, challengeToken, expiresIn: _e, ...prof } = result;
-      setPendingTwoFactor({ challengeToken, profile: prof });
+      setPendingTwoFactor({ challengeToken: result.challengeToken });
       return { requiresTwoFactor: true };
     }
-    applySession(result);
-    return { requiresTwoFactor: false };
+    await applySession(result);
+    return { requiresTwoFactor: false, isNewUser: !!result.isNewUser };
   }, [applySession]);
 
   const completeTwoFactor = useCallback(
@@ -226,7 +272,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!pendingTwoFactor) throw new Error('No two-factor challenge in progress');
       const session = await authApi.completeTwoFactor(pendingTwoFactor.challengeToken, code);
       setPendingTwoFactor(null);
-      applySession(session);
+      await applySession(session);
     },
     [pendingTwoFactor, applySession]
   );
@@ -235,32 +281,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (token: string) => {
       const result = await authApi.verifyMagicLink(token);
       if (isTwoFactorChallenge(result)) {
-        const { requiresTwoFactor: _r, challengeToken, expiresIn: _e, ...prof } = result;
-        setPendingTwoFactor({ challengeToken, profile: prof });
+        setPendingTwoFactor({ challengeToken: result.challengeToken });
         return { requiresTwoFactor: true };
       }
-      applySession(result);
+      await applySession(result);
       return { requiresTwoFactor: false };
     },
     [applySession]
   );
 
-  const signInWithProvider = useCallback(async (provider: 'google') => {
-    const result = await startOAuth(provider);
-    if (result.kind === 'challenge') {
-      setPendingTwoFactor({ challengeToken: result.challengeToken });
-      return { requiresTwoFactor: true };
-    }
-    const { accessToken, refreshToken } = result;
-    accessTokenRef.current = accessToken;
-    refreshTokenRef.current = refreshToken;
-    await writeTokens({ accessToken, refreshToken });
-    // OAuth returns tokens only, so fetch the profile.
-    const prof = await authApi.me();
-    setProfile(prof);
-    setStatus('authenticated');
-    return { requiresTwoFactor: false };
-  }, []);
+  const signInWithProvider = useCallback(
+    async (provider: 'google') => {
+      const result = await startOAuth(provider);
+      if (result.kind === 'challenge') {
+        setPendingTwoFactor({ challengeToken: result.challengeToken });
+        return { requiresTwoFactor: true };
+      }
+      const { accessToken, refreshToken, isNewUser } = result;
+      accessTokenRef.current = accessToken;
+      refreshTokenRef.current = refreshToken;
+      await saveTokens({ accessToken, refreshToken });
+      // OAuth returns tokens only, so fetch the profile.
+      const prof = await authApi.me();
+      if (isNewUser) await markInitialRoles(prof.id);
+      setProfile(prof);
+      setStatus('authenticated');
+      return { requiresTwoFactor: false, isNewUser };
+    },
+    [saveTokens, markInitialRoles]
+  );
+
+  const chooseInitialRoles = useCallback(
+    async (roles: SignupRoleId[]) => {
+      try {
+        setProfile(await authApi.setInitialRoles(roles));
+        await markInitialRoles(null);
+        return true;
+      } catch (err) {
+        // An older API, or the window has closed: carry on with the renter role they already hold.
+        const closed =
+          err instanceof ApiError &&
+          (err.status === 404 || apiErrorCode(err) === 'INITIAL_ROLES_CLOSED');
+        if (!closed) throw err;
+        await markInitialRoles(null);
+        return false;
+      }
+    },
+    [markInitialRoles]
+  );
+
+  const skipInitialRoles = useCallback(() => {
+    void markInitialRoles(null);
+  }, [markInitialRoles]);
 
   useEffect(() => {
     void readPreferredPortal().then(setPreferredPortal);
@@ -311,6 +383,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithProvider,
       signInWithApple,
       applyExternalSession: applySession,
+      initialRolesPending,
+      chooseInitialRoles,
+      skipInitialRoles,
       refreshProfile,
       signOut,
     }),
@@ -326,6 +401,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithProvider,
       signInWithApple,
       applySession,
+      initialRolesPending,
+      chooseInitialRoles,
+      skipInitialRoles,
       refreshProfile,
       signOut,
     ]

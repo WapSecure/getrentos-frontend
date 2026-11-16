@@ -1,5 +1,6 @@
 import { Badge } from '@sureground/ui';
 import { MANDATE_STATUS_LABELS, type MandateStatus } from '@/services/mandateService';
+import { formatClock } from '@sureground/shared';
 
 // Shared so the list and the detail page always colour a status the same way.
 export const STATUS_VARIANT: Record<
@@ -45,11 +46,10 @@ export function formatMoment(value: string | null | undefined): string {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleString('en-GB', {
+  return formatClock(date, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-    hour: '2-digit',
     minute: '2-digit',
     timeZone: 'Africa/Lagos',
   });

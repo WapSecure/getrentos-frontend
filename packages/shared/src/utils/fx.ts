@@ -1,3 +1,5 @@
+import { formatClock } from './clock';
+
 /** Display only, never a quote: naira stays the price. Two significant figures, half up; under one unit gives none. */
 
 export const INDICATIVE_CURRENCIES = ['GBP', 'USD', 'EUR', 'CAD'] as const;
@@ -62,12 +64,6 @@ export function indicativeAmount(
 }
 
 const LAGOS_TIME_ZONE = 'Africa/Lagos';
-const lagosTime = new Intl.DateTimeFormat('en-GB', {
-  timeZone: LAGOS_TIME_ZONE,
-  hour: '2-digit',
-  minute: '2-digit',
-  hourCycle: 'h23',
-});
 const lagosDay = new Intl.DateTimeFormat('en-GB', {
   timeZone: LAGOS_TIME_ZONE,
   day: 'numeric',
@@ -77,7 +73,7 @@ const lagosDay = new Intl.DateTimeFormat('en-GB', {
 export function indicativeRateLabel(source: string, asOf: string | Date): string | null {
   const when = asOf instanceof Date ? asOf : new Date(asOf);
   if (!source.trim() || Number.isNaN(when.getTime())) return null;
-  return `Indicative, ${source.trim()} rate at ${lagosTime.format(when)} Lagos, ${lagosDay.format(when)}. You pay in naira.`;
+  return `Indicative, ${source.trim()} rate at ${formatClock(when, { timeZone: LAGOS_TIME_ZONE }, 'en-GB')} Lagos, ${lagosDay.format(when)}. You pay in naira.`;
 }
 
 /** `available: false` means the rate source is not set up, is down, or over 24 hours old: show naira only. */

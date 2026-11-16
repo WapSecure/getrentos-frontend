@@ -22,7 +22,7 @@ export default function GatemanDeliveriesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [householdPage, setHouseholdPage] = useState(1);
 
-  const { estate, isLoading: isEstateLoading } = useGatemanPost();
+  const { estate, gate, isLoading: isEstateLoading } = useGatemanPost();
 
   const { data: gates } = useQuery({
     queryKey: estateKeys.gates(estate?.id ?? ''),
@@ -181,6 +181,7 @@ export default function GatemanDeliveriesPage() {
         onHouseholdPageChange={setHouseholdPage}
         isHouseholdsLoading={isHouseholdsLoading}
         gates={gates}
+        defaultGateId={gate?.id}
         onClose={() => setIsModalOpen(false)}
         onSubmit={(data) => logDelivery.mutate(data)}
         isSubmitting={logDelivery.isPending}

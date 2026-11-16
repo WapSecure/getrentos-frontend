@@ -1,3 +1,5 @@
+import { formatClock } from './clock';
+
 // Machine codes (document types, event types, scan reasons) never reach people as-is.
 const CODE_LABELS: Record<string, string> = {
   C_OF_O: 'Certificate of Occupancy',
@@ -53,6 +55,6 @@ export const formatDateTime = (value: string | Date): string => {
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return '';
   const day = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const time = formatClock(date, {}, 'en-GB');
   return `${day}, ${time}`;
 };

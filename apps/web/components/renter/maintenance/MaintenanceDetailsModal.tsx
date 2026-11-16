@@ -24,6 +24,7 @@ import {
 } from '@sureground/ui';
 import type { MaintenanceRequest } from '@/types/maintenance';
 import { maintenanceCategoryLabel } from '@/lib/maintenanceCategory';
+import { formatClock } from '@sureground/shared';
 
 interface MaintenanceDetailsModalProps {
   isOpen: boolean;
@@ -182,11 +183,10 @@ export const MaintenanceDetailsModal = ({
                 <p className="mt-1 text-sm text-foreground">
                   Visit booked for{' '}
                   <span className="font-medium">
-                    {new Date(request.scheduledFor).toLocaleString('en-NG', {
+                    {formatClock(new Date(request.scheduledFor), {
                       weekday: 'long',
                       day: 'numeric',
                       month: 'long',
-                      hour: '2-digit',
                       minute: '2-digit',
                     })}
                   </span>

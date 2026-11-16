@@ -1,3 +1,5 @@
+import { formatClock } from './clock';
+
 interface CollectableDelivery {
   residentName?: string;
   collectedAt?: string;
@@ -11,8 +13,7 @@ const sameDay = (a: Date, b: Date) =>
   a.getMonth() === b.getMonth() &&
   a.getDate() === b.getDate();
 
-const formatTime = (value: Date) =>
-  new Intl.DateTimeFormat('en-NG', { hour: 'numeric', minute: '2-digit' }).format(value);
+const formatTime = (value: Date) => formatClock(value);
 
 const formatDay = (value: Date) =>
   new Intl.DateTimeFormat('en-NG', { day: 'numeric', month: 'short' }).format(value);
