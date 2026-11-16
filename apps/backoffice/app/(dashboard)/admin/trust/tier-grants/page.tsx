@@ -163,7 +163,7 @@ export default function TierGrantsPage() {
   return (
     <>
       <PageHeader
-        title="Tier 3 Grants"
+        title="Tier 3 grants"
         description="Financial capability granted by hand, for hosts who cannot pass the automated bank name enquiry. A grant counts exactly like a passing bank check, so it needs a second officer, is audited, can carry an expiry, and can be withdrawn at any time."
       />
 

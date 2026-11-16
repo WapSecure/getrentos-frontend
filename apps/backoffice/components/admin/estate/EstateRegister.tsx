@@ -85,7 +85,7 @@ export const EstateRegister = () => {
       <PageHeader
         eyebrow="Estates"
         title="Estate register"
-        description="Every gated community with its organization, manager and community health."
+        description="Every gated community with its organisation, manager and community health."
       />
 
       <Card className="shadow-sm">

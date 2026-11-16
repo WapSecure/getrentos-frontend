@@ -13,6 +13,7 @@ import {
   isForeignPurpose,
   REVIEW_CASE_PRIORITY_META,
   REVIEW_CASE_STATUS_META,
+  VERIFICATION_STATUS_META,
 } from './trustMeta';
 
 export const REVIEW_CASE_STATUS_VARIANT: Record<TrustReviewCaseStatus, BadgeVariant> = {
@@ -71,7 +72,9 @@ export const ReviewCaseCard = ({ caseItem, delay, onReview }: ReviewCaseCardProp
         <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
           <UserRoundSearch className="h-3.5 w-3.5" />
           {subjectLabel} · {verification?.subjectId ? verification.subjectId.slice(0, 8) : '—'}
-          {verification?.status ? ` · ${verification.status}` : ''}
+          {verification?.status
+            ? ` · ${VERIFICATION_STATUS_META[verification.status]?.label ?? verification.status}`
+            : ''}
         </p>
         {caseItem.dueAt && (
           <p

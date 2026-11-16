@@ -482,7 +482,7 @@ export function StatementsQueue() {
       },
       {
         key: 'org',
-        header: 'Organization',
+        header: 'Organisation',
         render: (s) => (
           <span className="text-muted-foreground">{s.organizationName ?? 'Self-managed'}</span>
         ),
