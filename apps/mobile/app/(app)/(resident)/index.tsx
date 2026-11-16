@@ -122,7 +122,7 @@ export default function ResidentHome() {
       <DashboardHeader
         eyebrow={dashboardGreeting()}
         title={firstName(profile?.legalName)}
-        roleBadge="RS"
+        roleBadge="Resident"
         subtitle={
           household.data
             ? `${household.data.estate.name} · Unit ${household.data.unitLabel}`

@@ -71,7 +71,7 @@ export default function OwnerHome() {
     <DashboardHeader
       eyebrow={dashboardGreeting()}
       title={firstName(profile?.legalName)}
-      roleBadge="PO"
+      roleBadge="Property owner"
       subtitle="Your properties, offers and sales"
       accessory={
         <View style={{ flexDirection: 'row', gap: 4 }}>

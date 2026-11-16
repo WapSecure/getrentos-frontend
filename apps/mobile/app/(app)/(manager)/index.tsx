@@ -64,7 +64,7 @@ export default function AgencyHome() {
       <DashboardHeader
         eyebrow={dashboardGreeting()}
         title={firstName(profile?.legalName)}
-        roleBadge="PM"
+        roleBadge="Property manager"
         subtitle={dashboard.data?.firmName ?? 'Your agency workspace'}
         accessory={
           <IconButton

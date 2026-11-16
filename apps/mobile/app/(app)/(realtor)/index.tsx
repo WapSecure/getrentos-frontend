@@ -114,7 +114,7 @@ export default function RealtorHome() {
     <DashboardHeader
       eyebrow={dashboardGreeting()}
       title={firstName(profile?.legalName)}
-      roleBadge="RL"
+      roleBadge="Realtor"
       subtitle={
         today.length
           ? `${today.length} ${today.length === 1 ? 'viewing' : 'viewings'} today`

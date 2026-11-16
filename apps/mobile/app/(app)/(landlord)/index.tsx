@@ -86,7 +86,7 @@ export default function LandlordOverview() {
     <DashboardHeader
       eyebrow={dashboardGreeting()}
       title={firstName(profile?.legalName)}
-      roleBadge="LL"
+      roleBadge="Landlord"
       subtitle="Your rentals, tenants and rent"
       accessory={
         <View style={{ flexDirection: 'row', gap: 4 }}>
