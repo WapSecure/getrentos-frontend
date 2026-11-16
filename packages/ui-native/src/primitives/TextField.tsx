@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Eye, EyeOff } from '@sureground/icons/native';
+import { sanitisePhoneInput } from '@sureground/shared';
 import { useTheme } from '../theme';
 import { useReducedMotion } from '../accessibility';
 import { Text } from './Text';
@@ -47,6 +48,7 @@ export const TextField = forwardRef<TextInputInstance, TextFieldProps>(function 
     onBlur,
     accessibilityLabel,
     accessibilityHint,
+    onChangeText,
     ...rest
   },
   ref
@@ -116,6 +118,11 @@ export const TextField = forwardRef<TextInputInstance, TextFieldProps>(function 
             onBlur?.(e);
           }}
           {...rest}
+          onChangeText={
+            rest.keyboardType === 'phone-pad' && onChangeText
+              ? (t) => onChangeText(sanitisePhoneInput(t))
+              : onChangeText
+          }
         />
         {secure ? (
           <Pressable
