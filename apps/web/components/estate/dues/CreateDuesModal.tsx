@@ -182,10 +182,11 @@ export const CreateDuesModal = ({
                 )}
               </div>
             )}
-            {!chargeAll && selectedHouseholdIds.length > 0 && (
+            {!chargeAll && (
               <p className="text-xs text-muted-foreground">
-                {selectedHouseholdIds.length} household
-                {selectedHouseholdIds.length === 1 ? '' : 's'} selected across pages.
+                {selectedHouseholdIds.length === 0
+                  ? 'Pick at least one household to charge.'
+                  : `${selectedHouseholdIds.length} household${selectedHouseholdIds.length === 1 ? '' : 's'} selected across pages.`}
               </p>
             )}
           </div>
