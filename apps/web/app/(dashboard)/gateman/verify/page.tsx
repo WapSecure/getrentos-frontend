@@ -21,7 +21,7 @@ import { WalkInDialog } from '@/components/gateman/WalkInDialog';
 import { InsideNowPanel } from '@/components/gateman/InsideNowPanel';
 import { GateRowIcon, GateSection, gateRowEdge } from '@/components/gateman/GateSection';
 import { useGateVoice } from '@/components/gateman/useGateVoice';
-import { digitsFromSpeech } from '@sureground/shared';
+import { digitsFromSpeech, formatClock } from '@sureground/shared';
 import { useVoiceInput } from '@/lib/voice';
 import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
 import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
@@ -68,8 +68,7 @@ async function decodeQrFromFile(file: File): Promise<string | null> {
 
 const INSIDE_PAGE_SIZE = 20;
 
-const formatTime = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', { hour: '2-digit', minute: '2-digit' }).format(new Date(value));
+const formatTime = (value: string) => formatClock(new Date(value), { minute: '2-digit' });
 
 type BlockedWrite = { kind: 'check-in'; code: string } | { kind: 'admit'; pass: VisitorPass };
 

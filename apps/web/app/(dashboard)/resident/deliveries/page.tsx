@@ -5,7 +5,7 @@ import { Package } from '@sureground/icons';
 import { Badge, EmptyState, ListSkeleton, PageHeader } from '@sureground/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
-import { collectionSummary } from '@sureground/shared';
+import { collectionSummary, formatClock } from '@sureground/shared';
 import { estateResidentKeys } from '@/lib/queryKeys';
 import { ExpectedDeliveriesPanel } from '@/components/estate/deliveries/ExpectedDeliveriesPanel';
 import type { DeliveryLog } from '@/types/estate';
@@ -21,12 +21,7 @@ const statusLabels: Record<DeliveryLog['status'], string> = {
 };
 
 const formatDateTime = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value));
+  formatClock(new Date(value), { day: 'numeric', month: 'short', minute: '2-digit' });
 
 export default function ResidentDeliveriesPage() {
   const { data, isLoading } = useQuery({

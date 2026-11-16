@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge, Button } from '@sureground/ui';
-import { collectionSummary } from '@sureground/shared';
+import { collectionSummary, formatClock } from '@sureground/shared';
 import type { DeliveryLog } from '@/types/estate';
 
 const statusVariant: Record<DeliveryLog['status'], 'warning' | 'success'> = {
@@ -15,12 +15,7 @@ const statusLabels: Record<DeliveryLog['status'], string> = {
 };
 
 const formatDateTime = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value));
+  formatClock(new Date(value), { day: 'numeric', month: 'short', minute: '2-digit' });
 
 interface DeliveryLogRowProps {
   log: DeliveryLog;

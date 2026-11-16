@@ -1,6 +1,7 @@
 import { Bot, ShieldCheck, UserRound, Wrench } from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { formatDualTime } from '@/lib/format';
+import { formatClock } from '@sureground/shared';
 
 export type ActivityFeedActorKind =
   | 'MANAGER'
@@ -48,11 +49,7 @@ const dayOf = (iso: string) =>
   });
 
 const timeOf = (iso: string) =>
-  new Date(iso).toLocaleTimeString('en-NG', {
-    timeZone: 'Africa/Lagos',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  formatClock(new Date(iso), { timeZone: 'Africa/Lagos', minute: '2-digit' });
 
 export const ActivityFeed = ({
   items,

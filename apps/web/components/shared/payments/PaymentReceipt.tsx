@@ -30,6 +30,7 @@ import {
 import { ROUTES } from '@/lib/constants/auth';
 import { currentPath, withNext } from '@/lib/nextPath';
 import type { PaymentKind, PaymentProvider, PaymentStatus } from '@/types/payments';
+import { formatClock } from '@sureground/shared';
 
 const WHAT: Record<PaymentKind, string> = {
   RENT: 'rent payment',
@@ -86,14 +87,12 @@ const CHANNEL: Record<string, string> = {
 
 /** A date and time as people in Lagos read it: "7 Nov 2026, 1:49 pm". */
 const lagosDateTime = (iso: string) =>
-  new Date(iso).toLocaleString('en-GB', {
+  formatClock(new Date(iso), {
     timeZone: 'Africa/Lagos',
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-    hour: 'numeric',
     minute: '2-digit',
-    hour12: true,
   });
 
 const lagosDate = (iso: string) =>

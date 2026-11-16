@@ -1,6 +1,6 @@
 'use client';
 
-import { passTimeline } from '@sureground/shared';
+import { passTimeline, formatClock } from '@sureground/shared';
 import { Badge, Button } from '@sureground/ui';
 import { IdCheckDialog } from '@/components/estate/visitor-passes/IdCheckDialog';
 import { EstateRow, RowAvatar } from '@/components/estate/shared/EstateListSection';
@@ -29,15 +29,9 @@ const statusLabels: Record<VisitorPass['status'], string> = {
 };
 
 const formatDate = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value));
+  formatClock(new Date(value), { day: 'numeric', month: 'short', minute: '2-digit' });
 
-const formatTime = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', { hour: '2-digit', minute: '2-digit' }).format(new Date(value));
+const formatTime = (value: string) => formatClock(new Date(value), { minute: '2-digit' });
 
 interface VisitorPassRowProps {
   pass: VisitorPass;

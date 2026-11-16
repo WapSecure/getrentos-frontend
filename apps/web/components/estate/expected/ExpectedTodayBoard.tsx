@@ -7,6 +7,7 @@ import { Badge, Card, EmptyState, ListSkeleton } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
+import { formatClock } from '@sureground/shared';
 
 // A hint board only: nothing here admits anyone; the person still presents a PIN.
 export const ExpectedTodayBoard = ({ estateId }: { estateId: string }) => {
@@ -39,12 +40,8 @@ export const ExpectedTodayBoard = ({ estateId }: { estateId: string }) => {
         <div>
           <p className="font-medium text-foreground">{board.tally.label}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Counted at{' '}
-            {new Date(board.asOf).toLocaleTimeString(undefined, {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-            . This list does not admit anyone. Each visitor must still present their pass.
+            Counted at {formatClock(new Date(board.asOf), { minute: '2-digit' })}. This list does
+            not admit anyone. Each visitor must still present their pass.
           </p>
         </div>
         <Badge variant={board.tally.byEndOfToday > 0 ? 'info' : 'neutral'}>

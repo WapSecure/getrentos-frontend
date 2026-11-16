@@ -3,6 +3,7 @@
 import { KeyRound } from '@sureground/icons';
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 import type { IssuedVisitorPass } from '@/types/estate';
+import { formatClock } from '@sureground/shared';
 
 interface VisitorPinDialogProps {
   pass: IssuedVisitorPass | null;
@@ -10,13 +11,12 @@ interface VisitorPinDialogProps {
 }
 
 const formatDate = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', {
+  formatClock(new Date(value), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-    hour: '2-digit',
     minute: '2-digit',
-  }).format(new Date(value));
+  });
 
 export const VisitorPinDialog = ({ pass, onClose }: VisitorPinDialogProps) => {
   return (

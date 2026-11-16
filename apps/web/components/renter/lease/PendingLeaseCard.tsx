@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Clock, FileSignature, FileText, Lock, Wallet } from '@sureground/icons';
 import { Alert, Button, Card, Checkbox, SignaturePad } from '@sureground/ui';
-import { formatCurrency, formatDate } from '@sureground/shared';
+import { formatCurrency, formatDate, formatClock } from '@sureground/shared';
 import { leaseRentLabel } from '@/lib/leaseTerm';
 import { renterService, type PendingLease } from '@/services/renterService';
 
@@ -14,13 +14,11 @@ interface PendingLeaseCardProps {
 }
 
 const formatDeadline = (value: string) =>
-  new Date(value).toLocaleString('en-NG', {
+  formatClock(new Date(value), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    // The lease lapses on Lagos time, wherever the renter is reading from.
+    minute: '2-digit', // The lease lapses on Lagos time, wherever the renter is reading from.
     timeZone: 'Africa/Lagos',
     timeZoneName: 'short',
   });

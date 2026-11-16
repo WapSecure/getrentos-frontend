@@ -1,3 +1,5 @@
+import { formatClock } from './clock';
+
 // Business times are Lagos times; an investor abroad also sees their own.
 
 const LAGOS = 'Africa/Lagos';
@@ -19,13 +21,14 @@ const clockParts = (date: Date, timeZone: string) => {
     timeZone,
     weekday: 'short',
     day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
   }).formatToParts(date);
   const part = (type: Intl.DateTimeFormatPartTypes) =>
     parts.find((p) => p.type === type)?.value ?? '';
-  return { time: `${part('hour')}:${part('minute')}`, day: part('day'), weekday: part('weekday') };
+  return {
+    time: formatClock(date, { timeZone }, 'en-GB'),
+    day: part('day'),
+    weekday: part('weekday'),
+  };
 };
 
 export const formatDualTime = (date: Date | string, viewerTimeZone?: string | null): string => {
