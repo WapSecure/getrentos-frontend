@@ -50,11 +50,11 @@ export default function GatemanExpected() {
 
   return (
     <Screen>
-      <DashboardHeader eyebrow="Gate console" title="Expected today" />
+      <DashboardHeader eyebrow="Gate operations" title="Expected today" />
       <View style={{ padding: spacing.lg, gap: spacing.lg }}>
         <Text variant="caption" color="mutedForeground">
-          This is what the estate has been told, not a door. Every visitor still presents their own
-          pass, and you can always turn somebody away whatever this says.
+          This is who the estate has been told to expect. It does not let anyone in. Every visitor
+          still presents their own pass, and you can always turn somebody away whatever this says.
         </Text>
 
         {isPostLoading ? (
