@@ -1,6 +1,6 @@
 'use client';
 
-import { formatLocation } from '@sureground/shared';
+import { formatDate, formatLocation } from '@sureground/shared';
 import { ROUTES } from '@/lib/constants/auth';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -610,11 +610,13 @@ export default function EstateMarketplacePage() {
                       {agreement.propertyTitle}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {agreement.propertyAddress}, {agreement.propertyCity} ·{' '}
-                      {agreement.estateListingCount} listing
+                      {[agreement.propertyAddress, agreement.propertyCity]
+                        .filter(Boolean)
+                        .join(', ')}{' '}
+                      · {agreement.estateListingCount} listing
                       {agreement.estateListingCount === 1 ? '' : 's'}
                       {agreement.expiresAt
-                        ? ` · until ${new Date(agreement.expiresAt).toLocaleDateString()}`
+                        ? ` · until ${formatDate(agreement.expiresAt, 'long')}`
                         : ''}
                     </p>
                   </div>

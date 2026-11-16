@@ -91,9 +91,12 @@ export default function OwnerEstateAgreementsPage() {
             {agreement.note && (
               <p className="text-sm text-muted-foreground mt-2">“{agreement.note}”</p>
             )}
-            {isPending && agreement.requestedByEmail && (
+            {isPending && (agreement.requestedByName || agreement.requestedByEmail) && (
               <p className="text-xs text-muted-foreground mt-2">
-                Asked by {agreement.requestedByEmail}
+                Asked by{' '}
+                {agreement.requestedByName && agreement.requestedByEmail
+                  ? `${agreement.requestedByName} (${agreement.requestedByEmail})`
+                  : (agreement.requestedByName ?? agreement.requestedByEmail)}
               </p>
             )}
           </div>

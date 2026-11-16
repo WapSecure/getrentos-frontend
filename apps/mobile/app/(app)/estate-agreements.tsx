@@ -165,9 +165,12 @@ function AgreementCard({
         {pending ? null : <Badge label="Marketing live" tone="success" />}
       </View>
       {a.note ? <Text variant="callout">“{a.note}”</Text> : null}
-      {pending && a.requestedByEmail ? (
+      {pending && (a.requestedByName || a.requestedByEmail) ? (
         <Text variant="caption" color="mutedForeground">
-          Asked by {a.requestedByEmail}
+          Asked by{' '}
+          {a.requestedByName && a.requestedByEmail
+            ? `${a.requestedByName} (${a.requestedByEmail})`
+            : (a.requestedByName ?? a.requestedByEmail)}
         </Text>
       ) : null}
       {!pending && a.estateListingCount ? (

@@ -14,6 +14,7 @@ export interface EstateAgreement {
   propertyState: string;
   status: EstateAgreementStatus;
   ownerName?: string;
+  requestedByName?: string | null;
   requestedByEmail?: string | null;
   note?: string | null;
   decisionNote?: string | null;
