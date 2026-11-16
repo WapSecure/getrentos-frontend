@@ -30,7 +30,7 @@ function errorText(code: string, language: ReplyLanguage): string {
       return `Speaking in ${languageLabel(language)} is not supported on this phone yet. Try English, or type.`;
     case 'not-allowed':
     case 'service-not-allowed':
-      return 'Allow the microphone and speech recognition for Sureground in Settings to speak your question.';
+      return 'Allow the microphone and speech recognition for Sureground in Settings to use your voice.';
     case 'no-speech':
     case 'speech-timeout':
       return 'Didn’t catch that. Tap the mic and try again.';
