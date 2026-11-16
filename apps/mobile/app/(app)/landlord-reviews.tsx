@@ -33,7 +33,7 @@ export default function LandlordReviews() {
       <DetailScreenHeader
         eyebrow="Reputation"
         title="Reviews"
-        subtitle="Tenant feedback and performance trends"
+        subtitle="How tenants rate you and your homes"
         onBack={() => goBack()}
       />
 
