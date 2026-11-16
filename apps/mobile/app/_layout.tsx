@@ -38,7 +38,7 @@ SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 /** One effect, one `router.replace` per transition: scattered `<Redirect>`s trip React's update counter on the native stack. */
 function useProtectedRoute(onboardingSeen: boolean | null) {
-  const { status, usablePortal, workspaces, switchWorkspace } = useAuth();
+  const { status, usablePortal, workspaces, switchWorkspace, initialRolesPending } = useAuth();
   const segments = useSegments();
   const router = useRouter();
   const lastTarget = useRef<string | null>(null);
@@ -50,6 +50,18 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
 
     const root = segments[0];
     const inApp = root === '(app)';
+
+    // A social sign-in that created the account picks its roles before anything else.
+    if (status === 'authenticated' && initialRolesPending) {
+      const target = '/(auth)/sign-up/roles';
+      const onRoles = (segments as string[]).join('/') === '(auth)/sign-up/roles';
+      if (!onRoles && lastTarget.current !== target) {
+        lastTarget.current = target;
+        router.replace(target as never);
+      }
+      if (onRoles) lastTarget.current = null;
+      return;
+    }
     // Route on the portal we can open, not the most senior role, which may have no screens yet.
     const portalReady = !!usablePortal;
 
@@ -100,7 +112,16 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
       }
     }
     if (!target) lastTarget.current = null;
-  }, [status, usablePortal, workspaces, switchWorkspace, segments, router, onboardingSeen]);
+  }, [
+    status,
+    usablePortal,
+    workspaces,
+    switchWorkspace,
+    initialRolesPending,
+    segments,
+    router,
+    onboardingSeen,
+  ]);
 }
 
 const STACK_SCREEN_OPTIONS = { headerShown: false, animation: 'fade' } as const;

@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, TextInput, type TextInputInstance, View } from 'react-native';
 import { useTheme } from '../theme';
+import { Text } from './Text';
 
 export interface OtpInputProps {
   value: string;
@@ -10,8 +11,10 @@ export interface OtpInputProps {
   autoFocus?: boolean;
   invalid?: boolean;
   onComplete?: (value: string) => void;
+  accessibilityLabel?: string;
 }
 
+/** One real input behind drawn cells: a single autofill target and one thing for a screen reader to focus. */
 export function OtpInput({
   value,
   onChange,
@@ -20,87 +23,81 @@ export function OtpInput({
   autoFocus = false,
   invalid = false,
   onComplete,
+  accessibilityLabel,
 }: OtpInputProps) {
   const { colors, radius } = useTheme();
-  const inputs = useRef<Array<TextInputInstance | null>>([]);
-  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
-  const digits = value.replace(/\D/g, '').slice(0, length).split('');
+  const input = useRef<TextInputInstance | null>(null);
+  const [focused, setFocused] = useState(false);
+  const digits = value.replace(/\D/g, '').slice(0, length);
 
-  const setAt = (index: number, raw: string) => {
-    const incoming = raw.replace(/\D/g, '');
-    if (!incoming) {
-      const next = digits.slice();
-      next[index] = '';
-      const joined = next.join('').slice(0, length);
-      onChange(joined);
-      return;
-    }
-    const next = value.replace(/\D/g, '').split('');
-    incoming
-      .slice(0, length - index)
-      .split('')
-      .forEach((d, offset) => {
-        next[index + offset] = d;
-      });
-    const joined = next.join('').slice(0, length);
-    onChange(joined);
-    const focusIndex = Math.min(index + incoming.length, length - 1);
-    inputs.current[focusIndex]?.focus();
-    if (joined.length === length) onComplete?.(joined);
+  // Cleared after a refused code: put the cursor back so the next attempt can be typed straight away.
+  const hadDigits = useRef(digits.length > 0);
+  useEffect(() => {
+    if (hadDigits.current && digits.length === 0 && !disabled) input.current?.focus();
+    hadDigits.current = digits.length > 0;
+  }, [digits.length, disabled]);
+
+  const change = (raw: string) => {
+    const next = raw.replace(/\D/g, '').slice(0, length);
+    if (next === digits) return;
+    onChange(next);
+    if (next.length === length) onComplete?.(next);
   };
 
+  const active = focused ? Math.min(digits.length, length - 1) : -1;
+
   return (
-    <View style={styles.row} accessibilityLabel="Verification code">
+    <View style={styles.row}>
       {Array.from({ length }).map((_, i) => {
-        const filled = !!digits[i];
-        const focused = focusedIndex === i;
+        const filled = i < digits.length;
+        const current = i === active;
         const borderColor = invalid
           ? colors.destructive
-          : focused || filled
+          : current || filled
             ? colors.primary
             : colors.border;
         return (
-          <TextInput
+          <View
             key={i}
-            ref={(el) => {
-              inputs.current[i] = el;
-            }}
-            value={digits[i] ?? ''}
-            editable={!disabled}
-            autoFocus={autoFocus && i === 0}
-            keyboardType="number-pad"
-            textContentType="oneTimeCode"
-            autoComplete="sms-otp"
-            maxLength={length}
-            selectTextOnFocus
-            caretHidden
-            accessibilityLabel={`Digit ${i + 1} of ${length}`}
-            accessibilityHint={invalid ? 'The code was not accepted' : undefined}
-            selectionColor={colors.primary}
-            onFocus={() => setFocusedIndex(i)}
-            onBlur={() => setFocusedIndex((f) => (f === i ? null : f))}
-            onChangeText={(t) => setAt(i, t)}
-            onKeyPress={({ nativeEvent }) => {
-              if (nativeEvent.key === 'Backspace' && !digits[i] && i > 0) {
-                const next = digits.slice();
-                next[i - 1] = '';
-                onChange(next.join(''));
-                inputs.current[i - 1]?.focus();
-              }
-            }}
+            importantForAccessibility="no-hide-descendants"
+            accessibilityElementsHidden
             style={[
               styles.box,
               {
                 borderRadius: radius.md,
-                color: colors.foreground,
-                backgroundColor: focused ? colors.card : filled ? colors.card : colors.secondary,
+                backgroundColor: current || filled ? colors.card : colors.secondary,
                 borderColor,
-                borderWidth: focused || filled || invalid ? 2 : StyleSheet.hairlineWidth * 2,
+                borderWidth: current || filled || invalid ? 2 : StyleSheet.hairlineWidth * 2,
               },
             ]}
-          />
+          >
+            <Text variant="bodyStrong" maxFontSizeMultiplier={1.4} style={styles.digit}>
+              {digits[i] ?? ''}
+            </Text>
+          </View>
         );
       })}
+      <TextInput
+        ref={input}
+        value={digits}
+        onChangeText={change}
+        editable={!disabled}
+        autoFocus={autoFocus}
+        keyboardType="number-pad"
+        textContentType="oneTimeCode"
+        autoComplete="one-time-code"
+        maxLength={length}
+        caretHidden
+        accessibilityLabel={accessibilityLabel ?? `Verification code, ${length} digits`}
+        accessibilityHint={invalid ? 'The code was not accepted' : undefined}
+        accessibilityState={{ disabled }}
+        aria-invalid={invalid}
+        maxFontSizeMultiplier={1.4}
+        selectionColor="transparent"
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        style={styles.input}
+      />
     </View>
   );
 }
@@ -111,8 +108,15 @@ const styles = StyleSheet.create({
     flex: 1,
     aspectRatio: 0.86,
     maxWidth: 52,
-    textAlign: 'center',
-    fontSize: 22,
-    fontWeight: '700',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  digit: { fontSize: 22, lineHeight: 28, textAlign: 'center' },
+  // Laid over the cells so a tap or long-press-to-paste lands on it; nearly invisible, never hidden, so autofill still offers the code.
+  input: {
+    ...StyleSheet.absoluteFill,
+    color: 'transparent',
+    opacity: 0.02,
+    fontSize: 16,
   },
 });

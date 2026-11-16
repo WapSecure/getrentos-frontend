@@ -17,7 +17,6 @@ describe('authentication validation', () => {
       fullName: 'Ada Okafor',
       email: 'ada@getsureground.io',
       password: 'secure-password',
-      confirmPassword: 'secure-password',
       acceptedTerms: false,
     });
     expect(result.success).toBe(false);
@@ -26,18 +25,15 @@ describe('authentication validation', () => {
     }
   });
 
-  it('requires matching passwords for email signup', () => {
-    const result = emailSignupSchema.safeParse({
-      fullName: 'Ada Okafor',
-      email: 'ada@getsureground.io',
-      password: 'secure-password',
-      confirmPassword: 'different-password',
-      acceptedTerms: true,
-    });
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues.map((issue) => issue.path[0])).toContain('confirmPassword');
-    }
+  it('needs one password only for email signup', () => {
+    expect(
+      emailSignupSchema.safeParse({
+        fullName: 'Ada Okafor',
+        email: 'ada@getsureground.io',
+        password: 'secure-password',
+        acceptedTerms: true,
+      }).success
+    ).toBe(true);
   });
 
   it('accepts a valid Nigerian phone signup', () => {
@@ -46,7 +42,6 @@ describe('authentication validation', () => {
         fullName: 'Ada Okafor',
         phone: '+234 803 123 4567',
         password: 'secure-password',
-        confirmPassword: 'secure-password',
         acceptedTerms: true,
       }).success
     ).toBe(true);

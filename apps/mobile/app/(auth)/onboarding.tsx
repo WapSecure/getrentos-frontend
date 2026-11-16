@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AccessibilityInfo, BackHandler, Platform, useWindowDimensions, View } from 'react-native';
+import {
+  AccessibilityInfo,
+  BackHandler,
+  Platform,
+  ScrollView,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { router, type Href } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
@@ -45,7 +52,7 @@ const SLIDES = [
     key: 'escrow',
     eyebrow: 'Protection',
     title: 'Sureground holds your money safely',
-    body: 'Rent is held by Sureground and released to your landlord when you confirm move-in or on its scheduled release date, whichever comes first. A deposit on a home you’re buying is only released to the seller once they hand over the keys and you confirm. A dispute keeps money held until it’s resolved.',
+    body: 'Rent is held by Sureground and released to your landlord when you confirm move-in or on the agreed date.',
     Scene: EscrowScene,
   },
   {
@@ -151,8 +158,8 @@ export default function Onboarding() {
           <LinkButton
             label="Skip"
             tone="muted"
-            accessibilityHint="Skips the introduction"
-            onPress={() => leave('/(auth)/welcome')}
+            accessibilityHint="Skips to creating an account or signing in"
+            onPress={() => goTo(LAST)}
           />
         ) : null}
       </View>
@@ -324,31 +331,41 @@ function Slide({
 
   return (
     <View style={{ width: screenWidth }}>
-      {/* One focusable summary; the illustration below is decorative. */}
-      <Animated.View
-        accessible
-        accessibilityRole="header"
-        accessibilityLabel={`${slide.eyebrow}. ${slide.title}. ${slide.body}`}
-        style={[{ paddingHorizontal: spacing.xl, maxWidth: 560 }, copyStyle]}
+      {/* Scrolls at large text sizes instead of pushing the copy off screen. */}
+      <ScrollView
+        style={{ flexGrow: 0, flexShrink: 1 }}
+        showsVerticalScrollIndicator={false}
+        nestedScrollEnabled
       >
-        <Text variant="label" color="primary" uppercase>
-          {slide.eyebrow}
-        </Text>
-        <Text
-          variant="display"
-          style={{ marginTop: spacing.sm, fontSize: 29, lineHeight: 35, letterSpacing: -0.8 }}
+        {/* One focusable summary; the illustration below is decorative. */}
+        <Animated.View
+          accessible
+          accessibilityRole="header"
+          accessibilityLabel={`${slide.eyebrow}. ${slide.title}. ${slide.body}`}
+          style={[{ paddingHorizontal: spacing.xl, maxWidth: 560 }, copyStyle]}
         >
-          {slide.title}
-        </Text>
-        <Text variant="body" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-          {slide.body}
-        </Text>
-      </Animated.View>
+          <Text variant="label" color="primary" uppercase>
+            {slide.eyebrow}
+          </Text>
+          <Text
+            variant="display"
+            style={{ marginTop: spacing.sm, fontSize: 29, lineHeight: 35, letterSpacing: -0.8 }}
+          >
+            {slide.title}
+          </Text>
+          <Text variant="body" color="mutedForeground" style={{ marginTop: spacing.sm }}>
+            {slide.body}
+          </Text>
+        </Animated.View>
+      </ScrollView>
 
       <Animated.View
         importantForAccessibility="no-hide-descendants"
         accessibilityElementsHidden
-        style={[{ flex: 1, marginTop: spacing.lg, alignItems: 'center' }, sceneStyle]}
+        style={[
+          { flex: 1, minHeight: 120, marginTop: spacing.lg, alignItems: 'center' },
+          sceneStyle,
+        ]}
       >
         <View
           style={{

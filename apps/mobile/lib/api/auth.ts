@@ -21,9 +21,11 @@ export interface AuthSession extends AuthProfile {
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
+  /** Set when a social sign-in created the account, so the person still picks their roles. */
+  isNewUser?: boolean;
 }
 
-export interface TwoFactorChallenge extends AuthProfile {
+export interface TwoFactorChallenge extends Partial<AuthProfile> {
   requiresTwoFactor: true;
   challengeToken: string;
   expiresIn: number;
@@ -112,6 +114,19 @@ export const authApi = {
         headers: deviceId ? { 'x-device-id': deviceId } : undefined,
       })
     ),
+
+  signupPrecheck: (input: { password?: string; referralCode?: string }) =>
+    apiFetch<{ ok: true }>('/auth/signup/precheck', {
+      method: 'POST',
+      anonymous: true,
+      body: input,
+    }),
+
+  setInitialRoles: (selectedRoles: string[]) =>
+    apiFetch<AuthProfile>('/auth/initial-roles', {
+      method: 'POST',
+      body: { selectedRoles },
+    }),
 
   startFaceRecovery: (identifier: string) =>
     apiFetch<{ recoveryId: string; secret: string; session: SmileLivenessSession }>(

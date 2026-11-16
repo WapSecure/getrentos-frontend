@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { CustodyProvider } from '@/lib/agency/custody';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useAppLockOffer } from '@/hooks/useAppLockOffer';
 
 const SCREEN_OPTIONS = { headerShown: false } as const;
 const PORTAL_UNAVAILABLE_OPTIONS = { presentation: 'modal' } as const;
@@ -9,6 +10,7 @@ const DETAIL_OPTIONS = { animation: 'slide_from_right' } as const;
 // No redirect here: the root `useProtectedRoute` keeps anonymous users out and routes unbuilt portals away.
 export default function AppLayout() {
   const { usablePortal } = useAuth();
+  useAppLockOffer(!!usablePortal);
   return (
     <CustodyProvider enabled={usablePortal === 'manager'}>
       <Stack screenOptions={SCREEN_OPTIONS}>
