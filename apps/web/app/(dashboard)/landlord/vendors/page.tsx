@@ -11,7 +11,8 @@ import {
   useToast,
   PageHeader,
 } from '@sureground/ui';
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, HardHat } from '@sureground/icons';
 import { VendorCard } from '@/components/landlord/vendors/VendorCard';
@@ -25,11 +26,12 @@ import type { Vendor, VendorInput } from '@/types/landlord';
 
 const PAGE_SIZE = 10;
 
-export default function LandlordVendorsPage() {
+function LandlordVendorsPageContent() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  // ?add=1 (e.g. from assigning a repair) opens the add form straight away.
+  const [isFormOpen, setIsFormOpen] = useState(useSearchParams().get('add') === '1');
   const [editing, setEditing] = useState<Vendor | null>(null);
   const [viewing, setViewing] = useState<Vendor | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -239,5 +241,14 @@ export default function LandlordVendorsPage() {
         isLoading={removeVendorMutation.isPending || toggleActiveMutation.isPending}
       />
     </>
+  );
+}
+
+export default function LandlordVendorsPage() {
+  // useSearchParams needs a Suspense boundary on a statically rendered page.
+  return (
+    <Suspense fallback={null}>
+      <LandlordVendorsPageContent />
+    </Suspense>
   );
 }

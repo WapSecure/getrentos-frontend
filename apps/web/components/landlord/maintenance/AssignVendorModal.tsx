@@ -18,6 +18,8 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
 import type { LandlordMaintenanceRequest } from '@/types/landlord';
+import Link from 'next/link';
+import { ROUTES } from '@/lib/constants/auth';
 
 const PAGE_SIZE = 10;
 
@@ -77,7 +79,7 @@ export const AssignVendorModal = ({
               <EmptyState
                 icon={HardHat}
                 title="No active vendors"
-                description="No active vendors in your directory. Add or reactivate one from the Vendors page."
+                description="No active vendors in your directory. Add one below, or reactivate one from the Vendors page."
                 size="compact"
               />
             ) : (
@@ -127,6 +129,16 @@ export const AssignVendorModal = ({
                 className="pt-3"
               />
             )}
+            {/* Without this, a landlord whose vendors are the wrong trade had no way forward from here. */}
+            <p className="pt-2 text-sm text-muted-foreground">
+              Need a different trade?{' '}
+              <Link
+                href={`${ROUTES.LANDLORD_VENDORS}?add=1`}
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Add a vendor
+              </Link>
+            </p>
           </div>
         </DialogContent>
       )}
