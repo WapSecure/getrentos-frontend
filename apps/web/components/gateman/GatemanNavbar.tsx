@@ -19,7 +19,7 @@ interface GatemanNavbarProps {
 }
 
 const navItems = [
-  { label: 'Check-In', href: ROUTES.GATEMAN_DASHBOARD, icon: KeyRound },
+  { label: 'Check-in', href: ROUTES.GATEMAN_DASHBOARD, icon: KeyRound },
   { label: 'Vehicles', href: ROUTES.GATEMAN_VEHICLES, icon: Car },
   { label: 'Deliveries', href: ROUTES.GATEMAN_DELIVERIES, icon: Package },
   { label: 'Incidents', href: ROUTES.GATEMAN_INCIDENTS, icon: Siren },

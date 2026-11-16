@@ -140,7 +140,7 @@ export default function GatemanDeliveriesPage() {
 
       <div>
         <h2 className="text-sm font-semibold text-foreground mb-3">
-          Awaiting Pickup ({awaiting.length})
+          Awaiting pickup ({awaiting.length})
         </h2>
         {isAwaitingLoading ? (
           <ListSkeleton rows={2} />
