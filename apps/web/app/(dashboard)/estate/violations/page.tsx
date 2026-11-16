@@ -4,7 +4,14 @@ import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEsta
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TriangleAlert, Plus } from '@sureground/icons';
-import { Button, CardSkeleton, EmptyState, ToggleChip, PageHeader } from '@sureground/ui';
+import {
+  Button,
+  CardSkeleton,
+  ConfirmDialog,
+  EmptyState,
+  ToggleChip,
+  PageHeader,
+} from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -12,7 +19,7 @@ import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { ReportViolationModal } from '@/components/estate/violations/ReportViolationModal';
 import { CloseViolationModal } from '@/components/estate/violations/CloseViolationModal';
 import { ViolationCard } from '@/components/estate/violations/ViolationCard';
-import type { ViolationStatus } from '@/types/estate';
+import type { Violation, ViolationStatus } from '@/types/estate';
 import {
   EstateFilterChips,
   EstateListSection,
@@ -31,6 +38,7 @@ const statusFilters: { value: ViolationStatus | 'all'; label: string }[] = [
 export default function EstateViolationsPage() {
   const queryClient = useQueryClient();
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [warning, setWarning] = useState<Violation | null>(null);
   const [statusFilter, setStatusFilter] = useState<ViolationStatus | 'all'>('all');
   const [closeTarget, setCloseTarget] = useState<{
     id: string;
@@ -76,7 +84,10 @@ export default function EstateViolationsPage() {
   const warnMutation = useMutation({
     mutationFn: (violationId: string) =>
       unwrap(estateService.issueViolationWarning(estate!.id, violationId)),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      setWarning(null);
+    },
   });
 
   const closeMutation = useMutation({
@@ -176,7 +187,7 @@ export default function EstateViolationsPage() {
               <li key={violation.id}>
                 <ViolationCard
                   violation={violation}
-                  onWarn={() => warnMutation.mutate(violation.id)}
+                  onWarn={() => setWarning(violation)}
                   onResolve={() => setCloseTarget({ id: violation.id, action: 'resolve' })}
                   onDismiss={() => setCloseTarget({ id: violation.id, action: 'dismiss' })}
                   isUpdating={warnMutation.isPending || closeMutation.isPending}
@@ -193,6 +204,22 @@ export default function EstateViolationsPage() {
         onClose={() => setIsReportOpen(false)}
         onSubmit={(data) => reportViolation.mutate(data)}
         isSubmitting={reportViolation.isPending}
+      />
+
+      <ConfirmDialog
+        open={warning !== null}
+        onOpenChange={(open) => {
+          if (!open) setWarning(null);
+        }}
+        title={warning ? `Send a warning to ${warning.residentName}?` : ''}
+        description={
+          warning
+            ? `They are notified straight away with what was reported: "${warning.description}"`
+            : ''
+        }
+        confirmLabel="Send warning"
+        onConfirm={() => warning && warnMutation.mutate(warning.id)}
+        isLoading={warnMutation.isPending}
       />
 
       <CloseViolationModal

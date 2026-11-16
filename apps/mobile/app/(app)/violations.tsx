@@ -34,7 +34,7 @@ const STATUS_TONE: Record<ViolationStatus, BadgeTone> = {
 
 const CATEGORY_LABEL: Record<string, string> = {
   noise: 'Noise',
-  unauthorized_parking: 'Unauthorized parking',
+  unauthorized_parking: 'Unauthorised parking',
   pet_violation: 'Pet violation',
   property_maintenance: 'Property maintenance',
   other: 'Other',
