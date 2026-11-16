@@ -164,7 +164,7 @@ export const OwnerLandWorkspace = () => {
   return (
     <>
       <PageHeader
-        eyebrow="Land v1"
+        eyebrow="Land"
         title="Land portfolio"
         description="Register a parcel, submit title evidence, and keep it private until ownership and land diligence are verified."
         actions={
