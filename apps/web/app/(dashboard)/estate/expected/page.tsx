@@ -41,7 +41,7 @@ export default function EstateExpectedPage() {
           title="Expected today"
           description={
             <>
-              Unused invitations, regular visitors due today and parcels still waiting. on one
+              Unused invitations, regular visitors due today and parcels still waiting, on one
               board.
             </>
           }
@@ -58,9 +58,8 @@ export default function EstateExpectedPage() {
 
         <Alert variant="neutral" className="mb-6">
           <p className="text-xs leading-5">
-            This is a reference board, not an access control. Every visitor must still presents
-            their own pass at the gate, and a guard can always turn somebody away whatever this
-            says.
+            This is a reference board, not an access control. Every visitor must still present their
+            own pass at the gate, and a guard can always turn somebody away whatever this says.
           </p>
         </Alert>
 
