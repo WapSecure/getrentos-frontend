@@ -24,7 +24,7 @@ const statusLabels: Record<Violation['status'], string> = {
 
 const categoryLabels: Record<Violation['category'], string> = {
   noise: 'Noise',
-  unauthorized_parking: 'Unauthorized parking',
+  unauthorized_parking: 'Unauthorised parking',
   pet_violation: 'Pet violation',
   property_maintenance: 'Property maintenance',
   other: 'Other',
@@ -45,7 +45,7 @@ export default function ResidentViolationsPage() {
     <>
       <PageHeader
         title="Violations"
-        description={<>{violations?.length ?? 0} violations reported against your household</>}
+        description={`${violations?.length ?? 0} ${(violations?.length ?? 0) === 1 ? 'violation' : 'violations'} reported against your household`}
       />
 
       {isLoading ? (
