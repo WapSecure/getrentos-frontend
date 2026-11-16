@@ -43,7 +43,7 @@ export const HelpCenterContent = ({ messagesHref = '/admin/messages' }: HelpCent
   return (
     <>
       <PageHeader
-        title="Staff help center"
+        title="Staff help centre"
         description="Operating guidance and escalation paths for Sureground backoffice staff"
       />
 

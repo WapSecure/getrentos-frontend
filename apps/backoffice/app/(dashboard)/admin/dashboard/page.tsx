@@ -56,11 +56,11 @@ export default function AdminDashboardPage() {
       )}
 
       <div className="grid gap-6 xl:grid-cols-12">
-        <div className="space-y-6 xl:col-span-8">
+        <div className="min-w-0 space-y-6 xl:col-span-8">
           <PlatformGrowthChart />
           <AdminActivityFeed />
         </div>
-        <aside className="xl:col-span-4">
+        <aside className="min-w-0 xl:col-span-4">
           <AdminQuickActions />
         </aside>
       </div>

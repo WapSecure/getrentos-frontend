@@ -873,7 +873,7 @@ export function StaffQueue() {
       },
       {
         key: 'organization',
-        header: 'Organization',
+        header: 'Organisation',
         render: (s) => (
           <Cell
             primary={s.organizationName}
