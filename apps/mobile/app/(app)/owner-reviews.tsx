@@ -9,6 +9,7 @@ import { ownerApi } from '@/lib/api/owner';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { TenantReviewsSection } from '@/components/reviews/TenantReviewsSection';
 
 export default function OwnerReviews() {
   const { colors, spacing, radius } = useTheme();
@@ -72,6 +73,8 @@ export default function OwnerReviews() {
         <Skeleton height={90} radius={radius.lg} />
       ) : null}
 
+      <TenantReviewsSection />
+
       <QueryState
         query={reviews}
         skeleton={<Skeleton height={120} radius={radius.lg} />}
@@ -79,7 +82,7 @@ export default function OwnerReviews() {
         empty={{
           icon: <Star size={34} color={colors.mutedForeground} />,
           title: 'No reviews yet',
-          description: 'Buyers can review you after a completed sale.',
+          description: 'Tenants can review you when a tenancy ends, and buyers after a completed sale.',
         }}
       >
         {(reviews.data?.items ?? []).map((r) => (

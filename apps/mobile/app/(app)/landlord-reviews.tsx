@@ -8,6 +8,7 @@ import { Card, EmptyState, QueryState, Skeleton, Text, useTheme } from '@suregro
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordReview } from '@/lib/api/landlord';
 import { formatDate } from '@/lib/format';
+import { TenantReviewsSection } from '@/components/reviews/TenantReviewsSection';
 import { StarRating } from '@/components/reviews/StarRating';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -83,6 +84,9 @@ export default function LandlordReviews() {
                   </View>
                 )}
               </Card>
+              <View style={{ marginTop: spacing.md }}>
+                <TenantReviewsSection />
+              </View>
             </View>
           }
           contentContainerStyle={{

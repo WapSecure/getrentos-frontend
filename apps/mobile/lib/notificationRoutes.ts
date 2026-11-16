@@ -14,6 +14,7 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/renter/documents': '/(app)/documents',
   '/renter/saved': '/(app)/saved',
   '/renter/trust-score': '/(app)/trust-score',
+  '/renter/reviews': '/(app)/reviews',
   '/renter/viewings': '/(app)/viewings',
   '/renter/roommates': '/(app)/roommates',
   '/buyer/offers': '/(app)/(buyer)/offers',
@@ -27,6 +28,7 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   // The answered notification links buyers here; anyone else gets `/developments/<id>`.
   [ROUTES.BUYER_DEVELOPER_QUESTIONS]: DEVELOPER_QUESTIONS_ROUTE,
   '/landlord/applications': '/(app)/landlord-applications',
+  '/landlord/reviews': '/(app)/landlord-reviews',
   '/landlord/payments': '/(app)/landlord-payments',
   '/landlord/maintenance': '/(app)/landlord-maintenance',
   '/landlord/leases': '/(app)/landlord-leases',
