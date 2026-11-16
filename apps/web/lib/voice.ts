@@ -45,7 +45,7 @@ function errorText(code: string, language: ReplyLanguage): string {
       return `Speaking in ${languageLabel(language)} is not supported in this browser yet. Try English, or type.`;
     case 'not-allowed':
     case 'service-not-allowed':
-      return 'Allow microphone access for this site to speak your question.';
+      return 'Allow microphone access for this site to use your voice.';
     case 'no-speech':
       return 'Didn’t catch that. Press the mic and try again.';
     case 'network':
