@@ -19,6 +19,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import type { BuyerPropertyListing } from '@/types/buyer';
 import { ROUTES } from '@/lib/constants/auth';
+import { BuyerPurchaseNav } from '@/components/shared/navigation/WorkflowNavs';
 
 export default function BuyerSavedPage() {
   const router = useRouter();
@@ -74,6 +75,7 @@ export default function BuyerSavedPage() {
           )
         }
       />
+      <BuyerPurchaseNav />
 
       <QueryState
         isLoading={isLoading}

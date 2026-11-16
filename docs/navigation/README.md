@@ -107,6 +107,7 @@ and focus.
 **Contextual navigation:**
 
 - Pipeline tabs (`SectionNav`) on landlord lettings (Listings, Viewing requests, Applications, Offers, Leads) and owner selling (Sale listings, Buyer leads, Viewings, Offers, Transactions).
+- More pipeline tabs: landlord tenancies (Tenants, Leases, Inspections, Deposits, Notices), realtor deals (Leads, Viewings, Offers, Commissions) and buyer buying (Saved properties, Viewing requests, Video tours, Inspections, Offers, Transactions).
 - Tabbed hubs (`HubTabs`) for pages merged into one (payments, maintenance, financials and others).
 - Breadcrumbs on detail pages.
 

@@ -26,6 +26,7 @@ import { AgencyAgentSelfPayout } from '@/components/agency/AgencyAgentSelfPayout
 import type { Commission, CommissionSide, CommissionStatus } from '@/types/realtor';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
+import { RealtorPipelineNav } from '@/components/shared/navigation/WorkflowNavs';
 
 const PAGE_SIZE = 10;
 
@@ -237,6 +238,7 @@ export default function RealtorCommissionsPage() {
           ) : undefined
         }
       />
+      <RealtorPipelineNav />
 
       <ProFeatureGate
         title="Commission tracking is a Pro feature"

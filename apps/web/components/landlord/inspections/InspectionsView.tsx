@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, ClipboardCheck } from '@sureground/icons';
 import {
@@ -38,7 +38,7 @@ const statusFilters: { value: 'all' | InspectionStatus; label: string }[] = [
 const PAGE_SIZE = 12;
 
 // Role-agnostic: /inspections serves any property controller, so the landlord and owner portals both render this.
-export function InspectionsView() {
+export function InspectionsView({ sectionNav }: { sectionNav?: ReactNode } = {}) {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<'all' | InspectionStatus>('all');
@@ -86,6 +86,7 @@ export function InspectionsView() {
           </Button>
         }
       />
+      {sectionNav}
 
       <Tabs
         value={filter}

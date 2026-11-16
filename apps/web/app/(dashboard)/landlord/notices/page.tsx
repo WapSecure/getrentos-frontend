@@ -33,6 +33,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { formatDate } from '@/lib/format';
 import type { NoticeKind, NoticeServiceMethod, TenancyNotice } from '@/types/tenancy-notice';
+import { LandlordTenanciesNav } from '@/components/shared/navigation/WorkflowNavs';
 
 type Tab = 'running' | 'periods';
 
@@ -224,6 +225,7 @@ export default function LandlordNoticesPage() {
               : `${notices.length} running`
         }
       />
+      <LandlordTenanciesNav />
 
       <SegmentedControl
         aria-label="Notices view"

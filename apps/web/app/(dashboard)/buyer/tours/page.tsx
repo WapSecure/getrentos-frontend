@@ -2,6 +2,7 @@ import { ArrowRight } from '@sureground/icons';
 import { BuyerTours } from '@/components/shared/tours/BuyerTours';
 import { findPropertyHref } from '@/lib/constants/visitRoutes';
 import { Button, PageHeader } from '@sureground/ui';
+import { BuyerPurchaseNav } from '@/components/shared/navigation/WorkflowNavs';
 
 export default function BuyerToursPage() {
   return (
@@ -20,6 +21,7 @@ export default function BuyerToursPage() {
           </Button>
         }
       />
+      <BuyerPurchaseNav />
       <BuyerTours scope="all" />
     </div>
   );
