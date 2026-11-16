@@ -26,6 +26,9 @@ const STATUS: Record<UserAccountStatus, { label: string; variant: BadgeVariant }
   banned: { label: 'Banned', variant: 'danger' },
 };
 
+// Enterprise is staff-granted (no self-serve checkout), so every tier must be reachable here.
+const PLAN_TIERS: PlanTier[] = ['FREE', 'PRO', 'ENTERPRISE'];
+
 const planLabel = (tier: PlanTier) =>
   tier === 'ENTERPRISE' ? 'Enterprise' : tier === 'PRO' ? 'Pro' : 'Free';
 
@@ -94,18 +97,19 @@ export const UserDetailModal = ({
                 <Badge variant={user.planTier === 'FREE' ? 'neutral' : 'primary'}>
                   {planLabel(user.planTier)}
                 </Badge>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-1 h-6 px-2 text-xs"
-                  isLoading={isChangingSubscription}
-                  onClick={() =>
-                    onChangeSubscription(user.id, user.planTier === 'FREE' ? 'PRO' : 'FREE')
-                  }
-                >
-                  <BadgeCheck className="w-3 h-3" />
-                  {user.planTier === 'FREE' ? 'Upgrade to Pro' : 'Move to Free'}
-                </Button>
+                {PLAN_TIERS.filter((tier) => tier !== user.planTier).map((tier) => (
+                  <Button
+                    key={tier}
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1 h-6 px-2 text-xs"
+                    isLoading={isChangingSubscription}
+                    onClick={() => onChangeSubscription(user.id, tier)}
+                  >
+                    <BadgeCheck className="w-3 h-3" />
+                    Move to {planLabel(tier)}
+                  </Button>
+                ))}
               </div>
             </div>
           </div>
