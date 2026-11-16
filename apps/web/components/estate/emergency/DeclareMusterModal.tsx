@@ -125,7 +125,7 @@ export const DeclareMusterModal = ({
           <Field
             label="Where should everybody gather?"
             optionalLabel="(optional)"
-            hint="Leave it blank if you have not decided. Residents are told to leave by the nearest exit instead: nobody is kept waiting on a form field."
+            hint="Leave it blank if you have not decided. Residents are told to leave by the nearest exit instead, so nobody is kept waiting on a form field."
           >
             <Input
               type="text"

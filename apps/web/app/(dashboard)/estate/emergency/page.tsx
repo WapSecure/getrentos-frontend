@@ -14,6 +14,7 @@ import {
   ToggleChip,
   PageHeader,
 } from '@sureground/ui';
+import { formatClock } from '@sureground/shared';
 import { estateService } from '@/services/estateService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -168,7 +169,7 @@ export default function EstateEmergencyPage() {
           title="No roll call is in progress"
           className="mb-6"
         >
-          Raising the alarm tells every household immediately and takes the roll as it stands :
+          Raising the alarm tells every household immediately and takes the roll as it stands:
           everybody the estate believes is inside, plus every visitor the gate has admitted and not
           logged out. You can refresh that list while the emergency is open, because people keep
           arriving.
@@ -210,8 +211,9 @@ export default function EstateEmergencyPage() {
                 </div>
                 <p className="text-sm text-foreground mt-2">{muster.description}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Raised {new Date(muster.declaredAt).toLocaleString()}
-                  {muster.closedAt && ` · stood down ${new Date(muster.closedAt).toLocaleString()}`}
+                  Raised {formatClock(muster.declaredAt, { day: 'numeric', month: 'short' })}
+                  {muster.closedAt &&
+                    ` · stood down ${formatClock(muster.closedAt, { day: 'numeric', month: 'short' })}`}
                 </p>
               </div>
 
@@ -243,9 +245,9 @@ export default function EstateEmergencyPage() {
 
             {isLive && (
               <p className="text-xs text-muted-foreground mt-2">
-                Nobody standing this down marks it as timed out and stops asking. &ldquo;Check the
-                gate again&rdquo; adds anybody admitted since the roll was taken: nothing else on it
-                moves.
+                If nobody stands it down, it is marked as timed out and residents stop being asked.
+                &ldquo;Check the gate again&rdquo; adds anybody admitted since the roll was taken.
+                Nothing else on it changes.
               </p>
             )}
 
@@ -388,7 +390,7 @@ const HistoryRow = ({ summary, onOpen }: { summary: MusterSummary; onOpen: () =>
         </div>
         <p className="text-sm text-muted-foreground mt-0.5 truncate">{summary.description}</p>
         <p className="text-xs text-muted-foreground mt-1">
-          {new Date(summary.declaredAt).toLocaleString()}
+          {formatClock(summary.declaredAt, { day: 'numeric', month: 'short' })}
         </p>
       </div>
       <p className="text-xs text-muted-foreground text-right shrink-0 max-w-[16rem]">

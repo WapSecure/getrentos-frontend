@@ -52,8 +52,7 @@ export const CloseMusterDialog = ({
 
         <DialogDescription className="mt-1 text-sm text-muted-foreground">
           The roll is frozen and every household is told the estate has stood down. Nobody can be
-          marked afterwards: the record says what the estate knew at the time, and a line added
-          later is indistinguishable from a correction to a mistake nobody made.
+          marked after this, so the record shows exactly what the estate knew at the time.
         </DialogDescription>
 
         {needsNote && (
