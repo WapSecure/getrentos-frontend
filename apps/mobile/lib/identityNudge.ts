@@ -34,7 +34,7 @@ export function identityNudgeCopy({
   // the grace period, so the card says what is blocked now.
   return {
     title: 'Verify your identity',
-    detail: `Unlocks ${unlocks}: takes two minutes`,
+    detail: `Unlocks ${unlocks}. Takes two minutes`,
     accessibilityLabel: `Verify your identity. Unlocks ${unlocks}.`,
   };
 }
