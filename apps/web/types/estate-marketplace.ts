@@ -57,6 +57,8 @@ export interface EstateListing {
   /** Never the estate. */
   ownerName?: string;
   viewCount: number;
+  /** The unit is let or promised, so renters no longer see it even while it is published. */
+  unitTaken?: boolean;
   createdAt: string;
 }
 

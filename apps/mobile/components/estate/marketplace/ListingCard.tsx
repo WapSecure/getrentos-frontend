@@ -6,7 +6,7 @@ import { StatusPill } from '@/components/host/HostUI';
 import {
   listingName,
   listingPricePeriod,
-  listingStatus,
+  listingBadge,
   listingTypeLabel,
   type EstateListing,
 } from '@/lib/api/estateMarketplace';
@@ -14,7 +14,7 @@ import { formatNaira } from '@/lib/format';
 
 export function ListingCard({ listing, onPress }: { listing: EstateListing; onPress: () => void }) {
   const { colors, spacing, radius } = useTheme();
-  const s = listingStatus(listing.status);
+  const s = listingBadge(listing);
   const name = listingName(listing);
   const photos = listing.media?.length ?? 0;
   const cover = listing.media?.[0]?.url ?? listing.coverImageUrl;

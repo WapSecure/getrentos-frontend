@@ -24,7 +24,8 @@ import {
   listingMoves,
   listingName,
   listingPricePeriod,
-  listingStatus,
+  listingBadge,
+  UNIT_TAKEN_NOTE,
   listingTypeLabel,
   marketplaceKeys,
   parseNaira,
@@ -58,7 +59,7 @@ function ListingManager({ estateId, listing }: { estateId: string; listing: Esta
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
-  const s = listingStatus(listing.status);
+  const s = listingBadge(listing);
   const photos = listing.media ?? [];
   const room = photoRoom(listing);
   const moves = listingMoves(listing.status);
@@ -144,6 +145,11 @@ function ListingManager({ estateId, listing }: { estateId: string; listing: Esta
           {listing.unitName ? ` · ${listing.unitName}` : ''}
           {listing.availableFrom ? ` · from ${formatDate(listing.availableFrom, 'short')}` : ''}
         </Text>
+        {listing.status === 'PUBLISHED' && listing.unitTaken ? (
+          <Text variant="caption" color="mutedForeground">
+            {UNIT_TAKEN_NOTE}
+          </Text>
+        ) : null}
         <Text variant="caption" color="mutedForeground">
           {formatLocation(listing.address, listing.city)}
           {listing.ownerName ? ` · owner ${listing.ownerName}` : ''}

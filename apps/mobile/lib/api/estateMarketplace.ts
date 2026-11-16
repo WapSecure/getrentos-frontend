@@ -88,6 +88,8 @@ export interface EstateListing {
   /** Owner of record: never the estate. */
   ownerName?: string;
   viewCount: number;
+  /** The unit is let or promised, so renters no longer see it even while it is published. */
+  unitTaken?: boolean;
   createdAt: string;
 }
 
@@ -235,12 +237,20 @@ export const LISTING_STATUS: Record<ListingStatus, { label: string; tone: Tone }
   PUBLISHED: { label: 'Live', tone: 'success' },
   PAUSED: { label: 'Paused', tone: 'warning' },
   DRAFT: { label: 'Draft', tone: 'info' },
-  PENDING_VERIFICATION: { label: 'Being checked', tone: 'info' },
+  PENDING_VERIFICATION: { label: 'Draft', tone: 'info' },
   CLOSED: { label: 'Closed', tone: 'neutral' },
 };
 
 export const listingStatus = (s: string) =>
   LISTING_STATUS[s as ListingStatus] ?? { label: s.toLowerCase(), tone: 'neutral' as Tone };
+
+export const UNIT_TAKEN_NOTE =
+  'The unit is let or promised, so renters no longer see this listing.';
+
+export const listingBadge = (l: Pick<EstateListing, 'status' | 'unitTaken'>) =>
+  l.status === 'PUBLISHED' && l.unitTaken
+    ? { label: 'Unit taken', tone: 'warning' as Tone }
+    : listingStatus(l.status);
 
 export const AGREEMENT_STATUS: Record<AgreementStatus, { label: string; tone: Tone }> = {
   ACTIVE: { label: 'Can market', tone: 'success' },
