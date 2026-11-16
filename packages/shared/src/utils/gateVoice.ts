@@ -1,4 +1,5 @@
-// Number words only: homophones such as "to" and "for" would turn ordinary words into digits.
+// Number words count anywhere. Sound-alikes ("for", "to") count only between digits: recognisers
+// often hear "four" as "for", but "the PIN for them is" must not gain a 4.
 const DIGIT_WORDS: Record<string, string> = {
   zero: '0',
   oh: '0',
@@ -14,19 +15,37 @@ const DIGIT_WORDS: Record<string, string> = {
   nine: '9',
 };
 
+const SOUND_ALIKES: Record<string, string> = {
+  won: '1',
+  to: '2',
+  too: '2',
+  for: '4',
+  fore: '4',
+  ate: '8',
+};
+
 export function digitsFromSpeech(text: string): string {
-  const out: string[] = [];
   const tokens = text
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, ' ')
     .split(/\s+/)
     .filter(Boolean);
+  const plain = (t: string | undefined) =>
+    t !== undefined && (/^\d+$/.test(t) || t in DIGIT_WORDS || t === 'double' || t === 'triple');
+  const out: string[] = [];
   for (let i = 0; i < tokens.length; i++) {
     const t = tokens[i];
     const repeat = t === 'double' ? 2 : t === 'triple' ? 3 : 1;
-    const word = repeat > 1 ? tokens[++i] : t;
+    const at = repeat > 1 ? i + 1 : i;
+    const word = tokens[at];
     if (!word) break;
-    const digits = /^\d+$/.test(word) ? word : DIGIT_WORDS[word];
+    if (repeat > 1) i++;
+    const alike = SOUND_ALIKES[word];
+    const betweenDigits =
+      alike !== undefined && (plain(tokens[at - (repeat > 1 ? 2 : 1)]) || plain(tokens[at + 1]));
+    const digits = /^\d+$/.test(word)
+      ? word
+      : (DIGIT_WORDS[word] ?? (betweenDigits ? alike : undefined));
     if (digits) out.push(digits.repeat(repeat));
   }
   return out.join('');

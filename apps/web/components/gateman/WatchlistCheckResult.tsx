@@ -15,7 +15,7 @@ export const WatchlistCheckResult = ({ screening }: { screening: WatchlistScreen
         <div>
           <p>Nobody on this estate&apos;s watch list matches that.</p>
           <p className="text-xs mt-0.5">
-            Compared exactly against what the list holds, ignoring case, spacing and word order: so
+            Compared exactly against what the list holds, ignoring case, spacing and word order, so
             a genuinely different spelling would not show up.
           </p>
         </div>

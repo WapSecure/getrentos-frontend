@@ -193,8 +193,9 @@ export const AddWatchlistEntryModal = ({
           </Field>
 
           <Field
-            label="Permanent?"
-            optionalLabel="Leave blank for an entry that stands until somebody lifts it"
+            label="Ends on"
+            optionalLabel="(optional)"
+            hint="Leave blank to keep the entry until somebody lifts it."
           >
             <DatePicker value={expiresAt} onChange={setExpiresAt} clearable />
           </Field>

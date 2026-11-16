@@ -115,6 +115,13 @@ export default function EstateDashboardPage() {
     enabled: !!estate && isPro,
   });
 
+  // Same query the gate console makes: the setup form's gate count is a guess, not gates that exist.
+  const gates = useQuery({
+    queryKey: estateKeys.gates(estate?.id ?? ''),
+    queryFn: () => unwrap(estateService.listGates(estate!.id)),
+    enabled: !!estate,
+  });
+
   // Same query the shared attention feed makes, so it is fetched once.
   const attention = useQuery({
     queryKey: attentionKeys.feed('estate', estate?.id),
@@ -158,7 +165,13 @@ export default function EstateDashboardPage() {
         eyebrow="Overview"
         title={estate.name}
         description={formatLocation(estate.address, estate.city, estate.state)}
-        meta={`${pluralize(estate.householdCount, 'household')} · ${pluralize(estate.gateCount ?? 0, 'active gate')}`}
+        meta={
+          gates.data
+            ? `${pluralize(estate.householdCount, 'household')} · ${
+                gates.data.length ? pluralize(gates.data.length, 'gate') : 'no gates set up yet'
+              }`
+            : pluralize(estate.householdCount, 'household')
+        }
       />
 
       {estate.householdCount === 0 && (
