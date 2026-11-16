@@ -59,7 +59,8 @@ export function describeProperty(p: PropertyCardData): string {
     p.bathrooms ? `${p.bathrooms} bathroom${p.bathrooms === 1 ? '' : 's'}` : null,
     p.size ? `${p.size} square metres` : null,
     p.tag,
-    p.score != null ? `${Math.round(p.score)} percent match` : null,
+    // The home's review score out of 100 (the web calls it Property score), not a personal match.
+    p.score != null ? `property score ${Math.round(p.score)} out of 100` : null,
     p.trustLabel ? p.trustLabel.label : p.verified ? 'Verified' : null,
     ...(p.badges ?? []),
   ]
