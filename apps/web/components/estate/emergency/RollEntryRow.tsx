@@ -11,6 +11,7 @@ import {
   type RadioOption,
   Textarea,
 } from '@sureground/ui';
+import { formatClock } from '@sureground/shared';
 import type { MusterRollEntry, MusterRollState } from '@/types/estate';
 
 // "Not yet accounted for" stays selectable so a mistap can be undone; the wording is "Accounted for", never "safe".
@@ -58,7 +59,7 @@ export const RollEntryRow = ({ entry, rollOpen, isSaving, onAnswer }: RollEntryR
           {answered && entry.stateAt && (
             <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
               <Clock className="w-3 h-3" />
-              Answered {new Date(entry.stateAt).toLocaleTimeString()}
+              Answered {formatClock(entry.stateAt)}
             </p>
           )}
         </div>

@@ -15,6 +15,7 @@ import {
   Textarea,
   PageHeader,
 } from '@sureground/ui';
+import { formatClock } from '@sureground/shared';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -95,7 +96,8 @@ export default function ResidentEmergencyPage() {
               </p>
             )}
             <p className="text-xs text-muted-foreground mt-2">
-              Raised {new Date(muster.declaredAt).toLocaleString()}: {muster.statusLabel}
+              Raised {formatClock(muster.declaredAt, { day: 'numeric', month: 'short' })} ·{' '}
+              {muster.statusLabel}
             </p>
           </div>
         </div>
