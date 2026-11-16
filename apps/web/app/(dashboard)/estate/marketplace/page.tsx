@@ -71,7 +71,17 @@ const statusBadge = (status: EstateAgreement['status']) => {
   }
 };
 
-const listingStatusBadge = (status: EstateListing['status']) => {
+const listingStatusBadge = ({ status, unitTaken }: Pick<EstateListing, 'status' | 'unitTaken'>) => {
+  if (status === 'PUBLISHED' && unitTaken) {
+    return (
+      <Badge
+        variant="warning"
+        title="The unit is let or promised, so renters no longer see this listing."
+      >
+        Unit taken
+      </Badge>
+    );
+  }
   switch (status) {
     case 'PUBLISHED':
       return <Badge variant="success">Live</Badge>;
@@ -724,7 +734,7 @@ export default function EstateMarketplacePage() {
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      {listingStatusBadge(listing.status)}
+                      {listingStatusBadge(listing)}
                       <Button
                         variant="ghost"
                         onClick={() =>
