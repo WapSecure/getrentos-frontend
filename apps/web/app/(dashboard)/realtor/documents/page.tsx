@@ -116,9 +116,9 @@ export default function RealtorDocumentsPage() {
         eyebrow="Work"
         title="Documents"
         description={
-          <>
-            Agency agreements, contracts and licence, {total} file{total === 1 ? '' : 's'}
-          </>
+          data
+            ? `Agency agreements, contracts and licence, ${total} file${total === 1 ? '' : 's'}`
+            : 'Agency agreements, contracts and licence'
         }
         actions={
           <Button
