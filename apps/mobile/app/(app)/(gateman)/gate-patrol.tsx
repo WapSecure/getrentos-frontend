@@ -59,7 +59,7 @@ export default function GatemanPatrol() {
 
   return (
     <Screen>
-      <DashboardHeader eyebrow="Gate console" title="Patrol checkpoint" />
+      <DashboardHeader eyebrow="Gate operations" title="Patrol checkpoint" />
       <View style={{ padding: spacing.lg, gap: spacing.lg }}>
         <SectionHeader
           title="Scan the code at the checkpoint"
