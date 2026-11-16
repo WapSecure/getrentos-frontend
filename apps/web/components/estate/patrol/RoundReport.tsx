@@ -183,8 +183,7 @@ const RoundCard = ({ round }: { round: PatrolRound }) => {
         <div className="min-w-0">
           <p className="font-medium text-foreground">{round.routeName}</p>
           <p className="text-sm text-muted-foreground">
-            Due {formatInstant(round.scheduledFor)} · window shut{' '}
-            {formatInstant(round.windowEndsAt)}
+            Due {formatInstant(round.scheduledFor)} · finish by {formatInstant(round.windowEndsAt)}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

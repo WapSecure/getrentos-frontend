@@ -312,9 +312,6 @@ const IssuedCodeNotice = ({
           </Button>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">{checkpoint.guidance}</p>
-        <p className="mt-2 text-xs text-muted-foreground">
-          It cannot be shown again. If it goes missing, give the checkpoint a new code.
-        </p>
       </div>
       <Button variant="ghost" size="sm" onClick={onDismiss}>
         Done
