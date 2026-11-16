@@ -296,9 +296,6 @@ export default function PurchaseWorkspace() {
                   variant="callout"
                   color={data.nextAction.waitingForYou ? 'foreground' : 'mutedForeground'}
                 >
-                  <Text variant="callout" color="mutedForeground">
-                    {data.nextAction.waitingForYou ? 'Waiting for you: ' : 'Next: '}
-                  </Text>
                   {data.nextAction.label}
                 </Text>
               ) : null}

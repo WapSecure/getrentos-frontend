@@ -121,7 +121,6 @@ export const BuyerEscrowTransactionCard = ({
                 : 'mt-2 text-sm text-muted-foreground'
             }
           >
-            {transaction.nextAction.waitingForYou ? 'Waiting for you: ' : 'Next: '}
             {transaction.nextAction.label}
           </p>
         )}
