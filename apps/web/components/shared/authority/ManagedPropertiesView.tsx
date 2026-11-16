@@ -354,7 +354,7 @@ export const ManagedPropertiesView = ({ managePath }: { managePath?: string } = 
     <>
       <PageHeader
         title="Managed properties"
-        description="Properties you can act for because the owner gave you authority: with exactly what that authority lets you do."
+        description="Properties you can act for because the owner gave you authority, and exactly what that authority lets you do."
       />
 
       {managed.isLoading ? (
