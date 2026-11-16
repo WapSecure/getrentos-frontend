@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { BadgeCheck } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { PlanGateError } from '@sureground/shared';
-import { tierAtLeast, type PlanTier } from '@sureground/shared';
+import { PLAN_TIER_LABELS, tierAtLeast, type PlanTier } from '@sureground/shared';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { ROUTES } from '@/lib/constants/auth';
 
@@ -34,8 +34,11 @@ export function EstateFeatureGate({
   if (isLoading && !refusal) return null;
 
   if (knownShortfall || refusal) {
-    const needed = refusal?.required ?? required;
-    const current = refusal?.current ?? tier;
+    const label = (t: string | number) => PLAN_TIER_LABELS[String(t) as PlanTier] ?? String(t);
+    const needed = label(refusal?.required ?? required);
+    const currentTier = refusal?.current ?? tier;
+    const current = currentTier !== undefined ? label(currentTier) : undefined;
+    const article = /^[AEIOU]/.test(needed) ? 'an' : 'a';
 
     return (
       <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border p-12 text-center">
@@ -44,9 +47,9 @@ export function EstateFeatureGate({
         </div>
         <h1 className="mt-4 text-lg font-semibold text-foreground">{feature}</h1>
         <p className="mt-2 max-w-md text-sm text-muted-foreground">
-          {feature} is an {needed} feature.
+          {feature} is {article} {needed} feature.
           {current ? ` ${estate?.name ?? 'This estate'} is on ${current}.` : ''} Nothing here is a
-          safety feature: an estate without it makes slower decisions about who is on site, not
+          safety feature. An estate without it makes slower decisions about who is on site, not
           unsafe ones.
         </p>
         <Button variant="primary" className="mt-6" href={ESTATE_BILLING_HREF}>
