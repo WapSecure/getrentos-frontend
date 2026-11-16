@@ -29,5 +29,5 @@ export const VISITOR_ID_DOCUMENT_ORDER: readonly VisitorIdDocumentType[] = [
 
 export const ID_CHECK_NOT_ADMISSION_NOTICE =
   'Recording a document does not admit anybody. The visitor is admitted on their pass, ' +
-  'as always — this only keeps a record of who was at the gate, for the estate to look ' +
+  'as always. This only keeps a record of who was at the gate, for the estate to look ' +
   'back at if an arrival is ever questioned.';

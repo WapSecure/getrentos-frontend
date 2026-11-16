@@ -178,7 +178,7 @@ export default function OwnerDocuments() {
                   description={
                     d.sharedWithBuyer
                       ? 'Your buyer can open this document'
-                      : 'Private — only you can see it'
+                      : 'Private, only you can see it'
                   }
                   accessibilityLabel={`Share ${d.name} with the buyer`}
                   value={d.sharedWithBuyer}

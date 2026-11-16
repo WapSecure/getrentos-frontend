@@ -52,7 +52,7 @@ const SLIDES = [
     key: 'trust',
     eyebrow: 'Trust',
     title: 'Verified before it matters',
-    body: 'We confirm identity, ownership and licences when they count — before a listing goes live or money moves — so you know who you are dealing with.',
+    body: 'We confirm identity, ownership and licences when they count (before a listing goes live or money moves), so you know who you are dealing with.',
     Scene: VerifiedPeopleScene,
   },
 ] as const;

@@ -134,7 +134,7 @@ export default function Payments() {
       toast.show(
         early
           ? 'Rent released to your landlord.'
-          : 'Move-in confirmed — rent released to your landlord.',
+          : 'Move-in confirmed. Rent released to your landlord.',
         'success'
       );
       refreshPayments();
@@ -156,7 +156,7 @@ export default function Payments() {
         ? `This releases the ${held}rent Sureground is holding for ${payment.propertyName} to your landlord now${
             payment.releaseDate ? `, instead of on ${formatDate(payment.releaseDate, 'short')}` : ''
           }. It can't be undone.`
-        : `This releases the ${held}rent Sureground is holding for ${payment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`,
+        : `This releases the ${held}rent Sureground is holding for ${payment.propertyName} to your landlord now. Only confirm once you've moved in, as it can't be undone.`,
       [
         { text: 'Not yet', style: 'cancel' },
         {
@@ -510,12 +510,12 @@ function PaymentRow({
           {p.heldAmountNaira ? `${formatNaira(p.heldAmountNaira)} held. ` : ''}
           {releaseAction === 'release-now'
             ? p.releaseDate
-              ? `Held under Sureground Payment Protection — releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or now if you choose.`
-              : 'Held under Sureground Payment Protection — release it to your landlord when you are ready.'
+              ? `Held under Sureground Payment Protection. It releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or now if you choose.`
+              : 'Held under Sureground Payment Protection. Release it to your landlord when you are ready.'
             : releaseAction === 'confirm-move-in'
               ? p.releaseDate
-                ? `Held under Sureground Payment Protection — releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or sooner if you confirm move-in.`
-                : 'Held under Sureground Payment Protection — confirm move-in to release it to your landlord.'
+                ? `Held under Sureground Payment Protection. It releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or sooner if you confirm move-in.`
+                : 'Held under Sureground Payment Protection. Confirm move-in to release it to your landlord.'
               : 'Held under Sureground Payment Protection until you confirm move-in.'}
         </Text>
       ) : null}
