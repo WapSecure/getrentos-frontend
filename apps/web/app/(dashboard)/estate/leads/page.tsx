@@ -262,7 +262,7 @@ export default function EstateLeadsPage() {
       <Alert variant="neutral" icon={ShieldCheck}>
         <p>
           You see enquiries for properties the owner has given you marketing rights for. A property
-          that is merely inside the estate: with no agreement: stays private to its owner, and its
+          that is merely inside the estate, with no agreement, stays private to its owner, and its
           enquiries never reach this page.
         </p>
       </Alert>

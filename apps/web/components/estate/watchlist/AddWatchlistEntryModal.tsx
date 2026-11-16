@@ -125,7 +125,7 @@ export const AddWatchlistEntryModal = ({
 
           <p className="text-xs text-muted-foreground">
             {severity === 'BLOCK'
-              ? 'The gate is refused, and they can only be admitted if a guard gives a reason: which you are told about.'
+              ? 'The gate is refused, and they can only be admitted if a guard gives a reason, which you are told about.'
               : 'The gate is not refused. The estate office is told when they arrive.'}
           </p>
 

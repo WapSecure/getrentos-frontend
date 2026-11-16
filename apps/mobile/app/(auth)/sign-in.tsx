@@ -333,7 +333,7 @@ export default function SignIn() {
               <TextField
                 label="Email"
                 placeholder="you@example.com"
-                hint="We’ll email you a one-tap sign-in link: no password needed."
+                hint="We’ll email you a one-tap sign-in link, so no password is needed."
                 leftIcon={<AtSign size={18} color={colors.mutedForeground} />}
                 autoCapitalize="none"
                 autoCorrect={false}
