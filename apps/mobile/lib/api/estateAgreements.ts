@@ -8,6 +8,7 @@ export interface EstateAgreement {
   propertyTitle: string;
   propertyAddress: string;
   status: EstateAgreementStatus;
+  requestedByName?: string | null;
   requestedByEmail?: string | null;
   note?: string | null;
   estateListingCount: number;

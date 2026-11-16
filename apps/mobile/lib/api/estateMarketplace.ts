@@ -35,6 +35,7 @@ export interface MarketingAgreement {
   propertyState: string;
   status: AgreementStatus;
   ownerName?: string;
+  requestedByName?: string | null;
   requestedByEmail?: string | null;
   note?: string | null;
   decisionNote?: string | null;
