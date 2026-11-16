@@ -31,6 +31,8 @@ interface LogDeliveryModalProps {
   onHouseholdPageChange: (page: number) => void;
   isHouseholdsLoading?: boolean;
   gates?: Gate[];
+  /** The gate console's current post; the guard can still change it. */
+  defaultGateId?: string;
   onClose: () => void;
   onSubmit: (data: {
     householdId?: string;
@@ -61,6 +63,7 @@ const LogDeliveryForm = ({
   onHouseholdPageChange,
   isHouseholdsLoading,
   gates,
+  defaultGateId,
   onClose,
   onSubmit,
   isSubmitting,
@@ -71,7 +74,7 @@ const LogDeliveryForm = ({
   const [checkError, setCheckError] = useState<string | null>(null);
   const [courier, setCourier] = useState('');
   const [recipientName, setRecipientName] = useState('');
-  const [gateId, setGateId] = useState('');
+  const [gateId, setGateId] = useState(defaultGateId ?? '');
   const [photo, setPhoto] = useState<File | null>(null);
   const gateOptions = (gates ?? []).map((gate) => ({ value: gate.id, label: gate.name }));
 

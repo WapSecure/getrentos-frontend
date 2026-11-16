@@ -772,7 +772,7 @@ test('estate manager operations workspace', async ({ page }, testInfo) => {
   await usePersona(page, ['ESTATE_MANAGER']);
   await reviewPage(page, `${webURL}/estate/dashboard`, testInfo);
   await expect(page.getByRole('heading', { name: estate.name })).toBeVisible();
-  await expect(page.getByText('84 households · 2 active gates', { exact: true })).toBeVisible();
+  await expect(page.getByText('84 households · 2 gates', { exact: true })).toBeVisible();
   await expect(page.getByText('Dues collection trend', { exact: true })).toBeVisible();
   await expect(page.getByText('Estate dashboard', { exact: true })).toHaveCount(0);
 });

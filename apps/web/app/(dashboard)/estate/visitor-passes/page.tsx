@@ -7,6 +7,7 @@ import { KeyRound, Plus } from '@sureground/icons';
 import {
   Button,
   CardSkeleton,
+  ConfirmDialog,
   EmptyState,
   Pagination,
   ToggleChip,
@@ -49,6 +50,7 @@ export default function EstateVisitorPassesPage() {
   const [issuedPass, setIssuedPass] = useState<IssuedVisitorPass | null>(null);
   const [page, setPage] = useState(1);
   const [householdPage, setHouseholdPage] = useState(1);
+  const [revoking, setRevoking] = useState<{ id: string; visitorName: string } | null>(null);
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
@@ -119,6 +121,7 @@ export default function EstateVisitorPassesPage() {
     onSuccess: () => {
       invalidatePasses();
       setPage(1);
+      setRevoking(null);
     },
   });
 
@@ -218,7 +221,7 @@ export default function EstateVisitorPassesPage() {
                 <VisitorPassRow
                   pass={pass}
                   estateId={estate.id}
-                  onRevoke={() => revokePass.mutate(pass.id)}
+                  onRevoke={() => setRevoking({ id: pass.id, visitorName: pass.visitorName })}
                   isRevoking={revokePass.isPending}
                 />
               </li>
@@ -226,6 +229,23 @@ export default function EstateVisitorPassesPage() {
           </EstateRowList>
         )}
       </EstateListSection>
+
+      <ConfirmDialog
+        open={revoking !== null}
+        onOpenChange={(open) => {
+          if (!open) setRevoking(null);
+        }}
+        title="Revoke this pass?"
+        description={
+          revoking
+            ? `${revoking.visitorName} will be turned away at the gate. This can't be undone; issue a new pass if they still need to visit.`
+            : ''
+        }
+        confirmLabel="Revoke pass"
+        tone="danger"
+        onConfirm={() => revoking && revokePass.mutate(revoking.id)}
+        isLoading={revokePass.isPending}
+      />
 
       <IssueVisitorPassModal
         isOpen={isModalOpen}
