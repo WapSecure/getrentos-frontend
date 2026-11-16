@@ -17,7 +17,8 @@
     "/realtor",
     "/agent",
     "/estate",
-    "/resident"
+    "/resident",
+    "/representing"
   ],
   "webOnly": ["/land/market", "/land/dossier", "/land/disputes", "/land/reviews"]
 }

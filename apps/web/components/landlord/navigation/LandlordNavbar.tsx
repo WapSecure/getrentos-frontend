@@ -45,10 +45,10 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
           markRead={(id) => unwrap(landlordService.markNotificationRead(id))}
           markAllRead={() => unwrap(landlordService.markAllNotificationsRead())}
           refetchAfterMarking
-          viewAllHref={ROUTES.LANDLORD_DASHBOARD}
+          viewAllHref="/landlord/notifications"
         />
       }
-      profileMenu={<LandlordProfileDropdown user={user} />}
+      profileMenu={<LandlordProfileDropdown user={user} asManager={asManager} />}
       navigation={landlordNavigation}
       navigationGates={{ isLocked }}
     />

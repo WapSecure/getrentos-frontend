@@ -68,34 +68,35 @@ export default function RealtorReviewsPage() {
         description="See how clients and leads rate their experience with you"
       />
 
-      <div className="grid lg:grid-cols-3 gap-6 mb-6">
-        <Card className="p-6 flex flex-col items-center justify-center text-center">
-          <p className="text-4xl font-bold text-foreground">{overallRating.toFixed(1)}</p>
-          <StarRow rating={Math.round(overallRating)} />
-          <p className="text-xs text-muted-foreground mt-2">
-            Based on {total} review{total === 1 ? '' : 's'}
-          </p>
-        </Card>
+      {total > 0 && (
+        <div className="grid lg:grid-cols-3 gap-6 mb-6">
+          <Card className="p-6 flex flex-col items-center justify-center text-center">
+            <p className="text-4xl font-bold text-foreground">{overallRating.toFixed(1)}</p>
+            <StarRow rating={Math.round(overallRating)} />
+            <p className="text-xs text-muted-foreground mt-2">
+              Based on {total} review{total === 1 ? '' : 's'}
+            </p>
+          </Card>
 
-        <Card className="lg:col-span-2 p-6 space-y-4">
-          {distribution.map(({ star, count }) => (
-            <div key={star} className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground w-16 shrink-0 flex items-center gap-1">
-                <Star className="w-3.5 h-3.5 fill-primary text-primary" />
-                {star}
-              </span>
-              <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-primary"
-                  style={{ width: `${(count / maxCount) * 100}%` }}
-                />
+          <Card className="lg:col-span-2 p-6 space-y-4">
+            {distribution.map(({ star, count }) => (
+              <div key={star} className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground w-16 shrink-0 flex items-center gap-1">
+                  <Star className="w-3.5 h-3.5 fill-primary text-primary" />
+                  {star}
+                </span>
+                <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-primary"
+                    style={{ width: `${(count / maxCount) * 100}%` }}
+                  />
+                </div>
+                <span className="text-sm font-medium text-foreground w-8 text-right">{count}</span>
               </div>
-              <span className="text-sm font-medium text-foreground w-8 text-right">{count}</span>
-            </div>
-          ))}
-        </Card>
-      </div>
-
+            ))}
+          </Card>
+        </div>
+      )}
       <div className="space-y-4">
         {reviews.length === 0 ? (
           <EmptyState

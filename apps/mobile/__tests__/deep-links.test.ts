@@ -43,6 +43,12 @@ describe('links into the app', () => {
     expect(go('https://getsureground.io/land/representing/purchases/P9')).toEqual({
       route: '/(app)/land-represented?kind=purchase&id=P9',
     });
+    expect(go('https://getsureground.io/representing')).toEqual({
+      route: '/(app)/land-representing',
+    });
+    expect(go('https://getsureground.io/representing/transactions/T4')).toEqual({
+      route: '/(app)/land-represented?kind=transaction&id=T4',
+    });
   });
 
   it('opens landlord and estate public pages', () => {

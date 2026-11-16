@@ -261,7 +261,7 @@ const ClaimForm = () => {
     <Card className="p-5">
       <h2 className="font-semibold text-foreground mb-1">Ask to act for a property</h2>
       <p className="text-sm text-muted-foreground mb-4">
-        Enter the property’s code — the owner can copy it from their property page (it looks like
+        Enter the property’s code. The owner can copy it from their property page (it looks like
         PR-AB7K-9Q). An officer checks the mandate, then grants the two capabilities separately:
         listing a property and moving money on it are not the same permission.
       </p>
@@ -354,7 +354,7 @@ export const ManagedPropertiesView = ({ managePath }: { managePath?: string } = 
     <>
       <PageHeader
         title="Managed properties"
-        description="Properties you can act for because the owner gave you authority: with exactly what that authority lets you do."
+        description="Properties you can act for because the owner gave you authority, and exactly what that authority lets you do."
       />
 
       {managed.isLoading ? (

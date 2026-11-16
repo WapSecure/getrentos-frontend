@@ -30,7 +30,6 @@ interface PaymentCardProps {
   onDownloadReceipt: () => void;
   onDispute: () => void;
   onConfirmMoveIn: () => void;
-  /** Set only on held rent: move-in is asked once per lease, then held rent can be released early. */
   releaseAction?: RentReleaseAction;
 }
 

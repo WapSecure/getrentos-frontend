@@ -8,7 +8,6 @@ import type { Paginated } from './properties';
 export interface StaffMember {
   userId: string;
   name: string;
-  /** Empty when the account is phone-only. */
   email: string;
   /** "+234 803 *** 4567" for a phone-only account; never the full number. */
   phoneMasked?: string | null;
@@ -55,7 +54,6 @@ export const estateStaffSetupApi = {
     apiFetch<Paginated<StaffMember>>(
       `/estate/${estateId}/staff?page=${page}&pageSize=${STAFF_PAGE_SIZE}`
     ),
-  /** By the phone number or email on their Sureground account (gatemen are often phone-only). */
   addGateman: (estateId: string, contact: string) =>
     apiFetch<StaffMember>(`/estate/${estateId}/staff/gateman`, {
       method: 'POST',

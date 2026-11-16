@@ -251,7 +251,6 @@ function subscriptionColumns(
       key: 'keyDate',
       header: 'Key date',
       render: (row) => {
-        // Only trialing, active and past-due rows have a meaningful next date.
         const lapsed = row.status === 'NONE' || row.status === 'CANCELLED';
         const keyDate = row.status === 'TRIALING' ? row.trialEndsAt : row.currentPeriodEnd;
         const keyLabel =

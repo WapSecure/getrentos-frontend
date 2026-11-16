@@ -12,7 +12,13 @@ export type TrustConsentType =
   | 'BANK_ACCOUNT_CHECK'
   | 'DOCUMENT_PROCESSING';
 
-// What each consent is recorded for (the purpose the API stores with it).
+const CONSENT_LABEL: Record<TrustConsentType, string> = {
+  ID_CHECK: 'ID check',
+  BIOMETRIC: 'Selfie comparison',
+  BANK_ACCOUNT_CHECK: 'Bank account check',
+  DOCUMENT_PROCESSING: 'Document check',
+};
+
 const CONSENT_PURPOSE: Record<TrustConsentType, string> = {
   ID_CHECK: 'Identity verification',
   BIOMETRIC: 'Biometric verification',
@@ -22,7 +28,6 @@ const CONSENT_PURPOSE: Record<TrustConsentType, string> = {
 
 export const TRUST_CONSENTS_KEY = ['trust-consents'] as const;
 
-/** The person's trust consents, and whether one of a type is active. */
 export function useTrustConsents() {
   const { data: consents } = useQuery({
     queryKey: TRUST_CONSENTS_KEY,
@@ -36,14 +41,12 @@ export function useTrustConsents() {
   return { consents, find, isActive };
 }
 
-/** Asks for one trust consent before a check, or shows when it was given with a way to withdraw it. */
 export function TrustConsentPrompt({
   type,
   text,
   onError,
 }: {
   type: TrustConsentType;
-  /** What the consent lets us do, in plain words. */
   text: string;
   onError?: (message: string | null) => void;
 }) {
@@ -79,7 +82,7 @@ export function TrustConsentPrompt({
 
   return isActive(type) && consent ? (
     <p className="text-xs text-muted-foreground">
-      Consent given {formatDate(consent.grantedAt)} ·{' '}
+      {CONSENT_LABEL[type]}: consent given {formatDate(consent.grantedAt)} ·{' '}
       <button
         type="button"
         className="underline hover:no-underline"
@@ -91,7 +94,9 @@ export function TrustConsentPrompt({
     </p>
   ) : (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 p-3">
-      <p className="min-w-0 flex-1 text-xs text-muted-foreground">{text}</p>
+      <p className="min-w-0 flex-1 text-xs text-muted-foreground">
+        <span className="font-medium text-foreground">{CONSENT_LABEL[type]}.</span> {text}
+      </p>
       <Button
         size="sm"
         isLoading={grant.isPending}

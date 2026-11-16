@@ -43,7 +43,6 @@ const ListingPreview = ({ listing }: { listing: Listing }) => {
 
   return (
     <div className="grid lg:grid-cols-[minmax(0,1fr)_340px]">
-      {/* Photos and video */}
       <div className="min-w-0 lg:max-h-[88dvh] lg:overflow-y-auto lg:overscroll-contain">
         <div className="relative h-56 bg-muted sm:h-72 lg:h-96">
           {showVideo && listing.videoTourUrl ? (
@@ -116,7 +115,6 @@ const ListingPreview = ({ listing }: { listing: Listing }) => {
         )}
       </div>
 
-      {/* Listing facts */}
       <div className="border-t border-border p-5 sm:p-6 lg:max-h-[88dvh] lg:overflow-y-auto lg:overscroll-contain lg:border-l lg:border-t-0">
         <p className="text-2xs uppercase tracking-wide text-muted-foreground mb-1">
           Renter-facing preview

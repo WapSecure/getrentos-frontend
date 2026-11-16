@@ -1,10 +1,6 @@
 import { formatCurrency } from '../utils/format';
 
-/**
- * DIA-30: a value exists only as a dated report by an accredited valuer. It is always shown with the valuer and
- * the date, never as "market value" or "worth". A report over 12 months old is shown as out of date and never
- * counted in a total. Nothing is estimated between reports.
- */
+/** A value is only a dated accredited valuer report; one over 12 months old is shown out of date and never totalled. */
 export type ValuationMethod = 'COMPARABLE_SALES' | 'INCOME' | 'COST' | 'RESIDUAL';
 
 export const VALUATION_METHOD_LABELS: Record<ValuationMethod, string> = {
@@ -31,13 +27,11 @@ export interface PropertyValuation {
   validUntil: string;
   /** Over 12 months old: shown, never counted. */
   outOfDate: boolean;
-  /** Portfolio rows only. */
   propertyTitle?: string;
 }
 
 const METHODS = new Set<string>(Object.keys(VALUATION_METHOD_LABELS));
 
-/** An API valuation, checked field by field; undefined when absent or malformed. */
 export const valuationOf = (raw: unknown): PropertyValuation | undefined => {
   if (!raw || typeof raw !== 'object') return undefined;
   const v = raw as Record<string, unknown>;
@@ -77,15 +71,12 @@ const naira = (amount: string | number) => {
   return Number.isFinite(n) ? formatCurrency(n) : null;
 };
 
-/** "Valued at ₦95,000,000 by Ada Okafor, 1 June 2026". */
 export const valuationSentence = (v: PropertyValuation): string =>
   `Valued at ${naira(v.amount) ?? '—'} by ${v.valuerName}, ${valuationDate(v.reportDate)}`;
 
-/** "Ada Okafor, 1 June 2026": for a table cell under the figure. */
 export const valuerAndDate = (v: PropertyValuation): string =>
   `${v.valuerName}, ${valuationDate(v.reportDate)}`;
 
-/** The method, or why the figure no longer counts. */
 export const valuationNote = (v: PropertyValuation): string =>
   v.outOfDate
     ? 'Out of date: the report is over 12 months old and is not counted'
@@ -118,7 +109,6 @@ export const portfolioValuationView = (
   };
 };
 
-/** The line under the total: one valuer named outright, several summarised by count. */
 export const portfolioValuationSubtitle = (view: PortfolioValuationView): string => {
   const counted = view.valuations.filter((v) => !v.outOfDate);
   const notValued = view.notValuedCount ? `; ${view.notValuedCount} not valued` : '';

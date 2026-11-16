@@ -29,10 +29,7 @@ import {
   type ManagementFeeType,
 } from '@/services/mandateService';
 
-/**
- * BD-2: a fee in a signed agreement changes only by a proposal the other side accepts. Shown on the
- * agreement for the owner and for the manager; who may do what comes from the API.
- */
+// A signed fee changes only by a proposal the other side accepts; who may do what comes from the API.
 
 const REASON_MIN = 10;
 const MONTHS_AHEAD = 12;
@@ -50,7 +47,6 @@ const STATUS_BADGE: Record<FeeAmendment['status'], 'warning' | 'success' | 'neut
   EXPIRED: 'neutral',
 };
 
-/** A Lagos calendar day, "1 December 2026". */
 export function formatLagosDay(value: string | null | undefined): string {
   if (!value) return '';
   const date = /^\d{4}-\d{2}-\d{2}$/.test(value)
@@ -65,23 +61,17 @@ export function formatLagosDay(value: string | null | undefined): string {
   });
 }
 
-/** The first day of each month from `earliest`, the only days a new fee may start on. */
-/** Today as a Lagos date, YYYY-MM-DD, to compare with a version's effective date. */
 function lagosToday(): string {
   return new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Lagos' });
 }
 
-/** The day before a YYYY-MM-DD date, as a Lagos day for people to read. */
 function dayBefore(day: string): string {
   const date = new Date(`${day}T12:00:00+01:00`);
   date.setUTCDate(date.getUTCDate() - 1);
   return formatLagosDay(date.toISOString());
 }
 
-/**
- * The fee in force today, and an agreed change that has not started yet. The agreement's fee row moves on acceptance,
- * so `currentFee` alone would announce the new fee weeks early; the versions say what applies when.
- */
+// The agreement's fee row moves on acceptance, so `currentFee` alone would announce the new fee weeks early.
 export function feeHeadline(data: Pick<FeeAmendmentOverview, 'currentFee' | 'versions'>): string {
   const today = lagosToday();
   const upcoming = data.versions

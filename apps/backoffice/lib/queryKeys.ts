@@ -258,7 +258,6 @@ export const adminKeys = {
   reviewCases: (params?: {
     status?: string;
     priority?: string;
-    /** 'foreign' lists only diaspora identity cases. */
     purpose?: string;
     page?: number;
     pageSize?: number;
@@ -291,4 +290,5 @@ export const adminKeys = {
     ['admin', 'property-authorities', params?.status ?? 'all'] as const,
   aiUsage: (days: number) => ['admin', 'ai', 'usage', days] as const,
   aiReviews: ['admin', 'ai', 'reviews'] as const,
+  listingWarnings: ['admin', 'ai', 'listingWarnings'] as const,
 };

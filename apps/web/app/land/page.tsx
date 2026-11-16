@@ -5,6 +5,7 @@ import { LandMarketplaceBrowser } from '@/components/land/LandMarketplaceBrowser
 import { ListingItemListJsonLd } from '@/components/seo/ListingItemListJsonLd';
 import { fetchFirstPage, isFilteredView, landFirstPagePath } from '@/lib/marketFirstPage';
 import { mapPublicLand } from '@/lib/publicLandMap';
+import { SITE_OG_IMAGES } from '@/lib/site';
 
 const baseMetadata: Metadata = {
   title: 'Land: Reviewed Land Listings',
@@ -12,6 +13,7 @@ const baseMetadata: Metadata = {
     'Browse land listings with a dated diligence review that shows what was checked, and payments held until you confirm each step.',
   alternates: { canonical: '/land' },
   openGraph: {
+    images: SITE_OG_IMAGES,
     title: 'Land: Reviewed Land Listings',
     description: 'Browse land listings with a dated, scoped diligence review on Sureground.',
     url: '/land',
@@ -19,8 +21,7 @@ const baseMetadata: Metadata = {
   },
 };
 
-// Filtered and searched views share the unfiltered page's canonical and stay out of the index,
-// so query strings can't multiply into thin duplicate pages; links on them are still followed.
+// Query-string views share the unfiltered canonical and stay noindex, so they can't multiply into thin duplicates.
 export async function generateMetadata({
   searchParams,
 }: {
@@ -36,8 +37,6 @@ export default async function LandMarketplacePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  // The browser only uses it for the unfiltered view; the item list is only for the indexable page.
-  // When land is off the layout's gate shows its notice in place of this page.
   const [filtered, initialData] = await Promise.all([
     searchParams.then(isFilteredView),
     fetchFirstPage(landFirstPagePath(), mapPublicLand),

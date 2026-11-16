@@ -46,7 +46,6 @@ export function DevelopmentPaymentNotice({ compact = false }: { compact?: boolea
   );
 }
 
-/** What Sureground staff checked before this development went live, and what nobody checked. */
 export function DevelopmentChecks({ development }: { development: ShowroomDevelopment }) {
   const { colors, spacing } = useTheme();
   return (

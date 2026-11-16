@@ -1,5 +1,4 @@
-// Sureground Managed (Diaspora M4: DIA-20, DIA-21, DIA-22). The shapes live in @sureground/shared
-// so web and mobile read one copy, and a change on the backend is one edit.
+// The shapes live in @sureground/shared so web and mobile read one copy.
 export {
   EVIDENCE_STAGE_KEYS,
   PHOTO_STAGES,

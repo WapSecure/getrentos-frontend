@@ -19,7 +19,7 @@ const STATUS_PRESENTATION: Record<
   { label: string; icon: React.ElementType; className: string }
 > = {
   OPEN: {
-    label: 'Appeal submitted — under review',
+    label: 'Appeal submitted and under review',
     icon: Clock,
     className: 'text-warning',
   },
@@ -29,12 +29,12 @@ const STATUS_PRESENTATION: Record<
     className: 'text-warning',
   },
   OVERTURNED: {
-    label: 'Appeal successful — the decision has been reopened for review',
+    label: 'Appeal successful. The decision has been reopened for review',
     icon: CheckCircle2,
     className: 'text-success',
   },
   UPHELD: {
-    label: 'Appeal reviewed — the original decision stands',
+    label: 'Appeal reviewed. The original decision stands',
     icon: XCircle,
     className: 'text-destructive',
   },

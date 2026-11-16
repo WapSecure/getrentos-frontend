@@ -11,7 +11,6 @@ interface SimilarPropertiesProps {
   currentId: string;
 }
 
-/** Ranked on the server: nearby, a comparable yearly rent and about the same bedrooms. */
 export const SimilarProperties = ({ currentId }: SimilarPropertiesProps) => {
   const { data: similar = [] } = useQuery({
     queryKey: ['public-market', 'rent', 'similar', currentId],

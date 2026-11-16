@@ -72,14 +72,12 @@ export default function BuyerListingDetail() {
     (o) => o.listingId === id && (o.status === 'submitted' || o.status === 'countered')
   );
   const isSaved = listing ? savedIds.has(listing.id) : false;
-  // The buyer route has no media list, verified flag or offer status; the public listing has them.
   const pub = useQuery({
     queryKey: qk.market.detail('sale', id),
     queryFn: () => publicMarketApi.detail('sale', id),
     enabled: !!id,
     retry: false,
   });
-  // Shared with the web showroom, so both show the same facts, costs and media.
   const showroom = useMemo(
     () =>
       listing
@@ -99,7 +97,6 @@ export default function BuyerListingDetail() {
             media: pub.data?.media,
             isVerified: pub.data?.verified,
             underOffer: pub.data?.underOffer,
-            // The buyer route has no commercial block; the public listing has it, already checked.
             commercial: pub.data?.commercial,
           })
         : undefined,
@@ -238,7 +235,6 @@ export default function BuyerListingDetail() {
                   />
                 ) : null}
 
-                {/* Commercial: the lease and the space come before the description, as on the web. */}
                 {showroom?.commercial ? (
                   <ShowroomCommercial commercial={showroom.commercial} market="sale" />
                 ) : null}

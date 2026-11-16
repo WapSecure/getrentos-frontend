@@ -81,7 +81,6 @@ test.beforeEach(async ({ page }, testInfo) => {
   );
   await page.route('**/__qa_api/**', async (route) => {
     const path = new URL(route.request().url()).pathname.replace('/__qa_api', '');
-    // Restoring the session on load is not a save.
     if (isSessionRefresh(route)) return fulfillSessionRefresh(route, user.id);
     // Unexpected writes must fail; visual review must never simulate a save.
     if (route.request().method() !== 'GET')
@@ -436,6 +435,7 @@ test.beforeEach(async ({ page }, testInfo) => {
       '/admin/verifications': empty,
       '/admin/disputes': empty,
       '/admin/fraud-alerts': empty,
+      '/admin/ai/reviews/listing-warnings': [],
       '/admin/client-money/reconciliation': {
         rows: [],
         attestation: null,
@@ -464,7 +464,6 @@ test.beforeEach(async ({ page }, testInfo) => {
       },
       '/admin/rentals/listings': empty,
       '/admin/land/diligence': empty,
-      // Staff without two-factor see the set-up screen instead of admin pages.
       '/users/me/security/2fa': { enrolled: true, enabled: true, requiredForAdminTools: true },
       '/agent/route': {
         date: new Date().toISOString().slice(0, 10),

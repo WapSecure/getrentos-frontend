@@ -7,6 +7,7 @@ import {
   CalendarClock,
   ChevronDown,
   CircleAlert,
+  ClipboardCheck,
   ClipboardList,
   ClipboardPlus,
   PackagePlus,
@@ -14,6 +15,7 @@ import {
   ShieldCheck,
   TriangleAlert,
   Wrench,
+  Zap,
 } from '@sureground/icons';
 import { HomeAssetRegistry } from '@/components/home-management/HomeAssetRegistry';
 import { HomeManagementInspectionFeed } from '@/components/home-management/HomeManagementInspectionFeed';
@@ -42,9 +44,13 @@ import {
 import dynamic from 'next/dynamic';
 import { unwrap } from '@/lib/apiHelpers';
 import {
+  UTILITIES_VIEW_FOR,
   homeManagementTabHref,
   parseHomeManagementTab,
+  utilitiesViewHref,
   type HomeManagementTab,
+  type UtilitiesCreateKind,
+  type UtilitiesView,
 } from '@/lib/homeManagementTabs';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
@@ -54,7 +60,14 @@ import {
   type HomeManagementVendor,
 } from '@/services/homeManagementService';
 import { ownerService } from '@/services/ownerService';
+import { utilitiesService } from '@/services/utilitiesService';
+import {
+  formatSpendOrNoData,
+  shouldShowUtilityTiles,
+  generatorServiceSummary,
+} from '@sureground/shared';
 import { propertyAuthorityService } from '@/services/propertyAuthorityService';
+import type { WorkOrderForm } from '@/components/home-management/HomeManagementWorkOrderQueue';
 
 const sectionFallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
 const HomeManagementSlaPolicies = dynamic(
@@ -78,6 +91,13 @@ const HomeManagementWorkOrderQueue = dynamic(
     ),
   { loading: sectionFallback }
 );
+const HomeManagementUtilities = dynamic(
+  () =>
+    import('@/components/home-management/utilities/HomeManagementUtilities').then(
+      (m) => m.HomeManagementUtilities
+    ),
+  { loading: sectionFallback }
+);
 const HomeManagementEscalationQueue = dynamic(
   () =>
     import('@/components/home-management/HomeManagementEscalationQueue').then(
@@ -93,23 +113,26 @@ interface HomeManagementWorkspaceProps {
   /** Narrows everything to the client's property, so pickers, lists and history can't reach another client's home. */
   scopePropertyId?: string;
   eyebrow?: string;
-  /** One plain line of context under the title; each role has a default. */
   description?: ReactNode;
-  /**
-   * The query parameter that holds the open tab. The landlord hub already uses `tab` for its own
-   * Requests / Home Management switch, so it passes another name.
-   */
+  // The landlord hub already uses `tab` for its own switch, so it passes another name.
   tabParam?: string;
+  recordOnly?: boolean;
 }
 
-type CreateKind = 'work-order' | 'asset' | 'plan' | 'policy';
+type CreateKind = 'work-order' | 'asset' | 'plan' | 'policy' | UtilitiesCreateKind;
 
 const CREATE_TAB: Record<CreateKind, HomeManagementTab> = {
   'work-order': 'work-orders',
   asset: 'assets',
   plan: 'preventive-care',
   policy: 'service-standards',
+  fuel: 'utilities',
+  meter: 'utilities',
+  'water-test': 'utilities',
 };
+
+const isUtilitiesKind = (kind: CreateKind): kind is UtilitiesCreateKind =>
+  kind === 'fuel' || kind === 'meter' || kind === 'water-test';
 
 const DEFAULT_DESCRIPTION: Record<HomeManagementWorkspaceRole, string> = {
   owner: 'Work orders, care plans, assets and records for the homes you own.',
@@ -136,6 +159,7 @@ export function HomeManagementWorkspace({
   eyebrow = 'Property care',
   description,
   tabParam = 'tab',
+  recordOnly = false,
 }: HomeManagementWorkspaceProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -146,19 +170,35 @@ export function HomeManagementWorkspace({
       homeManagementTabHref(pathname, searchParams.toString(), tab, tabParam),
     [pathname, searchParams, tabParam]
   );
+  const utilitiesHref = useCallback(
+    (view: UtilitiesView) => {
+      const tabUrl = new URL(tabHref('utilities'), 'http://local');
+      return utilitiesViewHref(tabUrl.pathname, tabUrl.search.slice(1), view);
+    },
+    [tabHref]
+  );
   // A push, not a replace, so the back button returns to the previous tab.
   const setTab = (tab: HomeManagementTab) => router.push(tabHref(tab), { scroll: false });
   const [createRequest, setCreateRequest] = useState<{ kind: CreateKind; id: number } | null>(null);
   const clearCreateRequest = useCallback(() => setCreateRequest(null), []);
   // Never reused, so a section that stays mounted still sees the next click as a new request.
   const requestSequence = useRef(0);
-  const requestCreate = (kind: CreateKind) => {
-    if (activeTab !== CREATE_TAB[kind]) setTab(CREATE_TAB[kind]);
+  const [workOrderPrefill, setWorkOrderPrefill] = useState<Partial<WorkOrderForm> | undefined>();
+  const requestCreate = (kind: CreateKind, prefill?: Partial<WorkOrderForm>) => {
+    setWorkOrderPrefill(kind === 'work-order' ? prefill : undefined);
+    if (isUtilitiesKind(kind)) {
+      // One navigation for the tab and its sub-view, so the right form's panel is mounted.
+      router.push(utilitiesHref(UTILITIES_VIEW_FOR[kind]), { scroll: false });
+    } else if (activeTab !== CREATE_TAB[kind]) setTab(CREATE_TAB[kind]);
     requestSequence.current += 1;
     setCreateRequest({ kind, id: requestSequence.current });
   };
   const requestFor = (kind: CreateKind) =>
     createRequest?.kind === kind ? createRequest.id : undefined;
+  const utilitiesRequest =
+    createRequest && isUtilitiesKind(createRequest.kind)
+      ? { kind: createRequest.kind, id: createRequest.id }
+      : undefined;
 
   const [assetPage, setAssetPage] = useState(1);
   const [chosenAssetPropertyId, setAssetPropertyId] = useState('');
@@ -244,6 +284,13 @@ export function HomeManagementWorkspace({
     queryFn: () => unwrap(homeManagementService.getDashboard()),
   });
 
+  const utilitiesQuery = useQuery({
+    queryKey: homeManagementKeys.utilities.summary(),
+    enabled: !scopePropertyId,
+    queryFn: () => unwrap(utilitiesService.summary()),
+  });
+  const utilities = utilitiesQuery.data;
+
   // A manager's assignable vendors are the owners' directories for the properties they control; assignment is still validated against each owner at write time.
   const vendorsQuery = useQuery({
     queryKey: [...homeManagementKeys.vendors, role],
@@ -314,16 +361,38 @@ export function HomeManagementWorkspace({
       icon: Wrench,
       href: tabHref('assets'),
     },
+    ...(shouldShowUtilityTiles(utilities)
+      ? [
+          {
+            label: `Utility spend (${utilities!.monthLabel.split(' ')[0]})`,
+            value: formatSpendOrNoData(utilities!.spendThisMonth),
+            icon: Zap,
+            href: utilitiesHref('spend'),
+          },
+          {
+            label: 'Generators due a service',
+            value: generatorServiceSummary(utilities!.generatorsDue, utilities!.generatorsDueSoon),
+            icon: Wrench,
+            href: utilitiesHref('power'),
+            attention: utilities!.generatorsDue > 0,
+          },
+        ]
+      : []),
   ];
   // Only server-calculated, portfolio-wide counts earn a badge; a paginated list's length would mislead.
   const tabCounts: Partial<Record<HomeManagementTab, number>> = scopePropertyId
     ? {}
-    : { 'work-orders': summary?.openWorkOrders, 'preventive-care': summary?.plansDue };
+    : {
+        'work-orders': summary?.openWorkOrders,
+        'preventive-care': summary?.plansDue,
+        utilities: utilities?.generatorsDue,
+      };
   const tabs: { id: HomeManagementTab; label: string; countLabel?: string }[] = [
     { id: 'overview', label: 'Overview' },
     { id: 'work-orders', label: 'Work orders', countLabel: 'open' },
     { id: 'preventive-care', label: 'Preventive care', countLabel: 'due' },
     { id: 'assets', label: 'Assets' },
+    { id: 'utilities', label: 'Utilities', countLabel: 'generators due a service' },
     { id: 'service-standards', label: 'Service standards' },
     { id: 'history', label: 'History & records' },
   ];
@@ -388,6 +457,32 @@ export function HomeManagementWorkspace({
                 >
                   <Settings2 className="h-4 w-4 text-primary" aria-hidden="true" />
                   Add service policy
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={!hasProperties}
+                  title={noPropertyTitle}
+                  onSelect={() => requestCreate('fuel')}
+                >
+                  <Zap className="h-4 w-4 text-primary" aria-hidden="true" />
+                  Log fuel
+                </DropdownMenuItem>
+                {!recordOnly && (
+                  <DropdownMenuItem
+                    disabled={!hasProperties}
+                    title={noPropertyTitle}
+                    onSelect={() => requestCreate('meter')}
+                  >
+                    <Zap className="h-4 w-4 text-primary" aria-hidden="true" />
+                    Add meter
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  disabled={!hasProperties}
+                  title={noPropertyTitle}
+                  onSelect={() => requestCreate('water-test')}
+                >
+                  <ClipboardCheck className="h-4 w-4 text-primary" aria-hidden="true" />
+                  Record water test
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -459,6 +554,7 @@ export function HomeManagementWorkspace({
             isLoading={dashboardQuery.isLoading}
             scopePropertyId={scopePropertyId}
             tabHref={tabHref}
+            utilities={utilities}
           />
         </TabsContent>
 
@@ -482,6 +578,7 @@ export function HomeManagementWorkspace({
             viewerRole={role}
             showCreateAction={false}
             createRequest={requestFor('work-order')}
+            createPrefill={workOrderPrefill}
             onCreateRequestHandled={clearCreateRequest}
           />
         </TabsContent>
@@ -519,6 +616,27 @@ export function HomeManagementWorkspace({
             }}
             createRequest={requestFor('asset')}
             onCreateRequestHandled={clearCreateRequest}
+          />
+        </TabsContent>
+
+        <TabsContent value="utilities" className={panelClass}>
+          <HomeManagementUtilities
+            properties={properties}
+            scopePropertyId={scopePropertyId}
+            recordOnly={recordOnly}
+            createRequest={utilitiesRequest}
+            onCreateRequestHandled={clearCreateRequest}
+            onRaiseWorkOrder={(from) =>
+              requestCreate('work-order', {
+                propertyId: from.propertyId,
+                assetId: from.assetId ?? '',
+                category: 'WATER_BOREHOLE',
+                issueTitle: from.sourceName
+                  ? `Treat the water from ${from.sourceName}`
+                  : 'Treat the water after a failed water test',
+                description: `The latest water test (${from.labName}) failed. Treat the water, then book a retest.`,
+              })
+            }
           />
         </TabsContent>
 

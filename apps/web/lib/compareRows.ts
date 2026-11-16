@@ -1,10 +1,6 @@
 import { trustChainLabel, type TrustChainLike, type TrustLabelTone } from '@sureground/shared';
 
-/**
- * The compare table's verification cell. It reads the trust chain, as the browse card and the listing
- * page do, so it can never say "verified" next to "verification in progress". The bare flag is only the
- * fallback for a listing the API sends no chain for.
- */
+/** Reads the trust chain like the browse card; the bare flag only when the API sends no chain. */
 export function compareVerification(property: { trustChain?: TrustChainLike; verified: boolean }): {
   label: string;
   tone: TrustLabelTone;
@@ -15,7 +11,6 @@ export function compareVerification(property: { trustChain?: TrustChainLike; ver
     : { label: 'Not verified yet', tone: 'pending' };
 }
 
-/** The compare table's rating cell: a star rating only when there are reviews behind it; null means none. */
 export function compareRating(property: {
   rating: number;
   landlordReviews?: number;

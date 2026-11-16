@@ -130,7 +130,11 @@ function ChargeForm({
             {(units.data?.items ?? []).map((u) => (
               <Chip
                 key={u.id}
-                label={u.unitName}
+                label={
+                  u.occupancyStatus === 'occupied' && u.tenantName
+                    ? `${u.unitName} · ${u.tenantName}`
+                    : `${u.unitName} · vacant`
+                }
                 selected={unitIds.includes(u.id)}
                 onPress={() => toggleUnit(u.id)}
                 disabled={mutation.isPending}

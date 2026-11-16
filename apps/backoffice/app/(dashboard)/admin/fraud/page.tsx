@@ -6,6 +6,7 @@ import { Activity, AlertTriangle, Plus, Search, ShieldAlert } from '@sureground/
 import { FraudAlertCard } from '@/components/admin/fraud/FraudAlertCard';
 import { FraudAlertDetailModal } from '@/components/admin/fraud/FraudAlertDetailModal';
 import { NewFraudAlertModal } from '@/components/admin/fraud/NewFraudAlertModal';
+import { ListingWarningsQueue } from '@/components/admin/fraud/ListingWarningsQueue';
 import {
   CardSkeleton,
   ConfirmDialog,
@@ -115,6 +116,7 @@ export default function AdminFraudPage() {
       unwrap(adminService.updateFraudAlertStatus(id, status)),
     onSuccess: (_updated, { status, subjectName }) => {
       toast.success(STATUS_TOASTS[status](subjectName));
+      void queryClient.invalidateQueries({ queryKey: adminKeys.listingWarnings });
       return queryClient.invalidateQueries({ queryKey: ['admin', 'fraudAlerts'] });
     },
   });
@@ -133,8 +135,10 @@ export default function AdminFraudPage() {
     setPendingDecision({ id: alert.id, subjectName: alert.subjectName, status });
   };
 
-  const invalidateFraudAlerts = () =>
-    queryClient.invalidateQueries({ queryKey: ['admin', 'fraudAlerts'] });
+  const invalidateFraudAlerts = () => {
+    void queryClient.invalidateQueries({ queryKey: adminKeys.listingWarnings });
+    return queryClient.invalidateQueries({ queryKey: ['admin', 'fraudAlerts'] });
+  };
 
   const { data: activeAlertDetail, isLoading: activeAlertDetailLoading } = useQuery({
     queryKey: adminKeys.fraudAlertDetail(activeAlertId ?? ''),
@@ -225,7 +229,6 @@ export default function AdminFraudPage() {
       <PageHeader
         eyebrow="Risk"
         title="Fraud and risk review"
-        // The open-alert counts live in the strip below; the header only says what the page is for.
         description="Triage new alerts, investigate them and record a decision."
         actions={
           <div className="flex flex-wrap gap-2">
@@ -263,6 +266,8 @@ export default function AdminFraudPage() {
           },
         ]}
       />
+
+      <ListingWarningsQueue onOpenAlert={setActiveAlertId} />
 
       <OpsToolbar>
         <SearchInput

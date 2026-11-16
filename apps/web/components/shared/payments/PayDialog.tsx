@@ -35,7 +35,6 @@ export interface PayDialogProps {
   error?: string | null;
   onPay: () => void;
   busy?: boolean;
-  /** Why this payment can't start yet (e.g. identity not verified): shown first, and the pay button is disabled. */
   blocked?: ReactNode;
   notReadyLabel?: string;
   /** The card is charged only for a shortfall (an invoice paid from held rent first): no fee or total row is added. */

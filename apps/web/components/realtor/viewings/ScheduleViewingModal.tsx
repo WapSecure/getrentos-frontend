@@ -18,6 +18,7 @@ import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorLead, realtorService, type RealtorLeadApi } from '@/services/realtorService';
+import { VIEWING_MAX_HOUR, VIEWING_MIN_HOUR, viewingMinDate } from '@/lib/viewingSlots';
 
 export type CreateViewingInput = Omit<ViewingAppointment, 'id' | 'status'> & { leadId: string };
 
@@ -146,11 +147,16 @@ export const ScheduleViewingModal = ({
           </Field>
 
           <Field label="Date" required>
-            <DatePicker value={date} onChange={setDate} />
+            <DatePicker value={date} onChange={setDate} min={viewingMinDate()} />
           </Field>
 
           <Field label="Time" required>
-            <TimePicker value={time} onChange={setTime} />
+            <TimePicker
+              value={time}
+              onChange={setTime}
+              minHour={VIEWING_MIN_HOUR}
+              maxHour={VIEWING_MAX_HOUR}
+            />
           </Field>
 
           <Field label="Notes" optionalLabel="(optional)">

@@ -5,13 +5,15 @@ import { PublicMarketBrowser } from '@/components/market/PublicMarketBrowser';
 import { firstPagePath, saleToCard } from '@/lib/publicListingMap';
 import { ListingItemListJsonLd } from '@/components/seo/ListingItemListJsonLd';
 import { fetchFirstPage, isFilteredView } from '@/lib/marketFirstPage';
+import { SITE_OG_IMAGES } from '@/lib/site';
 
 const baseMetadata: Metadata = {
   title: 'Properties for Sale in Nigeria',
   description:
-    'Browse homes for sale across Nigeria. Verified properties, Sureground Payment Protection, and results you can scope to a single estate.',
+    'Homes for sale across Nigeria. Verified properties are marked, deposits go through Sureground Payment Protection, and you can search a single estate.',
   alternates: { canonical: '/buy' },
   openGraph: {
+    images: SITE_OG_IMAGES,
     title: 'Properties for Sale in Nigeria',
     description: 'Browse homes for sale across Nigeria with Sureground Payment Protection.',
     url: '/buy',
@@ -19,8 +21,7 @@ const baseMetadata: Metadata = {
   },
 };
 
-// Filtered and searched views share the unfiltered page's canonical and stay out of the index,
-// so query strings can't multiply into thin duplicate pages; links on them are still followed.
+// Query-string views share the unfiltered canonical and stay noindex, so they can't multiply into thin duplicates.
 export async function generateMetadata({
   searchParams,
 }: {
@@ -36,7 +37,6 @@ export default async function BuyMarketplacePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  // The browser only uses it for the unfiltered view; the item list is only for the indexable page.
   const [filtered, initialData] = await Promise.all([
     searchParams.then(isFilteredView),
     fetchFirstPage(firstPagePath('sale'), saleToCard),

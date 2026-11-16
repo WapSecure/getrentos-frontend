@@ -114,7 +114,10 @@ export interface ApplicationNote {
 export const applicationsApi = {
   /** The renter's own details from their latest application; null if none (or not supported yet). */
   lastDetails: () =>
-    apiFetch<LastApplicationDetails | null>('/renter/applications/last-details').catch(() => null),
+    // An empty body comes back as undefined, which React Query refuses: no details is null.
+    apiFetch<LastApplicationDetails | null>('/renter/applications/last-details')
+      .then((details) => details ?? null)
+      .catch(() => null),
 
   list: (page = 1, pageSize = 50) =>
     apiFetch<Paginated<RenterApplication>>(

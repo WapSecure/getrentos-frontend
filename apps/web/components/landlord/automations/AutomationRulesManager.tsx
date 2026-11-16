@@ -188,7 +188,7 @@ export function AutomationRulesManager() {
         <div className="min-w-0">
           <h2 className="text-base font-semibold text-foreground">Automation rules</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Send an announcement automatically — on a recurring schedule, or when a tenancy event
+            Send an announcement automatically, on a recurring schedule or when a tenancy event
             happens (rent due soon, overdue, lease expiring).
           </p>
         </div>
@@ -340,7 +340,7 @@ export function AutomationRulesManager() {
                 </Field>
               </div>
             ) : (
-              <Field label="Property scope" hint="Optional — leave as all for the whole portfolio.">
+              <Field label="Property scope" hint="Optional. Leave as all for the whole portfolio.">
                 <Select
                   value={form.propertyId}
                   onValueChange={(propertyId) => setForm((f) => ({ ...f, propertyId }))}

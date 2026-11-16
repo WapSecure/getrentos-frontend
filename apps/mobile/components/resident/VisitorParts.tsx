@@ -7,12 +7,11 @@ import { formatDateTime } from '@/lib/format';
 export type VisitorTone = 'active' | 'waiting' | 'finished';
 
 export function visitorInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const parts = name.trim().split(/\s+/).filter((w) => /^\p{L}/u.test(w));
   const letters = parts.length > 1 ? [parts[0][0], parts[parts.length - 1][0]] : [parts[0]?.[0]];
   return letters.filter(Boolean).join('').toUpperCase() || '?';
 }
 
-/** Decorative: the visitor's name is always written beside it, so screen readers skip it. */
 export function VisitorInitials({
   name,
   tone = 'active',
@@ -52,7 +51,6 @@ export function VisitorInitials({
   );
 }
 
-/** A small uppercase label above a group of cards, with an optional count. */
 export function GroupLabel({
   label,
   count,
@@ -104,7 +102,6 @@ export function GroupLabel({
   );
 }
 
-/** Laid out like a ticket: who it is for, the QR code, a tear line, then the PIN in large spaced digits. */
 export function PassTicket({
   pass,
 }: {
@@ -121,7 +118,6 @@ export function PassTicket({
         borderWidth: 1,
         borderColor: colors.border,
         backgroundColor: colors.background,
-        // Clips the outer half of each notch so only the cut-out shows.
         overflow: 'hidden',
       }}
     >
@@ -155,7 +151,6 @@ export function PassTicket({
         </View>
       </View>
 
-      {/* Tear line with a notch cut from each side. */}
       <View style={{ height: notch, justifyContent: 'center' }}>
         <View
           style={{
@@ -207,7 +202,6 @@ export function PassTicket({
             <View
               key={i}
               style={{
-                // Shares the row so a long PIN still fits on one line on a small phone.
                 flex: 1,
                 maxWidth: 48,
                 paddingVertical: spacing.sm,
@@ -232,7 +226,6 @@ export function PassTicket({
   );
 }
 
-/** Equal segments in a track, for picking how long a pass lasts. Small phones get two rows of two. */
 export function DurationChoice({
   label,
   options,

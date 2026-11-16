@@ -17,7 +17,6 @@ const SPRING = { mass: 0.5, damping: 14, stiffness: 220 };
 export interface PressableScaleProps extends PressableProps {
   activeScale?: number;
   haptic?: boolean;
-  /** Fade to half opacity when disabled. Off for controls that draw their own disabled state. */
   dimWhenDisabled?: boolean;
 }
 

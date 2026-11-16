@@ -26,7 +26,7 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
-import { HOME_ASSET_CATEGORY_SUGGESTIONS } from '@sureground/shared';
+import { HOME_ASSET_CATEGORY_SUGGESTIONS, utilityKindForCategory } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi, type Asset, type AssetStatus } from '@/lib/api/homeCare';
 import { errorMessage } from '@/lib/api/client';
@@ -43,7 +43,6 @@ const STATUS: Record<AssetStatus, { label: string; tone: Tone }> = {
   NEEDS_SERVICE: { label: 'Needs service', tone: 'warning' },
   RETIRED: { label: 'Retired', tone: 'neutral' },
 };
-// The shared suggestions first, then the other common kinds; always ending with Other.
 const ASSET_KINDS = [
   ...HOME_ASSET_CATEGORY_SUGGESTIONS,
   'Fridge',
@@ -301,6 +300,7 @@ function AddAsset({ defaultHome, onDone }: { defaultHome: string; onDone: () => 
         warrantyExpiresAt: warrantyTo
           ? new Date(`${warrantyTo}T12:00:00`).toISOString()
           : undefined,
+        utilityKind: utilityKindForCategory(category) ?? undefined,
       }),
     onSuccess: () => {
       void haptics.success();

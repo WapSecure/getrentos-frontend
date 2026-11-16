@@ -9,10 +9,6 @@ import { qk } from '@/lib/query/keys';
 import { useDiasporaAvailability } from '@/hooks/useDiasporaAvailability';
 import { useForeignIdentityStatus } from '@/hooks/useForeignIdentityStatus';
 
-/**
- * The way to the identity checks for investing from abroad, on the trust screens. Shown only
- * while Diaspora Invest is on and the person has an investor profile.
- */
 export function IdentityAbroadEntry() {
   const { colors, spacing } = useTheme();
   const { enabled } = useDiasporaAvailability();

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert, RefreshControl, View } from 'react-native';
 
+import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -57,13 +58,18 @@ export default function LandlordApplications() {
       landlordApi.setApplicationStatus(id, status),
     onMutate: ({ id }) => setBusyId(id),
     onSettled: () => setBusyId(null),
-    onSuccess: (_d, { status }) => {
+    onSuccess: (result, { status }) => {
       qc.invalidateQueries({ queryKey: ['landlord', 'applications'] });
       qc.invalidateQueries({ queryKey: qk.landlord.dashboardStats });
-      toast.show(
-        status === 'approved' ? 'Application approved.' : 'Application rejected.',
-        'success'
-      );
+      qc.invalidateQueries({ queryKey: ['landlord', 'leases'] });
+      if (status !== 'approved') {
+        toast.show('Application rejected.', 'success');
+      } else if (result?.leaseDrafted === false) {
+        toast.show('Approved. No lease was drafted: create one from Leases.', 'info');
+        router.push('/(app)/landlord-leases');
+      } else {
+        toast.show('Approved. A draft lease is ready in Leases.', 'success');
+      }
     },
     onError: (e) => toast.show(errorMessage(e, 'Could not update that application.'), 'error'),
   });
@@ -216,7 +222,6 @@ function ApplicationCard({
               <Text variant="caption">{trustScoreDisplay(a.trustScore)}</Text>
             </Detail>
           </View>
-          {/* Full width: in a third of the card, "Self-employed — Consultant" broke over three lines. */}
           <Detail label="Employment">
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Briefcase size={12} color={colors.mutedForeground} />
@@ -277,7 +282,6 @@ function Detail({ label, children }: { label: string; children: React.ReactNode 
 const EMPLOYMENT_ENUM =
   /^(EMPLOYED|SELF_EMPLOYED|UNEMPLOYED|FULL_TIME|PART_TIME|CONTRACT|STUDENT|RETIRED)\b/;
 
-/** The status part sometimes arrives as a raw enum ("EMPLOYED — Zenith Bank"); show it in sentence case. */
 function employmentLabel(value: string): string {
   return value.replace(EMPLOYMENT_ENUM, (word) => {
     const spaced = word.replace(/_/g, ' ').toLowerCase();

@@ -1,7 +1,6 @@
 import type { Href } from 'expo-router';
 import type { PurchaseSummary } from '@sureground/shared';
 
-/** The buyer opens their own workspace; a representative opens the one they see for the buyer. */
 export const purchaseWorkspaceHref = (
   purchase: Pick<PurchaseSummary, 'role' | 'transactionId'>
 ): string =>

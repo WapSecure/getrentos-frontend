@@ -77,10 +77,8 @@ export interface LandlordProperty {
   totalUnits: number;
   occupiedUnits: number;
   annualRentRoll: number;
-  /** Lowest asking rent among units with no current tenancy, in its own period. */
   askingRent?: number;
   askingRentPeriod?: 'month' | 'year';
-  /** The vacant units ask different rents, so `askingRent` is the lowest. */
   askingRentVaries?: boolean;
   createdAt: string;
   archived: boolean;
@@ -92,6 +90,7 @@ export type RentStatus = 'paid' | 'pending' | 'due' | 'overdue' | 'partial';
 export interface LandlordTenant {
   id: string;
   name: string;
+  tenantUserId?: string | null;
   email: string;
   phone: string;
   propertyId: string;
@@ -154,7 +153,6 @@ export interface LandlordUnit {
   occupancyStatus: OccupancyStatus;
   /** Who lives there, when the portfolio list knows. */
   tenantName?: string;
-  /** The API enum (e.g. 'COMMERCIAL'), on vacant units: a commercial unit's listing form adds the commercial block. */
   propertyType?: string;
 }
 
@@ -174,6 +172,7 @@ export type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejec
 
 export interface LandlordApplication {
   id: string;
+  leaseDrafted?: boolean;
   applicantName: string;
   applicantEmail: string;
   applicantPhone: string;
@@ -242,17 +241,13 @@ export interface LandlordLease {
   paymentDueAt?: string;
   tenantSigned: boolean;
   landlordSigned: boolean;
-  /** How often the rent amount is charged. Older APIs leave it out. */
   rentPeriod?: 'month' | 'year';
   createdAt: string;
 }
 
-/** Signed in a way that leaves no e-signature records: imported, paper or pre-launch leases. */
 const SIGNED_STATUSES = new Set<LeaseStatus>(['signed', 'active', 'expired', 'terminated']);
-/** The tenant has already signed by the time a lease reaches these. */
 const TENANT_SIGNED_STATUSES = new Set<LeaseStatus>(['awaiting_payment', 'awaiting_landlord']);
 
-/** Who has signed, trusting the lease status over the e-signature records. */
 export function leaseSignatures(
   l: Pick<LandlordLease, 'status' | 'tenantSigned' | 'landlordSigned'>
 ): {
@@ -297,7 +292,6 @@ export type MaintenancePriority = 'low' | 'medium' | 'high' | 'urgent';
 /** Mirrors the backend's `MaintenanceRequestStatus`, lowercased. */
 export type MaintenanceStatus = 'submitted' | 'assigned' | 'in_progress' | 'resolved' | 'cancelled';
 
-/** Still waiting on the landlord or a vendor. */
 export const OPEN_MAINTENANCE_STATUSES: readonly MaintenanceStatus[] = [
   'submitted',
   'assigned',
@@ -318,8 +312,9 @@ export interface LandlordMaintenance {
   propertyId: string;
   propertyName: string;
   unitName?: string;
-  vendorId?: string;
-  vendorName?: string;
+  assignedVendorId?: string;
+  assignedVendorName?: string;
+  scheduledFor?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -362,6 +357,7 @@ export interface LandlordPayment {
   unitId?: string;
   unitName?: string;
   amount: number;
+  category?: string;
   dueDate: string;
   paidDate?: string;
   status: LandlordPaymentStatus;
@@ -539,7 +535,6 @@ export interface LandlordListing {
   coverImage?: string;
   galleryImages?: string[];
   videoTourUrl?: string;
-  /** The API enum (e.g. 'COMMERCIAL'). */
   propertyType?: string;
   /** Commercial properties only. Read through `commercialDetailsOf`, never trusted as is. */
   commercial?: unknown;
@@ -602,9 +597,32 @@ export interface MicrositeSettings {
 export interface LandlordReviewSummary {
   averageRating: number;
   reviewCount: number;
-  averageCommunication: number;
-  averagePropertyCondition: number;
-  averageResponsiveness: number;
+  averageAsLandlord: number | null;
+  averagePropertyCondition: number | null;
+  landlordReviewCount: number;
+  propertyReviewCount: number;
+}
+
+export interface PendingTenantReview {
+  leaseId: string;
+  tenantName: string;
+  propertyName: string;
+  leaseEnd: string;
+}
+
+export interface WrittenTenantReview {
+  id: string;
+  leaseId: string | null;
+  tenantName: string;
+  propertyName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
+export interface TenantReviews {
+  pending: PendingTenantReview[];
+  written: WrittenTenantReview[];
 }
 
 export interface LandlordReview {
@@ -612,9 +630,7 @@ export interface LandlordReview {
   tenantName: string;
   propertyName: string;
   rating: number;
-  communication: number;
-  propertyCondition: number;
-  responsiveness: number;
+  category: string;
   comment: string;
   createdAt: string;
 }
@@ -889,6 +905,7 @@ export interface LandlordConversation {
   id: string;
   participantName: string;
   participantRole: string;
+  propertyTitle?: string;
   lastMessage: string;
   lastMessageTime: string;
   unreadCount: number;
@@ -983,10 +1000,10 @@ export const landlordApi = {
       body: { reason },
     }),
 
-  assignVendor: (id: string, vendorId: string) =>
+  assignVendor: (id: string, vendorId: string, scheduledFor?: string) =>
     apiFetch<LandlordMaintenance>(`/landlord/maintenance/${id}/assign-vendor`, {
       method: 'PATCH',
-      body: { vendorId },
+      body: { vendorId, ...(scheduledFor ? { scheduledFor } : {}) },
     }),
 
   payments: (page = 1, pageSize = 20) =>
@@ -1045,6 +1062,9 @@ export const landlordApi = {
     apiFetch<MicrositeSettings>('/landlord/microsite', { method: 'PATCH', body: patch }),
 
   reviewsSummary: () => apiFetch<LandlordReviewSummary>('/landlord/reviews/summary'),
+  tenantReviews: () => apiFetch<TenantReviews>('/landlord/reviews/tenants'),
+  reviewTenant: (input: { leaseId: string; rating: number; comment?: string }) =>
+    apiFetch<WrittenTenantReview>('/landlord/reviews/tenants', { method: 'POST', body: input }),
 
   reviews: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<LandlordReview>>(`/landlord/reviews?page=${page}&pageSize=${pageSize}`),
@@ -1265,7 +1285,6 @@ export const landlordApi = {
 
   /** Returns the storage key to attach to a property; the file is not committed yet. */
   uploadPropertyMedia: (file: PickedFile, kind: 'image' | 'video') => {
-    // Videos go straight to storage, so a large tour never passes through the API.
     if (kind === 'video') return uploadVideoDirect('/landlord/properties', file);
     const form = new FormData();
     appendFile(form, 'file', file);
@@ -1276,11 +1295,9 @@ export const landlordApi = {
     );
   },
 
-  /** A video tour, straight to storage, with progress and cancel. Returns the storage key. */
   uploadPropertyVideo: (file: PickedFile, options: UploadProgressOptions = {}) =>
     uploadVideoDirect('/landlord/properties', file, options).then((r) => r.key),
 
-  /** A photo for `uploadPropertyMedia`'s staging, with progress and cancel. Returns the storage key. */
   uploadPropertyPhoto: (file: PickedFile, options: UploadProgressOptions = {}) => {
     const form = new FormData();
     appendFile(form, 'file', file);

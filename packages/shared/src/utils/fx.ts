@@ -1,11 +1,4 @@
-/**
- * Indicative foreign-currency figures beside a naira price (diaspora plan D1). Naira stays the
- * price and the payment currency: these are display only, never a quote, never something to pay in.
- *
- * Rounding rule: two significant figures, in whole units of the currency, half up
- * (£82,345 → about £82,000; £8,250 → about £8,300; £947 → about £950; £3.40 → about £3).
- * Anything that rounds to under one unit, or a non-positive amount, gives no figure at all.
- */
+/** Display only, never a quote: naira stays the price. Two significant figures, half up; under one unit gives none. */
 
 export const INDICATIVE_CURRENCIES = ['GBP', 'USD', 'EUR', 'CAD'] as const;
 export type IndicativeCurrency = (typeof INDICATIVE_CURRENCIES)[number];
@@ -16,14 +9,12 @@ export const isIndicativeCurrency = (code: string | null | undefined): code is I
   (INDICATIVE_CURRENCIES as readonly string[]).includes(code ?? '');
 
 export interface IndicativeAmount {
-  /** Rounded, whole units of `currency`. */
   amount: number;
   currency: IndicativeCurrency;
-  /** "about £82,000" */
   text: string;
 }
 
-/** Whole naira as a number, from a number, bigint, or a digit string (BIGINT columns arrive as strings). */
+/** BIGINT columns arrive as strings. */
 function nairaNumber(naira: number | bigint | string): number | null {
   if (typeof naira === 'number') return Number.isFinite(naira) ? naira : null;
   if (typeof naira === 'bigint') return Number(naira);
@@ -55,10 +46,7 @@ function formatAmount(amount: number, currency: IndicativeCurrency): string {
   return formatter.format(amount);
 }
 
-/**
- * `rate` is 1 NGN in `currency` (as `GET /fx/indicative` returns it). Null when there is
- * nothing honest to show: no usable rate, an unsupported currency, or an amount under one unit.
- */
+/** `rate` is 1 NGN in `currency`; null when there is nothing honest to show. */
 export function indicativeAmount(
   nairaWhole: number | bigint | string,
   rate: number | null | undefined,
@@ -86,17 +74,13 @@ const lagosDay = new Intl.DateTimeFormat('en-GB', {
   month: 'short',
 });
 
-/** "Indicative, Open Exchange Rates rate at 14:05 Lagos, 11 Nov. You pay in naira." */
 export function indicativeRateLabel(source: string, asOf: string | Date): string | null {
   const when = asOf instanceof Date ? asOf : new Date(asOf);
   if (!source.trim() || Number.isNaN(when.getTime())) return null;
   return `Indicative, ${source.trim()} rate at ${lagosTime.format(when)} Lagos, ${lagosDay.format(when)}. You pay in naira.`;
 }
 
-/**
- * `GET /fx/indicative` (public). `rates` is 1 NGN in each currency. `available: false` means the
- * rate source is not set up, is down, or its rate is over 24 hours old: show naira only.
- */
+/** `available: false` means the rate source is not set up, is down, or over 24 hours old: show naira only. */
 export interface IndicativeRates {
   available: boolean;
   source: string | null;

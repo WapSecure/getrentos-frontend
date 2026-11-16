@@ -7,7 +7,6 @@ import { isPublicWebPath } from '@/lib/sessionRoutes';
 
 const showSignedOut = () => useAuthStore.getState().setAuthenticated(false);
 
-/** Public pages drop an ended session in place; signed-in areas still go to sign-in. */
 export function WebQueryProvider({ children }: { children: ReactNode }) {
   return (
     <QueryProvider isPublicPath={isPublicWebPath} onSignedOutInPlace={showSignedOut}>

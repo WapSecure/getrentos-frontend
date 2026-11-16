@@ -1,4 +1,12 @@
 export const qk = {
+  statements: {
+    list: (kind: string) => ['service-charge-statements', kind] as const,
+    one: (kind: string, id: string) => ['service-charge-statements', kind, id] as const,
+  },
+  estateServiceCharges: {
+    list: (estateId: string) => ['estate', estateId, 'service-charges'] as const,
+    one: (estateId: string, id: string) => ['estate', estateId, 'service-charges', id] as const,
+  },
   auth: {
     me: ['auth', 'me'] as const,
   },
@@ -31,7 +39,6 @@ export const qk = {
     firms: ['management-transfers', 'firms'] as const,
     handover: (id: string) => ['management-transfers', 'handover', id] as const,
   },
-  // Sureground Diaspora Invest: the investor workspace, onboarding, identity abroad and Managed.
   fx: { indicative: ['fx', 'indicative'] as const },
   investor: {
     all: ['investor'] as const,
@@ -43,7 +50,6 @@ export const qk = {
     identity: ['investor', 'identity-abroad'] as const,
     transactions: ['investor', 'buyer-transactions'] as const,
   },
-  // One purchase as its buyer or the buyer's representative sees it.
   purchaseWorkspace: {
     all: ['purchase-workspace'] as const,
     detail: (role: string, txId: string) => ['purchase-workspace', role, txId] as const,
@@ -184,6 +190,24 @@ export const qk = {
     plans: ['home-care', 'plans'] as const,
     sla: (propertyId: string) => ['home-care', 'sla', propertyId] as const,
     timeline: ['home-care', 'timeline'] as const,
+    /** Power and water; every key starts with `utilities` so one invalidation refreshes them all. */
+    utilities: ['home-care', 'utilities'] as const,
+    generators: (propertyId: string) =>
+      ['home-care', 'utilities', 'generators', propertyId] as const,
+    readings: (assetId: string) => ['home-care', 'utilities', 'readings', assetId] as const,
+    meters: (propertyId: string) => ['home-care', 'utilities', 'meters', propertyId] as const,
+    supplyHours: (meterId: string) => ['home-care', 'utilities', 'supply', meterId] as const,
+    purchases: (propertyId: string, kind: string) =>
+      ['home-care', 'utilities', 'purchases', propertyId, kind] as const,
+    utilitiesAnalytics: (propertyId: string, months: number) =>
+      ['home-care', 'utilities', 'analytics', propertyId, months] as const,
+    serviceCharges: (propertyId: string) =>
+      ['home-care', 'utilities', 'service-charges', propertyId] as const,
+    serviceCharge: (id: string) => ['home-care', 'utilities', 'service-charge', id] as const,
+    utilitiesSummary: (propertyId: string) =>
+      ['home-care', 'utilities', 'summary', propertyId] as const,
+    waterTests: (propertyId: string) =>
+      ['home-care', 'utilities', 'water-tests', propertyId] as const,
   },
   billing: {
     mine: ['billing'] as const,
@@ -191,6 +215,7 @@ export const qk = {
     invoices: ['billing', 'invoices'] as const,
   },
   estateManager: {
+    notifications: ['estate-manager', 'notifications'] as const,
     reportDigest: (estateId: string) => ['estate-manager', estateId, 'report-digest'] as const,
     collectionPlan: (estateId: string, language: string) =>
       ['estate-manager', estateId, 'collection-plan', language] as const,
@@ -228,6 +253,7 @@ export const qk = {
       ['estate-manager', estateId, 'watchlist', status] as const,
   },
   renter: {
+    maintenanceHomes: ['renter', 'maintenance', 'homes'] as const,
     lastApplicationDetails: ['renter', 'applications', 'last-details'] as const,
     leaseGuide: ['renter', 'lease', 'guide'] as const,
     listingCheck: (listingId: string) => ['renter', 'listing', listingId, 'check'] as const,
@@ -350,6 +376,7 @@ export const qk = {
     notificationPreferences: ['realtor', 'notification-preferences'] as const,
   },
   agent: {
+    notifications: ['agent', 'notifications'] as const,
     dashboard: ['agent', 'dashboard'] as const,
     route: (start: string) => ['agent', 'route', start] as const,
     notificationPreferences: ['agent', 'settings', 'notifications'] as const,
@@ -509,6 +536,7 @@ export const qk = {
     leads: (page = 1, pageSize = 20) => ['landlord', 'leads', { page, pageSize }] as const,
     microsite: ['landlord', 'microsite'] as const,
     reviewsSummary: ['landlord', 'reviews', 'summary'] as const,
+    tenantReviews: ['landlord', 'reviews', 'tenants'] as const,
     reviews: (page = 1, pageSize = 20) => ['landlord', 'reviews', { page, pageSize }] as const,
     documents: (page = 1, pageSize = 20, search?: string, category?: string) =>
       [

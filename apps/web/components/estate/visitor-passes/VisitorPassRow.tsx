@@ -32,12 +32,12 @@ const formatDate = (value: string) =>
   new Intl.DateTimeFormat('en-NG', {
     day: 'numeric',
     month: 'short',
-    hour: 'numeric',
+    hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(value));
 
 const formatTime = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
+  new Intl.DateTimeFormat('en-NG', { hour: '2-digit', minute: '2-digit' }).format(new Date(value));
 
 interface VisitorPassRowProps {
   pass: VisitorPass;

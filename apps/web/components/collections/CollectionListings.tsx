@@ -4,7 +4,6 @@ import { MarketListingCard } from '@/components/market/MarketListingCard';
 import { toMarketCard } from '@/lib/marketCards';
 import type { PublicCollection } from '@/lib/collections';
 
-/** The collection's listings, in the curator's order, counted under `{market}_collection`. */
 export function CollectionListings({ collection }: { collection: PublicCollection }) {
   return (
     <ol

@@ -39,7 +39,6 @@ const statusConfig: Record<
 interface RealtorListingPreviewModalProps {
   listing: RealtorListing | null;
   onClose: () => void;
-  /** Commercial properties only: opens the commercial details editor. */
   onEditCommercial?: (listing: RealtorListing) => void;
 }
 

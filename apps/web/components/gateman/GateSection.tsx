@@ -2,22 +2,16 @@ import type { ReactNode } from 'react';
 import { cn } from '@sureground/shared';
 
 interface GateSectionProps {
-  /** Used for the heading id, so the section is named by its title. */
   id: string;
   title: string;
-  /** One plain line under the title saying what the list holds. */
   description?: ReactNode;
-  /** Shows a count pill next to the title; omit while loading. */
   count?: number;
-  /** Read out instead of the bare number, e.g. "3 inside". */
   countLabel?: string;
-  /** Sits on the right of the header, e.g. a secondary action. */
   action?: ReactNode;
   children: ReactNode;
   className?: string;
 }
 
-/** The gate console's card section: header with title, count and a one-line explanation, then content. */
 export const GateSection = ({
   id,
   title,
@@ -67,7 +61,6 @@ const chipTone: Record<Tone, string> = {
   danger: 'bg-destructive-subtle text-destructive',
 };
 
-/** The round leading icon on a gate list row, tinted by the row's state. */
 export const GateRowIcon = ({
   tone = 'neutral',
   children,
@@ -93,7 +86,6 @@ const edgeTone: Record<Tone, string> = {
   danger: 'before:bg-destructive',
 };
 
-/** A thin tinted bar on a row's left edge, for states that need the guard's attention. */
 export const gateRowEdge = (tone: Tone) =>
   tone === 'neutral'
     ? ''

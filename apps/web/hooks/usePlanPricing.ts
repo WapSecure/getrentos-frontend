@@ -7,8 +7,7 @@ import {
 import { unwrap } from '@/lib/apiHelpers';
 import { subscriptionKeys } from '@/lib/queryKeys';
 
-// Read from the backend so the price shown is always the price charged. A server-rendered page
-// passes what it fetched as `initialData`, which counts as fresh for the stale time.
+// Read from the backend so the price shown is the price charged; server-fetched `initialData` counts as fresh.
 export function usePlanPricing(initialData?: PlanPricing) {
   const { data, isLoading, isError } = useQuery({
     queryKey: subscriptionKeys.pricing,

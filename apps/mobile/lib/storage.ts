@@ -9,8 +9,7 @@ const SECURE_OPTIONS: SecureStore.SecureStoreOptions = {
 
 const isWeb = Platform.OS === 'web';
 
-// Outside a development build, the web fallback keeps values (sign-in tokens) in memory only: a
-// page reload signs the user out, but nothing sensitive is left in clear text in localStorage.
+// Outside a development build the web fallback keeps sign-in tokens in memory only, never in localStorage.
 const webPersists = isWeb && typeof __DEV__ !== 'undefined' && __DEV__;
 const webMemory = new Map<string, string>();
 

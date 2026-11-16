@@ -70,22 +70,15 @@ const SCENARIO_ROWS: ScenarioRow[] = [
   { label: 'Net income over 5 years', pick: (s) => s.cashFlowNet },
 ];
 
-/**
- * DIA-19: investment analysis in naira on an investment-eligible listing. Every figure carries
- * its source; the investor's own figures replace the defaults. Hidden while Diaspora Invest is
- * off, and when the API has no analysis for the listing.
- */
 export function ListingInvestmentAnalysis({ listingId }: { listingId: string }) {
   const { enabled } = useDiasporaAvailability();
   const [edits, setEdits] = useState<AnalysisEdits>({});
-  // Debounced as a string, so an unchanged input never schedules another render.
   const settled = useDebouncedValue(JSON.stringify(analysisInput(edits)), 500);
   const input = useMemo(() => JSON.parse(settled) as ReturnType<typeof analysisInput>, [settled]);
   const analysis = useQuery({
     queryKey: investorKeys.analysis(listingId, input),
     queryFn: () => unwrap(investorService.getListingAnalysis(listingId, input)),
     enabled,
-    // An optional section: if the analysis can't load, leave it out rather than failing the listing page.
     throwOnError: false,
     retry: false,
     placeholderData: keepPreviousData,

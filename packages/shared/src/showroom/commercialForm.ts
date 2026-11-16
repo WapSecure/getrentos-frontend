@@ -1,9 +1,6 @@
 import type { CommercialDetails, CommercialFitOutCondition, CommercialPermittedUse } from './types';
 
-/**
- * The commercial block's form model, shared by the web and mobile listing forms: the same fields,
- * limits, payloads and error messages on both, so a value one accepts the other never refuses.
- */
+// Shared by the web and mobile listing forms, so a value one accepts the other never refuses.
 
 export type CommercialStated = '' | 'yes' | 'no';
 
@@ -60,21 +57,17 @@ export const COMMERCIAL_LIMITS = {
 
 export type CommercialDeal = 'rent' | 'sale';
 
-/** Who reads the stated details, and what the VAT question is about: the rent on a let, the price on a sale. */
 export const commercialDealCopy = (deal: CommercialDeal = 'rent') =>
   deal === 'sale'
     ? { audience: 'Buyers', amount: 'Price' }
     : { audience: 'Renters', amount: 'Rent' };
 
-/** Lease lengths offered as chips, in years. */
 export const LEASE_TERM_CHOICES = [1, 2, 3, 5, 7, 10, 15, 20, 25];
 
-/** The API's limits on lease terms: whole years from 1 to 99, no repeats, at most 10. */
 export const LEASE_TERM_LIMITS = { min: 1, max: 99, count: 10 } as const;
 
 const WHOLE = /^\d+$/;
 
-/** Adds a lease length typed into the "Other" box, or says why it can't be added. */
 export function addLeaseTerm(
   current: number[],
   raw: string
@@ -115,7 +108,6 @@ export const commercialFromDetails = (d?: CommercialDetails): CommercialValues =
   vatIncluded: toStated(d?.vatIncluded),
 });
 
-/** Only what is stated; undefined when nothing is. Used on create. */
 export function commercialToCreatePayload(v: CommercialValues): CommercialDetails | undefined {
   const payload: CommercialDetails = {
     permittedUse: v.permittedUse || undefined,
@@ -159,7 +151,6 @@ export function commercialToUpdatePayload(v: CommercialValues): CommercialUpdate
 // A trailing dot is what NumberInput shows mid-typing, so it is allowed.
 const TWO_DECIMALS = /^\d+(?:\.\d{0,2})?$/;
 
-/** The first problem in the form, in the API's words; null when it can be saved. */
 export function commercialError(v: CommercialValues): string | null {
   const terms = v.leaseTermOptionsYears;
   if (

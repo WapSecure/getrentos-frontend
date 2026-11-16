@@ -15,13 +15,15 @@ import { StepList } from '@/components/marketing/StepList';
 import { photos } from '@/components/marketing/photos';
 import { faqJsonLd, type PlainFaq } from '@/lib/faqJsonLd';
 import { ROUTES } from '@/lib/constants/auth';
+import { SITE_OG_IMAGES } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'For Renters: Find and Rent a Home in Nigeria',
   description:
-    'Search homes to rent, see which listings and landlords are verified, apply online and pay rent through Sureground Payment Protection. Report repairs from your account after you move in.',
+    'Find a home to rent, see which listings and landlords are verified, apply online and pay rent through Sureground Payment Protection. Report repairs too.',
   alternates: { canonical: '/renters' },
   openGraph: {
+    images: SITE_OG_IMAGES,
     title: 'Sureground for renters',
     description: 'Search, apply, sign and pay rent in one place, with your first rent protected.',
     url: '/renters',

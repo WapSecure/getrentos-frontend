@@ -109,7 +109,6 @@ export default function ShortletDetail() {
 
   const listing = query.data;
   const saved = (wishlistQuery.data ?? []).includes(id);
-  // The same media list as the web stay page: photos, then the video tour, then the 360 tour.
   const media = useMemo(() => (listing ? shortletMedia(listing) : []), [listing]);
   useTrackDetailView(listing ? id : undefined, 'shortlet');
 

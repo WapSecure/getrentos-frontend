@@ -27,6 +27,7 @@ import type { SupportMessage, SupportThread } from '@/types/support';
 import type { RenewalOffer } from '@/types/lease';
 import type {
   CreateMaintenanceRequestInput,
+  MaintenanceHome,
   MaintenanceRequest,
   MaintenanceSummary,
 } from '@/types/maintenance';
@@ -228,7 +229,8 @@ export interface Payment {
   totalChargedNaira?: number;
   /** 0 once released. */
   heldAmountNaira?: number;
-  /** The tenant has the keys: held rent is then released early, not "on move-in". */
+  /** The first rent on a new lease: paid in full, never in part. */
+  fullPaymentOnly?: boolean;
   moveInConfirmed?: boolean;
   /** Reopenable until `expiresAt`. */
   resumeCheckout?: { url: string; reference: string; expiresAt: string };
@@ -809,6 +811,14 @@ export const renterService = {
     );
   },
 
+  async getReceivedReviews(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<ReviewItem>>> {
+    return safeCall(() =>
+      authFetch<Paginated<ReviewItem>>(`/renter/reviews${toQuery(params)}`)
+    );
+  },
+
   async submitReview(data: {
     leaseId: string;
     category: 'LANDLORD' | 'PROPERTY';
@@ -1006,7 +1016,6 @@ export const renterService = {
         body: JSON.stringify({ participantId, propertyId: propertyId ?? undefined }),
       })
     ).then((res) =>
-      // Only a conversation about a home counts as an enquiry.
       propertyId ? trackOnSuccess(res, { name: 'inquiry_submitted', market: 'rent' }) : res
     );
   },
@@ -1365,6 +1374,10 @@ export const renterService = {
     return safeCall(() =>
       authFetch<Paginated<MaintenanceRequest>>(`/renter/maintenance${toQuery(params)}`)
     );
+  },
+
+  async listMaintenanceHomes(): Promise<ApiResponse<MaintenanceHome[]>> {
+    return safeCall(() => authFetch('/renter/maintenance/homes'));
   },
 
   async createMaintenanceRequest(

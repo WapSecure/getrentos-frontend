@@ -96,7 +96,6 @@ export function HomeManagementEscalationQueue({
   isPropertiesLoading = false,
 }: HomeManagementEscalationQueueProps) {
   const queryClient = useQueryClient();
-  // '' is every property, the default.
   const [selectedPropertyId, setSelectedPropertyId] = useState(ALL_PROPERTIES);
   const [page, setPage] = useState(1);
   const [escalationConfirmation, setEscalationConfirmation] =
@@ -192,7 +191,6 @@ export function HomeManagementEscalationQueue({
     />
   );
 
-  // Nothing to coordinate: a work order list should not sit under a full-height empty panel.
   if (!isPropertiesLoading && properties.length === 0) return null;
   const selectedProperty = properties.find((property) => property.id === effectivePropertyId);
   if (

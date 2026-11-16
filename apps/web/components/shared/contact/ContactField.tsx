@@ -4,16 +4,11 @@ import { useState } from 'react';
 import { Field, Input } from '@sureground/ui';
 import { readContactInput } from '@sureground/shared';
 
-/** True once the value reads as an email or a phone number the server can look up. */
 export function contactIsReady(value: string): boolean {
   const kind = readContactInput(value).kind;
   return kind === 'email' || kind === 'phone';
 }
 
-/**
- * "Their phone number or email". Accounts can be phone-only, so a lookup that takes only an email
- * strands many people. Checks the input on blur; the server has the final word.
- */
 export function ContactField({
   id,
   value,

@@ -3,6 +3,8 @@ import {
   Building2,
   CalendarClock,
   ClipboardCheck,
+  FileSignature,
+  FileText,
   FolderOpen,
   Globe,
   Handshake,
@@ -86,6 +88,13 @@ export const ownerNavigation = defineRoleNavigation({
       href: ROUTES.OWNER_VIEWINGS,
       icon: CalendarClock,
     },
+    {
+      id: 'applications',
+      labelKey: 'sidebar.applications',
+      href: ROUTES.OWNER_APPLICATIONS,
+      icon: FileText,
+    },
+    { id: 'leases', labelKey: 'sidebar.leases', href: ROUTES.OWNER_LEASES, icon: FileSignature },
     { id: 'tours', label: 'Video tours', href: VISIT_ROUTES.OWNER_TOURS, icon: Video },
     { id: 'offers', labelKey: 'sidebar.offers', href: ROUTES.OWNER_OFFERS, icon: Handshake },
     {
@@ -147,14 +156,12 @@ export const ownerNavigation = defineRoleNavigation({
       href: ROUTES.OWNER_TRUST_PROFILE,
       icon: ShieldCheck,
     },
-    // The owner's own agreements with a manager: view, sign, end, and answer a fee change.
     {
       id: 'management',
       label: 'Management agreements',
       href: ROUTES.OWNER_MANAGEMENT,
       icon: Handshake,
     },
-    // Literal label: a mandate holder is not necessarily the owner.
     { id: 'managed', label: 'Managed properties', href: ROUTES.OWNER_MANAGED, icon: KeyRound },
     {
       id: 'invest',
@@ -185,6 +192,7 @@ export const ownerNavigation = defineRoleNavigation({
       label: 'Selling',
       items: ['listings', 'leads', 'viewings', 'tours', 'offers', 'transactions', 'realtors'],
     },
+    { label: 'Letting', items: ['applications', 'leases'] },
     { label: 'Land', items: ['land', 'landSales'] },
     { label: 'Short stays', items: ['shortlets'] },
     { label: 'Property care', items: ['homeManagement', 'vendors', 'inspections', 'deposits'] },

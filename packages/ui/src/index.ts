@@ -1,5 +1,6 @@
 export * from './AnimatedParticles';
 export * from './BackButton';
+export * from './Avatar';
 export * from './Badge';
 export * from './Button';
 export * from './Card';

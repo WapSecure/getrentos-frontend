@@ -54,19 +54,15 @@ export interface Property {
   galleryImageKeys?: string[];
   videoTourUrl?: string;
   videoTourKey?: string;
-  /** A 360 tour link on an allowed host. */
   tourUrl?: string;
-  /** Room and caption per photo, keyed by storage key. */
   mediaDetails?: PropertyMediaDetails;
   verificationStatus: VerificationStatus;
   totalUnits: number;
   occupiedUnits: number;
   /** Contracted rent per year across let units, normalised to a year. */
   annualRentRoll: number;
-  /** Lowest asking rent among units with no current tenancy, in its own period. */
   askingRent?: number;
   askingRentPeriod?: 'month' | 'year';
-  /** The vacant units ask different rents, so `askingRent` is the lowest. */
   askingRentVaries?: boolean;
   /** In naira. Optional; they drive cap rate and yield. */
   estimatedValue?: number;
@@ -104,7 +100,6 @@ export type PropertyUpdatePayload = Partial<
   coverImageKey?: string | null;
   /** `null` clears the video tour; omit to leave it untouched. */
   videoTourKey?: string | null;
-  /** `null` or '' clears it. */
   tourUrl?: string | null;
   /** Replaces the whole map; `null` clears it. Keys must be this property's photos. */
   mediaDetails?: PropertyMediaDetails | null;
@@ -156,7 +151,6 @@ export interface Listing {
   legalFee?: number;
   /** The API enum (e.g. 'COMMERCIAL'); read through `isCommercialType`. */
   propertyType?: string;
-  /** Commercial properties only: what the landlord stated. */
   commercial?: CommercialDetails;
   amenities: string[];
   availabilityDate: string;
@@ -168,6 +162,7 @@ export interface Listing {
   galleryImages?: string[];
   videoTourUrl?: string;
   status: ListingStatus;
+  isLet?: boolean;
   createdAt: string;
 }
 
@@ -290,6 +285,8 @@ export interface RentalApplication {
   applicantName: string;
   applicantEmail: string;
   applicantPhone: string;
+  canMessage?: boolean;
+  leaseDrafted?: boolean;
   propertyId: string;
   propertyName: string;
   unitId: string;
@@ -416,6 +413,7 @@ export interface LandlordMaintenanceRequest {
 export interface Tenant {
   id: string;
   name: string;
+  tenantUserId?: string | null;
   email: string;
   phone: string;
   avatar?: string;

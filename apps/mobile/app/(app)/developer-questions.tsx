@@ -35,10 +35,6 @@ import { formatDate } from '@/lib/format';
 import { goBack } from '@/lib/goBack';
 import { qk } from '@/lib/query/keys';
 
-/**
- * "Questions to developers", as on the web's /buyer/developer-questions: every question the buyer has
- * asked a developer, newest first, with the answer. Sureground takes no payment for a development.
- */
 export default function DeveloperQuestions() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

@@ -18,7 +18,6 @@ interface ListStateProps {
   children: ReactNode;
   skeletonRows?: number;
   skeletonClassName?: string;
-  /** Replaces the plain bars with placeholders shaped like the real rows or cards. */
   skeleton?: ReactNode;
   errorTitle?: string;
   errorDescription?: string;

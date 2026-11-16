@@ -140,8 +140,7 @@ export default function Notifications() {
   const renderItem = ({ item }: { item: RenterNotification }) => {
     const Icon = CATEGORY_ICON[item.type] ?? Bell;
     const route = routeForActionUrl(item.action?.url);
-    // The remove button sits beside the card's press target, not inside it, so a tap on
-    // the bin never also opens the notification (and web gets no button inside a button).
+    // Beside the card's press target, not inside it: a nested button breaks web and opens the notification on a bin tap.
     return (
       <View style={{ marginBottom: spacing.sm }}>
         <Pressable

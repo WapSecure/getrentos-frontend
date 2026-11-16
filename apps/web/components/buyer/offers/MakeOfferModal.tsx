@@ -78,7 +78,6 @@ export const MakeOfferModal = ({
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  // DIA-07: asked before sending, so a large offer is not refused with a 403.
   const [fundsHold, setFundsHold] = useState<string | null>(null);
   const [acceptedRisks, setAcceptedRisks] = useState(false);
 
@@ -119,8 +118,7 @@ export const MakeOfferModal = ({
     queryFn: () => unwrap(buyerService.getListing(defaultPropertyId as string)),
     enabled: isOpen && !!defaultPropertyId,
   });
-  // The server refuses offers from buyers whose identity is not verified: say so before they fill
-  // the form. An unloaded or failed status never blocks; the server still has the final say.
+  // The server refuses unverified buyers; an unloaded or failed status never blocks, the server has the final say.
   const { data: kycStatus } = useQuery({
     queryKey: ['kyc-status'],
     queryFn: () => unwrap(kycService.getStatus()),

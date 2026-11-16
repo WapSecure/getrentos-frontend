@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Users } from '@sureground/icons/native';
-import { personContactLabel } from '@sureground/shared';
+import { personContactLabel, salePlanLabel } from '@sureground/shared';
 import {
   Badge,
   Button,
@@ -156,7 +156,7 @@ function Principal({ appointment: a }: { appointment: Appointment }) {
               <DealRow
                 key={t.transactionId}
                 title={t.title}
-                detail={`Resale · ${formatNaira(t.amount)}`}
+                detail={`${salePlanLabel({ propertyType: t.propertyType })} · ${formatNaira(t.amount)}`}
                 approves={t.youApprovePayments}
                 onPress={() =>
                   router.push(`/(app)/land-represented?kind=transaction&id=${t.transactionId}`)

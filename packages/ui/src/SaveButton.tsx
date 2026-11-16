@@ -13,7 +13,6 @@ interface SaveButtonProps {
   onClick?: () => unknown;
   disabled?: boolean;
   isLoading?: boolean;
-  /** `secondary` + `sm` for a save inside a row, where a full primary button would shout. */
   variant?: 'primary' | 'secondary' | 'outline';
   size?: 'sm' | 'md';
   'aria-label'?: string;

@@ -130,9 +130,9 @@ export default function RealtorListingsPage() {
         eyebrow="Work"
         title="Listings"
         description={
-          <>
-            {total} listing{total === 1 ? '' : 's'} across your clients
-          </>
+          data
+            ? `${total} listing${total === 1 ? '' : 's'} across your clients`
+            : 'Listings across your clients'
         }
         actions={
           <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreateModal}>

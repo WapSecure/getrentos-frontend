@@ -50,10 +50,7 @@ import type { CollectionsManager } from '@/services/adminCollectionsService';
 import { RuleEditor } from './RuleEditor';
 import { SponsorshipPanel } from './SponsorshipPanel';
 
-/**
- * Paid placement is labelled wherever it shows, but only with a record of who paid, and only from the
- * record's start day to its end day (Lagos dates).
- */
+/** Paid placement is labelled only with a record of who paid, and only within its Lagos start and end days. */
 function SponsoredBadge({ collection }: { collection: ManagedCollection }) {
   const record = collection.sponsorship;
   if (record?.state === 'running') return <Badge variant="warning">Sponsored</Badge>;
@@ -85,10 +82,6 @@ interface DraftItem {
   visible: boolean;
 }
 
-/**
- * List and edit one curator's collections. The server decides which listings are theirs to add;
- * the picker only offers those, and a refusal is shown as it comes back.
- */
 export function AdminCollectionsView({
   manager,
   queryKey,

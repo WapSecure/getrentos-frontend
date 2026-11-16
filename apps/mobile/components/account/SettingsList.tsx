@@ -82,7 +82,11 @@ function SettingsRow({ item, first }: { item: SettingsItem; first: boolean }) {
         ) : null}
       </View>
       {item.value ? (
-        <Text variant="caption" style={{ color: toneColor, fontWeight: '700' }}>
+        <Text
+          variant="caption"
+          numberOfLines={1}
+          style={{ color: toneColor, fontWeight: '700', flexShrink: 1, maxWidth: '40%' }}
+        >
           {item.value}
         </Text>
       ) : null}

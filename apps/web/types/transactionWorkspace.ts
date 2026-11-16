@@ -8,11 +8,7 @@ import type { LandMilestone } from './landBuyer';
 import type { LandPerfectionStep } from './landClosing';
 import type { CoApprovalView } from './landRepresentative';
 
-/**
- * Mirrors the backend's `land/dto/transaction-workspace.dto.ts` (DIA-15, DIA-16). One purchase,
- * seen by its buyer, its seller or the buyer's representative. Sureground holds only the deposit
- * under Payment Protection, never the rest of the price (D11).
- */
+/** Mirrors the backend's `land/dto/transaction-workspace.dto.ts`; Sureground holds only the deposit, never the price. */
 
 export {
   LEGAL_STATUSES,
@@ -33,7 +29,6 @@ export {
   type WorkspaceViewerRole,
 } from '@sureground/shared';
 export interface WorkspaceMilestone extends LandMilestone {
-  /** The professional who checked it. */
   verifiedBy?: { name: string; role?: string };
 }
 
@@ -55,7 +50,6 @@ export interface WorkspaceLegalCase {
   blockers: string[];
 }
 
-/** The seller sees `{ binding }` only. */
 export type WorkspaceCoApproval = CoApprovalView;
 
 export interface WorkspaceRepresentative {
@@ -64,7 +58,6 @@ export interface WorkspaceRepresentative {
   relationship: string;
   scopes: string[];
   status: 'INVITED' | 'ACTIVE';
-  /** Gives the second approval on this sale. */
   approvesPayments: boolean;
 }
 
@@ -91,7 +84,6 @@ export interface WorkspaceHistoryItem {
   at: string;
   label: string;
   actorKind: WorkspaceActorKind;
-  /** Staff always show as "Sureground". */
   actor: string;
   important: boolean;
 }
@@ -99,7 +91,6 @@ export interface WorkspaceHistoryItem {
 export interface WorkspaceDelays {
   overdueMilestones: number;
   overdueLegalSteps: number;
-  /** A step is more than 30 days late. */
   escalated: boolean;
 }
 
@@ -114,7 +105,6 @@ export interface TransactionWorkspace {
   nextAction: NextAction | null;
   milestones: WorkspaceMilestone[];
   conditions: WorkspaceCondition[];
-  /** Null, with no legal steps, until staff open title perfection. */
   legalCase: WorkspaceLegalCase | null;
   legalSteps: LandPerfectionStep[];
   coApproval: WorkspaceCoApproval;
@@ -126,14 +116,12 @@ export interface TransactionWorkspace {
   deposit?: WorkspaceDeposit;
 }
 
-/** The deposit held under Payment Protection; paying, releasing and refunding stay on buyer/transactions. */
 export interface WorkspaceDeposit {
   amount: number;
   currency: 'NGN';
   escrowStatus: string;
   payable: boolean;
   releasable: boolean;
-  /** The buyer can take the deposit back now: held, and the handover has not started. */
   refundable?: boolean;
 }
 
@@ -150,13 +138,10 @@ export interface SaleDispute {
   description?: string;
   /** Older disputes only: links typed in by a party. Untrusted, never previewed. */
   evidence?: string[];
-  /** Files either party uploaded, oldest first, with 15-minute links. Only on the single-dispute read. */
   attachments?: SaleDisputeAttachment[];
-  /** Sureground's decision, once resolved. */
   resolution?: string;
   resolvedAt?: string;
   createdAt: string;
-  /** When Sureground will respond by (the staff response window); null once under review or decided. */
   respondBy?: string | null;
   respondByParty?: 'SUREGROUND' | null;
 }

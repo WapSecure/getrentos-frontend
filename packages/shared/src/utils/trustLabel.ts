@@ -24,7 +24,6 @@ export function trustChainLabel(chain: TrustChainLike): { label: string; tone: T
     const name = PENDING_NAME[outstanding[0].id] ?? 'one check pending';
     return { label: `Verified · ${name}`, tone: 'partial' };
   }
-  // A verified property whose owner ID and ownership are both still open is not yet a verified listing.
   return { label: 'Verification in progress', tone: 'pending' };
 }
 
@@ -39,10 +38,8 @@ export interface ListingVerificationInput {
   verificationSummary?: unknown;
 }
 
-/** Approved with conditions: the conditions are still outstanding, so it never counts as verified. */
 const CONDITIONAL_STATUSES = new Set(['CONDITIONAL', 'CONDITIONALLY_APPROVED']);
 
-/** The `status` of an API object, normalised; undefined when it has none (older APIs send raw shapes). */
 const statusOf = (value: unknown): string | undefined => {
   const status =
     value && typeof value === 'object' ? (value as { status?: unknown }).status : undefined;
@@ -67,11 +64,7 @@ export interface ListingVerification {
   tone: TrustLabelTone;
 }
 
-/**
- * The listing badge every card on web and mobile shows. The trust chain is the source of truth, as
- * the API caps its property link by the verification summary; the bare flag is only a fallback.
- * Approval with conditions (land CONDITIONAL, summary CONDITIONALLY_APPROVED) is never verified.
- */
+/** The trust chain decides, as the API caps its property link by the verification summary; the bare flag is a fallback. */
 export function listingVerification(listing: ListingVerificationInput): ListingVerification {
   // Checked first: neither a stale chain nor the bare flag may turn conditional approval into "Verified".
   if (conditionsOutstanding(listing)) {
@@ -86,7 +79,6 @@ export function listingVerification(listing: ListingVerificationInput): ListingV
     : { verified: false, label: 'Verification in progress', tone: 'pending' };
 }
 
-/** Shorthand for a card that shows a badge only when the listing is verified. */
 export function isListingVerified(listing: ListingVerificationInput): boolean {
   return listingVerification(listing).verified;
 }

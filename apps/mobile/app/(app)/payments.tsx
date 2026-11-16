@@ -41,6 +41,7 @@ import { PayAmountSheet } from '@/components/payments/PayAmountSheet';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { ServiceChargesEntry } from '@/components/service-charge/ServiceChargesEntry';
 import { goBack } from '@/lib/goBack';
 
 const PAGE_SIZE = 20;
@@ -133,7 +134,7 @@ export default function Payments() {
       toast.show(
         early
           ? 'Rent released to your landlord.'
-          : 'Move-in confirmed — rent released to your landlord.',
+          : 'Move-in confirmed. Rent released to your landlord.',
         'success'
       );
       refreshPayments();
@@ -143,7 +144,6 @@ export default function Payments() {
     onError: (err) => toast.show(errorMessage(err, 'Could not release this payment.'), 'error'),
   });
 
-  // Over every loaded payment: move-in is asked once per home, then held rent can be released early.
   const releaseActions = useMemo(() => rentReleaseActions(items), [items]);
 
   const confirmMoveIn = (payment: Payment) => {
@@ -155,7 +155,7 @@ export default function Payments() {
         ? `This releases the ${held}rent Sureground is holding for ${payment.propertyName} to your landlord now${
             payment.releaseDate ? `, instead of on ${formatDate(payment.releaseDate, 'short')}` : ''
           }. It can't be undone.`
-        : `This releases the ${held}rent Sureground is holding for ${payment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`,
+        : `This releases the ${held}rent Sureground is holding for ${payment.propertyName} to your landlord now. Only confirm once you've moved in, as it can't be undone.`,
       [
         { text: 'Not yet', style: 'cancel' },
         {
@@ -189,6 +189,9 @@ export default function Payments() {
           </View>
         }
       />
+      <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+        <ServiceChargesEntry kind="renter" />
+      </View>
 
       <QueryState
         query={query}
@@ -308,7 +311,6 @@ function PaymentsSummaryCard({
       ? `${formatNaira(summary.totalHeldNaira)} of your rent is held by Sureground until it is released to your landlord.`
       : null;
 
-  // A charge in processing is not owed yet, but saying "up to date" above it reads as a contradiction.
   if (summary.openCount === 0 && processingCount > 0) {
     return (
       <Card elevated>
@@ -506,12 +508,12 @@ function PaymentRow({
           {p.heldAmountNaira ? `${formatNaira(p.heldAmountNaira)} held. ` : ''}
           {releaseAction === 'release-now'
             ? p.releaseDate
-              ? `Held under Sureground Payment Protection — releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or now if you choose.`
-              : 'Held under Sureground Payment Protection — release it to your landlord when you are ready.'
+              ? `Held under Sureground Payment Protection. It releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or now if you choose.`
+              : 'Held under Sureground Payment Protection. Release it to your landlord when you are ready.'
             : releaseAction === 'confirm-move-in'
               ? p.releaseDate
-                ? `Held under Sureground Payment Protection — releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or sooner if you confirm move-in.`
-                : 'Held under Sureground Payment Protection — confirm move-in to release it to your landlord.'
+                ? `Held under Sureground Payment Protection. It releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or sooner if you confirm move-in.`
+                : 'Held under Sureground Payment Protection. Confirm move-in to release it to your landlord.'
               : 'Held under Sureground Payment Protection until you confirm move-in.'}
         </Text>
       ) : null}

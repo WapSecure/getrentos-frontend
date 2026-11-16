@@ -51,7 +51,6 @@ export const PropertyDetailModal = ({
     <Dialog open onOpenChange={(next) => !next && onClose()}>
       <DialogContent size="xl" padded={false} showClose={false} className="lg:max-w-5xl">
         <div className="grid lg:grid-cols-[minmax(0,1fr)_340px]">
-          {/* Listing record */}
           <div className="min-w-0 lg:max-h-[88dvh] lg:overflow-y-auto lg:overscroll-contain">
             <div className="relative aspect-[16/9] max-h-80 w-full bg-muted">
               {listing.image ? (
@@ -198,7 +197,6 @@ export const PropertyDetailModal = ({
             </div>
           </div>
 
-          {/* Price, seller and actions */}
           <aside className="flex flex-col gap-5 border-t border-border bg-secondary/40 p-5 sm:p-7 lg:max-h-[88dvh] lg:overflow-y-auto lg:overscroll-contain lg:border-l lg:border-t-0">
             <div className="hidden lg:block">
               <p className="text-sm text-muted-foreground">Asking price</p>
@@ -247,20 +245,28 @@ export const PropertyDetailModal = ({
               >
                 Request viewing
               </Button>
-              <Button
-                variant="primary"
-                icon={<Handshake className="w-4 h-4" />}
-                onClick={() =>
-                  openOffer && onViewOffer ? onViewOffer(openOffer.id) : onMakeOffer()
-                }
-                disabled={!openOffer && listing?.acceptingOffers === false}
-              >
-                {openOffer
-                  ? 'View your offer'
-                  : listing?.acceptingOffers === false
-                    ? 'Under offer'
-                    : 'Make an offer'}
-              </Button>
+              {!openOffer && listing?.acceptingOffers === false ? (
+                <p
+                  role="status"
+                  className="flex items-start gap-2 rounded-lg bg-secondary px-3 py-2.5 text-sm text-muted-foreground"
+                >
+                  <Handshake className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span>
+                    The seller has accepted another offer. You can still message them or book a
+                    viewing in case it falls through.
+                  </span>
+                </p>
+              ) : (
+                <Button
+                  variant="primary"
+                  icon={<Handshake className="w-4 h-4" />}
+                  onClick={() =>
+                    openOffer && onViewOffer ? onViewOffer(openOffer.id) : onMakeOffer()
+                  }
+                >
+                  {openOffer ? 'View your offer' : 'Make an offer'}
+                </Button>
+              )}
             </div>
           </aside>
         </div>

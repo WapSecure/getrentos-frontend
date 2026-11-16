@@ -28,7 +28,6 @@ import { Sheet } from '@/components/Sheet';
 import { ClaimItems } from './ClaimItems';
 import { ClaimDeductionsForm } from './ClaimDeductionsForm';
 
-/** D-6 end of tenancy, landlord side: record move-out, claim deductions within 14 days, follow the outcome. */
 export function EndOfTenancyCard({ depositId }: { depositId: string }) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();

@@ -21,10 +21,6 @@ import { errorMessage } from '@/lib/api/client';
 import { withStepUpSummary } from '@/lib/stepUp';
 import { formatDate, formatNaira } from '@/lib/format';
 
-/**
- * One spend request above the owner's limit. Approving asks the owner to confirm it is them; an
- * EXPLICIT request says so. Used by the approvals screen and the Managed screen.
- */
 export function SpendApprovalCard({
   approval: a,
   role,

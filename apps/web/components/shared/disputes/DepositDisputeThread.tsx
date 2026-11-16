@@ -42,12 +42,7 @@ const EVIDENCE_ACCEPT = '.pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.txt,.csv,.xls,.x
 /** Only plain web links from older disputes are shown, and never previewed. */
 const isWebLink = (value: string) => /^https?:\/\//i.test(value);
 
-/**
- * A deposit dispute's thread for one of its two parties: what was raised, the messages with the
- * other side and Sureground, both parties' files, a reply box and evidence upload while it is open,
- * and Sureground's response deadline. The buyer and the seller see the same page from their side.
- * The model has no appeal, so the page says decisions are final and points to the transparency centre.
- */
+// The model has no appeal, so the page says decisions are final and points to the transparency centre.
 export const DepositDisputeThread = ({
   disputeId,
   back,

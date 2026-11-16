@@ -27,7 +27,6 @@ export function readableActivityDescription(type: string, description: string): 
   return subject ? `${MEDIA_REUSE_GENERIC} — ${subject}` : MEDIA_REUSE_GENERIC;
 }
 
-/** Only published rent and sale listings have a public page to open. */
 export function matchedListingUrl(listing: FraudAlertMediaReuse['matchedListing']): string | null {
   if (!listing || listing.status !== 'PUBLISHED') return null;
   if (listing.type === 'RENT') return `${WEB_APP_URL}/rent/${encodeURIComponent(listing.id)}`;

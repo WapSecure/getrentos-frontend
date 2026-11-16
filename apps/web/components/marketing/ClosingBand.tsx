@@ -6,14 +6,10 @@ interface ClosingBandProps {
   title: ReactNode;
   lead?: ReactNode;
   actions: ReactNode;
-  /** A short label above the title; defaults to "Get started". */
   eyebrow?: string;
 }
 
-/**
- * The full-width Sureground blue band that closes a page. Every line of text on it is full-strength
- * `primary-foreground`, never faded, so it passes contrast in both themes.
- */
+/** Every line is full-strength `primary-foreground`, never faded, so it passes contrast in both themes. */
 export const ClosingBand = ({
   title,
   lead,
@@ -24,7 +20,6 @@ export const ClosingBand = ({
     className="relative isolate overflow-hidden bg-primary text-primary-foreground"
     aria-label="Get started"
   >
-    {/* Two quiet rings, drawn in the band's own foreground: decoration only. */}
     <div
       aria-hidden="true"
       className="pointer-events-none absolute -top-40 -right-40 -z-10 h-[34rem] w-[34rem] rounded-full border border-primary-foreground/15 md:-top-56 md:-right-24 md:h-[46rem] md:w-[46rem]"

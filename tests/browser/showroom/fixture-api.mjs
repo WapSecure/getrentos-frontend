@@ -1,4 +1,3 @@
-// Test-only fixture API for the showroom: serves fx-* listings, proxies everything else to the real API.
 import http from 'node:http';
 
 const UPSTREAM = process.env.FIXTURE_UPSTREAM ?? 'http://localhost:4000';

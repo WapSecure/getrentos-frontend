@@ -20,7 +20,6 @@ test('a one-year lease with monthly rent charges is not labelled annual rent', (
 
 test('a one-year lease with a single rent charge still reads as annual rent', () => {
   assert.equal(leaseRentLabel(undefined, START, END, 1), 'Annual rent');
-  // Annual rent plus a deposit of the same amount.
   assert.equal(leaseRentLabel(undefined, START, END, 2), 'Annual rent');
   assert.equal(leaseRentLabel(undefined, START, END), 'Annual rent');
 });

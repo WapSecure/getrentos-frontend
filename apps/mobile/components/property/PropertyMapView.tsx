@@ -6,13 +6,11 @@ import { buildMapHtml, readBoundaryMessage, type PropertyMapViewProps } from './
 
 export type { PropertyMapMarker, PropertyMapViewProps } from './propertyMapHtml';
 
-// The part of the WebView handle this map uses.
 interface MapWebViewHandle {
   postMessage: (message: string) => void;
 }
 
-// react-native-webview 14 combines its iOS, Android and Windows prop types, which
-// React Native 0.88's types reduce to `never`. These are the props this map passes.
+// react-native-webview 14's combined prop types reduce to `never` under React Native 0.88, so the props are typed here.
 const MapWebView = WebView as unknown as ComponentType<{
   ref?: Ref<MapWebViewHandle>;
   source: { html: string };

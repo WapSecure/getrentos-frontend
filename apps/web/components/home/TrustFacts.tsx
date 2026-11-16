@@ -3,6 +3,7 @@ import { CreditCard, Eye, FileCheck, Lock, Shield, Users } from '@sureground/ico
 import { Container } from '@/components/marketing/Container';
 import { IconTile } from '@/components/marketing/IconTile';
 import { SectionIntro } from '@/components/marketing/SectionIntro';
+import { RENT_RELEASE_RULE } from '@sureground/shared';
 
 // Only what the platform demonstrably does: no grade, licence, "AI" or round-the-clock claims.
 const FACTS = [
@@ -14,7 +15,7 @@ const FACTS = [
   {
     icon: Lock,
     title: 'Payment Protection',
-    body: 'Rent is released to the landlord on schedule; a sale deposit only after the handover is done and the buyer confirms. Disputes keep money held.',
+    body: `${RENT_RELEASE_RULE}; a sale deposit only after the handover is done and the buyer confirms. Disputes keep money held.`,
   },
   {
     icon: FileCheck,

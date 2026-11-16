@@ -4,3 +4,4 @@ export * from './utils';
 export * from './auth';
 export * from './showroom';
 export * from './diaspora';
+export * from './homeUtilities';

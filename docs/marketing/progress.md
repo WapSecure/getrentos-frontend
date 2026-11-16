@@ -49,6 +49,19 @@ Status of the marketing redesign and launch-readiness brief, by milestone. PR nu
 - Waiting: backend #211 (analytics event allow-list) — backend CI blocked by a GitHub billing failure; local specs queued behind the memory gate.
 - Open, needs an admin: branch protection on `dev`, hosting/deploy automation, legal sign-off on Diaspora, guide and Privacy Policy copy before Diaspora goes live in production.
 
+## Brief re-check (13 Nov 2026)
+
+- Benchmark completed for the brief's named sites: Property Finder and Linear observed; Sotheby's returned empty responses, so nothing is claimed about it (`competitor-benchmark.md` §7).
+- One crawl rule for all four markets, private screens out of the index, honest share text (#274, decision D12).
+- Open: after-screenshots predate the brand-blue restore (#233) and the premium facelift, so they need retaking; location pages beyond Lagos depend on live inventory (D6); diaspora guides for UK, US and Canada readers need legal review before publishing.
+
+## Brief re-check (14 Nov 2026)
+
+- After-screenshots retaken after the brand-blue restore and facelift: 32 pages, desktop and phone (#277).
+- og:image on every public page, titles at 60 characters or fewer, Article JSON-LD on guides (#279).
+- Keyboard pass of the homepage: a skip-to-content link now comes first on every public page (#281). The More menu reports its open state correctly and returns focus on Escape.
+- UK, US and Canada diaspora guide briefs drafted (`diaspora-guide-briefs.md`). Not for publishing: each needs written answers from counsel first, and merges into the general guide if the answers don't differ by country.
+
 ## Follow-ups from the live demo (12 Nov 2026)
 
 - Public pages no longer force a sign-in when a session expires; only signed-in areas redirect (#211).
@@ -65,3 +78,7 @@ Status of the marketing redesign and launch-readiness brief, by milestone. PR nu
 - Mobile onboarding claims aligned with what the marketplace shows (#175).
 - Short-stay payout wording matches the payout rules across web and app (#207); owner sales count no longer calls every sale protected (#203).
 - Mobile search no longer sends typed text to Sentry (#191); back-office top bar no longer covers the menu button on phones (#195).
+
+## Launch check (14 Nov 2026)
+
+- Launch check of all 33 sitemap URLs; description, title and honest-fallback fixes (#283). Final report: `final-report.md`.

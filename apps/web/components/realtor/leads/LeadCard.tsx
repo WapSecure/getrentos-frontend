@@ -56,7 +56,7 @@ export const LeadCard = ({
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div className="min-w-0">
           <p className="text-xs text-muted-foreground">Email</p>
-          <p className="text-sm font-medium text-foreground truncate">{lead.email || '—'}</p>
+          <p className="text-sm font-medium text-foreground truncate">{lead.email || 'Not given'}</p>
         </div>
         <div>
           <p className="text-xs text-muted-foreground">Inquired</p>

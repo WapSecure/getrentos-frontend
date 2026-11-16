@@ -69,7 +69,6 @@ const STEPS: { id: Step; title: string }[] = [
   { id: 'risk', title: 'Risk statement' },
 ];
 
-/** The side panel: what the answers are for, in plain words. */
 const WHY_WE_ASK: { icon: SgIcon; title: string; body: string }[] = [
   {
     icon: Globe,
@@ -128,7 +127,6 @@ const PLANS_FIELDS: readonly InvestorProfileField[] = [
   'ownershipStructure',
 ];
 
-/** Where to start: the first step with a required field still empty, else the statement if it is still owed. */
 const firstStep = (profile: InvestorProfile | null, wantsRisk: boolean): Step => {
   if (!profile) return 'about';
   const missing = new Set(profile.missingFields ?? []);
@@ -440,7 +438,6 @@ const RiskStep = ({ portal, onBack }: { portal: InvestorPortal; onBack: () => vo
       router.push(DIASPORA_ROUTES.workspace(portal));
     },
     onError: async (error) => {
-      // A newer statement was published while this one was open: show it and ask again.
       if (error instanceof ApiError && error.status === 409) {
         setStale(true);
         setAgreed(false);
@@ -535,7 +532,6 @@ export const InvestorOnboarding = ({ portal }: { portal: InvestorPortal }) => {
   const onboarded = Boolean(profile.data?.onboardingCompletedAt);
   const wantsRisk = searchParams.get('step') === 'risk';
   const [chosen, setStep] = useState<Step | null>(null);
-  // A saved profile can go straight to the statement when the link asks for it.
   const step: Step = chosen ?? (profile.isSuccess ? firstStep(profile.data, wantsRisk) : 'about');
 
   const index = STEPS.findIndex((item) => item.id === step);

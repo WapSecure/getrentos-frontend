@@ -282,7 +282,6 @@ export interface HostPayout {
   paidAt?: string;
   bookingCount: number;
   /** Where it went (bank + last four digits), only when the API can prove it. */
-  /** Why the last transfer did not complete, while FAILED. */
   failureReason?: string | null;
   sentTo?: PayoutSentTo | null;
   createdAt: string;
@@ -425,7 +424,6 @@ export const hostShortletsApi = {
     );
   },
 
-  // Straight to storage, so a large video never passes through the API.
   uploadVideo: (file: PickedFile, options: UploadProgressOptions = {}) =>
     uploadVideoDirect('/host/shortlets', file, options),
 

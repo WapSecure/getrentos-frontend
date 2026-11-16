@@ -25,7 +25,7 @@ const FAQS: { question: string; answer: string }[] = [
   {
     question: 'How are payments protected?',
     answer:
-      "It depends on the payment. Rent is held by Sureground and released to your landlord on schedule. A deposit on a home or land you're buying is held by Sureground and only released to the seller once the handover is done and you confirm it (for a home, the keys and vacant possession; for land, the conveyance steps); it is never released on a timer. If something is wrong, raise a dispute and the money stays held until it is resolved.",
+      "It depends on the payment. Rent is held by Sureground and released to your landlord when you confirm move-in or on its scheduled release date, whichever comes first. A deposit on a home or land you're buying is held by Sureground and only released to the seller once the handover is done and you confirm it (for a home, the keys and vacant possession; for land, the conveyance steps); it is never released on a timer. If something is wrong, raise a dispute and the money stays held until it is resolved.",
   },
   {
     question: 'How do I contact someone about my account?',

@@ -97,8 +97,6 @@ export async function ShowroomPage({
           <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] xl:gap-14">
             <div className="min-w-0 space-y-10">
               <header className="space-y-3">
-                {/* The trust chain is what the browse card shows, so the page reads the same. Without
-                    one, the summary's status replaces the old "Verified" tick so the two never disagree. */}
                 {listing.trustChain ? (
                   <a
                     href="#trust"
@@ -145,7 +143,6 @@ export async function ShowroomPage({
                   <MapPin className="mt-1 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                   <span>{formatLocation(listing.address, listing.location)}</span>
                 </p>
-                {/* Phones see the price here; the full breakdown sits further down. */}
                 <p className="font-display data-value text-[2rem] leading-tight font-normal tracking-[-0.015em] text-foreground lg:hidden">
                   {formatCurrency(listing.price)}
                   {listing.priceUnit && (
@@ -189,7 +186,6 @@ export async function ShowroomPage({
                 )}
               </header>
 
-              {/* Commercial: the lease and the space come before the description. */}
               {listing.commercial && (
                 <ShowroomCommercial commercial={listing.commercial} market={market} />
               )}
@@ -239,7 +235,6 @@ export async function ShowroomPage({
 
               <ShowroomTrust listing={listing} />
 
-              {/* DIA-19: only where the checks make the listing investment eligible. */}
               {market !== 'rent' &&
                 listing.verificationSummary?.status === 'INVESTMENT_ELIGIBLE' && (
                   <ListingInvestmentAnalysis listingId={listing.id} />

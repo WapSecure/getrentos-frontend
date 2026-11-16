@@ -12,7 +12,6 @@ import type {
 export interface AssuredLandListParams extends PublicLandListParams {
   /** Only parcels verified to at least this assurance tier. */
   minAssuranceTier?: LandAssuranceTier;
-  /** Only parcels shown inside this map area. */
   area?: MapArea;
 }
 

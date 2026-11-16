@@ -13,14 +13,12 @@ export interface CheckboxOption<T extends string = string> {
 }
 
 interface CheckboxGroupProps<T extends string> {
-  /** The group's question. Always read out; `hideLegend` only hides it on screen. */
   legend: ReactNode;
   hideLegend?: boolean;
   value: readonly T[];
   onValueChange: (value: T[]) => void;
   options: readonly CheckboxOption<T>[];
   orientation?: 'vertical' | 'horizontal';
-  /** Lays the options out in a grid; wins over `orientation`. */
   columns?: 1 | 2 | 3 | 4;
   hint?: ReactNode;
   error?: ReactNode;
@@ -64,7 +62,6 @@ export function CheckboxGroup<T extends string>({
   const hasMessage = Boolean(error || hint);
   const invalid = Boolean(error);
 
-  // Ticked values keep the order they were ticked in.
   const toggle = (option: T, on: boolean) =>
     onValueChange(
       on

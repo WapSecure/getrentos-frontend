@@ -1,8 +1,10 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { MessageCircle, FileCheck, ShieldCheck, Home } from '@sureground/icons';
-import { Badge, Button } from '@sureground/ui';
+import { MessageCircle, FileCheck, ShieldCheck, Home, Phone } from '@sureground/icons';
+import { Badge, Button, useToast } from '@sureground/ui';
 import { paymentStatusBadges } from '@/lib/statusBadge';
 import { formatDate } from '@/lib/format';
 import {
@@ -13,6 +15,8 @@ import {
 } from '@/components/shared/records/RecordParts';
 import type { Tenant, RentPaymentStatus } from '@/types/landlord';
 import { ROUTES } from '@/lib/constants/auth';
+import { landlordService } from '@/services/landlordService';
+import { unwrap } from '@/lib/apiHelpers';
 import { trustScoreDisplay } from '@sureground/shared';
 
 const rentStatusConfig = paymentStatusBadges;
@@ -40,6 +44,18 @@ const moveInTense = (dateString?: string | null): string => {
 export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
   const rentStatus = rentStatusConfig[tenant.rentStatus];
   const moveInLabel = moveInTense(tenant.moveInDate);
+  const router = useRouter();
+  const toast = useToast();
+  const openChat = useMutation({
+    mutationFn: () =>
+      unwrap(landlordService.startConversation(tenant.tenantUserId as string, tenant.propertyId)),
+    onSuccess: (conversation) =>
+      router.push(`${ROUTES.LANDLORD_MESSAGES}?conversation=${encodeURIComponent(conversation.id)}`),
+    onError: (err: Error) => toast.error(err.message || 'We could not open that conversation.'),
+  });
+  const leaseHref = tenant.leaseId
+    ? `${ROUTES.LANDLORD_LEASES}?lease=${encodeURIComponent(tenant.leaseId)}`
+    : ROUTES.LANDLORD_LEASES;
 
   return (
     <motion.div
@@ -84,18 +100,35 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
       />
 
       <RecordActions className="flex-nowrap">
+        {tenant.tenantUserId ? (
+          <Button
+            variant="outline"
+            size="sm"
+            fullWidth
+            className="gap-1.5"
+            onClick={() => openChat.mutate()}
+            isLoading={openChat.isPending}
+            loadingText="Opening…"
+            aria-label={`Message ${tenant.name}`}
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+            Message
+          </Button>
+        ) : tenant.phone ? (
+          <Button
+            href={`tel:${tenant.phone}`}
+            variant="outline"
+            size="sm"
+            fullWidth
+            className="gap-1.5"
+            aria-label={`Call ${tenant.name}`}
+          >
+            <Phone className="w-3.5 h-3.5" />
+            Call
+          </Button>
+        ) : null}
         <Button
-          href={ROUTES.LANDLORD_MESSAGES}
-          variant="outline"
-          size="sm"
-          fullWidth
-          className="gap-1.5"
-        >
-          <MessageCircle className="w-3.5 h-3.5" />
-          Message
-        </Button>
-        <Button
-          href={ROUTES.LANDLORD_LEASES}
+          href={leaseHref}
           variant="outline"
           size="sm"
           fullWidth

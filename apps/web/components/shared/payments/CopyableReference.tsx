@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Check, Copy } from '@sureground/icons';
 import { IconButton } from '@sureground/ui';
 
-/** A payment reference with a copy button: people quote it to support. */
 export function CopyableReference({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {

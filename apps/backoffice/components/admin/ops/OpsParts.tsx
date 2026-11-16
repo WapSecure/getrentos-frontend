@@ -10,7 +10,6 @@ export interface FilterChipOption<T extends string> {
   count?: number;
 }
 
-/** A single-choice row of filter chips; the pressed chip is the active filter. */
 export function FilterChips<T extends string>({
   label,
   value,
@@ -45,7 +44,6 @@ export function FilterChips<T extends string>({
   );
 }
 
-/** The search and filter controls above a queue, framed as one bar. */
 export function OpsToolbar({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div
@@ -62,12 +60,10 @@ export function OpsToolbar({ children, className }: { children: ReactNode; class
 export interface Fact {
   label: string;
   value: ReactNode;
-  /** Spans the full row, for long values such as references. */
   wide?: boolean;
   mono?: boolean;
 }
 
-/** Key facts of a record as a label-over-value grid. */
 export function FactGrid({
   facts,
   columns = 2,
@@ -105,7 +101,6 @@ export function FactGrid({
   );
 }
 
-/** A tinted square holding a record's icon, in brand blue unless a risk tone is given. */
 export function IconTile({
   children,
   tone = 'primary',

@@ -15,13 +15,15 @@ import { StepList } from '@/components/marketing/StepList';
 import { photos } from '@/components/marketing/photos';
 import { faqJsonLd, type PlainFaq } from '@/lib/faqJsonLd';
 import { ROUTES } from '@/lib/constants/auth';
+import { SITE_OG_IMAGES } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'For Landlords: Let Your Property in Nigeria',
   description:
-    'List a unit, review applications with a screening report, sign leases online and collect rent through Sureground Payment Protection. Maintenance requests and deposits in the same place.',
+    'List a unit, screen applicants, sign leases online and collect rent through Sureground Payment Protection, with repairs and deposits in one place.',
   alternates: { canonical: '/landlords' },
   openGraph: {
+    images: SITE_OG_IMAGES,
     title: 'Sureground for landlords',
     description: 'Listings, applications, leases, rent and maintenance in one workspace.',
     url: '/landlords',

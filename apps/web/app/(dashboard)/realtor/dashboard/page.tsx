@@ -89,7 +89,7 @@ export default function RealtorDashboardPage() {
       )}
 
       <div className="grid gap-6 xl:grid-cols-12">
-        <div className="space-y-6 xl:col-span-8">
+        <div className="min-w-0 space-y-6 xl:col-span-8">
           <ProFeatureGate
             title="Commission analytics is a Pro feature"
             description="Upgrade to Pro to track what you've earned from closed deals and see your monthly commission trend."
@@ -99,7 +99,7 @@ export default function RealtorDashboardPage() {
           </ProFeatureGate>
           <RealtorActivityFeed />
         </div>
-        <aside className="xl:col-span-4" aria-label="Quick actions">
+        <aside className="min-w-0 xl:col-span-4" aria-label="Quick actions">
           <RealtorQuickActions />
         </aside>
       </div>

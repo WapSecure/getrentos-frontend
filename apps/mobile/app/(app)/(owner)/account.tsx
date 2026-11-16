@@ -36,6 +36,7 @@ import { useInvestItems } from '@/components/account/useInvestItems';
 import { ProfileCard } from '@/components/account/AccountParts';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { RepresentingGroup } from '@/components/account/RepresentingGroup';
 import { managementItems } from '@/components/account/managementItems';
 
 const go = (href: Href) => () => router.push(href);
@@ -45,6 +46,23 @@ export default function OwnerAccount() {
   const { colors, spacing } = useTheme();
   const trustItems = useTrustItems('owner', { audience: 'buyers' });
   const investItems = useInvestItems();
+
+  const letting: SettingsItem[] = [
+    {
+      key: 'applications',
+      label: 'Applications',
+      description: 'Review and decide on people who want to rent',
+      icon: ClipboardList,
+      onPress: go('/(app)/landlord-applications'),
+    },
+    {
+      key: 'leases',
+      label: 'Leases',
+      description: 'Drafts, signatures and renewals',
+      icon: FileSignature,
+      onPress: go('/(app)/landlord-leases'),
+    },
+  ];
 
   const selling: SettingsItem[] = [
     ...investItems,
@@ -244,8 +262,10 @@ export default function OwnerAccount() {
       <ProfileCard role="Property owner" fallbackName="Sureground owner" />
 
       <WorkspaceSwitcher />
+      <RepresentingGroup />
 
       <SettingsGroup title="Selling" items={selling} />
+      <SettingsGroup title="Letting" items={letting} />
       <SettingsGroup title="Tenancy & oversight" items={managementItems()} />
       <SettingsGroup title="Trust & reputation" items={trust} />
       <SettingsGroup

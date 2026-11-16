@@ -18,10 +18,6 @@ const TRUST_SCREEN: Record<AccountPortal, Href> = {
   estate: '/(app)/estate-trust-profile',
 };
 
-/**
- * The same two trust rows on every role's account screen: identity, then the
- * trust screen. The score shown is the one that screen shows.
- */
 export function useTrustItems(
   portal: AccountPortal,
   { identityHint, audience }: { identityHint?: string; audience: string }

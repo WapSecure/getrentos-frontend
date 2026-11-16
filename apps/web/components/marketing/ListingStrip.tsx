@@ -13,7 +13,6 @@ interface ListingStripProps {
   cta: string;
 }
 
-/** Three of the newest live listings, rendered on the server. Hidden when there are none. */
 export async function ListingStrip({ market, id, title, href, cta }: ListingStripProps) {
   const items = await latestListings(market, 3);
   if (items.length === 0) return null;

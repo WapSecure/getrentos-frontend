@@ -12,7 +12,7 @@ export const formatVisit = (iso: string) =>
     weekday: 'short',
     day: 'numeric',
     month: 'short',
-    hour: 'numeric',
+    hour: '2-digit',
     minute: '2-digit',
   });
 

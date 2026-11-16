@@ -27,13 +27,14 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
       ),
     },
     {
-      // Property and unit on two lines, so the row fits a laptop screen.
       key: 'property',
       header: 'Property',
       render: (payment) => (
         <>
           <span className="block text-foreground">{payment.propertyName}</span>
-          <span className="block text-xs text-muted-foreground">{payment.unitName}</span>
+          <span className="block text-xs text-muted-foreground">
+            {[payment.unitName, chargeLabel(payment.category)].filter(Boolean).join(' · ')}
+          </span>
         </>
       ),
     },
@@ -95,7 +96,7 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
             {payout.label}
           </Badge>
         ) : (
-          <span className="text-muted-foreground">None</span>
+          <span className="text-muted-foreground">Not yet</span>
         );
       },
     },
@@ -136,3 +137,9 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
     />
   );
 };
+
+function chargeLabel(category?: string): string | null {
+  if (!category || category === 'rent') return null;
+  const words = category.replace(/_/g, ' ').toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}

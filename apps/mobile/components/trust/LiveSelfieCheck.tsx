@@ -12,9 +12,7 @@ export function LiveSelfieCheck({
   mode = 'enrol',
 }: {
   session: SmileLivenessSession;
-  /** `jobId` is set when Smile received the capture, so the caller can ask the server for the result. */
   onClose: (outcome: LiveSelfieOutcome | null, jobId?: string) => void;
-  /** `document`: a selfie, then the passport photo page, sent as one document verification job. */
   mode?: 'enrol' | 'match' | 'document';
 }) {
   const sdk = useMemo(() => loadSmileSdk(), []);

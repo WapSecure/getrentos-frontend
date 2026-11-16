@@ -1,5 +1,5 @@
 import type { PublicListingDetail } from '@/lib/publicListingDetail';
-import { SITE_URL } from '@/lib/site';
+import { SITE_NAME, SITE_URL } from '@/lib/site';
 
 export interface Crumb {
   name: string;
@@ -19,10 +19,6 @@ export function breadcrumbJsonLd(crumbs: Crumb[]) {
   };
 }
 
-/**
- * The listings a market page shows, each pointing at its own listing page (Google's summary-page
- * list format). Only for the unfiltered first page: filtered views are noindex.
- */
 export function itemListJsonLd(items: Crumb[]) {
   return {
     '@context': 'https://schema.org',
@@ -38,10 +34,7 @@ export function itemListJsonLd(items: Crumb[]) {
 
 const PRICE_UNIT: Record<string, string> = { month: 'MON', year: 'ANN' };
 
-/**
- * A RealEstateListing describing only what the page shows: no ratings, no invented dates.
- * Rentals carry a per-month or per-year price; land is a Place rather than a home.
- */
+/** Only what the page shows: no ratings, no invented dates. */
 export function listingJsonLd(listing: PublicListingDetail, path: string) {
   const url = `${SITE_URL}${path}`;
   const address = {
@@ -107,5 +100,20 @@ export function listingJsonLd(listing: PublicListingDetail, path: string) {
         : {}),
       ...(listing.availableFrom ? { availabilityStarts: listing.availableFrom } : {}),
     },
+  };
+}
+
+/** No dates: the guides do not record them, and a made-up date would be worse than none. */
+export function articleJsonLd(article: { title: string; summary: string; path: string }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.title,
+    description: article.summary,
+    url: `${SITE_URL}${article.path}`,
+    mainEntityOfPage: `${SITE_URL}${article.path}`,
+    inLanguage: 'en-GB',
+    author: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+    publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
   };
 }

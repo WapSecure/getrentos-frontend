@@ -47,7 +47,6 @@ import {
   type Size,
 } from '@/lib/floorPlanMarkers';
 
-/** The same events as the web viewer (packages/ui MediaViewer). */
 export interface MediaEvent {
   type: 'gallery_open' | 'media_category_select' | 'video_start' | 'video_complete' | 'tour_start';
   mediaIndex?: number;
@@ -60,11 +59,9 @@ const INK = {
   fg: '#fff',
   dim: 'rgba(255,255,255,0.72)',
   tile: 'rgba(255,255,255,0.12)',
-  // Floor plans are line drawings: they read on a light page, shown whole.
   paper: '#fff',
 };
 const MAX_ZOOM = 4;
-/** A room marker: a 44pt hit area around a 28pt numbered dot. */
 const MARKER_HIT = 44;
 const MARKER_DOT = 28;
 const THUMB = 56;
@@ -91,11 +88,8 @@ export function MediaViewer({
   startIndex?: number;
   title: string;
   onClose: () => void;
-  /** For measurement; the viewer itself never sends anything. */
   onMediaEvent?: (event: MediaEvent) => void;
-  /** A signed video link has lapsed: the caller fetches the listing again. */
   onVideoExpired?: () => void;
-  /** Structured floor plans from `floorPlansOf`: a plan page then lists its rooms and sizes. */
   floorPlans?: ShowroomFloorPlan[];
 }) {
   return (
@@ -141,8 +135,7 @@ function ViewerBody({
 }) {
   const insets = useSafeAreaInsets();
   const screen = useWindowDimensions();
-  // The stage is measured, not assumed: a page sized from the window (or left to flex) can
-  // collapse to zero height inside a horizontal list on the web, and is wrong in split screen.
+  // Measured, not assumed: a window-sized page can collapse to zero height in a horizontal list on the web.
   const [stage, setStage] = useState<{ width: number; height: number } | null>(null);
   const width = stage?.width ?? screen.width;
   const reduced = useReducedMotion();
@@ -155,8 +148,6 @@ function ViewerBody({
   // Big enough for the screen's real pixels; the API's largest copy is 1600px.
   const pixelWidth = PixelRatio.getPixelSizeForLayoutSize(width);
 
-  // Fetch the photos either side of the current one at the size the pager will ask for, so a
-  // swipe shows the next photo at once instead of a blank stage while it downloads.
   useEffect(() => {
     const near = [items[index - 1], items[index + 1], items[index + 2]]
       .filter((m): m is MediaItem => !!m && m.kind === 'image')
@@ -172,19 +163,15 @@ function ViewerBody({
     return [...seen.entries()];
   }, [items]);
 
-  // Floor plans are a tab of their own, one level per plan, named by the lister's caption.
   const levels = useMemo(() => floorPlanLevels(items), [items]);
   const levelAt = levels.findIndex((l) => l.index === index);
   const onPlan = levelAt >= 0;
-  // The lister's rooms and sizes for this level, when they added them; every size keeps its label.
   const plan = onPlan ? floorPlanFor(floorPlans, item.id) : undefined;
 
-  // Photos are counted on their own, as on the hero; a video or tour page is named instead.
   const photoCount = items.filter((m) => m.kind === 'image').length;
   const photoNumber = items.slice(0, index + 1).filter((m) => m.kind === 'image').length;
   const position = item.kind === 'image' ? `${photoNumber} / ${photoCount}` : kindLabel(item);
 
-  // The active thumbnail sits in the middle of the strip, or at its padded start.
   useEffect(() => {
     if (items.length < 2) return;
     const centre = THUMB_PAD + index * (THUMB + THUMB_GAP) + THUMB / 2;
@@ -221,11 +208,9 @@ function ViewerBody({
     }
   };
 
-  // The room shown is the current photo's, or the last tagged room before it.
   const currentRoom =
     item.room ?? [...items.slice(0, index + 1)].reverse().find((m) => m.room)?.room;
 
-  // The plan's numbered rooms, as in the room list; one with a linked photo opens it, as its row does.
   const planMarkers = (p: ShowroomFloorPlan | undefined): PlanMarker[] | undefined => {
     if (!p) return undefined;
     const marks = numberedMarkers(p.rooms).map(({ room, number }) => {
@@ -368,7 +353,6 @@ function ViewerBody({
             scrollEnabled={!zoomed}
             showsHorizontalScrollIndicator={false}
             initialScrollIndex={index}
-            // Keeps the starting page when the stage is resized (rotation, split screen).
             key={`${stage!.width}x${stage!.height}`}
             getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
             onMomentumScrollEnd={onPage}
@@ -442,7 +426,6 @@ function ViewerBody({
         {item.room || item.caption ? (
           <View style={{ paddingHorizontal: 16, gap: 2 }}>
             {onPlan ? (
-              // The level name is the lister's caption as written: a plan claims no sizes.
               <Text variant="bodyStrong" style={{ color: INK.fg }}>
                 {levels[levelAt]!.label}
               </Text>
@@ -564,7 +547,6 @@ function ViewerBody({
                       uri:
                         m.kind === 'image' ? variantAtLeast(m.url, m.variants, 320) : m.posterUrl,
                     }}
-                    // A plan is never cropped, even as a thumbnail.
                     contentFit={isFloorPlan(m) ? 'contain' : 'cover'}
                     cachePolicy="memory-disk"
                     recyclingKey={m.id}
@@ -668,7 +650,6 @@ function StartCard({
   );
 }
 
-/** Pinch or double-tap to zoom; drag to look around once zoomed. The pager stops swiping while zoomed. */
 const thumbPlaceholder = (m: MediaItem) => {
   const uri = m.kind === 'image' ? placeholderOf(m.placeholder) : undefined;
   return uri ? { uri } : undefined;
@@ -686,17 +667,13 @@ function ZoomableImage({
   markers,
 }: {
   uri: string;
-  /** A tiny blurred `data:` URI shown until the photo loads. */
   placeholder?: string;
   alt: string;
   reduced: boolean;
   current: boolean;
-  /** Owned by the viewer, which also locks the pager while it is true. */
   zoomed: boolean;
   onZoomChange: (zoomed: boolean) => void;
-  /** The image's own size, when the API sent it; otherwise read when it loads. */
   natural?: Size;
-  /** A floor plan's numbered rooms, drawn on the image and zoomed with it. */
   markers?: PlanMarker[];
 }) {
   const [failed, setFailed] = useState(false);
@@ -711,7 +688,6 @@ function ZoomableImage({
   const startX = useSharedValue(0);
   const startY = useSharedValue(0);
 
-  // A page left behind drops its zoom, so coming back shows the whole photo.
   useEffect(() => {
     if (current) return;
     scale.set(1);
@@ -837,14 +813,9 @@ interface PlanMarker {
   x: number;
   y: number;
   label: string;
-  /** Opens the room's photo; a room without one is shown but not tappable. */
   onPress?: () => void;
 }
 
-/**
- * One numbered room on the plan. It sits inside the zoomed view, so it moves with the plan, and is
- * scaled back by the zoom so the dot and its 44pt hit area stay the same size on screen.
- */
 function PlanMarkerView({
   marker,
   x,

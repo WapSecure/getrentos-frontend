@@ -3,7 +3,6 @@ export type CollectionStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 export type CollectionKind = 'hand_picked' | 'rule';
 export type RuleSort = 'newest' | 'price_asc' | 'price_desc';
 
-/** A saved public search; the backend runs it through the market's own browse query. */
 export interface CollectionRule {
   search?: string;
   city?: string;
@@ -66,13 +65,11 @@ export type SponsorshipInput = Omit<
   note?: string;
 };
 
-/** Enough of a listing card to pick and order it; each market's card is mapped by cardSummary. */
 export interface MarketCard {
   id: string;
   title: string;
   location: string;
   price?: number;
-  /** Staff collections: why the listing cannot be added (its lister opted out). */
   unavailableReason?: string;
 }
 
@@ -97,9 +94,7 @@ export interface ManagedCollection {
   /** The stored flag; the public label needs `sponsorship` too. */
   sponsored: boolean;
   sponsorship: CollectionSponsorship | null;
-  /** Flagged sponsored with no record: the public label is hidden until one is added. */
   sponsorshipMissing: boolean;
-  /** Whether the public sees the Sponsored label today: a record, and today within its dates. */
   sponsoredLabelShowing: boolean;
   kind: CollectionKind;
   rule: CollectionRule | null;
@@ -110,7 +105,6 @@ export interface ManagedCollection {
   itemCount: number;
   updatedAt: string;
   items?: ManagedCollectionItem[];
-  /** Staff collections: listings their listers took out. */
   optOuts?: Array<{ listingId: string; title: string; reason: string; at: string }>;
 }
 
@@ -176,7 +170,6 @@ const num = (v: unknown) => {
   return Number.isFinite(n) ? n : undefined;
 };
 
-/** Rent cards carry `location`; sale, land and shortlet cards carry city and state. */
 export function cardSummary(market: CardMarket, raw: unknown): MarketCard {
   const r = (raw ?? {}) as Record<string, unknown>;
   const place =

@@ -34,7 +34,7 @@ const COPY = {
     representative:
       'The buyer asked that money is only released with your approval too. Approve a step only once you have seen the document or been on site yourself.',
   },
-  // Built homes (D11): Sureground holds only the deposit, never the rest of the price.
+  // Built homes: Sureground holds only the deposit, never the rest of the price.
   deposit: {
     on: 'The deposit held under Payment Protection is only released to the seller once you and',
     onTail: 'have both approved the handover. Sureground does not hold the rest of the price.',
@@ -44,11 +44,7 @@ const COPY = {
   },
 } as const;
 
-/**
- * Two-person approval on a deal. The buyer turns it on or off (switching off takes 48 hours); the
- * representative it names gives the second approval here. A step needing both is confirmed only
- * once both have approved.
- */
+// A step needing both is confirmed only once both have approved; switching off takes 48 hours.
 export const CoApprovalCard = ({
   deal,
   labelFor,
@@ -61,9 +57,7 @@ export const CoApprovalCard = ({
   labelFor: (key: string) => string;
   onChanged?: (message: string, variant: 'success' | 'error') => void;
   viewer?: 'buyer' | 'representative';
-  /** `deposit` for a built home, where only the held deposit is released. */
   moneyScope?: 'steps' | 'deposit';
-  /** After the representative approves, so the caller can refresh what depends on it. */
   onApproved?: () => void;
 }) => {
   const queryClient = useQueryClient();
@@ -134,7 +128,6 @@ export const CoApprovalCard = ({
 
   if (rule.isLoading || rule.isError || !rule.data) return null;
   const data = rule.data;
-  // A representative who does not hold the rule has nothing to approve here.
   if (!isBuyer && !data.binding) return null;
   const stepLabel = (step: CoApprovalPendingStep) =>
     step.releasesDeposit

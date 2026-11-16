@@ -1,5 +1,3 @@
-// Copy for the landlord's "Cancel viewing" / "Decline" confirmation, naming who, what and when.
-
 export interface ViewingCancelTarget {
   renterName: string;
   propertyName: string;

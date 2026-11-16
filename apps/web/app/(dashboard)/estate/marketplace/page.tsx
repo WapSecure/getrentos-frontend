@@ -48,7 +48,6 @@ import type { EstateAgreement, EstateListing, EstateListingType } from '@/types/
 import { useEstatePlan } from '@/hooks/useEstatePlan';
 import type { ApiError } from '@sureground/shared';
 
-// Publishing needs a verified identity; point the manager at the page that gives one.
 const identityAction = (err: Error, router: { push: (href: string) => void }) =>
   (err as Partial<ApiError>).code === 'IDENTITY_REQUIRED' || /approved identity/i.test(err.message)
     ? {
@@ -267,7 +266,7 @@ const NewListingPanel = ({
       <div className="border-t border-border pt-4">
         <p className="text-sm text-muted-foreground">
           This estate has no property it is cleared to market yet. Add a property and wait for the
-          owner to approve: then listings can be published here.
+          owner to approve, then listings can be published here.
         </p>
       </div>
     );

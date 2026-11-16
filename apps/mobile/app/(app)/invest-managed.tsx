@@ -41,7 +41,6 @@ import { SpendApprovalCard } from '@/components/management/SpendApprovalCard';
 import { WorkOrderCard } from '@/components/homecare/WorkOrderCard';
 import { OwnerStatementTotals } from '@/components/landlord/OwnerStatementTotals';
 
-/** Past this many properties a segmented control stops fitting a phone. */
 const SEGMENTED_MAX = 3;
 const JOB_PAGE_SIZE = 10;
 const STATEMENT_STATUS_LABELS: Record<string, string> = { DRAFT: 'Draft', ISSUED: 'Issued' };
@@ -49,11 +48,6 @@ const STATEMENT_STATUS_LABELS: Record<string, string> = { DRAFT: 'Draft', ISSUED
 const isSet = (value: number | null | undefined): value is number =>
   value !== null && value !== undefined;
 
-/**
- * Sureground Managed for an investor (DIA-20): one property at a time, with its agreement, the
- * spending waiting for them, its repairs and the latest statement. Changes to the agreement stay
- * on the management screens; this one links there.
- */
 export default function InvestManaged() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -296,7 +290,6 @@ function StatementCard({ property }: { property: InvestorManagedProperty }) {
   );
 }
 
-/** The ledger lines behind the statement, read when opened, as on web. */
 function StatementBreakdown({ statementId }: { statementId: string }) {
   const { colors, spacing } = useTheme();
   const [open, setOpen] = useState(false);
@@ -375,7 +368,6 @@ function Approvals({ propertyId }: { propertyId: string }) {
   );
 }
 
-/** Read through the owner route, so it needs no Pro plan; each job opens read-only. */
 function Jobs({ propertyId }: { propertyId: string }) {
   const { colors, spacing } = useTheme();
   const jobs = useQuery({

@@ -47,7 +47,7 @@ export const ApplicationCard = ({
           <RecordAvatar name={application.applicantName} />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-foreground truncate">
+              <h3 className="font-semibold text-foreground break-words">
                 {application.applicantName}
               </h3>
               {isVerified ? (
@@ -59,7 +59,7 @@ export const ApplicationCard = ({
                 />
               )}
             </div>
-            <p className="text-xs text-muted-foreground truncate">
+            <p className="text-xs text-muted-foreground line-clamp-2 break-words">
               {application.propertyName} · {application.unitName}
             </p>
           </div>
@@ -83,28 +83,44 @@ export const ApplicationCard = ({
         ]}
       />
 
-      <RecordActions className="flex-nowrap">
-        <Button variant="outline" size="sm" fullWidth className="gap-1.5" onClick={onViewDetails}>
-          <Eye className="w-3.5 h-3.5" />
-          Details
-        </Button>
-        {!isDecided && (
-          <>
+      <RecordActions className="flex-col items-stretch">
+        <div className="flex w-full items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            fullWidth
+            className="min-w-0 flex-1 gap-1.5"
+            onClick={onViewDetails}
+          >
+            <Eye className="w-3.5 h-3.5" />
+            Details
+          </Button>
+          {!isDecided && (
             <IconButton
               label="Request more info"
               size="sm"
               icon={<MessageSquareText />}
               onClick={onRequestInfo}
             />
-            <Button variant="danger-ghost" size="sm" className="gap-1.5" onClick={onReject}>
+          )}
+        </div>
+        {!isDecided && (
+          <div className="grid w-full grid-cols-2 gap-2">
+            <Button
+              variant="danger-ghost"
+              size="sm"
+              fullWidth
+              className="gap-1.5"
+              onClick={onReject}
+            >
               <X className="w-3.5 h-3.5" />
               Reject
             </Button>
-            <Button variant="primary" size="sm" className="gap-1.5" onClick={onApprove}>
+            <Button variant="primary" size="sm" fullWidth className="gap-1.5" onClick={onApprove}>
               <Check className="w-3.5 h-3.5" />
               Approve
             </Button>
-          </>
+          </div>
         )}
       </RecordActions>
     </motion.div>

@@ -9,7 +9,6 @@ export const TRUST_TONE_VARIANT: Record<TrustLabelTone, BadgeVariant> = {
   pending: 'neutral',
 };
 
-// Fully verified reads as solid Sureground blue so it stands apart from a partial (tinted) chain.
 const VERIFIED_CLASS = 'border-primary bg-primary text-primary-foreground';
 
 export const TrustChainBadge = ({

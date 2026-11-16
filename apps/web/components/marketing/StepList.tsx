@@ -5,7 +5,6 @@ export interface Step {
   body: ReactNode;
 }
 
-/** A real sequence, so the numbers carry meaning: what happens first, then next. */
 export const StepList = ({ steps }: { steps: Step[] }) => (
   <ol className="grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
     {steps.map((step, index) => (

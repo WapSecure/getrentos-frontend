@@ -86,7 +86,7 @@ export default function LandlordOverview() {
     <DashboardHeader
       eyebrow={dashboardGreeting()}
       title={firstName(profile?.legalName)}
-      roleBadge="LL"
+      roleBadge="Landlord"
       subtitle="Your rentals, tenants and rent"
       accessory={
         <View style={{ flexDirection: 'row', gap: 4 }}>
@@ -109,7 +109,6 @@ export default function LandlordOverview() {
   const units = s ? s.occupiedUnits + s.vacantUnits + s.reservedUnits : 0;
   const occupancy = s && units > 0 ? Math.round((s.occupiedUnits / units) * 100) : 0;
 
-  // Outstanding rent and open repairs live in the attention cards above, shown only when they need action.
   const statGroups = s ? (
     <>
       <StatGroup
@@ -129,7 +128,6 @@ export default function LandlordOverview() {
             Icon: UserCheck,
             onPress: () => router.push('/(app)/(landlord)/tenants'),
           },
-          // Only while a unit is actually held: a permanent "Reserved 0" was the one tile you couldn't tap.
           ...(s.reservedUnits > 0
             ? [
                 {
@@ -218,16 +216,16 @@ export default function LandlordOverview() {
           <AttentionCard
             Icon={TriangleAlert}
             tone="danger"
-            title={`${s.outstandingPayments} rent ${s.outstandingPayments === 1 ? 'payment' : 'payments'} outstanding`}
+            title={`${s.outstandingPayments} unpaid ${s.outstandingPayments === 1 ? 'charge' : 'charges'}`}
             detail={
               <Text variant="caption" color="mutedForeground">
                 {showMoney ? <Price amount={s.outstandingAmount} variant="caption" /> : '••••••'}{' '}
                 still to collect
               </Text>
             }
-            accessibilityLabel={`${s.outstandingPayments} rent ${s.outstandingPayments === 1 ? 'payment is' : 'payments are'} outstanding. Open payments`}
-            eyebrow="Rent to collect"
-            actionLabel="See rent payments"
+            accessibilityLabel={`${s.outstandingPayments} unpaid ${s.outstandingPayments === 1 ? 'charge' : 'charges'}. Open payments`}
+            eyebrow="To collect"
+            actionLabel="See payments"
             onPress={() => router.push('/(app)/landlord-payments')}
           />
         ) : null}
@@ -236,8 +234,11 @@ export default function LandlordOverview() {
             Icon={Wrench}
             tone="warning"
             title={`${s.activeMaintenanceRequests} open maintenance ${s.activeMaintenanceRequests === 1 ? 'request' : 'requests'}`}
-            detail="Assign a vendor or mark them resolved"
-            // The lead card only when no rent is outstanding: one blue button per screen.
+            detail={
+              s.activeMaintenanceRequests === 1
+                ? 'Assign a vendor, book a visit or mark it resolved'
+                : 'Assign vendors, book visits or mark them resolved'
+            }
             eyebrow={s.outstandingPayments > 0 ? undefined : 'Repairs'}
             actionLabel={s.outstandingPayments > 0 ? undefined : 'See maintenance'}
             onPress={() => router.push('/(app)/landlord-maintenance')}

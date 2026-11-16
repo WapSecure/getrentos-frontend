@@ -1,5 +1,4 @@
-// ISO 3166-1 alpha-2 codes with their English names, for country pickers. Static on purpose: the
-// API stores the code, and the list must not change with the browser's locale data.
+// Static on purpose: the API stores the ISO code, and the list must not change with the browser's locale data.
 export const COUNTRIES: readonly { code: string; name: string }[] = [
   { code: 'AF', name: 'Afghanistan' },
   { code: 'AX', name: 'Åland Islands' },

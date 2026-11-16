@@ -10,7 +10,6 @@ import { cn } from '@sureground/shared';
 import { hasMapPoint, type DiscoveryView, type MapArea, type MapPoint } from '@/lib/mapArea';
 import type { DiscoveryPin } from './DiscoveryMap';
 
-// Leaflet loads only when someone opens the map, never with the list.
 const DiscoveryMap = dynamic(() => import('./DiscoveryMap').then((m) => m.DiscoveryMap), {
   ssr: false,
   loading: () => (
@@ -48,7 +47,6 @@ export function DiscoveryViewToggle({
   );
 }
 
-/** Shown above results while a map area filters them. */
 export function MapAreaNotice({ onClear }: { onClear: () => void }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-sm">
@@ -72,21 +70,14 @@ interface MapDiscoveryViewProps<T extends { id: string } & MapPoint> {
   renderCard: (item: T, state: { selected: boolean; position: number }) => ReactNode;
   area?: MapArea;
   onSearchArea: (area: MapArea) => void;
-  /** Clears a searched or drawn area from the map itself. */
   onClearArea?: () => void;
   selectedId?: string;
   onSelect: (id: string | undefined) => void;
-  /** Pagination and anything else under the list. */
   footer?: ReactNode;
-  /** Shown in place of the list when there are no results; the map stays so the area can be moved. */
   empty?: ReactNode;
   className?: string;
 }
 
-/**
- * The map-first layout: results on the left (below the map on phones), the map beside them.
- * The list renders straight away; the map arrives when it has loaded, so a slow network still browses.
- */
 export function MapDiscoveryView<T extends { id: string } & MapPoint>({
   items,
   title,
@@ -116,7 +107,6 @@ export function MapDiscoveryView<T extends { id: string } & MapPoint>({
   }));
   const anyApproximate = pins.some((p) => p.approximate);
 
-  // A pin picked on the map brings its card into view.
   useEffect(() => {
     if (!selectedId) return;
     const card = listRef.current?.querySelector<HTMLElement>(

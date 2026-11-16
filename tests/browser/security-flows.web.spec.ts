@@ -2,18 +2,7 @@ import { createHmac } from 'crypto';
 import { expect, test, type Page } from '@playwright/test';
 import { accountFromEnv, signIn } from './helpers/auth';
 
-/**
- * Security flows end to end against a running local stack (API, web, backoffice, MailHog).
- *
- *   E2E_LANDLORD_EMAIL / E2E_PASSWORD   a landlord with a transaction PIN
- *   E2E_LANDLORD_PIN                    that PIN
- *   E2E_RENTER_EMAIL                    a renter, for the trust page
- *   E2E_API_URL                         e.g. http://127.0.0.1:4100
- *   E2E_MAILHOG_URL                     e.g. http://localhost:8025
- *   E2E_ADMIN_EMAIL, E2E_ADMIN_TOTP_SECRET, E2E_BACKOFFICE_URL   for the staff check
- *
- * Each test skips when what it needs isn't set, and none of them uses real personal data.
- */
+// Needs a local stack (API, web, back office, MailHog); each test skips when its E2E_* env vars are unset.
 
 const landlord = accountFromEnv('LANDLORD');
 const pin = process.env.E2E_LANDLORD_PIN;
@@ -136,7 +125,6 @@ test.describe('security flows', () => {
 
     await signIn(page, landlord!);
     await change(changed, true);
-    // Put the account back so the next run starts from the same place.
     await change(original, false);
   });
 

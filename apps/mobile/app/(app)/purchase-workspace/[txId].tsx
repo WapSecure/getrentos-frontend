@@ -36,6 +36,7 @@ import {
   nextActionTarget,
   releaseDialogDescription,
   releaseOutcome,
+  salePlanLabel,
   workspaceProgress,
   type WorkspaceSection,
 } from '@sureground/shared';
@@ -64,11 +65,6 @@ import { DepositPaySheet } from '@/components/purchases/DepositPaySheet';
 import { StepProgress } from '@/components/purchases/StepProgress';
 import { asHref, depositDisputeHref } from '@/components/purchases/purchaseHref';
 
-const PLAN_LABEL: Record<TransactionWorkspace['plan'], string> = {
-  BUILT_HOME: 'Built home',
-  LAND_RESALE: 'Land sale',
-};
-
 const PROFESSIONAL_LABEL: Record<WorkspaceProfessional['role'], string> = {
   SURVEYOR: 'Surveyor',
   LAWYER: 'Lawyer',
@@ -88,14 +84,8 @@ const CTA_LABEL: Record<WorkspaceSection, string> = {
   steps: 'Review the steps',
 };
 
-/** History shown before "Show all": the workspace is a glance, the record is on request. */
 const HISTORY_INITIAL = 5;
 
-/**
- * The workspace's lean condition, in the shape the shared conditions list reads. The list shows
- * the shared remedy once below it, so a condition repeats it only when its own differs, and never
- * once it is met or waived.
- */
 const toClosingCondition = (
   c: WorkspaceCondition,
   _index: number,
@@ -120,12 +110,7 @@ const toClosingCondition = (
   };
 };
 
-/**
- * One purchase as its buyer or the buyer's representative sees it (DIA-15): three separate
- * statuses, the next action, the steps, the legal transfer, approvals, people, documents and
- * history. Sureground holds only the deposit under Payment Protection, never the rest of the
- * price (D11), so nothing here says the price is held.
- */
+/** Sureground holds only the deposit, never the rest of the price, so nothing here says the price is held. */
 export default function PurchaseWorkspace() {
   const { txId, role: roleParam } = useLocalSearchParams<{ txId: string; role?: string }>();
   const role: WorkspaceViewer = roleParam === 'representative' ? 'REPRESENTATIVE' : 'BUYER';
@@ -147,7 +132,6 @@ export default function PurchaseWorkspace() {
   });
   const data = workspace.data;
   const isBuyer = data?.viewer.role === 'BUYER';
-  // The deposit amount and seller come from the buyer's own transaction, not the workspace.
   const transactions = useQuery({
     queryKey: qk.buyer.transactions(1, 50),
     queryFn: () => buyerTransactionsApi.list(1, 50),
@@ -212,7 +196,6 @@ export default function PurchaseWorkspace() {
         data?.coApproval.representative?.name ??
           data?.representatives.find((r) => r.approvesPayments)?.name
       );
-      // Waiting for the second approval: nothing moved, so the message stays on the screen.
       setReleaseNotice(outcome.waiting ? outcome.message : null);
       refresh();
       toast.show(outcome.message, 'success');
@@ -259,7 +242,6 @@ export default function PurchaseWorkspace() {
   const progress = data ? workspaceProgress(data) : null;
   const target = data ? nextActionTarget(data) : null;
   const releasable = data ? canReleaseDeposit(data) : false;
-  // The deposit waits for the handover (built home) or every required land step and condition.
   const releaseBlockedReason = releasable && data ? releaseBlockedNote(data) : null;
   const releaseBlocked = releaseBlockedReason !== null;
 
@@ -268,7 +250,7 @@ export default function PurchaseWorkspace() {
       <DetailScreenHeader
         eyebrow={
           data
-            ? `${PLAN_LABEL[data.plan] ?? humaniseCode(data.plan)}${isRepresentative ? ' · You represent the buyer' : ''}`
+            ? `${salePlanLabel(data)}${isRepresentative ? ' · You represent the buyer' : ''}`
             : 'Purchase'
         }
         title={data?.propertyTitle ?? 'Purchase'}
@@ -301,7 +283,6 @@ export default function PurchaseWorkspace() {
               />
             }
           >
-            {/* The three statuses and what happens next. */}
             <Card style={{ gap: spacing.md }}>
               <AcquisitionStatusBadges statuses={data.statuses} />
               {data.nextAction ? (
@@ -309,9 +290,6 @@ export default function PurchaseWorkspace() {
                   variant="callout"
                   color={data.nextAction.waitingForYou ? 'foreground' : 'mutedForeground'}
                 >
-                  <Text variant="callout" color="mutedForeground">
-                    {data.nextAction.waitingForYou ? 'Waiting for you: ' : 'Next: '}
-                  </Text>
                   {data.nextAction.label}
                 </Text>
               ) : null}
@@ -700,7 +678,6 @@ function Summary({ title, detail }: { title: string; detail: string }) {
   );
 }
 
-/** A name, a line under it and a badge or action on the right. */
 function Rows({
   rows,
 }: {
@@ -731,7 +708,6 @@ function Rows({
   );
 }
 
-/** Everything recorded on the purchase, newest first, with Lagos time next to the viewer's. */
 function History({
   items,
   viewerTimeZone,

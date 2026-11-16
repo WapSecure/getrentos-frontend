@@ -1,10 +1,6 @@
 import type { MediaItem } from './types';
 
-/**
- * Showroom M8d, first step: off-plan developments are listed only. Sureground takes and holds no money
- * for them; buyers pay the developer. A development is public only after staff passed four checks.
- * Everything here is read through `developmentOf` / `developmentSummaryOf`, which drop anything malformed.
- */
+// Sureground takes and holds no money for developments: buyers pay the developer.
 
 export type DevelopmentStage = 'PLANNED' | 'APPROVED' | 'UNDER_CONSTRUCTION' | 'COMPLETED';
 export type DevelopmentCheckKind =
@@ -27,7 +23,6 @@ export const DEVELOPMENT_CHECK_KINDS: readonly DevelopmentCheckKind[] = [
   'BUILDING_APPROVAL',
 ];
 
-/** As the developer states it; the page says so. */
 export const DEVELOPMENT_STAGE_LABEL: Record<DevelopmentStage, string> = {
   PLANNED: 'Planned',
   APPROVED: 'Approved, not started',
@@ -35,7 +30,6 @@ export const DEVELOPMENT_STAGE_LABEL: Record<DevelopmentStage, string> = {
   COMPLETED: 'Completed',
 };
 
-/** What each staff check covered, in plain words. */
 export const DEVELOPMENT_CHECK_COPY: Record<
   DevelopmentCheckKind,
   { label: string; detail: string }
@@ -60,7 +54,6 @@ export const DEVELOPMENT_CHECK_COPY: Record<
   },
 };
 
-/** Said on every development page, next to the checks, so nobody reads more into them. */
 export const DEVELOPMENT_NOT_CHECKED: readonly string[] = [
   'The construction itself: its quality, its progress, or whether it will finish on time',
   'The prices, unit types and payment plan, which are as the developer states them',
@@ -89,7 +82,6 @@ export interface ShowroomDevelopmentApproval {
   kind: 'SITE_TITLE' | 'BUILDING_APPROVAL' | 'OTHER_APPROVAL';
   label: string;
   authority?: string;
-  /** True only when a Sureground staff check of it passed. */
   checked: boolean;
   checkedAt?: string;
 }
@@ -129,12 +121,9 @@ export interface ShowroomDevelopment {
   expectedCompletion?: string;
   developerName: string;
   registeredName?: string;
-  /** Always all four: a development without them is not shown at all. */
   checks: ShowroomDevelopmentCheck[];
   approvals: ShowroomDevelopmentApproval[];
-  /** Site photos are captioned with the date taken; impressions say they are impressions. */
   media: MediaItem[];
-  /** Site photos only, newest first: the progress gallery. */
   progress: MediaItem[];
   unitTypes: ShowroomUnitType[];
   paymentNote?: string;
@@ -177,7 +166,6 @@ const stageOf = (v: unknown) =>
   DEVELOPMENT_STAGES.includes(v as DevelopmentStage) ? (v as DevelopmentStage) : undefined;
 const httpsUrl = (v: unknown) => (typeof v === 'string' && /^https?:\/\//i.test(v) ? v : undefined);
 
-/** "June 2027" from "2027-06". */
 export function completionLabel(value: string | undefined): string | undefined {
   if (!value || !month(value)) return undefined;
   const [y, m] = value.split('-').map(Number) as [number, number];
@@ -191,10 +179,6 @@ export function completionLabel(value: string | undefined): string | undefined {
 const takenLabel = (iso: string) =>
   `Taken ${new Date(iso).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })}`;
 
-/**
- * One photo from the API. A site photo without a capture date is dropped (the gallery is dated); an
- * impression is captioned as one whatever the developer wrote.
- */
 function mediaItemOf(raw: unknown, order: number): MediaItem | undefined {
   if (!isRecord(raw) || raw.kind !== 'image') return undefined;
   const id = text(raw.id, 80);
@@ -255,7 +239,6 @@ function unitTypesOf(raw: unknown): ShowroomUnitType[] {
     const priceFromNaira = positive(u.priceFromNaira, 1e12);
     const unitsTotal = count(u.unitsTotal);
     let unitsAvailable = count(u.unitsAvailable);
-    // A count above the total is not shown rather than guessed at.
     if (unitsAvailable !== undefined && unitsTotal !== undefined && unitsAvailable > unitsTotal)
       unitsAvailable = undefined;
     out.push({
@@ -299,10 +282,6 @@ function instalmentsOf(raw: unknown, unitTypes: ShowroomUnitType[]): ShowroomIns
   return out;
 }
 
-/**
- * A public development, or undefined when it cannot be shown honestly: it must name all four checks with
- * a date, and its payment must go to the developer. Never anything else.
- */
 export function developmentOf(raw: unknown): ShowroomDevelopment | undefined {
   if (!isRecord(raw)) return undefined;
   const id = text(raw.id, 80);
@@ -426,10 +405,7 @@ export function developmentSummaryOf(raw: unknown): ShowroomDevelopmentSummary |
   };
 }
 
-/**
- * One instalment's amount as stated: "₦50,000,000", "30% of the price", or the timing only. Never a
- * total, and a percentage is never turned into naira.
- */
+/** Never a total, and a percentage is never turned into naira. */
 export function instalmentAmountLabel(
   i: Pick<ShowroomInstalment, 'amountNaira' | 'percent'>,
   formatNaira: (n: number) => string

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Image, Pressable, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AlertTriangle, ChevronLeft, Plus, Sparkles, X } from '@sureground/icons/native';
 import {
@@ -28,6 +27,7 @@ import { CategoryPicker } from '@/components/maintenance/CategoryPicker';
 import { pickPhoto } from '@/lib/filePicker';
 import type { PickedFile } from '@/lib/api/documents';
 import { errorMessage } from '@/lib/api/client';
+import { goBack } from '@/lib/goBack';
 
 const MAX_PHOTOS = 5;
 
@@ -44,6 +44,10 @@ export default function ReportMaintenance() {
   const [isEmergency, setIsEmergency] = useState(false);
   const [photos, setPhotos] = useState<PickedFile[]>([]);
   const [draft, setDraft] = useState<RepairDraft | null>(null);
+  const homes = useQuery({ queryKey: qk.renter.maintenanceHomes, queryFn: maintenanceApi.homes });
+  const [chosenHome, setChosenHome] = useState<string | null>(null);
+  const homeList = homes.data ?? [];
+  const unitId = homeList.length === 1 ? homeList[0].unitId : chosenHome;
   const fill = useMutation({
     mutationFn: () => maintenanceApi.draftFromPhotos(photos, description),
     onSuccess: (d) => {
@@ -69,11 +73,13 @@ export default function ReportMaintenance() {
         description: description.trim(),
         isEmergency,
         photos,
+        unitId: unitId ?? undefined,
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.renter.maintenance });
       toast.show('Maintenance request submitted.', 'success');
-      router.back();
+      // Opened from a notification or link there may be nothing to go back to.
+      goBack('/(app)/maintenance');
     },
     onError: (err) => toast.show(errorMessage(err, 'Could not submit this request.'), 'error'),
   });
@@ -84,7 +90,11 @@ export default function ReportMaintenance() {
     if (file) setPhotos((p) => [...p, file]);
   };
 
-  const canSubmit = title.trim().length > 0 && !!category && description.trim().length > 0;
+  const canSubmit =
+    title.trim().length > 0 &&
+    !!category &&
+    description.trim().length > 0 &&
+    (homeList.length < 2 || !!unitId);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -99,7 +109,7 @@ export default function ReportMaintenance() {
         }}
       >
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => goBack('/(app)/maintenance')}
           accessibilityRole="button"
           accessibilityLabel="Back"
           style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
@@ -134,6 +144,22 @@ export default function ReportMaintenance() {
             </Text>
           ) : null}
         </Card>
+
+        {homeList.length > 1 ? (
+          <View style={{ gap: spacing.sm }}>
+            <Text variant="bodyStrong">Which home?</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+              {homeList.map((h) => (
+                <Chip
+                  key={h.unitId}
+                  label={h.label}
+                  selected={unitId === h.unitId}
+                  onPress={() => setChosenHome(h.unitId)}
+                />
+              ))}
+            </View>
+          </View>
+        ) : null}
 
         <TextField
           label="What's wrong?"

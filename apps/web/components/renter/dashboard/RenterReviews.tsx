@@ -58,11 +58,6 @@ export const RenterReviews = () => {
     },
   });
 
-  const averageRating = useMemo(() => {
-    if (submitted.length === 0) return 0;
-    return submitted.reduce((sum, r) => sum + r.rating, 0) / submitted.length;
-  }, [submitted]);
-
   const handleStartReview = (review: PendingReview) => {
     setSelectedReview(review);
     setRating(0);
@@ -99,25 +94,6 @@ export const RenterReviews = () => {
         </div>
 
         <div className="p-4">
-          {submitted.length > 0 && (
-            <div className="flex items-center gap-4 mb-4 p-3 rounded-lg bg-secondary/60">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-foreground">{averageRating.toFixed(1)}</div>
-                <div className="flex gap-0.5 mt-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`w-3 h-3 ${star <= Math.round(averageRating) ? 'fill-primary text-primary' : 'text-muted-foreground/30'}`}
-                    />
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {submitted.length} review{submitted.length === 1 ? '' : 's'}
-                </p>
-              </div>
-            </div>
-          )}
-
           {pending.length > 0 && (
             <div>
               <h3 className="text-sm font-medium text-foreground mb-3">Pending reviews</h3>
@@ -169,7 +145,7 @@ export const RenterReviews = () => {
                           ))}
                         </div>
                       </div>
-                      {review.propertyTitle && (
+                      {review.propertyTitle && review.category !== 'PROPERTY' && (
                         <span className="flex items-center gap-1 text-xs text-muted-foreground">
                           <MapPin className="w-3 h-3" />
                           {review.propertyTitle}

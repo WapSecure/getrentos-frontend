@@ -83,7 +83,6 @@ export function AgencyOwnersView() {
           : 'Invitation sent to their Sureground app.'
       );
     },
-    // The invite dialog shows the reason (and a signup link when they are not on Sureground).
   });
 
   const revokeMutation = useMutation({

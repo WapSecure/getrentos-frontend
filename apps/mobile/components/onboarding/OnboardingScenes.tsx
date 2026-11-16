@@ -312,7 +312,7 @@ export function EscrowScene() {
         <EscrowNode
           icon={<Landmark size={19} color={colors.mutedForeground} />}
           label="Landlord is paid"
-          caption="Rent is released on schedule, unless a dispute is raised"
+          caption="Released when you confirm move-in or on the scheduled date, unless a dispute is raised"
         />
       </Layer>
 

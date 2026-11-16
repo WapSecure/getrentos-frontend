@@ -1,4 +1,5 @@
 import { FaqList, type Faq } from '@/components/marketing/FaqList';
+import { RENT_RELEASE_RULE } from '@sureground/shared';
 
 const QUESTIONS: Faq[] = [
   {
@@ -11,7 +12,7 @@ const QUESTIONS: Faq[] = [
   },
   {
     q: 'How does Sureground Payment Protection work?',
-    a: 'You pay Sureground, not the other party. Rent is released to the landlord on schedule, a sale deposit only after the handover is done and the buyer confirms, and a short-stay host after check-in. If you raise a dispute, the money stays held while it is resolved.',
+    a: `You pay Sureground, not the other party. ${RENT_RELEASE_RULE}. A sale deposit is released only after the handover is done and the buyer confirms, and a short-stay host is paid after check-in. If you raise a dispute, the money stays held while it is resolved.`,
   },
   {
     q: 'What is a C of O?',

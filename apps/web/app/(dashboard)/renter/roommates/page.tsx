@@ -63,7 +63,6 @@ export default function RoommatesPage() {
       invalidateRoommates();
       toast.success('Invitation sent.');
     },
-    // The invite dialog shows the reason (and a signup link when they are not on Sureground).
   });
 
   const removeMutation = useMutation({

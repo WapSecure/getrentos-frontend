@@ -48,7 +48,13 @@ export const buyerNavigation = defineRoleNavigation({
       href: ROUTES.BUYER_BOOKINGS,
       icon: BedDouble,
     },
-    { id: 'saved', labelKey: 'sidebar.saved_properties', href: ROUTES.BUYER_SAVED, icon: Heart },
+    {
+      id: 'saved',
+      labelKey: 'sidebar.saved_properties',
+      phoneBarLabel: 'Saved',
+      href: ROUTES.BUYER_SAVED,
+      icon: Heart,
+    },
     {
       id: 'viewings',
       labelKey: 'sidebar.viewing_requests',

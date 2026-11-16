@@ -164,8 +164,7 @@ export function LinkButton({
   accessibilityHint,
   style,
 }: LinkButtonProps) {
-  // Inline links may be drawn shorter than 44pt (e.g. legal links in a sentence); the hit area
-  // still grows to 44pt so they stay easy to tap.
+  // The hit area grows to 44pt even when an inline link is drawn shorter.
   const flat = StyleSheet.flatten(style) ?? {};
   const drawn = typeof flat.height === 'number' ? flat.height : flat.minHeight;
   const vertical = typeof drawn === 'number' && drawn < 44 ? Math.ceil((44 - drawn) / 2) : 0;

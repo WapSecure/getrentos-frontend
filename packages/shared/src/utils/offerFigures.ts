@@ -5,16 +5,11 @@ interface AmountMessage {
 }
 
 export interface OfferFigures {
-  /** The buyer's latest figure: their opening offer or their own last counter. */
   buyerAmount: number;
-  /** The seller's counter, only while it is the live figure (the buyer has not replied with a new amount). */
   sellerCounter?: number;
 }
 
-/**
- * Which figure is whose in a negotiation. The offer's own amount can move to the seller's counter
- * on some paths, so the thread decides and the offer amount is only the fallback.
- */
+/** The offer's own amount can move to the seller's counter on some paths, so the thread decides. */
 export function offerFigures<M extends AmountMessage>(
   messages: readonly M[],
   offerAmount: number,

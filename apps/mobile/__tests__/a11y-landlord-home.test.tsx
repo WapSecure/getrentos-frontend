@@ -19,7 +19,6 @@ import {
 const noop = () => undefined;
 const root = () => screen.container as HostElement;
 
-// The landlord home's building blocks, with the landlord's own quick actions.
 function LandlordHome() {
   const [showMoney, setShowMoney] = useState(true);
   return (
@@ -64,7 +63,6 @@ describe('landlord home', () => {
   it('every quick action, card and toggle has a role, a name and a 44pt target', async () => {
     await renderWithTheme(<LandlordHome />);
     const pressables = expectAccessiblePressables(root());
-    // Money toggle, attention card, four quick actions, "Show 2 more".
     expect(pressables).toHaveLength(7);
 
     for (const name of [

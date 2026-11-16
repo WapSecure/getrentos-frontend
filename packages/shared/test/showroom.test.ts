@@ -15,6 +15,7 @@ import {
 } from '../src/showroom/map.ts';
 import type { MediaItem } from '../src/showroom/types.ts';
 import { trustChainLabel } from '../src/utils/trustLabel.ts';
+import { RENT_PROTECTION_RULE } from '../src/constants/payment-protection.ts';
 
 const rental = {
   id: 'r1',
@@ -271,7 +272,6 @@ test('floor plans: one level per tagged photo, named by the caption exactly as w
   ];
   assert.deepEqual(floorPlanLevels(items), [
     { index: 0, label: 'Ground floor' },
-    // Numbers in a caption are the lister's words: shown as written, never parsed.
     { index: 2, label: 'First floor, 120 sqm (approx.)' },
   ]);
   assert.equal(isFloorPlan(items[3]!), false, 'only photos are plans');
@@ -394,14 +394,13 @@ const fullChain = {
       id: 'payment',
       label: 'Payment protected',
       met: true,
-      detail: 'Your rent is held by Sureground and only released once you confirm move-in.',
+      detail: RENT_PROTECTION_RULE,
     },
   ],
 };
 const summaryOf = (status: string) => ({ status, limits: ['x'] });
 
 test('sale: the trust chain never claims more than the verification summary on the same page', () => {
-  // The reported case: an approved ownership proof, but the checks have not started.
   const sale = fromSale({
     id: 's',
     title: 'House',
@@ -444,7 +443,6 @@ test('sale: the trust chain never claims more than the verification summary on t
     }).trustChain;
     assert.equal(cleared?.metCount, 4, status);
   }
-  // A list card has no summary: the API's chain stands.
   assert.equal(
     fromSale({ id: 's', title: 'x', price: 1, trustChain: fullChain }).trustChain?.metCount,
     4

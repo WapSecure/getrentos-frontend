@@ -44,10 +44,6 @@ import { SelectField } from '@/components/forms/SelectField';
 import { ConsentGate } from '@/components/trust/ConsentGate';
 import { LiveSelfieCheck } from '@/components/trust/LiveSelfieCheck';
 
-// Identity abroad for Diaspora Invest (decision D3), as on web: a passport checked by Smile ID with
-// a live selfie, and a proof of address and a bank statement our team reviews. Source of funds
-// (DIA-07) sits here too.
-
 const REVIEW_TIMESCALE = 'Our team reviews it within 2 working days.';
 const MAX_NOTE = 500;
 const COUNTRY_OPTIONS = COUNTRIES.map((c) => ({ value: c.code, label: c.name }));
@@ -145,7 +141,7 @@ function CardHead({
   );
 }
 
-/** Shown for every state except "send it now". Business dates stay Lagos dates (D2). */
+/** Business dates stay Lagos dates. */
 function StatusNote({ status, what }: { status: ForeignDocumentStatus; what: string }) {
   if (status.state === 'APPROVED') {
     return (
@@ -194,7 +190,6 @@ function PassportCard({ status }: { status: ForeignIdentityStatus['passport'] })
     },
     onError: (e) => {
       const code = codeOf(e);
-      // The free check is used, or Smile ID is off: the passport goes to our team instead.
       if (code === 'AUTOMATED_ATTEMPT_USED' || code === 'PASSPORT_CHECK_UNAVAILABLE') {
         setNotice(errorMessage(e, 'Send your passport to our team instead.'));
         void refresh();
@@ -473,11 +468,9 @@ const SUPPORTING_OPTIONS = (
   Object.keys(SOURCE_OF_FUNDS_SUPPORTING_LABELS) as SourceOfFundsSupportingKind[]
 ).map((value) => ({ value, label: SOURCE_OF_FUNDS_SUPPORTING_LABELS[value] }));
 
-/** The backend's limits, as on web. */
 const MAX_BANK_STATEMENTS = 6;
 const MAX_SUPPORTING = 5;
 
-/** DIA-07: asked above the D4 thresholds before an offer or deposit; reviewed like the documents above. */
 function SourceOfFundsCard({ status }: { status: SourceOfFundsStatus }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();

@@ -37,7 +37,6 @@ const payoutNote: Record<RentPayoutStatus, string> = {
 export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalProps) => {
   if (!payment) return null;
 
-  // Each status names a step already reached ("Funds held" is done once the rent is held).
   const states = stepStates(
     escrowSteps.map((s) => s.key),
     payment.escrowStatus

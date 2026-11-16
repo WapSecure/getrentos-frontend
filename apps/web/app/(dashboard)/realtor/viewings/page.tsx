@@ -87,9 +87,9 @@ function RealtorViewingsPageContent() {
         eyebrow="Work"
         title="Viewings"
         description={
-          <>
-            {total} scheduled tour{total === 1 ? '' : 's'}
-          </>
+          data
+            ? `${total} scheduled tour${total === 1 ? '' : 's'}`
+            : 'Scheduled tours'
         }
         actions={
           <Button

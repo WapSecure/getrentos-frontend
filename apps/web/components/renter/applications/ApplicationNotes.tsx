@@ -78,7 +78,7 @@ export const ApplicationNotes = ({
       month: 'short',
       day: 'numeric',
       year: 'numeric',
-      hour: 'numeric',
+      hour: '2-digit',
       minute: '2-digit',
     });
   };

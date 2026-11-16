@@ -7,13 +7,11 @@ interface HomeManagementSectionHeadingProps {
   id: string;
   title: string;
   description?: ReactNode;
-  /** Beside the title, such as a count the server calculated. */
   meta?: ReactNode;
   actions?: ReactNode;
   className?: string;
 }
 
-/** A plain section title with one line of context, so each tab reads as a list, not a pitch. */
 export function HomeManagementSectionHeading({
   id,
   title,
@@ -42,11 +40,7 @@ export function HomeManagementSectionHeading({
   );
 }
 
-/**
- * Opens a section's create dialog when the page header asks for it. The request is a number so a
- * second click opens it again; the section reports back once it has acted, which clears the request
- * and stops the dialog reopening when the tab is left and revisited.
- */
+// A counter, so a second click reopens the dialog; onHandled clears it so revisiting the tab does not.
 export function useCreateRequest(
   request: number | undefined,
   open: () => void,

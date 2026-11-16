@@ -69,10 +69,7 @@ import {
 } from '@/components/showroom/DevelopmentAssurance';
 import { AskTheDeveloper, SalesContact, signInToAsk } from '@/components/showroom/AskTheDeveloper';
 
-/**
- * A public off-plan development, as on the web's /developments/[id]: listed only. The developer
- * takes the money, and the page says so near the price and again in the payment plan.
- */
+/** Listed only: the developer takes the money, and the page says so near the price and in the payment plan. */
 export default function PublicDevelopment() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();
@@ -443,7 +440,6 @@ function UnitTypes({ development: d }: { development: ShowroomDevelopment }) {
   );
 }
 
-/** Site photos, newest first, each with the date it was taken; a tap opens the viewer there. */
 function ProgressGallery({ development: d }: { development: ShowroomDevelopment }) {
   const { colors, spacing, radius } = useTheme();
   const { width } = useWindowDimensions();

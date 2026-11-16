@@ -54,7 +54,7 @@ export const ROLES = {
   },
   OWNER: {
     id: 'owner',
-    name: 'Property Owner',
+    name: 'Property owner',
     description: 'List for sale, accept offers, track property value.',
     icon: 'TrendingUp',
     requiresVerification: ['identity', 'property'],
@@ -64,7 +64,7 @@ export const ROLES = {
   },
   BUYER: {
     id: 'buyer',
-    name: 'Property Buyer',
+    name: 'Property buyer',
     description: 'Save, compare, tour properties, make offers securely.',
     icon: 'Search',
     requiresVerification: ['identity'],
@@ -75,7 +75,7 @@ export const ROLES = {
   REALTOR: {
     id: 'realtor',
     name: 'Realtor',
-    description: 'Bring listings, schedule tours, negotiate on behalf.',
+    description: 'Bring listings, arrange viewings and negotiate for your clients.',
     icon: 'Users',
     requiresVerification: ['identity', 'license'],
     canAddLater: true,
@@ -85,7 +85,7 @@ export const ROLES = {
   AGENT: {
     id: 'agent',
     name: 'Agent',
-    description: 'Operate on behalf with scoped, delegated permissions.',
+    description: 'Act for landlords and owners, with only the permissions they give you.',
     icon: 'UserCheck',
     requiresVerification: ['identity'],
     canAddLater: true,
@@ -94,7 +94,7 @@ export const ROLES = {
   },
   ESTATE: {
     id: 'estate',
-    name: 'Estate Manager',
+    name: 'Estate manager',
     description: 'Manage a gated community: households, dues, and access.',
     icon: 'Briefcase',
     requiresVerification: ['identity'],
@@ -124,7 +124,7 @@ export const ROLES = {
   },
   MANAGER: {
     id: 'manager',
-    name: 'Property Manager',
+    name: 'Property manager',
     description: 'Run properties for owners under a management mandate.',
     icon: 'Briefcase',
     requiresVerification: ['identity'],
@@ -285,6 +285,7 @@ export const ROUTES = {
   RENTER_LEGAL_RESOURCES: '/renter/legal-resources',
   RENTER_BOOKINGS: '/renter/bookings',
   RENTER_REFERRALS: '/renter/referrals',
+  RENTER_REVIEWS: '/renter/reviews',
 
   LANDLORD_PROPERTIES: '/landlord/properties',
   LANDLORD_UNITS: '/landlord/units',
@@ -331,6 +332,8 @@ export const ROUTES = {
   OWNER_LEADS: '/owner/leads',
   OWNER_OFFERS: '/owner/offers',
   OWNER_VIEWINGS: '/owner/viewings',
+  OWNER_APPLICATIONS: '/owner/applications',
+  OWNER_LEASES: '/owner/leases',
   OWNER_TRANSACTIONS: '/owner/transactions',
   OWNER_ANALYTICS: '/owner/analytics',
   OWNER_DOCUMENTS: '/owner/documents',
@@ -338,7 +341,6 @@ export const ROUTES = {
   OWNER_REVIEWS: '/owner/reviews',
   OWNER_TRUST_PROFILE: '/owner/trust-profile',
   OWNER_MANAGED: '/owner/managed',
-  /** The owner's own agreements with a manager (Sureground Managed or a firm); OWNER_MANAGED is the reverse. */
   OWNER_MANAGEMENT: '/owner/management',
   OWNER_ACTIVITY: '/owner/activity',
   OWNER_QUERIES: '/owner/queries',
@@ -481,7 +483,7 @@ export const getDashboardRoute = (roleId: string): string => {
   return roleMap[roleId] || ROUTES.DASHBOARD;
 };
 
-const INVITED_ROLE_PRECEDENCE: readonly string[] = ['GATEMAN'];
+const INVITED_ROLE_PRECEDENCE: readonly string[] = ['ESTATE_MANAGER', 'GATEMAN'];
 
 // Takes the first role the web app has a portal for: an unmapped roles[0] fell back to renter and
 // a non-renter then looped between the renter guard and that fallback.

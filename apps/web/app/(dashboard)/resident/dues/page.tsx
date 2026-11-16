@@ -8,6 +8,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReceiptText, Repeat } from '@sureground/icons';
 import { Badge, Button, EmptyState, ListSkeleton, PageHeader } from '@sureground/ui';
 import { estateResidentService } from '@/services/estateResidentService';
+import { residentServiceChargesService } from '@/services/residentServiceChargesService';
+import { ServiceChargesTab } from '@/components/renter/payments/ServiceChargesTab';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
 import type { Due } from '@/types/estate';
@@ -43,6 +45,10 @@ export default function ResidentDuesPage() {
   const queryClient = useQueryClient();
   const [payError, setPayError] = useState<{ dueId: string; message: string } | null>(null);
   const providers = usePaymentProviders();
+  const serviceCharges = useQuery({
+    queryKey: estateResidentKeys.serviceCharges,
+    queryFn: () => unwrap(residentServiceChargesService.list()),
+  });
   const [payingDueId, setPayingDueId] = useState<string | null>(null);
   const [providerError, setProviderError] = useState<string | null>(null);
 
@@ -86,7 +92,24 @@ export default function ResidentDuesPage() {
 
   return (
     <>
-      <PageHeader title="Dues" description={<>{data?.total ?? 0} dues on your household</>} />
+      <PageHeader
+        title="Dues"
+        description={
+          <>
+            {data?.total ?? 0} {(data?.total ?? 0) === 1 ? 'due' : 'dues'} on your household
+          </>
+        }
+      />
+
+      {(serviceCharges.data?.length ?? 0) > 0 && (
+        <div className="mb-8">
+          <ServiceChargesTab
+            charges={serviceCharges.data ?? []}
+            hrefFor={(id) => `/resident/dues/service-charges/${id}`}
+            intro="Your household's share of the estate's shared costs. Pay each one below with your other dues. Open one to see how it was worked out or to raise a query."
+          />
+        </div>
+      )}
 
       {isLoading ? (
         <ListSkeleton rows={3} />

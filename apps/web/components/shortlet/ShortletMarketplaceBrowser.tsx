@@ -58,14 +58,12 @@ export const ShortletMarketplaceBrowser = ({
   initialCheckIn?: string;
   initialCheckOut?: string;
   hideHeader?: boolean;
-  /** The server-rendered unfiltered first page. */
   initialData?: Paginated<ShortletListing>;
 } = {}) => {
   const router = useRouter();
   const wishlist = useShortletWishlist();
   const searchParams = useSearchParams();
 
-  // The first render reads the link; after that React owns the state and mirrors it back to the URL.
   const [search, setSearch] = useState(() => urlParam.text(searchParams, 'q'));
   const [debouncedSearch, setDebouncedSearch] = useState(() => urlParam.text(searchParams, 'q'));
   useEffect(() => {

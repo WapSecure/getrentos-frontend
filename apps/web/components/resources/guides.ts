@@ -8,9 +8,7 @@ import {
   RISKS,
 } from '@/components/diaspora/public/content';
 
-// Guides are assembled only from copy already reviewed for the Diaspora Invest page
-// (components/diaspora/public/content.ts), so the hub makes no claim the product does not
-// already make. New guides need the same review before they are added here.
+// Only copy already reviewed for the Diaspora Invest page; new guides need the same review first.
 
 export interface GuideSection {
   title: string;
@@ -25,7 +23,6 @@ export interface Guide {
   summary: string;
   sections: GuideSection[];
   faqs: { question: string; answer: string }[];
-  /** Shown only while the service it describes is available. */
   requiresDiaspora?: boolean;
 }
 

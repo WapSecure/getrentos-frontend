@@ -27,6 +27,7 @@ import { useSessionExpiryDraft } from '@sureground/ui';
 import { EMPLOYMENT_STATUSES, type AddressValue } from '@sureground/shared';
 import type { Property, Document as ApplicationDocument } from '@/types/renter';
 import { nameOnly } from '@/lib/validations/input';
+import { savedDocumentFits } from '@/lib/applicationDocuments';
 import { renterService, type RenterDocument } from '@/services/renterService';
 import { renterKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
@@ -187,6 +188,10 @@ export const ApplicationWizard = ({
     .filter((doc) => !doc.uploaded)
     .map((doc) => ({ doc, file: libraryDocs.find((d) => sameName(d.name, doc.name)) }))
     .filter((m): m is { doc: ApplicationDocument; file: RenterDocument } => !!m.file);
+  // A file attached to one document can't be reused, so one ID card cannot stand in for proof of income too.
+  const usedIds = new Set(data.documents.flatMap((d) => (d.documentId ? [d.documentId] : [])));
+  const fittingDocs = (slotName: string) =>
+    libraryDocs.filter((file) => !usedIds.has(file.id) && savedDocumentFits(slotName, file));
   const attachSavedMatches = () =>
     savedMatches.forEach(({ doc, file }) => attachLibraryDoc(doc.name, file));
 
@@ -624,7 +629,7 @@ export const ApplicationWizard = ({
                       </>
                     ) : (
                       <>
-                        {libraryDocs.length > 0 && (
+                        {fittingDocs(doc.name).length > 0 && (
                           <Select
                             ariaLabel={`Use a saved document for ${doc.name}`}
                             value=""
@@ -636,7 +641,7 @@ export const ApplicationWizard = ({
                               const file = libraryDocs.find((d) => d.id === id);
                               if (file) attachLibraryDoc(doc.name, file);
                             }}
-                            options={[...libraryDocs]
+                            options={fittingDocs(doc.name)
                               .sort(
                                 (a, b) =>
                                   Number(sameName(b.name, doc.name)) -
@@ -691,10 +696,7 @@ export const ApplicationWizard = ({
                   label: 'Move-in / Term',
                   value: `${data.moveInDate ? formatDate(data.moveInDate) : '—'} · ${data.leaseTerm}`,
                 },
-                {
-                  label: 'Documents ready',
-                  value: `${data.documents.filter((d) => d.uploaded).length}/${data.documents.length}`,
-                },
+                { label: 'Documents', value: documentsSummary(data.documents) },
               ]}
             />
             <p className="text-xs text-muted-foreground">
@@ -764,3 +766,13 @@ const UploadButton = ({
     </>
   );
 };
+
+export function documentsSummary(documents: ApplicationDocument[]): string {
+  const required = documents.filter((d) => d.required);
+  const missing = required.filter((d) => !d.uploaded).map((d) => d.name);
+  const optional = documents.filter((d) => !d.required && d.uploaded).length;
+  const extra = optional ? `, plus ${optional} optional` : '';
+  if (missing.length) return `Missing ${missing.join(', ')}${extra}`;
+  const noun = required.length === 1 ? 'document' : 'documents';
+  return `All ${required.length} required ${noun}${extra}`;
+}

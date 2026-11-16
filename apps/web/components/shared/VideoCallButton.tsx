@@ -17,7 +17,6 @@ export const VideoCallButton = ({
   join: () => Promise<ApiResponse<VideoCallJoin>>;
   label?: string;
   size?: 'sm' | 'md';
-  /** How to word the time the call opens, e.g. Lagos time next to the viewer's. */
   opensAtLabel?: (opensAt: Date) => string;
 }) => {
   const [now, setNow] = useState(() => new Date());

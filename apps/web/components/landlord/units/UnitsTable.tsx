@@ -85,16 +85,15 @@ export const UnitsTable = ({
             key: 'rent',
             header: 'Rent',
             className: 'text-foreground font-medium whitespace-nowrap',
-            render: (unit) => (
-              <>
-                {unit.leaseRent !== undefined || unit.askingRent !== undefined
-                  ? formatCurrency((unit.leaseRent ?? unit.askingRent)!, {
-                      compact: true,
-                    })
-                  : '\u2014'}
-                {rentSuffix(unit.leaseRentPeriod ?? unit.askingRentPeriod)}
-              </>
-            ),
+            render: (unit) =>
+              unit.leaseRent !== undefined || unit.askingRent !== undefined ? (
+                <>
+                  {formatCurrency((unit.leaseRent ?? unit.askingRent)!, { compact: true })}
+                  {rentSuffix(unit.leaseRentPeriod ?? unit.askingRentPeriod)}
+                </>
+              ) : (
+                '\u2014'
+              ),
           },
           {
             key: 'status',

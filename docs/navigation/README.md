@@ -192,8 +192,11 @@ are measured `innerWidth`.
 | Renter                                  | Fixed (354584bd): menu button off screen     | Fixed: page scrolled 208px sideways | No overflow | Also 768, 900, 1280: no overflow          |
 
 Phone and tablet screenshots: `screenshots/after-agent-phone.png`, `screenshots/after-agent-tablet.png`.
-Bottom-bar labels cut off at 390px for long names ("Inspectio…", "Verificati…"); readable via the
-accessible name, but shorter labels would help. Browser back with the drawer open (landlord, 390px): returns to the previous page with the drawer
+Bottom-bar labels (2026-11-16): measured for every role at true 390 and 360px. Five were cut off; a
+nav item can now carry a short `phoneBarLabel` used only in the bar, with the full name kept as the
+link's accessible name: buyer "Saved", estate "Passes" and "Expected", agent "Checks" (cut at 360 only),
+resident "Notices" and "Repairs" (measured in the bar's own style; no resident test login works). All
+fit at both widths. Browser back with the drawer open (landlord, 390px): returns to the previous page with the drawer
 closed. Orientation (2026-11-11): landlord in phone landscape, 844 × 390: no sideways scroll, the bar
 stays at the bottom, and the open menu scrolls inside its own panel (before: 75px sideways scroll).
 Rotation itself only changes the width and height, so this covers it in the browser; a real device
@@ -218,16 +221,17 @@ check of rotation and safe-area insets is still open.
 
 ## 8. Functional and security regression results
 
-| Check                                                           | Result                                                                           |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Deep links, 150 pages, 7 roles                                  | Pass                                                                             |
-| Back, forward, reload, query string (estate)                    | Correct link stays current                                                       |
-| Another role's page typed into the URL (estate manager tried 7) | Redirected to the user's own home; nothing from the other role shown             |
-| Another role's API with a renter token                          | 403 on landlord, owner, buyer, realtor, agent and admin; 200 on the renter's own |
-| Group open/closed state after reload                            | Kept (browser test in `tests/browser/design-system.spec.ts`, not run in CI yet)  |
-| Role switching, workspace switching                             | **Not tested**                                                                   |
-| Dark mode                                                       | Seen working throughout; not systematically compared                             |
-| Long labels (Pidgin)                                            | One overflow found and fixed (wraps to two lines); not yet seen in the browser   |
+| Check                                                           | Result                                                                                                                                                                                                                                                            |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Deep links, 150 pages, 7 roles                                  | Pass                                                                                                                                                                                                                                                              |
+| Back, forward, reload, query string (estate)                    | Correct link stays current                                                                                                                                                                                                                                        |
+| Another role's page typed into the URL (estate manager tried 7) | Redirected to the user's own home; nothing from the other role shown                                                                                                                                                                                              |
+| Another role's API with a renter token                          | 403 on landlord, owner, buyer, realtor, agent and admin; 200 on the renter's own                                                                                                                                                                                  |
+| Group open/closed state after reload                            | Kept (browser test in `tests/browser/design-system.spec.ts`, not run in CI yet)                                                                                                                                                                                   |
+| Role switching (2026-11-16)                                     | Estate manager ↔ gateman and landlord ↔ property manager, both ways, kept after reload. Fixed: on `/agency` the menu called a manager "Landlord" and offered "Property manager" again (no way back); it now shows Property manager as current and offers Landlord |
+| Workspace switching (two estates)                               | **Not tested**: no test account manages two estates                                                                                                                                                                                                               |
+| Dark mode (2026-11-16)                                          | axe-core 4.14 (wcag2a–22aa) on the navigation of all 7 roles, light and dark, at 1180 and 390px: 0 violations. Current bar label measured by hand (axe could not see behind the dev badge): 5.83:1 light, 7.97:1 dark                                             |
+| Long labels (Pidgin)                                            | Moot since 2026-11-10: the language choice is switched off                                                                                                                                                                                                        |
 
 ## 9. Files changed (since `994aa79c^`)
 

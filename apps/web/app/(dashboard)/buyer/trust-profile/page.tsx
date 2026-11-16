@@ -8,7 +8,6 @@ import { buyerService } from '@/services/buyerService';
 import { buyerKeys } from '@/lib/queryKeys';
 
 export default function BuyerTrustPage() {
-  // Diaspora investors only: passport and documents from abroad.
   const extraTabs = useForeignIdentityTabs();
   return (
     <TrustHub

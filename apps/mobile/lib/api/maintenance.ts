@@ -61,6 +61,7 @@ export interface MaintenanceRequest {
   images: string[];
   assignedVendorId?: string;
   assignedVendorName?: string;
+  scheduledFor?: string;
   createdAt: string;
   updatedAt: string;
   resolvedAt?: string;
@@ -79,6 +80,13 @@ export interface CreateMaintenanceInput {
   description: string;
   isEmergency?: boolean;
   photos?: PickedFile[];
+  /** Required by the API when the renter rents more than one home. */
+  unitId?: string;
+}
+
+export interface MaintenanceHome {
+  unitId: string;
+  label: string;
 }
 
 export interface RepairDraft {
@@ -98,6 +106,7 @@ export const maintenanceApi = {
       `/renter/maintenance?page=${page}&pageSize=${pageSize}`
     ),
 
+  homes: () => apiFetch<MaintenanceHome[]>('/renter/maintenance/homes'),
   create: (input: CreateMaintenanceInput) => {
     const form = new FormData();
     form.append('title', input.title);
@@ -105,6 +114,7 @@ export const maintenanceApi = {
     form.append('priority', input.priority);
     form.append('description', input.description);
     if (input.isEmergency) form.append('isEmergency', 'true');
+    if (input.unitId) form.append('unitId', input.unitId);
     input.photos?.forEach((p) => appendFile(form, 'files', p));
     return apiUpload<MaintenanceRequest>('/renter/maintenance', form);
   },

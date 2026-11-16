@@ -165,3 +165,24 @@ PR links: `https://github.com/WapSecure/getrentos-frontend/pull/<n>`.
 **Consequences.** Impression counts drop from the merge date because quick scroll-pasts no longer count. Compare funnels only from 2026-11-12 onwards.
 
 **PRs.** #182.
+
+## D12. Crawl policy for market pages: noindex, not robots blocks
+
+**Date:** 13 Nov 2026 · **Status:** Accepted
+
+- Unfiltered `/rent`, `/buy`, `/shortlets`, `/land` are indexable with a self canonical.
+- Any query string (filters, sort, search text, `page`) gives `noindex, follow` and the unfiltered canonical. Pagination stays out of the index on purpose: the server renders only the first page, so `?page=2` would serve page 1's listings in its initial HTML. Individual listings reach search engines through `sitemap.xml`.
+- robots.txt no longer blocks `/shortlets?` and `/land?`. A crawler can only obey `noindex` on a page it may fetch, and a blocked URL can still be indexed from links without its content. All four markets now follow one rule.
+- Private return and invitation screens (`/payments`, `/billing`, `/agency-invite`, `/auth`, `/representing`) are blocked in robots.txt and carry `noindex, nofollow`.
+- Benchmark support: Property Finder blocks filter-parameter combinations but leaves listing and community URLs crawlable (see `competitor-benchmark.md` §7).
+- Revisit if server-rendered pagination is added: then `?page=N` can become indexable with a self canonical.
+
+## D13. Audience-led main navigation
+
+**Date:** 13 Nov 2026 · **Status:** Accepted
+
+- **Before:** the top bar held five discovery links (Buy, Rent, Short stays, Land, Off-plan) and hid Sell, Property management and Diaspora in More, so sellers, landlords, owners and Nigerians abroad (the supply side and the highest-value audience) had no visible entry.
+- **Now:** Buy, Rent, Sell, Manage (`/home-management`), Diaspora (only while the service is on, D10), then More: Short stays, Land, Off-plan, Estates, Detty December, Let, Realtors and agencies, Guides, Pricing, About. The mobile menu uses the same two lists ("Main" and "More").
+- **Why:** the brief's navigation names the audiences (buy, rent, sell, manage, invest from abroad); Property Finder's top level also carries "Sell your property" and "Find agents" (benchmark §7). Short stays and Land remain one tap away and are also tabs in the homepage hero search, so discovery of those markets is kept.
+- **Fit:** the bar uses fewer characters than before (25 against 30 in tracked capitals). Measured at a real 1,025 px viewport: More ends at 483 px and the centred logo starts at 499 px.
+- **Revisit** when analytics (analytics-plan.md) has 28+ days of nav click data per item.

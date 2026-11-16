@@ -69,7 +69,7 @@ async function decodeQrFromFile(file: File): Promise<string | null> {
 const INSIDE_PAGE_SIZE = 20;
 
 const formatTime = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
+  new Intl.DateTimeFormat('en-NG', { hour: '2-digit', minute: '2-digit' }).format(new Date(value));
 
 type BlockedWrite = { kind: 'check-in'; code: string } | { kind: 'admit'; pass: VisitorPass };
 
@@ -784,7 +784,6 @@ export default function GatemanVerifyPage() {
   );
 }
 
-/** The guard's post as a chip, so it reads as state rather than a sentence. */
 function PostChip({ gateName, needsChoice }: { gateName?: string; needsChoice: boolean }) {
   if (gateName) {
     return (

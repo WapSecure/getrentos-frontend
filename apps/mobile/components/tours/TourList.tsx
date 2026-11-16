@@ -43,10 +43,6 @@ const GROUP_EMPTY: Record<TourViewer, Record<TourGroup, { title: string; body: s
 
 type ListTour = GroupableTour & { id: string; land: string };
 
-/**
- * The tours screens' list, as on web: upcoming, waiting and past with counts, and the next booked
- * tour in one line. The caller's QueryState covers having no tours at all.
- */
 export function TourList<T extends ListTour>({
   tours,
   viewer,

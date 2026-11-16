@@ -10,6 +10,7 @@ import {
   type WorkOrderFeedback,
   type WorkOrderFeedbackInput,
   type WorkOrderPhotoStage,
+  type UtilityKind,
 } from '@sureground/shared';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
@@ -136,6 +137,7 @@ export interface Asset {
   installedAt?: string | null;
   warrantyExpiresAt?: string | null;
   status: AssetStatus;
+  utilityKind?: UtilityKind | null;
   property?: { title?: string | null; name?: string | null };
   unit?: { unitName?: string | null } | null;
   preventivePlans?: { id: string; nextDueAt: string }[];
@@ -146,7 +148,6 @@ export interface Plan {
   propertyId: string;
   title: string;
   category: Category;
-  /** Checklist copied into each work order the plan raises. */
   notes?: string | null;
   frequencyDays: number;
   nextDueAt: string;
@@ -325,17 +326,14 @@ export const homeCareApi = {
       ...(acknowledge ? { body: acknowledge } : {}),
     }),
 
-  /** Each stage of the job, from the problem reported to the owner's feedback. */
   evidence: (workOrderId: string) =>
     apiFetch<WorkOrderEvidence>(`/home-management/work-orders/${workOrderId}/evidence`),
-  /** Stamped with the time it is added; the stage says what the photo shows. */
   addPhoto: (workOrderId: string, file: PickedFile, stage: WorkOrderPhotoStage) => {
     const form = new FormData();
     appendFile(form, 'file', file);
     form.append('stage', stage);
     return apiUpload<MaintenancePhoto>(`/home-management/work-orders/${workOrderId}/photos`, form);
   },
-  /** Owner or manager attaches the paperwork behind a quote or an invoice on the job. */
   addDocument: (
     workOrderId: string,
     target: { quoteId: string } | { invoiceId: string },
@@ -351,7 +349,6 @@ export const homeCareApi = {
         : `invoices/${encodeURIComponent(target.invoiceId)}/documents`;
     return apiUpload<EvidenceDocument>(`/home-management/work-orders/${workOrderId}/${path}`, form);
   },
-  /** The owner's rating, once, after the job is RESOLVED. */
   feedback: (workOrderId: string, input: WorkOrderFeedbackInput) =>
     apiFetch<WorkOrderFeedback>(`/home-management/work-orders/${workOrderId}/feedback`, {
       method: 'POST',
@@ -373,9 +370,9 @@ export const homeCareApi = {
   addUnit: (propertyId: string, unitName: string) =>
     apiFetch<Unit>('/home-management/units', { method: 'POST', body: { propertyId, unitName } }),
 
-  assets: (propertyId?: string, status?: AssetStatus) =>
+  assets: (propertyId?: string, status?: AssetStatus, utilityKind?: UtilityKind) =>
     apiFetch<Paginated<Asset>>(
-      `/home-management/assets${toQuery({ propertyId, status, page: 1, pageSize: 100 })}`
+      `/home-management/assets${toQuery({ propertyId, status, utilityKind, page: 1, pageSize: 100 })}`
     ),
   addAsset: (input: {
     propertyId: string;
@@ -387,6 +384,7 @@ export const homeCareApi = {
     serialNumber?: string;
     installedAt?: string;
     warrantyExpiresAt?: string;
+    utilityKind?: UtilityKind;
   }) => apiFetch<Asset>('/home-management/assets', { method: 'POST', body: input }),
   setAssetStatus: (id: string, status: AssetStatus) =>
     apiFetch<Asset>(`/home-management/assets/${id}/status`, { method: 'PATCH', body: { status } }),

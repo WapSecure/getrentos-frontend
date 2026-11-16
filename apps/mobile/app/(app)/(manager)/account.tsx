@@ -23,6 +23,7 @@ import { agencyApi } from '@/lib/api/agency';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { RepresentingGroup } from '@/components/account/RepresentingGroup';
 import { AccountFooter, AppearanceFooter, ProfileCard } from '@/components/account/AccountParts';
 
 const go = (href: Href) => () => router.push(href);
@@ -155,6 +156,7 @@ export default function AgencyAccount() {
         note={dashboard.data?.firmName}
       />
       <WorkspaceSwitcher />
+      <RepresentingGroup />
       <SettingsGroup title="Your work" items={work} />
       <SettingsGroup title="The firm" items={firm} />
       <SettingsGroup title="Settings" items={settings} footer={<AppearanceFooter />} />

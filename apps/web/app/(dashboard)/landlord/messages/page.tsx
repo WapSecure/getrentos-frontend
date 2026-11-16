@@ -142,7 +142,9 @@ export default function LandlordMessagesPage() {
               </Button>
               <MessageThread
                 contactName={activeConversation.participantName}
-                contactRole={activeConversation.participantRole}
+                contactRole={[activeConversation.participantRole, activeConversation.propertyTitle]
+                  .filter(Boolean)
+                  .join(' · ')}
                 messages={messages as ThreadMessage[]}
                 onSend={handleSend}
               />

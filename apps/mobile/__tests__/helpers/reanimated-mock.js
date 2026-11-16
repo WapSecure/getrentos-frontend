@@ -1,6 +1,4 @@
-// A plain-React stand-in for react-native-reanimated (and react-native-worklets), registered in
-// jest.setup.js. The real packages need native runtimes that Jest does not have. Animations
-// resolve to their end value at once; layout animations (FadeIn.duration(120)…) are dropped.
+// The real packages need native runtimes Jest does not have.
 const React = require('react');
 const RN = require('react-native');
 
@@ -16,7 +14,6 @@ function createAnimatedComponent(Component) {
   return Animated;
 }
 
-// FadeIn, FadeIn.duration(120).delay(60), new Keyframe({...}): every call returns the builder again.
 function builder() {
   const target = function animationBuilder() {};
   const proxy = new Proxy(target, {
@@ -107,7 +104,6 @@ const explicit = {
   isSharedValue: (value) => !!value && typeof value.get === 'function',
 };
 
-// Anything else: capitalised names are layout-animation builders, hooks return an empty object.
 const reanimated = new Proxy(explicit, {
   get(target, key) {
     if (key in target) return target[key];

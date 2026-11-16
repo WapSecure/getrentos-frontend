@@ -3,18 +3,14 @@ import type { TourPlace } from './siteTour';
 
 /** Mirrors `land-pre-purchase-inspection.service.ts`: land and built homes for sale. */
 export interface PrePurchaseInspection extends LandWatchInspection {
-  /** The place's name: the parcel, the plot or the home. */
   land: string;
   city: string;
   state: string;
-  /** Set for a built home. */
   propertyId?: string | null;
   place?: 'land' | 'property';
-  /** The listing's cover photo, once the API sends it; until then the list shows the place icon. */
   coverImageUrl?: string | null;
   instructions?: string | null;
   reinspectionOfId?: string;
-  /** Can back a reservation held subject to it. */
   plotId?: string;
   questions: PrePurchaseInspectionQuestion[];
   disclaimer: string;

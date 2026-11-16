@@ -51,13 +51,22 @@ const PORTAL_PRIORITY: Portal[] = [
   'gateman',
 ];
 
+const CONSUMER_PORTALS: readonly Portal[] = ['buyer', 'renter', 'resident'];
+
 export function portalsForRoles(roles: BackendRole[]): Portal[] {
   const set = new Set<Portal>();
+  const consumerOrder: Portal[] = [];
   for (const r of roles) {
     const p = BACKEND_ROLE_TO_PORTAL[r];
-    if (p) set.add(p);
+    if (!p) continue;
+    set.add(p);
+    if (CONSUMER_PORTALS.includes(p) && !consumerOrder.includes(p)) consumerOrder.push(p);
   }
-  return PORTAL_PRIORITY.filter((p) => set.has(p));
+  const ranked = PORTAL_PRIORITY.filter((p) => set.has(p));
+  const firstConsumer = ranked.findIndex((p) => CONSUMER_PORTALS.includes(p));
+  if (firstConsumer === -1) return ranked;
+  const others = ranked.filter((p) => !CONSUMER_PORTALS.includes(p));
+  return [...others.slice(0, firstConsumer), ...consumerOrder, ...others.slice(firstConsumer)];
 }
 
 export function primaryPortal(roles: BackendRole[]): Portal {
@@ -120,7 +129,6 @@ export interface SignupRole {
   id: SignupRoleId;
   name: string;
   tagline: string;
-  /** @sureground/icons/native icon name */
   icon: 'Home' | 'Building2' | 'TrendingUp' | 'Search' | 'Users' | 'UserCheck' | 'Briefcase';
   requires: VerificationReq[];
 }
@@ -163,14 +171,14 @@ export const SIGNUP_ROLES: SignupRole[] = [
   {
     id: 'realtor',
     name: 'Realtor',
-    tagline: 'Bring listings, schedule tours, negotiate on behalf.',
+    tagline: 'Bring listings, arrange viewings and negotiate for your clients.',
     icon: 'Users',
     requires: ['identity', 'license'],
   },
   {
     id: 'agent',
     name: 'Agent',
-    tagline: 'Operate on behalf with scoped, delegated permissions.',
+    tagline: 'Act for landlords and owners, with only the permissions they give you.',
     icon: 'UserCheck',
     requires: ['identity'],
   },
@@ -183,12 +191,7 @@ export const SIGNUP_ROLES: SignupRole[] = [
   },
 ];
 
-/**
- * Tab screens that several portals define under the same name. Group segments are not
- * in URLs, so a link to "/messages" can resolve into another portal's group; we then
- * open the same screen in the user's own portal instead of dropping them on its home.
- * Keep in step with app/(app)/(<portal>)/<screen>.tsx.
- */
+/** Group segments are not in URLs, so open the screen in the user's own portal. Keep in step with app/(app)/(<portal>)/<screen>.tsx. */
 const SHARED_TAB_SCREENS: Record<string, readonly Portal[]> = {
   discover: ['buyer', 'renter'],
   messages: ['agent', 'buyer', 'landlord', 'owner', 'realtor', 'renter'],

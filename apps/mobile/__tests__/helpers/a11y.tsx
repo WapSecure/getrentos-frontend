@@ -18,17 +18,14 @@ export const MIN_TOUCH_TARGET = 44;
 
 export interface PressableIssue {
   element: HostElement;
-  /** The accessible name, when there is one, to find the control in the message. */
   name?: string;
   problem: string;
 }
 
 export interface AuditOptions {
-  /** Smallest tappable height/width in points, counting hitSlop. `false` skips the size check. */
   minTarget?: number | false;
 }
 
-/** Renders inside the app's theme and toast providers, the same as the root layout. */
 export function renderWithTheme(ui: ReactElement, wrapper?: (children: ReactNode) => ReactElement) {
   return render(
     <ThemeProvider initialPreference="light">
@@ -37,8 +34,6 @@ export function renderWithTheme(ui: ReactElement, wrapper?: (children: ReactNode
   );
 }
 
-// Props of the host element plus every composite that rendered it (Pressable, Button, Chip…),
-// stopping at the next host element up. That is where onPress and disabled are declared.
 function declaredProps(element: HostElement): Record<string, unknown>[] {
   const all: Record<string, unknown>[] = [element.props];
   let fiber = (element as unknown as { unstable_fiber: Fiber | null }).unstable_fiber?.return;
@@ -85,7 +80,6 @@ function textContent(element: HostElement): string {
     .join('');
 }
 
-/** What a screen reader announces: the label, else the text inside. */
 export function accessibleName(element: HostElement): string | undefined {
   const { props } = element;
   const label = props.accessibilityLabel ?? props['aria-label'];
@@ -111,10 +105,6 @@ function slop(hitSlop: HitSlop, a: 'top' | 'left', b: 'bottom' | 'right'): numbe
   return (hitSlop[a] ?? 0) + (hitSlop[b] ?? 0);
 }
 
-/**
- * The tappable height and width, counting hitSlop, where the style fixes them.
- * A side sized by its content or by flex is `undefined`: it cannot be measured without layout.
- */
 export function touchTarget(element: HostElement): { height?: number; width?: number } {
   const style = StyleSheet.flatten(element.props.style) ?? {};
   const hitSlop = declared(element, 'hitSlop') as HitSlop;
@@ -128,12 +118,10 @@ export function touchTarget(element: HostElement): { height?: number; width?: nu
   };
 }
 
-/** Every element a user can press that a screen reader can reach. */
 export function findPressables(root: HostElement): HostElement[] {
   return hostElements(root).filter((el) => isPressable(el) && !isHiddenFromAccessibility(el));
 }
 
-/** Lists what is wrong with each pressable under `root`; empty when they all pass. */
 export function auditPressables(root: HostElement, options: AuditOptions = {}): PressableIssue[] {
   const minTarget = options.minTarget ?? MIN_TOUCH_TARGET;
   const issues: PressableIssue[] = [];
@@ -148,7 +136,7 @@ export function auditPressables(root: HostElement, options: AuditOptions = {}): 
       report('is disabled but accessibilityState.disabled is not set');
     }
 
-    // VoiceOver and TalkBack focus an `accessible` container as one element, so a control
+    // VoiceOver and TalkBack focus an `accessible` container as one element, so controls inside it are unreachable.
     // inside one (including a button inside a button) can never be reached on its own.
     for (let parent = element.parent; parent; parent = parent.parent) {
       if (parent.type !== 'Text' && parent.props.accessible === true) {
@@ -174,11 +162,6 @@ function describe(issues: { name?: string; problem: string; element: HostElement
     .join('\n');
 }
 
-/**
- * Fails when any pressable under `root` lacks a role or an accessible name, hides its disabled
- * state, is unreachable inside an accessible container, or has a fixed size under 44pt.
- * Returns the pressables it checked so a test can assert on how many there are.
- */
 export function expectAccessiblePressables(
   root: HostElement,
   options: AuditOptions = {}
@@ -190,7 +173,6 @@ export function expectAccessiblePressables(
   return findPressables(root);
 }
 
-/** Fails when a text input a screen reader can reach has no label. */
 export function expectLabelledTextInputs(root: HostElement): HostElement[] {
   const inputs = hostElements(root).filter(
     (el) => el.type === 'TextInput' && !isHiddenFromAccessibility(el)

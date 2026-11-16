@@ -45,8 +45,7 @@ export const HomeHero = () => (
       </div>
     </Container>
 
-    <Container className="mt-8 md:mt-14">
-      {/* Phones get the search first and the photo after it; wider screens float the search over the photo. */}
+    <Container className="mt-8 md:mt-28">
       <div className="relative flex flex-col-reverse gap-6 md:block">
         <PhotoFrame
           photo={photos.lagosAerial}
@@ -54,14 +53,12 @@ export const HomeHero = () => (
           sizes="(min-width: 1240px) 1160px, 100vw"
           priority
         />
-        <div className="relative md:absolute md:inset-x-10 md:bottom-0 md:translate-y-1/2">
+        <div className="relative md:absolute md:inset-x-10 md:top-0 md:z-10 md:-translate-y-1/2">
           <HeroSearch />
         </div>
       </div>
     </Container>
-    <div aria-hidden="true" className="hidden h-24 md:block" />
-
-    <Container className="mt-10 md:mt-4">
+    <Container className="mt-10 md:mt-12">
       <ul className="grid gap-5 border-y border-border py-6 sm:grid-cols-3 sm:gap-8">
         {PROMISES.map(({ icon, title, body }) => (
           <li key={title} className="flex items-start gap-4">

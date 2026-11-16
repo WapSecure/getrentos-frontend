@@ -1,5 +1,3 @@
-// The renter dashboard's "Total rent paid": a money figure is shown only once the payments have
-// loaded. Before that the card rendered "₦0", which read as a real balance.
 export interface PaymentsForTotal {
   summary?: { totalPaidNaira?: number | null } | null;
   items?: { status: string; amount: number }[];

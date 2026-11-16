@@ -32,7 +32,7 @@ export default function RoleSelectionPage() {
     router.back();
   };
 
-  // Admin, Gateman, Resident and Property Manager are provisioned out of band, never offered at self-serve signup.
+  // Admin, gateman, resident and property manager are provisioned out of band, never offered at self-serve signup.
   const roleList = Object.values(ROLES)
     .filter(
       (role) =>

@@ -116,7 +116,6 @@ export const NotificationCard = ({
     if (href) router.push(href);
   };
 
-  // Row buttons sit inside the clickable card, so keep their clicks from also opening the notification.
   const handleMarkAsReadClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     onMarkAsRead(notification.id);

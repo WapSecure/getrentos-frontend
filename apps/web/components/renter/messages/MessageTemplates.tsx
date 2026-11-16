@@ -30,7 +30,6 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
 interface MessageTemplatesProps {
-  /** Who the template goes to; null when no conversation is open, which disables sending. */
   recipientName: string | null;
   onSelectTemplate: (content: string) => Promise<boolean>;
 }

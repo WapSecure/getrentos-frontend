@@ -21,11 +21,8 @@ export interface TrustHubExtraTab extends HubTab {
 interface TrustHubProps {
   portal: HubPortal;
   purpose: TrustPurpose;
-  /** What verifying unlocks in this role. */
   verificationDescription: string;
-  /** This page's path, linked from the verification tab back to the score. */
   trustHref: string;
-  /** Shown under the score: history for renters, the public profile for others. */
   moreDetails?: ReactNode;
   extraTabs?: TrustHubExtraTab[];
   subjectId?: string;
@@ -34,7 +31,6 @@ interface TrustHubProps {
 const TRUST_TAB: HubTab = { id: 'trust', label: 'Trust score', icon: Star };
 const VERIFICATION_TAB: HubTab = { id: 'verification', label: 'Verification', icon: ShieldCheck };
 
-// Requirements fixed outside the verification flow open the page that owns them.
 function hrefFor(portal: HubPortal, key: TrustRequirementKey): string | null {
   switch (key) {
     case 'EMAIL':
@@ -49,7 +45,6 @@ function hrefFor(portal: HubPortal, key: TrustRequirementKey): string | null {
   }
 }
 
-/** One trust page for every role: score, verification and any role extras as tabs. */
 export function TrustHub({
   portal,
   purpose,

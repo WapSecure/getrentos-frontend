@@ -72,7 +72,6 @@ type LandViewer = 'buyer' | 'member' | 'anonymous';
 
 interface LandMarketplaceBrowserProps {
   mode: MarketplaceMode;
-  /** The server-rendered unfiltered first page (public mode). */
   initialData?: Paginated<PublicLandListing>;
 }
 
@@ -128,7 +127,6 @@ const AREA_OPTIONS = [
 export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBrowserProps) => {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
-  // The first render reads the link; after that React owns the state and mirrors it back to the URL.
   const [search, setSearch] = useState(() => urlParam.text(searchParams, 'q'));
   const [debouncedSearch, setDebouncedSearch] = useState(() => urlParam.text(searchParams, 'q'));
   useEffect(() => {
@@ -612,7 +610,6 @@ export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBro
         <DialogContent size="xl" padded={false} className="lg:max-w-6xl lg:overflow-hidden">
           {activeListing && (
             <div className="grid lg:grid-cols-[minmax(0,1fr)_380px]">
-              {/* Parcel record */}
               <div className="min-w-0 lg:max-h-[88dvh] lg:overflow-y-auto lg:overscroll-contain">
                 <div className="relative h-56 bg-muted sm:h-72 lg:h-80">
                   {activeListing.coverImageUrl ? (
@@ -758,7 +755,6 @@ export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBro
                 </div>
               </div>
 
-              {/* Price, trust and actions */}
               <aside className="flex flex-col gap-5 border-t border-border bg-secondary/40 p-6 sm:p-8 lg:max-h-[88dvh] lg:overflow-y-auto lg:overscroll-contain lg:border-l lg:border-t-0">
                 <div>
                   <p className="text-sm text-muted-foreground">Asking price</p>

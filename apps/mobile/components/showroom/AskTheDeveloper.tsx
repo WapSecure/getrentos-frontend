@@ -40,16 +40,11 @@ import { DEVELOPER_QUESTIONS_ROUTE } from '@/lib/developerQuestions';
 import { mailLink, telLink } from '@/lib/developments';
 import { formatDate } from '@/lib/format';
 
-/** Signed out: sign in, then come straight back to this development. */
 export function signInToAsk(developmentId: string) {
   rememberAskIntent(developmentId);
   router.push('/(auth)/sign-in');
 }
 
-/**
- * "Ask the developer", as on the web: signed in only. The question and the answer are kept, so one
- * that goes unanswered can be followed up. Sureground takes no payment for a development.
- */
 export function AskTheDeveloper({ development: d }: { development: ShowroomDevelopment }) {
   const { colors, spacing } = useTheme();
   const { status } = useAuth();
@@ -76,7 +71,6 @@ export function AskTheDeveloper({ development: d }: { development: ShowroomDevel
 
 function SignedIn({ development: d }: { development: ShowroomDevelopment }) {
   const { colors, spacing, radius } = useTheme();
-  // As on the web: the list across developments lives in the buyer area.
   const isBuyer = useAuth().workspaces.includes('buyer');
   const toast = useToast();
   const queryClient = useQueryClient();

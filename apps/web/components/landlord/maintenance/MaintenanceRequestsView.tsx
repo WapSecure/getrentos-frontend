@@ -137,7 +137,6 @@ export function MaintenanceRequestsView() {
   const handleAssignVendor = (requestId: string, vendorId: string, scheduledFor?: string) =>
     assignVendorMutation.mutate({ requestId, vendorId, scheduledFor });
 
-  // Both change the request for good (no reopen, no lowering priority), so each asks first.
   const [confirming, setConfirming] = useState<{
     kind: 'resolve' | 'escalate';
     request: LandlordMaintenanceRequest;

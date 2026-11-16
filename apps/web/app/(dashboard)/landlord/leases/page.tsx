@@ -37,13 +37,15 @@ const statusFilters: { value: 'all' | LeaseStatus; label: string }[] = [
 const PAGE_SIZE = 10;
 
 function LandlordLeasesPageContent() {
-  const statusParam = useSearchParams().get('status');
+  const searchParams = useSearchParams();
+  const statusParam = searchParams.get('status');
+  const [onlyLeaseId, setOnlyLeaseId] = useState<string | null>(searchParams.get('lease'));
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<'all' | LeaseStatus>(
     statusParam === 'draft' ? 'draft' : 'all'
   );
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(searchParams.get('create') === '1');
   const [renewingLease, setRenewingLease] = useState<Lease | null>(null);
   const [signingLease, setSigningLease] = useState<Lease | null>(null);
   const [billingLease, setBillingLease] = useState<Lease | null>(null);
@@ -57,12 +59,18 @@ function LandlordLeasesPageContent() {
   } = useQuery({
     queryKey: [
       ...landlordKeys.leases(),
-      { page, pageSize: PAGE_SIZE, status: filter === 'all' ? undefined : filter },
+      {
+        page,
+        pageSize: PAGE_SIZE,
+        status: filter === 'all' ? undefined : filter,
+        leaseId: onlyLeaseId ?? undefined,
+      },
     ],
     queryFn: () =>
       unwrap(
         landlordService.listLeases({
           status: filter === 'all' ? undefined : filter,
+          leaseId: onlyLeaseId ?? undefined,
           page,
           pageSize: PAGE_SIZE,
         })
@@ -227,6 +235,23 @@ function LandlordLeasesPageContent() {
           </Button>
         }
       />
+
+      {onlyLeaseId && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
+          <p className="text-sm text-muted-foreground">Showing one lease.</p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setOnlyLeaseId(null);
+              setPage(1);
+              window.history.replaceState(null, '', window.location.pathname);
+            }}
+          >
+            Show all leases
+          </Button>
+        </div>
+      )}
 
       <RecordToolbar>
         <div

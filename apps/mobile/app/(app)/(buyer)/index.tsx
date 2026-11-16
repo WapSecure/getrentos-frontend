@@ -73,7 +73,7 @@ export default function BuyerHome() {
     <DashboardHeader
       eyebrow={dashboardGreeting()}
       title={firstName(profile?.legalName)}
-      roleBadge="BY"
+      roleBadge="Buyer"
       subtitle="Your offers, viewings and purchases"
       accessory={
         <View style={{ flexDirection: 'row', gap: 4 }}>

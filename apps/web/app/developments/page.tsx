@@ -25,7 +25,6 @@ interface Props {
 const stateOf = (raw: string | undefined) =>
   NIGERIA_STATES.find((s) => s.toLowerCase() === raw?.trim().toLowerCase());
 
-// Filtered and later pages keep the unfiltered canonical and stay out of the index.
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const { page, state } = await searchParams;
   return page || state ? { ...baseMetadata, robots: { index: false, follow: true } } : baseMetadata;

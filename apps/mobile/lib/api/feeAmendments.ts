@@ -2,10 +2,7 @@ import type { BadgeTone } from '@sureground/ui-native';
 import { apiFetch } from './client';
 import { APP_TIME_ZONE } from '../format';
 
-/**
- * BD-2: a fee in a signed agreement changes only by a proposal the other side accepts. Who may do what
- * comes from the API; never derive it here.
- */
+/** Who may do what comes from the API; never derive it here. */
 
 export type ManagementFeeType = 'PERCENTAGE' | 'FLAT';
 export type FeeAmendmentSide = 'OWNER' | 'MANAGER' | 'SUREGROUND';
@@ -28,7 +25,6 @@ export const FEE_TYPES: { value: ManagementFeeType; label: string }[] = [
 export interface FeeTerms {
   type: ManagementFeeType;
   value: number;
-  /** "8%" or "₦50,000", worded by the API. */
   label: string;
 }
 
@@ -76,7 +72,6 @@ export interface FeeAmendmentOverview {
   /** The first of a month at least 14 days away, YYYY-MM-DD. */
   earliestEffectiveFrom: string;
   maxPercentage: number;
-  /** Managed only: the published tier rates. */
   allowedPercentages: number[] | null;
   pending: FeeAmendment | null;
   history: FeeAmendment[];
@@ -93,7 +88,6 @@ export interface ProposeFeeAmendmentInput {
 export const FEE_REASON_MIN = 10;
 const MONTHS_AHEAD = 12;
 
-/** A Lagos calendar day, "1 December 2026". */
 export function formatLagosDay(value: string | null | undefined): string {
   if (!value) return '';
   const date = /^\d{4}-\d{2}-\d{2}$/.test(value)
@@ -108,7 +102,6 @@ export function formatLagosDay(value: string | null | undefined): string {
   });
 }
 
-/** Today as a Lagos date, YYYY-MM-DD. */
 export function lagosToday(now = new Date()): string {
   return now.toLocaleDateString('en-CA', { timeZone: APP_TIME_ZONE });
 }
@@ -119,10 +112,7 @@ function dayBefore(day: string): string {
   return formatLagosDay(date.toISOString());
 }
 
-/**
- * The fee in force today, and an agreed change that has not started yet. The agreement's fee moves on
- * acceptance, so `currentFee` alone would announce the new fee early; the versions say what applies when.
- */
+/** The agreement's fee moves on acceptance, so `currentFee` alone would announce a new fee early. */
 export function feeHeadline(
   data: Pick<FeeAmendmentOverview, 'currentFee' | 'versions'>,
   today = lagosToday()
@@ -134,7 +124,6 @@ export function feeHeadline(
     .filter((v) => v.effectiveFrom <= today)
     .sort((a, b) => b.version - a.version)[0];
   if (upcoming?.fee) {
-    // Before version 1's date, version 1 applies, as the statements read it.
     const now = inForce ?? [...data.versions].sort((a, b) => a.version - b.version)[0];
     if (now?.fee && now.version !== upcoming.version) {
       return `Fee: ${now.fee.label} until ${dayBefore(upcoming.effectiveFrom)}, then ${upcoming.fee.label} from ${formatLagosDay(upcoming.effectiveFrom)}`;
@@ -146,7 +135,6 @@ export function feeHeadline(
     : 'No fee recorded on this agreement.';
 }
 
-/** The first day of each month from `earliest`, the only days a new fee may start on. */
 export function effectiveDateOptions(earliest: string): { value: string; label: string }[] {
   const [year, month] = earliest.split('-').map(Number);
   return Array.from({ length: MONTHS_AHEAD }, (_, i) => {
@@ -165,7 +153,6 @@ export function proposerLabel(amendment: FeeAmendment): string {
   return amendment.proposedByName ?? 'The owner';
 }
 
-/** Why the new fee is not acceptable, or null. Empty input is not an error yet. */
 export function feeValueError(
   raw: string,
   type: ManagementFeeType,

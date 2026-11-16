@@ -21,7 +21,6 @@ const COPY: Record<TourPlace, { where: string; route: string }> = {
   home: { where: 'at the property', route: VISIT_ROUTES.BUYER_TOURS },
 };
 
-/** Ask for a live video tour of land (land routes) or a built home for sale (general routes). */
 export const RequestTourDialog = ({
   open,
   onClose,
@@ -44,7 +43,6 @@ export const RequestTourDialog = ({
   const [accepted, setAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Representatives are a land feature for now.
   const reps = useQuery({
     queryKey: representativeKeys.mine,
     queryFn: () => unwrap(representativeService.mine()),

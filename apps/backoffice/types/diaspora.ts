@@ -1,4 +1,3 @@
-/** Mirrors GET /admin/diaspora/queue (DIA-41). */
 export type DiasporaQueueKind =
   | 'FOREIGN_IDENTITY_REVIEW'
   | 'RISK_OR_PROFILE_FLAG'
@@ -18,7 +17,6 @@ export interface DiasporaQueueItem {
   investorId?: string;
   investorName?: string;
   title: string;
-  /** The source record's own status code. */
   status: string;
   dueAt?: string;
   overdue: boolean;
@@ -26,4 +24,15 @@ export interface DiasporaQueueItem {
   escalationLevel: number;
   assignedTo?: { id: string; name: string };
   link: { app: 'backoffice'; path: string };
+}
+
+/** Deadline windows in Lagos days; `today` and `week` leave out overdue items. */
+export type DiasporaQueueDue = 'overdue' | 'today' | 'week';
+
+export interface DiasporaQueueSummary {
+  overdue: number;
+  dueToday: number;
+  dueThisWeek: number;
+  unassigned: number;
+  mine: number;
 }

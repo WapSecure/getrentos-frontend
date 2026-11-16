@@ -64,7 +64,7 @@ export default function LandlordTenantsPage() {
             {isPending ? (
               <Skeleton className="inline-block h-4 w-56 max-w-full align-middle" />
             ) : (
-              `${total} tenant${total === 1 ? '' : 's'} across your portfolio`
+              `${total} tenanc${total === 1 ? 'y' : 'ies'} across your portfolio`
             )}
           </>
         }

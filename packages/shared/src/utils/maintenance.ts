@@ -1,5 +1,4 @@
-// Maintenance categories and statuses for every app. The API sends UPPERCASE codes for home
-// management and lowercase codes on the renter routes; every helper here accepts either.
+// The API sends UPPERCASE codes for home management and lowercase on the renter routes; every helper accepts either.
 
 export const MAINTENANCE_CATEGORY_CODES = [
   'GENERATOR_POWER',
@@ -38,7 +37,6 @@ export const MAINTENANCE_CATEGORY_LABELS: Record<MaintenanceCategoryCode, string
   OTHER: 'Other',
 };
 
-/** Short hints shown under a category in pickers. */
 export const MAINTENANCE_CATEGORY_HINTS: Partial<Record<MaintenanceCategoryCode, string>> = {
   GENERATOR_POWER: 'Generators, inverters, solar, power supply',
   WATER_BOREHOLE: 'Borehole, pumps, tanks, water treatment',
@@ -130,7 +128,6 @@ const sentenceCase = (value: string) => {
   return words ? words[0]!.toUpperCase() + words.slice(1) : '';
 };
 
-/** Plain label for a category code in either case; unknown codes read as sentence case. */
 export function maintenanceCategoryLabel(category: string | null | undefined): string {
   const code = toMaintenanceCategoryCode(category);
   if (code) return MAINTENANCE_CATEGORY_LABELS[code];
@@ -174,7 +171,6 @@ export function humaniseMaintenanceStatusLine(text: string): string {
   });
 }
 
-/** Suggestions for the free-text asset category; owners can still type their own. */
 export const HOME_ASSET_CATEGORY_SUGGESTIONS = [
   'Generator',
   'Inverter',

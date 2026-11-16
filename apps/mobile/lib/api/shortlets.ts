@@ -107,7 +107,6 @@ export interface ShortletListing {
   addressHidden?: boolean;
   coverImageUrl?: string;
   images?: string[];
-  /** Photos, video and 360 tour in display order; older responses send only the fields below. */
   media?: MediaItem[];
   videoUrl?: string;
   /** The uploaded video as an adaptive stream, once encoded. */

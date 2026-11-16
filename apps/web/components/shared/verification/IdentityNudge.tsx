@@ -7,11 +7,7 @@ import { Alert } from '@sureground/ui';
 import { kycService } from '@/services/kycService';
 import { unwrap } from '@/lib/apiHelpers';
 
-/*
- * No deadline here: the identity gate on inviting clients and publishing listings refuses an unverified
- * account even during the identity grace period, so "verify by <date>" promised time that was not there.
- * Say what is blocked now instead.
- */
+// No deadline: the identity gate refuses an unverified account even during the grace period.
 
 export function IdentityNudge({
   verificationHref,

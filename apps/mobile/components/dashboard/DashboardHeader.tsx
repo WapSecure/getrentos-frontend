@@ -60,7 +60,6 @@ export function DashboardHeader({
   );
 }
 
-/** The workspace's role initials ("LL", "RT") as a small Sureground blue chip beside the name. */
 function RoleChip({ label }: { label: string }) {
   const { colors, radius, scheme } = useTheme();
   return (
@@ -77,7 +76,7 @@ function RoleChip({ label }: { label: string }) {
       <Text
         variant="caption"
         maxFontSizeMultiplier={1.4}
-        style={{ color: colors.primary, fontWeight: '800', letterSpacing: 0.8 }}
+        style={{ color: colors.primary, fontWeight: '600' }}
       >
         {label}
       </Text>

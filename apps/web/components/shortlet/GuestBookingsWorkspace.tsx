@@ -332,9 +332,13 @@ export const GuestBookingsWorkspace = () => {
                   )}
                 </div>
                 <div className="text-right">
-                  <Badge variant={STATUS_VARIANT[b.status]}>
-                    {SHORTLET_BOOKING_STATUS_LABEL[b.status]}
-                  </Badge>
+                  {b.status === 'CONFIRMED' && b.paymentRequired ? (
+                    <Badge variant="warning">Awaiting payment</Badge>
+                  ) : (
+                    <Badge variant={STATUS_VARIANT[b.status]}>
+                      {SHORTLET_BOOKING_STATUS_LABEL[b.status]}
+                    </Badge>
+                  )}
                   <BookingTotal b={b} />
                   {b.paymentStatus && b.paymentStatus !== 'UNPAID' && (
                     <Badge
@@ -411,7 +415,7 @@ export const GuestBookingsWorkspace = () => {
                       {`Pay ${formatCurrency(guestBookingTotals(b).dueNow)}`}
                     </Button>
                   )}
-                  {(b.status === 'CONFIRMED' || b.status === 'COMPLETED') && (
+                  {(b.status === 'CONFIRMED' || b.status === 'COMPLETED') && !b.paymentRequired && (
                     <Button
                       variant="outline"
                       size="sm"

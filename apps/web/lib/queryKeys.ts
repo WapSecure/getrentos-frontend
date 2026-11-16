@@ -72,6 +72,7 @@ export const landlordKeys = {
   micrositeSettings: ['landlord', 'microsite'] as const,
   reviews: ['landlord', 'reviews'] as const,
   reviewSummary: ['landlord', 'reviews', 'summary'] as const,
+  tenantReviews: ['landlord', 'reviews', 'tenants'] as const,
   conversations: ['landlord', 'conversations'] as const,
   conversationMessages: (conversationId: string) =>
     ['landlord', 'conversations', conversationId, 'messages'] as const,
@@ -88,6 +89,8 @@ export const publicMarketKeys = {
 };
 
 export const renterKeys = {
+  serviceCharges: ['renter', 'service-charges'] as const,
+  serviceCharge: (id: string) => ['renter', 'service-charges', id] as const,
   lastApplicationDetails: ['renter', 'applications', 'last-details'] as const,
   deposits: ['renter', 'deposits'] as const,
   // Under deposits, so a dispute refreshes the plan too.
@@ -153,6 +156,7 @@ export const renterKeys = {
   notificationPreferences: ['renter', 'notificationPreferences'] as const,
   reviewsPending: ['renter', 'reviews', 'pending'] as const,
   reviewsSubmitted: ['renter', 'reviews', 'submitted'] as const,
+  reviewsReceived: ['renter', 'reviews', 'received'] as const,
   recentlyViewed: ['renter', 'recentlyViewed'] as const,
   wishlists: ['renter', 'wishlists'] as const,
   recommendations: ['renter', 'recommendations'] as const,
@@ -248,6 +252,30 @@ export const homeManagementKeys = {
   properties: (role: 'owner' | 'landlord' | 'manager') =>
     ['home-management', role, 'properties'] as const,
   vendors: ['home-management', 'landlord', 'vendors'] as const,
+  /** Power and water records; every key starts with `utilities` so one invalidation refreshes the tab. */
+  utilities: {
+    all: ['home-management', 'utilities'] as const,
+    generators: (propertyId?: string) =>
+      ['home-management', 'utilities', 'generators', propertyId ?? 'all'] as const,
+    readings: (assetId: string) => ['home-management', 'utilities', 'readings', assetId] as const,
+    healthNotes: (assetId: string) =>
+      ['home-management', 'utilities', 'health-notes', assetId] as const,
+    purchases: (params: Record<string, unknown>) =>
+      ['home-management', 'utilities', 'purchases', params] as const,
+    meters: (propertyId?: string) =>
+      ['home-management', 'utilities', 'meters', propertyId ?? 'all'] as const,
+    supplyHours: (meterId: string) =>
+      ['home-management', 'utilities', 'supply-hours', meterId] as const,
+    serviceCharges: (propertyId?: string) =>
+      ['home-management', 'utilities', 'service-charges', propertyId ?? 'all'] as const,
+    serviceCharge: (id: string) => ['home-management', 'utilities', 'service-charge', id] as const,
+    serviceChargeQueries: (propertyId?: string) =>
+      ['home-management', 'utilities', 'service-charge-queries', propertyId ?? 'all'] as const,
+    summary: (propertyId?: string) =>
+      ['home-management', 'utilities', 'summary', propertyId ?? 'all'] as const,
+    waterTests: (propertyId?: string, page = 1) =>
+      ['home-management', 'utilities', 'water-tests', propertyId ?? 'all', page] as const,
+  },
   vendorPayoutAccount: (vendorId: string) =>
     ['home-management', 'vendors', vendorId, 'payout-account'] as const,
 };
@@ -290,7 +318,6 @@ export const investorKeys = {
     ['investor', 'analysis', listingId, input] as const,
 };
 
-/** One purchase's workspace, as its buyer, seller or the buyer's representative sees it. */
 export const transactionWorkspaceKeys = {
   all: ['transaction-workspace'] as const,
   detail: (role: 'BUYER' | 'SELLER' | 'REPRESENTATIVE', txId: string) =>
@@ -365,6 +392,9 @@ export const buyerKeys = {
 };
 
 export const estateKeys = {
+  serviceCharges: (estateId: string) => ['estate', estateId, 'service-charges'] as const,
+  serviceCharge: (estateId: string, id: string) =>
+    ['estate', estateId, 'service-charges', id] as const,
   reportDigest: (estateId: string) => ['estate', estateId, 'report-digest'] as const,
   collectionPlan: (estateId: string, language: string) =>
     ['estate', estateId, 'collection-plan', language] as const,
@@ -458,6 +488,8 @@ export const estateKeys = {
 };
 
 export const estateResidentKeys = {
+  serviceCharges: ['estate', 'resident', 'service-charges'] as const,
+  serviceCharge: (id: string) => ['estate', 'resident', 'service-charges', id] as const,
   myHousehold: ['estate', 'resident', 'household'] as const,
   dues: (status?: string) => ['estate', 'resident', 'dues', status ?? 'all'] as const,
   announcements: ['estate', 'resident', 'announcements'] as const,

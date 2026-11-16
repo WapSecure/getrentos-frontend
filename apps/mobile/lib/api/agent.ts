@@ -252,6 +252,16 @@ export interface AgentNotificationPreference {
   push: boolean;
 }
 
+export interface AgentNotification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+  actionUrl?: string;
+}
+
 export interface AgentRoute {
   date: string;
   stops: {
@@ -276,6 +286,10 @@ export interface AgentRoute {
 }
 
 export const agentApi = {
+  notifications: () => apiFetch<AgentNotification[]>('/agent/notifications'),
+  markNotificationRead: (id: string) =>
+    apiFetch<void>(`/agent/notifications/${id}/read`, { method: 'PATCH' }),
+  markAllNotificationsRead: () => apiFetch<void>('/agent/notifications/read-all', { method: 'POST' }),
   route: (start?: { latitude: number; longitude: number }) =>
     apiFetch<AgentRoute>(
       `/agent/route${start ? `?latitude=${start.latitude}&longitude=${start.longitude}` : ''}`

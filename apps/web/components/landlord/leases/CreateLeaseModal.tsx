@@ -40,8 +40,7 @@ export const CreateLeaseModal = ({
   const [leaseStart, setLeaseStart] = useState('');
   const [leaseEnd, setLeaseEnd] = useState('');
   const [rentAmount, setRentAmount] = useState('');
-  // Stated on the form: the lease used to take the unit's asking period or silently fall back to
-  // yearly, so a monthly figure could be saved, and shown to the tenant, as annual rent.
+  // The rent period is asked for explicitly, so a monthly figure is never saved as annual rent.
   const [rentPeriod, setRentPeriod] = useState<'month' | 'year'>('year');
   const [securityDeposit, setSecurityDeposit] = useState('');
   const [submitting, setSubmitting] = useState<'draft' | 'send' | null>(null);

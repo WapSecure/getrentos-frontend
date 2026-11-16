@@ -14,7 +14,6 @@ interface BadgeProps {
   children: ReactNode;
   variant?: BadgeVariant;
   icon?: ReactNode;
-  /** A small status dot before the label, in the badge's own colour. */
   dot?: boolean;
   title?: string;
   className?: string;

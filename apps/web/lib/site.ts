@@ -10,3 +10,6 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://getsuregro
 export const SITE_TWITTER_HANDLE = '@sureground';
 
 export const SITE_OG_IMAGE = `${SITE_URL}/opengraph-image`;
+
+/** Page-level openGraph replaces the root one in Next.js, image included, so every page passes this. */
+export const SITE_OG_IMAGES = [{ url: SITE_OG_IMAGE, width: 1200, height: 630, alt: SITE_NAME }];

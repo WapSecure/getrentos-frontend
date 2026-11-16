@@ -75,7 +75,6 @@ const HoldRow = ({ hold }: { hold: PayoutHold }) => {
   );
 };
 
-/** Shown only while a payout is paused for a check. */
 export const PayoutHolds = () => {
   const { data } = useQuery({
     queryKey: accountSecurityKeys.payoutHolds,

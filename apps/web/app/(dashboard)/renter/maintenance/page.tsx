@@ -19,11 +19,13 @@ import {
   ListSkeleton,
   PageErrorState,
   Pagination,
+  ToggleChip,
   hasSessionDraft,
   useToast,
 } from '@sureground/ui';
 import type {
   CreateMaintenanceRequestInput,
+  MaintenanceHome,
   MaintenanceRequest,
   MaintenanceSummary,
 } from '@/types/maintenance';
@@ -51,6 +53,15 @@ export default function MaintenancePage() {
   }, [summaryKey, reloadKey]);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
+  const [homes, setHomes] = useState<MaintenanceHome[]>([]);
+  const [chosenHome, setChosenHome] = useState<string | null>(null);
+  useEffect(() => {
+    renterService.listMaintenanceHomes().then((res) => {
+      if (res.success && res.data) setHomes(res.data);
+    });
+  }, []);
+  const unitId = homes.length === 1 ? homes[0].unitId : chosenHome;
+
   const [showReportModal, setShowReportModal] = useState(() =>
     hasSessionDraft(REPORT_MAINTENANCE_DRAFT_KEY)
   );
@@ -133,7 +144,14 @@ export default function MaintenancePage() {
     data: CreateMaintenanceRequestInput,
     photos: File[] = []
   ): Promise<boolean> => {
-    const res = await renterService.createMaintenanceRequest(data, photos);
+    if (homes.length > 1 && !unitId) {
+      toast.error('Choose which home the problem is in first.');
+      return false;
+    }
+    const res = await renterService.createMaintenanceRequest(
+      { ...data, ...(unitId ? { unitId } : {}) },
+      photos
+    );
     if (res.success && res.data) {
       const created = res.data;
       setRequests((prev) => [created, ...prev]);
@@ -246,6 +264,26 @@ export default function MaintenancePage() {
             />
           </div>
           <div className="space-y-6">
+            {homes.length > 1 && (
+              <div className="rounded-xl border border-border bg-card p-4">
+                <p className="text-sm font-medium text-foreground">Which home?</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  You rent more than one: reports go to the home you choose.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {homes.map((h) => (
+                    <ToggleChip
+                      key={h.unitId}
+                      size="sm"
+                      pressed={unitId === h.unitId}
+                      onPressedChange={() => setChosenHome(h.unitId)}
+                    >
+                      {h.label}
+                    </ToggleChip>
+                  ))}
+                </div>
+              </div>
+            )}
             <QuickReport
               onQuickReport={handleReportIssue}
               onCustomReport={() => setShowReportModal(true)}

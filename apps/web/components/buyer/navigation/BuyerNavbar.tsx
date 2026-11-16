@@ -39,7 +39,7 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
           markRead={(id) => unwrap(buyerService.markNotificationRead(id))}
           markAllRead={() => unwrap(buyerService.markAllNotificationsRead())}
           refetchAfterMarking
-          viewAllHref={ROUTES.BUYER_DASHBOARD}
+          viewAllHref="/buyer/notifications"
         />
       }
       profileMenu={<BuyerProfileDropdown user={user} />}

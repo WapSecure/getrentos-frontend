@@ -6,18 +6,12 @@ import type { AttentionItem } from '@sureground/shared';
 import { asHref } from '@/components/purchases/purchaseHref';
 
 export interface AttentionListItem extends AttentionItem {
-  /** Replaces the severity glyph with one that says what the item is (a deposit, a tour). */
   icon?: SgIcon;
-  /** When it is due, already formatted (Lagos time beside the viewer's own). */
   due?: string;
 }
 
 const SEVERITY_LABEL = { urgent: 'Urgent', soon: 'Due soon', info: 'For information' } as const;
 
-/**
- * "Needs your attention": one row per thing waiting, each with what it is, when it is due and a
- * single action. The same rows and order as the web list.
- */
 export function AttentionList({
   items,
   title = 'Needs your attention',
@@ -25,7 +19,6 @@ export function AttentionList({
 }: {
   items: readonly AttentionListItem[];
   title?: string;
-  /** Shown when nothing is waiting; without it the card is not drawn at all. */
   empty?: { title: string; description?: string };
 }) {
   const { colors, spacing, radius } = useTheme();

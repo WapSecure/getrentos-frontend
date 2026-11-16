@@ -46,7 +46,7 @@ export const LandlordStatsCards = ({
             href: ROUTES.LANDLORD_FINANCIALS,
           },
           {
-            label: 'Outstanding rent',
+            label: 'Outstanding',
             icon: Wallet,
             value: moneyVisible ? formatCurrency(outstandingAmount, { compact: true }) : HIDDEN,
             subtitle:
@@ -81,7 +81,6 @@ export const LandlordStatsCards = ({
             label: 'Reserved',
             icon: Clock,
             value: reservedUnits,
-            // Off the market but not let (awaiting signature or first payment), so not counted as rented.
             subtitle: 'Awaiting signature or payment',
           },
           {

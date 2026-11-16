@@ -136,7 +136,6 @@ interface PreventiveMaintenancePlansProps {
   pageSize: number;
   total: number;
   onPageChange: (page: number) => void;
-  /** Set by the page header's Add menu; see useCreateRequest. */
   createRequest?: number;
   onCreateRequestHandled?: () => void;
 }

@@ -70,7 +70,7 @@ export const LeadCard = ({
           <RecordAvatar name={lead.leadName} />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-foreground truncate">{lead.leadName}</h3>
+              <h3 className="font-semibold text-foreground break-words">{lead.leadName}</h3>
               {lead.verified ? (
                 <ShieldCheck className="w-3.5 h-3.5 text-success shrink-0" aria-label="Verified" />
               ) : (
@@ -80,7 +80,9 @@ export const LeadCard = ({
                 />
               )}
             </div>
-            <p className="text-xs text-muted-foreground truncate">{lead.propertyName}</p>
+            <p className="text-xs text-muted-foreground line-clamp-2 break-words">
+              {lead.propertyName}
+            </p>
           </div>
         </div>
         <div className="flex flex-col items-end gap-1.5">

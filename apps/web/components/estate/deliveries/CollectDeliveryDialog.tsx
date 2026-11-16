@@ -6,7 +6,6 @@ import { COLLECTOR_NAME_MAX_LENGTH, defaultCollectorName } from '@sureground/sha
 import type { DeliveryLog } from '@/types/estate';
 
 interface CollectDeliveryDialogProps {
-  /** The parcel being handed over; null keeps the dialog closed. */
   log: DeliveryLog | null;
   onClose: () => void;
   onConfirm: (collectedBy?: string) => void;

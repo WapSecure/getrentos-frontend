@@ -191,7 +191,6 @@ export default function LandlordPropertyDetail() {
           icon={<ChevronLeft size={22} color={colors.foreground} />}
         />
         <View style={{ flex: 1 }}>
-          {/* Two action buttons share this row, so long names wrap instead of cutting to a few letters. */}
           <Text variant="heading" numberOfLines={2}>
             {p?.name ?? 'Property'}
           </Text>
@@ -329,9 +328,14 @@ export default function LandlordPropertyDetail() {
                     {i > 0 ? <Divider /> : null}
                     <View style={{ padding: spacing.lg, gap: 4 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                        <Text variant="bodyStrong" style={{ flex: 1 }}>
-                          {u.unitName}
-                        </Text>
+                        <View style={{ flex: 1 }}>
+                          <Text variant="bodyStrong">{u.unitName}</Text>
+                          {u.occupancyStatus === 'occupied' && u.tenantName ? (
+                            <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                              Let to {u.tenantName}
+                            </Text>
+                          ) : null}
+                        </View>
                         <Badge
                           label={OCCUPANCY_LABEL[u.occupancyStatus]}
                           tone={OCCUPANCY_TONE[u.occupancyStatus]}
@@ -354,17 +358,38 @@ export default function LandlordPropertyDetail() {
                         <View style={{ flex: 1 }} />
                         {/* The tenancy's rent is the money actually coming in, so it
                             wins over the asking rent once one exists. */}
-                        <Price
-                          amount={u.leaseRent ?? u.askingRent}
-                          period={u.leaseRentPeriod ?? u.askingRentPeriod}
-                          variant="callout"
-                        />
+                        {(u.leaseRent ?? u.askingRent) ? (
+                          <Price
+                            amount={u.leaseRent ?? u.askingRent}
+                            period={u.leaseRentPeriod ?? u.askingRentPeriod}
+                            variant="callout"
+                          />
+                        ) : (
+                          <Text variant="caption" color="mutedForeground">
+                            No rent set
+                          </Text>
+                        )}
                       </View>
 
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.lg }}>
                         {u.occupancyStatus === 'occupied' ? (
                           <Pressable
-                            onPress={() => markVacant.mutate(u.id)}
+                            onPress={() =>
+                              Alert.alert(
+                                `Mark ${u.unitName} vacant?`,
+                                u.tenantName
+                                  ? `${u.tenantName} is removed from the unit.`
+                                  : 'The occupier is removed from the unit.',
+                                [
+                                  { text: 'Cancel', style: 'cancel' },
+                                  {
+                                    text: 'Mark vacant',
+                                    style: 'destructive',
+                                    onPress: () => markVacant.mutate(u.id),
+                                  },
+                                ]
+                              )
+                            }
                             accessibilityRole="button"
                             accessibilityLabel={`Mark ${u.unitName} vacant`}
                             style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}

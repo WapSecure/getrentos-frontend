@@ -57,7 +57,6 @@ export function TrustOverview({
   portal: TrustPortal;
   onAction: (key: TrustRequirementKey) => void;
   moreDetails?: ReactNode;
-  /** A row under the identity summary, e.g. the identity checks for investing from abroad. */
   identityExtra?: ReactNode;
 }) {
   const { colors, spacing } = useTheme();

@@ -103,7 +103,6 @@ export default function ResidentHome() {
   };
 
   const recent = announcements.data?.items ?? [];
-  // Passes the gate will still honour, for the visitors summary.
   const activePasses = (passes.data?.items ?? []).filter(
     (pass) =>
       pass.status === 'pending' || pass.status === 'approved' || pass.status === 'checked_in'
@@ -122,7 +121,7 @@ export default function ResidentHome() {
       <DashboardHeader
         eyebrow={dashboardGreeting()}
         title={firstName(profile?.legalName)}
-        roleBadge="RS"
+        roleBadge="Resident"
         subtitle={
           household.data
             ? `${household.data.estate.name} · Unit ${household.data.unitLabel}`

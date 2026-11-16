@@ -168,7 +168,40 @@ export interface VerificationRequest {
   media?: VerificationDocument[];
   ownershipProofs?: OwnershipProofRef[];
   approvalRisk?: { reasons: string[]; secondOfficerRequired: boolean };
+  listingWarnings?: ListingWarning[];
 }
+
+export interface ListingWarningReason {
+  code: string;
+  text: string;
+}
+
+/** An automated listing check scoring 40 or more that no person has cleared or upheld yet. */
+export interface ListingWarning {
+  reviewId: string;
+  listingId: string;
+  propertyId: string;
+  score: number;
+  reasons: ListingWarningReason[];
+  scannedAt: string;
+  fraudAlertId: string | null;
+}
+
+export interface ListingWarningQueueItem {
+  reviewId: string;
+  listingId: string;
+  listingTitle: string;
+  propertyId: string | null;
+  propertyTitle: string | null;
+  propertyVerifiedAt: string | null;
+  arrivedAfterVerification: boolean;
+  score: number;
+  reasons: ListingWarningReason[];
+  scannedAt: string;
+  openFraudAlertId: string | null;
+}
+
+export type ListingWarningDecision = 'clear' | 'uphold';
 
 export interface OwnershipProofRef {
   id: string;
@@ -391,7 +424,6 @@ export interface AuditLogEntry {
   newValues?: unknown;
 }
 
-/** A stored file in the media registry (GET /admin/media). */
 export interface AdminMediaItem {
   objectKey: string;
   folder: string;

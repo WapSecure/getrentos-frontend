@@ -13,7 +13,6 @@ interface LandingHeroProps {
   id?: string;
 }
 
-/** The opening of a landing page: one h1, one promise, the next step, and a photo. */
 export const LandingHero = ({
   eyebrow,
   title,

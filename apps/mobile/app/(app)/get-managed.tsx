@@ -60,7 +60,6 @@ export default function GetManaged() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
-  // Owners reach this as their management agreements; changing manager is a landlord flow for now.
   const { usablePortal } = useAuth();
   const forOwner = usablePortal === 'owner';
   const [requestFor, setRequestFor] = useState<MyHome | null>(null);

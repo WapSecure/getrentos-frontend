@@ -35,6 +35,15 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 import { DepositPaySheet } from '@/components/purchases/DepositPaySheet';
 
+const HANDOVER_DELIVERED = new Set(['DELIVERED', 'CONFIRMED', 'WAIVED']);
+
+// Mirrors the server's release gate: a built home's deposit is refused until the keys step is delivered.
+function sellerHasHandedOver(tx: BuyerTransaction): boolean {
+  if (tx.propertyType === 'LAND' || !tx.milestones) return true;
+  const keys = tx.milestones.find((m) => m.key === 'KEYS_HANDED_OVER');
+  return !!keys && HANDOVER_DELIVERED.has(keys.status);
+}
+
 // Only the stages the backend drives (VERIFICATION_PENDING and SETTLEMENT_PENDING are never set); mirrors the web stepper.
 const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] = [
   {
@@ -57,7 +66,7 @@ const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] =
   },
 ];
 
-type Filter = 'all' | 'active' | 'released' | 'attention';
+type Filter = 'all' | 'active' | 'released' | 'refunded' | 'attention';
 const FILTERS: { value: Filter; label: string; match: (s: BuyerEscrowStatus) => boolean }[] = [
   { value: 'all', label: 'All', match: () => true },
   {
@@ -70,8 +79,17 @@ const FILTERS: { value: Filter; label: string; match: (s: BuyerEscrowStatus) => 
     label: 'Frozen (dispute)',
     match: (s) => s === 'frozen',
   },
-  { value: 'released', label: 'Completed', match: (s) => s === 'released' || s === 'refunded' },
+  { value: 'released', label: 'Completed', match: (s) => s === 'released' },
+  { value: 'refunded', label: 'Refunded', match: (s) => s === 'refunded' },
 ];
+
+const STATUS_ORDER: Record<string, number> = {
+  frozen: 0,
+  funds_held: 1,
+  deposit_pending: 2,
+  released: 3,
+  refunded: 4,
+};
 
 const ACTOR_LABEL: Record<string, string> = {
   buyer: 'You',
@@ -93,7 +111,13 @@ export default function BuyerTransactions() {
   });
   const all = useMemo(() => query.data?.items ?? [], [query.data]);
   const matcher = FILTERS.find((f) => f.value === filter)!.match;
-  const items = useMemo(() => all.filter((t) => matcher(t.escrowStatus)), [all, matcher]);
+  const items = useMemo(
+    () =>
+      all
+        .filter((t) => matcher(t.escrowStatus))
+        .sort((a, b) => (STATUS_ORDER[a.escrowStatus] ?? 5) - (STATUS_ORDER[b.escrowStatus] ?? 5)),
+    [all, matcher]
+  );
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['buyer', 'transactions'] });
   const fail = (fallback: string) => (err: unknown) =>
@@ -331,11 +355,17 @@ function TransactionCard({
           ) : null}
           {tx.escrowStatus === 'funds_held' ? (
             <>
-              <Button
-                label="Confirm receipt & release to seller"
-                loading={releasing}
-                onPress={onRelease}
-              />
+              {sellerHasHandedOver(tx) ? (
+                <Button
+                  label="Confirm receipt & release to seller"
+                  loading={releasing}
+                  onPress={onRelease}
+                />
+              ) : (
+                <Text variant="callout" color="mutedForeground">
+                  You can release the deposit once the seller marks the keys as handed over.
+                </Text>
+              )}
               <Button
                 label="Request refund"
                 variant="outline"

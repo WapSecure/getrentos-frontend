@@ -10,6 +10,7 @@ import { DocumentPreviewButton } from '@sureground/ui';
 import { formatDate, humaniseCodesInText, unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 import { OwnershipDocCheckPanel } from '@/components/admin/verifications/OwnershipDocCheckPanel';
+import { ListingWarningsPanel } from '@/components/admin/verifications/ListingWarningsPanel';
 import type { VerificationRequest } from '@/types/admin';
 import { useAdminCan } from '@/hooks/useAdminCan';
 import { roleLabel } from '@/lib/roleLabels';
@@ -17,7 +18,6 @@ import { roleLabel } from '@/lib/roleLabels';
 interface ReviewVerificationModalProps {
   request: VerificationRequest | null;
   onClose: () => void;
-  /** crossCheckIssues lists problems the document cross-check raised in this session, if it was run. */
   onApprove: (id: string, crossCheckIssues: string[]) => void;
   onReject: (id: string, reason: string) => void;
   onRequestClarification: (id: string, reason: string) => void;
@@ -58,6 +58,7 @@ export const ReviewVerificationModal = ({
   const documents = detail?.documents ?? [];
   const media = detail?.media ?? [];
   const detailUnavailable = detailLoading || detailError;
+  const listingWarnings = request?.type === 'property' ? (detail?.listingWarnings ?? []) : [];
 
   const handleClose = () => {
     if (isSubmitting) return;
@@ -98,7 +99,6 @@ export const ReviewVerificationModal = ({
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 sm:px-6">
             {mode === 'view' ? (
               <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-start">
-                {/* Documents and media */}
                 <div className="min-w-0 space-y-5">
                   <div>
                     <p className="text-sm font-semibold text-foreground mb-2">
@@ -197,8 +197,6 @@ export const ReviewVerificationModal = ({
                     </div>
                   )}
                 </div>
-
-                {/* Request facts and cross-checks */}
                 <div className="min-w-0 space-y-5">
                   <dl className="grid grid-cols-2 gap-3">
                     <div className="rounded-lg bg-secondary/50 px-3 py-2.5 ring-1 ring-border/60">
@@ -226,6 +224,7 @@ export const ReviewVerificationModal = ({
                       </ul>
                     </Alert>
                   ) : null}
+                  <ListingWarningsPanel warnings={listingWarnings} />
                   {request.type === 'property' && detail?.ownershipProofs?.length ? (
                     <OwnershipDocCheckPanel
                       proofs={detail.ownershipProofs}
@@ -294,7 +293,12 @@ export const ReviewVerificationModal = ({
                       className="flex-1 gap-1.5"
                       onClick={handleApprove}
                       isLoading={isApproving}
-                      disabled={isSubmitting || detailUnavailable}
+                      disabled={isSubmitting || detailUnavailable || listingWarnings.length > 0}
+                      title={
+                        listingWarnings.length > 0
+                          ? 'Resolve the automated listing warning first'
+                          : undefined
+                      }
                     >
                       <Check className="w-3.5 h-3.5" />
                       Approve

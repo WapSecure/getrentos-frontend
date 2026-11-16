@@ -22,9 +22,7 @@ interface DocumentUploadDialogProps {
   onOpenChange: (open: boolean) => void;
   categories: { value: string; label: string }[];
   onUpload: (data: UploadedDocumentData) => void | Promise<void>;
-  /** Defaults to "Upload document". */
   title?: string;
-  /** The label of the type picker. Defaults to "Category". */
   categoryLabel?: string;
 }
 

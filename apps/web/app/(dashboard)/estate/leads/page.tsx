@@ -238,7 +238,7 @@ export default function EstateLeadsPage() {
                 title={total === 0 ? 'No enquiries yet' : 'No matches'}
                 description={
                   total === 0
-                    ? 'When someone books a viewing, applies, offers or books a shortlet on a property you market, they appear here. Enquiries on properties that are simply inside the estate: and not marketed by you: stay with the owner.'
+                    ? 'When someone books a viewing, applies, offers or books a shortlet on a property you market, they appear here. Enquiries on properties that are simply inside the estate, and not marketed by you, stay with the owner.'
                     : 'No enquiry matches that search on this page.'
                 }
               />
@@ -262,7 +262,7 @@ export default function EstateLeadsPage() {
       <Alert variant="neutral" icon={ShieldCheck}>
         <p>
           You see enquiries for properties the owner has given you marketing rights for. A property
-          that is merely inside the estate: with no agreement: stays private to its owner, and its
+          that is merely inside the estate, with no agreement, stays private to its owner, and its
           enquiries never reach this page.
         </p>
       </Alert>

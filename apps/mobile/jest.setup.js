@@ -19,7 +19,6 @@ jest.mock(
 );
 jest.mock('react-native-worklets', () => require('./__tests__/helpers/reanimated-mock').worklets);
 
-// Insets of zero without a provider, so screens and the toast host render in isolation.
 jest.mock(
   'react-native-safe-area-context',
   () => require('react-native-safe-area-context/jest/mock').default

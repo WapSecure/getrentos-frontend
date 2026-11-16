@@ -20,6 +20,7 @@ import { residentApi, type Due, type DueCategory, type DueStatus } from '@/lib/a
 import { qk } from '@/lib/query/keys';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { ServiceChargesEntry } from '@/components/service-charge/ServiceChargesEntry';
 import { goBack } from '@/lib/goBack';
 import { PaySheet } from '@/components/payments/PaySheet';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
@@ -50,7 +51,7 @@ const CATEGORY_LABEL: Record<DueCategory, string> = {
 };
 
 export default function ResidentDues() {
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
   const checkout = usePaystackCheckout();
@@ -103,6 +104,9 @@ export default function ResidentDues() {
         subtitle="Charges, payments and recurring obligations"
         onBack={() => goBack()}
       />
+      <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+        <ServiceChargesEntry kind="resident" />
+      </View>
       <Screen refreshing={query.isRefetching} onRefresh={() => void query.refetch()}>
         <QueryState
           query={query}

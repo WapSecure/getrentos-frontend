@@ -12,6 +12,7 @@ import {
 import { cn } from '@sureground/shared';
 import { ChevronDown, Search, X } from '@sureground/icons';
 import { ThemeSwitch } from '@/components/layout/ThemeSwitch';
+import { SkipToMainLink } from '@/components/shared/navigation/SkipToMainLink';
 import { Logo } from '@/components/ui/Logo';
 import { CtaLink } from '@/components/marketing/CtaLink';
 import { ROUTES, getDashboardRoute, getUserRole } from '@/lib/constants/auth';
@@ -30,6 +31,15 @@ interface NavLink {
 const FIND_LINKS: NavLink[] = [
   { label: 'Buy', href: '/buy', hint: 'Homes for sale' },
   { label: 'Rent', href: '/rent', hint: 'Homes to rent' },
+  { label: 'Sell', href: '/sell', hint: 'List a home or land for sale' },
+  {
+    label: 'Manage',
+    href: ROUTES.HOME_MANAGEMENT,
+    hint: 'Property management for landlords and owners',
+  },
+];
+
+const MORE_LINKS: NavLink[] = [
   {
     label: 'Short stays',
     href: ROUTES.SHORTLET_MARKETPLACE,
@@ -37,25 +47,21 @@ const FIND_LINKS: NavLink[] = [
   },
   { label: 'Land', href: ROUTES.LAND_MARKETPLACE, hint: 'Plots with title checks' },
   { label: 'Off-plan', href: '/developments', hint: 'New developments checked by our staff' },
-];
-
-const MORE_LINKS: NavLink[] = [
-  { label: 'Sell', href: '/sell', hint: 'List a home or land for sale' },
-  { label: 'Let', href: '/landlords', hint: 'For landlords and property managers' },
   {
     label: 'Estates',
     href: ESTATE_MARKETPLACE_ROUTES.ESTATES_DIRECTORY,
     hint: 'Gated communities',
   },
   { label: 'Detty December', href: '/detty-december', hint: 'Peak-season stays, Dec 20 – Jan 3' },
-  { label: 'Property management', href: ROUTES.HOME_MANAGEMENT, hint: 'For landlords and owners' },
+  { label: 'Let', href: '/landlords', hint: 'For landlords letting a home' },
   { label: 'Realtors and agencies', href: '/agents', hint: 'Listings, leads and commissions' },
+  { label: 'Guides', href: '/resources', hint: 'How checks and payments work' },
   { label: 'Pricing', href: ROUTES.PRICING, hint: 'Free and Pro plans' },
   { label: 'About', href: '/about', hint: 'Who we are and how to reach us' },
 ];
 
 const DIASPORA_LINK: NavLink = {
-  label: 'Diaspora Invest',
+  label: 'Diaspora',
   href: DIASPORA_ROUTES.PUBLIC,
   hint: 'Buy and manage from abroad',
 };
@@ -67,17 +73,14 @@ const isCurrent = (pathname: string, href: string) => pathname === href;
 
 const FOCUSABLE = 'a[href], button:not([disabled])';
 
-// Availability is read in the browser, so with land off the "Land" link shows until the call
-// returns (except under /land, whose layout seeds the cache from the server). Seeding it for every
-// page would mean the root layout awaiting two API calls on every route, signed-in ones included,
-// since the ~45 pages rendering this have no shared public layout to do it in.
+// Read in the browser: seeding it server-side would make the root layout await two API calls on every route.
 export const Navigation = () => {
   const land = useLandAvailability();
   const diaspora = useDiasporaAvailability();
-  const findLinks = land.marketplace
-    ? FIND_LINKS
-    : FIND_LINKS.filter((link) => link.href !== ROUTES.LAND_MARKETPLACE);
-  const moreLinks = diaspora.enabled ? [DIASPORA_LINK, ...MORE_LINKS] : MORE_LINKS;
+  const findLinks = diaspora.enabled ? [...FIND_LINKS, DIASPORA_LINK] : FIND_LINKS;
+  const moreLinks = land.marketplace
+    ? MORE_LINKS
+    : MORE_LINKS.filter((link) => link.href !== ROUTES.LAND_MARKETPLACE);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -118,7 +121,6 @@ export const Navigation = () => {
     };
   }, [menuOpen]);
 
-  // Keeps Tab inside the open menu and its toggle.
   const trapFocus = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Tab' || !panel.current) return;
     const items = [
@@ -145,6 +147,7 @@ export const Navigation = () => {
 
   return (
     <>
+      <SkipToMainLink />
       <nav
         aria-label="Main"
         className={cn(
@@ -266,7 +269,7 @@ export const Navigation = () => {
           className="sheet-in fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto bg-background lg:hidden"
         >
           <div className="mx-auto flex min-h-full max-w-[1240px] flex-col px-4 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:px-6">
-            <p className="label-caps mb-2 text-muted-foreground">Find</p>
+            <p className="label-caps mb-2 text-muted-foreground">Main</p>
             <ul className="mb-8 border-t border-border">
               {findLinks.map((link) => (
                 <li key={link.href} className="border-b border-border">

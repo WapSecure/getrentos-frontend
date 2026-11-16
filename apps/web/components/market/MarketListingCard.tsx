@@ -8,7 +8,6 @@ import { SaveListingButton } from './SaveListingButton';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
 import { listingPath } from '@/lib/listingSlug';
 
-/** One public listing card in any market, counted under `surface` (e.g. "rent_similar"). */
 export function MarketListingCard({
   listing,
   market,
@@ -47,8 +46,7 @@ export function MarketListingCard({
       imageAlt={listing.title}
       eager={eager}
       status={MARKET_STATUS[market]}
-      // One trust signal, the same as the browse grid: the chain pill says "Verified" only when
-      // every check is met, so a passed property check alone never reads as fully verified.
+      // The chain pill says "Verified" only when every check is met; a passed property check alone never does.
       badges={<TrustChainBadge chain={listing.trustChain} fallbackVerified={listing.verified} />}
       facts={{ beds: listing.beds, baths: listing.baths, size: listing.size, type: listing.type }}
       meta={meta}

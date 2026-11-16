@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Any signed-in account: owning or having listed the property, not a role, is what counts.
 export default function ListingCollectionsLayout({ children }: { children: ReactNode }) {
   return (
     <main className="min-h-screen bg-background pt-16">

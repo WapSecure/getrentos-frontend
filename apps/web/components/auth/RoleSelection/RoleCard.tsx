@@ -89,7 +89,7 @@ export const RoleCard = ({ role, isSelected, onSelect, onDeselect, disabled }: R
           >
             {req === 'identity' && 'ID verified'}
             {req === 'property' && 'Property docs'}
-            {req === 'license' && 'License'}
+            {req === 'license' && 'Licence'}
           </span>
         ))}
       </div>

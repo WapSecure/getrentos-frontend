@@ -38,7 +38,6 @@ export interface RoommateExpense {
 export const roommatesApi = {
   list: () => apiFetch<Roommate[]>('/renter/roommates'),
 
-  /** By their phone number or email. */
   invite: (contact: string, message?: string) =>
     apiFetch<Roommate>('/renter/roommates/invite', {
       method: 'POST',

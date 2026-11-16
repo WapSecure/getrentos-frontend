@@ -16,7 +16,7 @@ export default function LandlordMessages() {
       subtitle="Tenants, applicants and agents"
       conversations={query.data?.items.map((c) => ({
         ...c,
-        context: roleLabel(c.participantRole),
+        context: [roleLabel(c.participantRole), c.propertyTitle].filter(Boolean).join(' · '),
       }))}
       loading={query.isPending}
       error={query.isError}

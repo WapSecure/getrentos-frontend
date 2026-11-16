@@ -21,7 +21,6 @@ const newsreader = Newsreader({
   subsets: ['latin'],
   display: 'swap',
   weight: ['300', '400', '500'],
-  // No italic: nothing sets the serif in italics, and every style is another preloaded file on every page.
   style: ['normal'],
   variable: '--font-newsreader',
 });
@@ -29,7 +28,7 @@ const newsreader = Newsreader({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} - Trust-Driven Property Operating System`,
+    default: `${SITE_NAME}: property in Nigeria you can check`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -47,7 +46,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     siteName: SITE_NAME,
-    title: `${SITE_NAME} - Trust-Driven Property Operating System`,
+    title: `${SITE_NAME}: property in Nigeria you can check`,
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     images: [{ url: SITE_OG_IMAGE, width: 1200, height: 630, alt: SITE_NAME }],
@@ -55,7 +54,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     site: SITE_TWITTER_HANDLE,
-    title: `${SITE_NAME} - Trust-Driven Property Operating System`,
+    title: `${SITE_NAME}: property in Nigeria you can check`,
     description: SITE_DESCRIPTION,
     images: [SITE_OG_IMAGE],
   },

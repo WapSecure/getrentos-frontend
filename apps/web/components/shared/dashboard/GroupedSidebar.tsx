@@ -40,7 +40,6 @@ export const activeSidebarHref = (
     .filter((href) => isSidebarRouteActive(pathname, href, dashboardHref))
     .sort((a, b) => b.length - a.length)[0];
 
-/** The workspace's first letter in a small blue tile, as a workspace switcher shows it. */
 function WorkspaceMark({ label, size = 'md' }: { label: string; size?: 'sm' | 'md' }) {
   return (
     <span
@@ -328,15 +327,24 @@ function MobilePrimaryNavigation({ ariaLabel, dashboardHref, groups }: GroupedSi
             key={item.href}
             href={item.href}
             aria-current={active ? 'page' : undefined}
+            aria-label={phoneBarAccessibleName(item)}
             className="mobile-primary-nav-item"
           >
             <Icon className="h-5 w-5" aria-hidden="true" />
-            <span className="max-w-full truncate px-0.5">{item.label}</span>
+            <span className="max-w-full truncate px-0.5">{item.phoneBarLabel ?? item.label}</span>
           </Link>
         );
       })}
     </nav>
   );
+}
+
+// The short phone-bar word must stay in the accessible name (WCAG 2.5.3), so voice users can say what they see.
+function phoneBarAccessibleName(item: { label?: unknown; phoneBarLabel?: string }) {
+  if (!item.phoneBarLabel || typeof item.label !== 'string') return undefined;
+  return item.label.toLowerCase().includes(item.phoneBarLabel.toLowerCase())
+    ? item.label
+    : `${item.phoneBarLabel}, ${item.label}`;
 }
 
 export function GroupedSidebar({

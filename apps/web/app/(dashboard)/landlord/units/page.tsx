@@ -212,10 +212,14 @@ function LandlordUnitsPageContent() {
         eyebrow="Portfolio"
         title="Units"
         description={
-          <>
-            {pluralize(totalUnits, 'unit')} across{' '}
-            {pluralize(totalProperties, 'property', 'properties')}
-          </>
+          isLoadingUnits ? (
+            'Loading your units…'
+          ) : (
+            <>
+              {pluralize(totalUnits, 'unit')} across{' '}
+              {pluralize(totalProperties, 'property', 'properties')}
+            </>
+          )
         }
         actions={
           <>
@@ -355,7 +359,6 @@ function LandlordUnitsPageContent() {
   );
 }
 
-/** The chosen property's title block and key facts, from the list already loaded for the filter. */
 function PropertySummary({ property }: { property: Property }) {
   const verification = verificationBadges[property.verificationStatus];
   const vacant = Math.max(property.totalUnits - property.occupiedUnits, 0);

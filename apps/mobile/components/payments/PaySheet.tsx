@@ -34,7 +34,6 @@ export interface PaySheetProps {
   providerError?: string | null;
   onPay: () => void;
   busy?: boolean;
-  /** Why this payment can't start yet (e.g. identity not verified): shown first, and the pay button is disabled. */
   blocked?: ReactNode;
 }
 

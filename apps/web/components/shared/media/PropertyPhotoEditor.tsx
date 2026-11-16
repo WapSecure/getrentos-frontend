@@ -10,7 +10,6 @@ import type { PropertyMediaDetails } from '@/types/landlord';
 
 export type EditablePhoto = {
   id: string;
-  /** Storage key once uploaded; new photos have a `file` instead. */
   key?: string;
   url: string;
   file?: File;
@@ -27,7 +26,6 @@ const ROOM_OPTIONS = [
   })),
 ];
 
-/** Cover first, then the rest, as the API orders the keys. */
 export const photosFromKeys = (
   keys: string[],
   urls: string[],
@@ -41,7 +39,6 @@ export const photosFromKeys = (
     caption: details?.[key]?.caption,
   }));
 
-/** `keys[i]` is the uploaded key of `photos[i]`. Returns null when nothing is tagged, which clears the map. */
 export const mediaDetailsFor = (
   photos: EditablePhoto[],
   keys: (string | undefined)[]
@@ -57,10 +54,8 @@ export const mediaDetailsFor = (
   return entries.length ? Object.fromEntries(entries) : null;
 };
 
-/** True while any new photo is still uploading or has failed: its key is not known yet. */
 export const photosPending = (photos: EditablePhoto[]) => photos.some((p) => p.file && !p.key);
 
-/** Room and caption inputs for one photo; also used where photos save one by one. */
 export function PhotoDetailFields({
   index,
   room,
@@ -96,12 +91,7 @@ interface PropertyPhotoEditorProps {
   photos: EditablePhoto[];
   onChange: (next: EditablePhoto[]) => void;
   max?: number;
-  /** Shown when there are no photos. */
   emptyHint?: string;
-  /**
-   * Uploads one photo and returns its storage key. When given, new photos upload as soon as they are added, each with
-   * progress, cancel and retry, and get their `key` when done; until then `photosPending` is true.
-   */
   upload?: (file: File, options: UploadOptions) => Promise<string>;
 }
 
@@ -208,7 +198,6 @@ export function PropertyPhotoEditor({
                   <X className="h-3 w-3" />
                 </button>
               </div>
-              {/* The upload bar sits where these are until the photo is in. */}
               <div
                 className={`absolute bottom-1 right-1 flex gap-1 ${uploads.states[photo.id] ? 'hidden' : ''}`}
               >
@@ -271,7 +260,6 @@ export function PropertyPhotoEditor({
   );
 }
 
-/** Over a photo while it uploads: progress with cancel, or the failure with retry. */
 function UploadOverlay({
   index,
   state,

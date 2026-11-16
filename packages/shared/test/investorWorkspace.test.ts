@@ -116,7 +116,6 @@ test('an open dispute shows with Sureground’s reply deadline and links to the 
     },
   });
   assert.equal(items.length, 2);
-  // Information, not a task: the model records no turn for the buyer.
   assert.deepEqual(
     items.map((i) => [i.kind, i.severity, i.title, i.link.path, i.dueAt, i.dueLabel]),
     [
@@ -368,7 +367,6 @@ test('portfolio figures come through only where the API has a record', () => {
   assert.equal(none.rentReceived12m, null);
   assert.equal(none.net12m, null);
   assert.equal(none.occupancyRate, null);
-  // An older API without the block reads as no figures, not zero.
   assert.equal(portfolioFigures({}).acquisitionCost, null);
 });
 

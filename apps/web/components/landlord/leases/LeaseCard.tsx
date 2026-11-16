@@ -50,6 +50,8 @@ export const LeaseCard = ({
   const status = leaseStatusBadges[lease.status];
   const remainingDays = daysUntil(lease.leaseEnd);
   const isExpiringSoon = lease.status === 'signed' && remainingDays > 0 && remainingDays <= 60;
+  // A signed lease past its end date is not ended: the tenant holds over until a renewal or a notice.
+  const isHoldingOver = lease.status === 'signed' && remainingDays < 0;
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
@@ -88,7 +90,13 @@ export const LeaseCard = ({
         facts={[
           {
             label: 'Lease period',
-            value: `${formatDate(lease.leaseStart)} – ${formatDate(lease.leaseEnd)}`,
+            value: (
+              <>
+                <span className="whitespace-nowrap">{formatDate(lease.leaseStart)} –</span>{' '}
+                <span className="whitespace-nowrap">{formatDate(lease.leaseEnd)}</span>
+              </>
+            ),
+            wrap: true,
           },
           {
             label: leaseRentLabel(lease.rentPeriod, lease.leaseStart, lease.leaseEnd),
@@ -101,6 +109,13 @@ export const LeaseCard = ({
       {isExpiringSoon && (
         <p className="text-xs text-warning mt-3 rounded-xl bg-warning-subtle px-2.5 py-1.5">
           Expires in {remainingDays} day{remainingDays === 1 ? '' : 's'}
+        </p>
+      )}
+
+      {isHoldingOver && (
+        <p className="text-xs text-warning mt-3 rounded-xl bg-warning-subtle px-2.5 py-1.5">
+          The term ended on {formatDate(lease.leaseEnd)}. The tenant is holding over until you renew
+          or serve notice.
         </p>
       )}
 
@@ -127,7 +142,7 @@ export const LeaseCard = ({
         </p>
       )}
 
-      <RecordActions className="flex-nowrap">
+      <RecordActions>
         {lease.status === 'draft' && (
           <Button
             variant="primary"
@@ -170,7 +185,7 @@ export const LeaseCard = ({
           </p>
         )}
         {lease.status === 'signed' && (
-          <>
+          <div className="grid w-full grid-cols-2 gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -198,13 +213,13 @@ export const LeaseCard = ({
               variant="outline"
               size="sm"
               fullWidth
-              className="gap-1.5"
+              className={onOpenSchedule ? 'col-span-2 gap-1.5' : 'gap-1.5'}
               onClick={() => onRequestRenewal(lease)}
             >
               <RefreshCcw className="w-3.5 h-3.5" />
               {lease.pendingRenewalOffer ? 'Replace offer' : 'Renew'}
             </Button>
-          </>
+          </div>
         )}
         {lease.status === 'expired' && (
           <Button

@@ -8,6 +8,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmDialog,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -51,7 +52,7 @@ const formatDate = (value: string) =>
   new Intl.DateTimeFormat('en-NG', {
     day: 'numeric',
     month: 'short',
-    hour: 'numeric',
+    hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(value));
 
@@ -90,6 +91,7 @@ export default function ResidentVisitorPassesPage() {
     mutationFn: (passId: string) => unwrap(estateResidentService.revokeMyVisitorPass(passId)),
     onSuccess: invalidate,
   });
+  const [revoking, setRevoking] = useState<{ id: string; visitorName: string } | null>(null);
 
   const approveMutation = useMutation({
     mutationFn: (passId: string) => unwrap(estateResidentService.approveWalkInVisitorPass(passId)),
@@ -222,7 +224,7 @@ export default function ResidentVisitorPassesPage() {
                     size="sm"
                     disabled={revokeMutation.isPending && revokeMutation.variables !== pass.id}
                     isLoading={revokeMutation.isPending && revokeMutation.variables === pass.id}
-                    onClick={() => revokeMutation.mutate(pass.id)}
+                    onClick={() => setRevoking({ id: pass.id, visitorName: pass.visitorName })}
                   >
                     Revoke
                   </Button>
@@ -241,6 +243,25 @@ export default function ResidentVisitorPassesPage() {
       />
 
       <VisitorPinDialog pass={issuedPass} onClose={() => setIssuedPass(null)} />
+
+      <ConfirmDialog
+        open={revoking !== null}
+        onOpenChange={(open) => {
+          if (!open) setRevoking(null);
+        }}
+        tone="danger"
+        title="Revoke this visitor pass?"
+        description={
+          revoking
+            ? `${revoking.visitorName} will be turned away at the gate. You can issue a new pass later, but this one cannot be restored.`
+            : ''
+        }
+        confirmLabel="Revoke pass"
+        onConfirm={() =>
+          revoking && revokeMutation.mutateAsync(revoking.id).then(() => setRevoking(null))
+        }
+        isLoading={revokeMutation.isPending}
+      />
 
       <Dialog
         open={!!denying}

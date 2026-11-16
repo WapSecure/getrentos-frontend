@@ -33,7 +33,7 @@ export const ASSIGNABLE_ROLES: {
   {
     value: 'ACCOUNTANT',
     label: 'Accountant',
-    hint: 'Finance only — no access to client properties',
+    hint: 'Finance only, with no access to client properties',
   },
   { value: 'STAFF', label: 'Staff', hint: 'General team member' },
 ];
@@ -58,15 +58,12 @@ export const MEMBER_STATE: Record<TeamMember['state'], { label: string; tone: Ba
 
 export interface TeamInvitation {
   id: string;
-  /** Empty when the invite went by phone number to an account with no email. */
   email: string;
-  /** Their number, masked ("+234 803 *** 4567"), when the invite has no email. */
   phoneMasked?: string | null;
   roleLabel: string;
   membershipExpiresAt: string | null;
   expiresAt: string;
   status: 'PENDING' | 'EXPIRED';
-  /** Only on a new invite: how it reached them (IN_APP is a notification in their app). */
   deliveredBy?: ('EMAIL' | 'IN_APP')[];
 }
 
@@ -375,9 +372,7 @@ export const setupEditable = (o: Onboarding | null) =>
 export interface JoinPreview {
   firmName: string;
   roleLabel: string;
-  /** Empty for an invite sent by phone number. */
   email: string;
-  /** The invitee's own number, masked; only shown to them. */
   phoneMasked?: string | null;
   status: 'PENDING' | 'EXPIRED' | 'ACCEPTED' | 'REVOKED';
   membershipExpiresAt: string | null;
@@ -396,7 +391,6 @@ const post = <T>(path: string, body?: unknown) =>
 export const agencyFirmApi = {
   members: () => apiFetch<TeamMember[]>('/agency/team/members'),
   invitations: () => apiFetch<TeamInvitation[]>('/agency/team/invitations'),
-  /** `contact` is their phone number or email; someone on Sureground hears in their app. */
   invite: ({
     contact,
     ...input

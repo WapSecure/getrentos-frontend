@@ -24,7 +24,6 @@ import {
 import { VideoCallButton } from '@/components/shared/VideoCallButton';
 import { PropertyThumb } from '@/components/shared/property/PropertyThumb';
 
-/** "12 Nov 2026 · 10:00 Lagos · 09:00 London": Lagos time next to the buyer's own. */
 export const tourTime = (at: string, buyerTimeZone: string) =>
   `${formatLagosDate(at)} · ${formatDualTime(at, buyerTimeZone)}`;
 
@@ -34,7 +33,6 @@ const canJoin = (tour: SiteTour, join?: Join) =>
   tour.status === 'SCHEDULED' &&
   Boolean((tour.videoCall === 'BUILT_IN' && join && tour.scheduledAt) || tour.meetingUrl);
 
-/** The way into a booked tour: the built-in call, or the link the host shared. */
 export const TourJoin = ({ tour, join }: { tour: SiteTour; join?: Join }) => {
   if (!canJoin(tour, join)) return null;
   if (tour.videoCall === 'BUILT_IN' && join && tour.scheduledAt) {
@@ -69,11 +67,6 @@ const Meta = ({ icon, children }: { icon: ReactNode; children: ReactNode }) => (
   </li>
 );
 
-/**
- * One video tour: the place, who is involved, its status and the next step, with the time in
- * Lagos next to the buyer's own. `children` holds anything to fill in (picking a time, notes);
- * `actions` and `aside` sit in the footer, actions on the right next to the join button.
- */
 export const TourCard = ({
   tour,
   who,
@@ -85,9 +78,7 @@ export const TourCard = ({
 }: {
   tour: SiteTour;
   who: string;
-  /** Opens the built-in call; tours on a pasted link show the link instead. */
   join?: Join;
-  /** One plain sentence on what happens next. */
   nextStep?: string;
   actions?: ReactNode;
   aside?: ReactNode;

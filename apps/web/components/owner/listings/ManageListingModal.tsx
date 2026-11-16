@@ -17,7 +17,6 @@ interface ManageListingModalProps {
   listing: SaleListing | null;
   onClose: () => void;
   onChangeStatus: (listingId: string, status: SaleListingStatus) => void;
-  /** Commercial properties only: opens the commercial details editor. */
   onEditCommercial?: (listing: SaleListing) => void;
 }
 

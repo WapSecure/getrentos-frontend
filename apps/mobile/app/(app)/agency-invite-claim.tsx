@@ -10,10 +10,6 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * An owner accepting a management firm's invitation in the app. A phone-only owner gets here from the
- * notification the firm's invite sent them; the server checks they are the account it names.
- */
 export default function AgencyInviteClaim() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

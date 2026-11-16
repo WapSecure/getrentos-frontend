@@ -66,7 +66,6 @@ export function AffordabilityCard({ listingId }: { listingId: string }) {
 
         <CurrencyField
           label="Monthly income"
-          // Show the income the answer used, so the field never looks empty while the text relies on it.
           value={
             form.monthlyIncome !== undefined
               ? form.monthlyIncome

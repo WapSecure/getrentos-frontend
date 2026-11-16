@@ -37,7 +37,6 @@ import {
 import { ROUTES } from '@/lib/constants/auth';
 import { defineRoleNavigation } from '../resolve';
 
-// Payments, Maintenance and Financials are tabbed hubs, so Arrears, Home Management and Owner Statements have no row of their own.
 export const landlordNavigation = defineRoleNavigation({
   ariaLabel: 'Landlord navigation',
   workspaceLabel: 'Property management',
@@ -194,7 +193,6 @@ export const landlordNavigation = defineRoleNavigation({
       href: ROUTES.LANDLORD_TRUST_PROFILE,
       icon: ShieldCheck,
     },
-    // Stays the landlord booked as a guest: their own account, not the portfolio.
     {
       id: 'bookings',
       labelKey: 'sidebar.shortlet_bookings',

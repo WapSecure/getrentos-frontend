@@ -11,10 +11,6 @@ import type {
   WorkspaceViewerRole,
 } from './types';
 
-// Pure helpers for the purchase workspace (DIA-15, DIA-16), for web and mobile. Sureground holds
-// only the deposit (D11). The workspace shapes are taken structurally, so each app keeps its own
-// milestone and legal-step types.
-
 interface WorkspaceShape {
   viewer: { role: WorkspaceViewerRole };
   statuses: { moneyStatus: { code: MoneyStatusCode | string } };
@@ -59,7 +55,6 @@ const LEGAL_VARIANT: Record<LegalStatusCode, StatusTone> = {
   PERFECTED: 'success',
 };
 
-/** A code the app does not know yet reads as neutral rather than breaking the page. */
 export const stageVariant = (code: string): StatusTone =>
   STAGE_VARIANT[code as OperationalStageCode] ?? 'neutral';
 export const moneyVariant = (code: string): StatusTone =>
@@ -67,28 +62,20 @@ export const moneyVariant = (code: string): StatusTone =>
 export const legalVariant = (code: string): StatusTone =>
   LEGAL_VARIANT[code as LegalStatusCode] ?? 'neutral';
 
-/** Why the handover cannot be approved yet, shown beside the disabled action. */
 export const HANDOVER_NOT_DELIVERED_NOTE =
   'The seller has not marked the keys as handed over yet. You can approve once they have.';
 
-/** Why the buyer cannot release the deposit yet, shown beside the disabled button. */
 export const RELEASE_BLOCKED_NOTE =
   'The seller has not marked the keys as handed over yet. You can release the deposit once they have.';
 
-/** A milestone that has reached the buyer: delivered, confirmed or waived. */
 const DELIVERED_STATUSES: ReadonlySet<string> = new Set(['DELIVERED', 'CONFIRMED', 'WAIVED']);
 
-/** The built-home step that releases the held deposit. */
 export const HANDOVER_KEY = 'KEYS_HANDED_OVER';
 
-/** A two-person approval of the handover the seller has not delivered yet: it cannot be given. */
 export const stepAwaitingDelivery = (step: CoApprovalPendingStep): boolean =>
   Boolean(step.releasesDeposit) && step.stepDelivered === false;
 
-/**
- * A built home whose handover (keys and vacant possession) the seller has not delivered yet. The
- * deposit cannot be released or approved until then. Land sales have their own release rules.
- */
+/** Built homes only; land sales have their own release rules. */
 export const handoverAwaitingDelivery = (workspace: {
   plan?: string;
   milestones: readonly { key: string; status: string }[];
@@ -102,10 +89,7 @@ export const handoverAwaitingDelivery = (workspace: {
 const SETTLED_STEP_STATUSES: ReadonlySet<string> = new Set(['CONFIRMED', 'WAIVED']);
 const SETTLED_CONDITION_STATUSES: ReadonlySet<string> = new Set(['SATISFIED', 'WAIVED']);
 
-/**
- * The required land steps and conditions the buyer has not confirmed yet. The server refuses to
- * release a land sale's deposit until this list is empty, so the button says so up front.
- */
+/** The server refuses to release a land sale's deposit until this is empty, so the button says so up front. */
 export const landReleaseOutstanding = (workspace: {
   plan?: string;
   milestones: readonly { label: string; status: string; required: boolean }[];
@@ -122,7 +106,6 @@ export const landReleaseOutstanding = (workspace: {
   ];
 };
 
-/** Why the buyer cannot release the deposit yet, or null when nothing holds it back. */
 export const releaseBlockedNote = (workspace: {
   plan?: string;
   milestones: readonly { key: string; label: string; status: string; required: boolean }[];
@@ -134,23 +117,17 @@ export const releaseBlockedNote = (workspace: {
   return `You can release the deposit once you have confirmed: ${outstanding.join('; ')}.`;
 };
 
-/** Only the buyer releases, and only a deposit that is held. */
 export const canReleaseDeposit = (
   workspace: Pick<WorkspaceShape, 'viewer' | 'statuses'>
 ): boolean =>
   workspace.viewer.role === 'BUYER' && workspace.statuses.moneyStatus.code === 'PROTECTED';
 
-/** "Amaka Obi" when the workspace knows the representative's name, else "your representative". */
 export const representativeLabel = (name?: string | null): string =>
   name?.trim() || 'your representative';
 
 const capitalise = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
 
-/**
- * What the buyer's release did. A representative's approval never moves money: under two-person
- * approval the buyer's first press only records their approval, and the buyer presses Release again
- * once both approvals are in. The API's own message is not used, so this copy stays accurate.
- */
+/** A representative's approval never moves money; the API's message is not used so this copy stays accurate. */
 export const releaseOutcome = (
   release: DepositReleaseOutcome | undefined,
   representativeName?: string | null
@@ -168,7 +145,6 @@ export const releaseOutcome = (
   };
 };
 
-/** What a representative's approval did. It never moves money itself. */
 export const approvalOutcomeMessage = (
   outcome: DepositReleaseApprovalOutcome | undefined
 ): string =>
@@ -179,11 +155,9 @@ export const approvalOutcomeMessage = (
 export type DepositReleaseStage =
   /** No two-person rule: the buyer's release sends the deposit straight away. */
   | 'SINGLE'
-  /** Two-person approval is on and neither approval is in yet. */
   | 'NEEDS_APPROVALS'
   /** The buyer approved; the representative has not. Nothing has moved. */
   | 'WAITING_FOR_REPRESENTATIVE'
-  /** Both approved; the buyer still has to press Release. */
   | 'BOTH_APPROVED';
 
 interface ReleaseStageShape {
@@ -195,7 +169,6 @@ interface ReleaseStageShape {
   };
 }
 
-/** Where the deposit release stands for the buyer under two-person approval. */
 export const depositReleaseStage = (workspace: ReleaseStageShape): DepositReleaseStage => {
   const { coApproval } = workspace;
   if (!coApproval.binding) return 'SINGLE';
@@ -211,7 +184,6 @@ export const depositReleaseStage = (workspace: ReleaseStageShape): DepositReleas
   return 'NEEDS_APPROVALS';
 };
 
-/** The buyer's release confirmation, worded for where the two approvals stand. */
 export const releaseDialogDescription = (
   stage: DepositReleaseStage,
   representativeName?: string | null
@@ -227,7 +199,6 @@ export const releaseDialogDescription = (
   return `Two-person approval is on, so this records your approval and nothing is released yet. Once ${rep} approves, press Release the deposit again to send it to the seller. Approve only once you have received the property and the documents you agreed. ${tail}`;
 };
 
-/** A short line for the buyer's deposit card, or null when there is nothing extra to say. */
 export const releaseStageNote = (
   stage: DepositReleaseStage,
   representativeName?: string | null
@@ -242,7 +213,6 @@ export const releaseStageNote = (
   return null;
 };
 
-/** Where a two-person approval stands, from the viewer's side, for the approvals card. */
 export const pendingApprovalStatus = (
   step: CoApprovalPendingStep,
   viewer: 'buyer' | 'representative'
@@ -257,7 +227,6 @@ export const pendingApprovalStatus = (
       }`;
 };
 
-/** Two-person approvals on this purchase still waiting for the viewer (not a handover the seller has not delivered). */
 export const approvalsWaitingFor = (
   viewer: 'BUYER' | 'REPRESENTATIVE',
   pending: readonly CoApprovalPendingStep[] | undefined
@@ -268,13 +237,26 @@ export const approvalsWaitingFor = (
       (viewer === 'BUYER' ? !step.buyerApproved : !step.representativeApproved)
   );
 
-/** "TITLE_DEED" → "Title deed". */
 export const humaniseCode = (code: string): string => {
   const words = code.toLowerCase().replace(/_/g, ' ').trim();
   return words.charAt(0).toUpperCase() + words.slice(1);
 };
 
-/** The step, condition or legal step a document belongs to, by its label where the workspace has it. */
+export type SalePlan = 'LAND_RESALE' | 'BUILT_HOME';
+
+export const SALE_PLAN_LABEL: Record<SalePlan, string> = {
+  LAND_RESALE: 'Land sale',
+  BUILT_HOME: 'Built home',
+};
+
+/** No type at all means a land resale: the representative's deal list once held only those. */
+export const salePlanLabel = (input: { plan?: string | null; propertyType?: string | null }) => {
+  if (input.plan) return SALE_PLAN_LABEL[input.plan as SalePlan] ?? humaniseCode(input.plan);
+  const plan: SalePlan =
+    !input.propertyType || input.propertyType === 'LAND' ? 'LAND_RESALE' : 'BUILT_HOME';
+  return SALE_PLAN_LABEL[plan];
+};
+
 export const documentLinkLabel = (
   document: Pick<WorkspaceDocument, 'linkedTo' | 'key'>,
   workspace: Pick<WorkspaceShape, 'milestones' | 'conditions' | 'legalSteps'>
@@ -288,7 +270,6 @@ export const documentLinkLabel = (
   return list.find((item) => item.key === document.key)?.label ?? humaniseCode(document.key);
 };
 
-/** Required steps confirmed or waived, and legal steps approved or not applicable, for the progress bars. */
 export const workspaceProgress = (
   workspace: Pick<WorkspaceShape, 'milestones' | 'legalSteps'>
 ): { steps: { done: number; total: number }; legal: { done: number; total: number } } => {
@@ -309,10 +290,6 @@ export const workspaceProgress = (
 
 export type WorkspaceSection = 'approvals' | 'deposit' | 'steps';
 
-/**
- * Where the header's call to action takes the viewer when something waits for them: an approval
- * first, then a step to confirm, then the deposit to release. Null when nothing is theirs to do.
- */
 export const nextActionTarget = (
   workspace: Pick<
     WorkspaceShape,
@@ -333,10 +310,6 @@ export const nextActionTarget = (
   return 'steps';
 };
 
-/**
- * The confirmation before a two-person approval. Approving the deposit release never moves money:
- * the buyer presses Release once both approvals are in.
- */
 export const coApprovalConfirmDescription = (input: {
   viewer: 'buyer' | 'representative';
   stepLabel: string;

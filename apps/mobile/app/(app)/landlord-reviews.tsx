@@ -8,6 +8,7 @@ import { Card, EmptyState, QueryState, Skeleton, Text, useTheme } from '@suregro
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordReview } from '@/lib/api/landlord';
 import { formatDate } from '@/lib/format';
+import { TenantReviewsSection } from '@/components/reviews/TenantReviewsSection';
 import { StarRating } from '@/components/reviews/StarRating';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -33,7 +34,7 @@ export default function LandlordReviews() {
       <DetailScreenHeader
         eyebrow="Reputation"
         title="Reviews"
-        subtitle="Tenant feedback and performance trends"
+        subtitle="How tenants rate you and your homes"
         onBack={() => goBack()}
       />
 
@@ -69,19 +70,22 @@ export default function LandlordReviews() {
                       </View>
                     </View>
 
-                    {(s?.reviewCount ?? 0) > 0 ? (
+                    {s?.averageAsLandlord != null || s?.averagePropertyCondition != null ? (
                       <View style={{ gap: 6 }}>
-                        <Facet label="Communication" value={s?.averageCommunication ?? 0} />
-                        <Facet
-                          label="Property condition"
-                          value={s?.averagePropertyCondition ?? 0}
-                        />
-                        <Facet label="Responsiveness" value={s?.averageResponsiveness ?? 0} />
+                        {s?.averageAsLandlord != null ? (
+                          <Facet label="You as landlord" value={s.averageAsLandlord} />
+                        ) : null}
+                        {s?.averagePropertyCondition != null ? (
+                          <Facet label="Property condition" value={s.averagePropertyCondition} />
+                        ) : null}
                       </View>
                     ) : null}
                   </View>
                 )}
               </Card>
+              <View style={{ marginTop: spacing.md }}>
+                <TenantReviewsSection />
+              </View>
             </View>
           }
           contentContainerStyle={{
@@ -102,7 +106,7 @@ export default function LandlordReviews() {
             <EmptyState
               icon={<Star size={32} color={colors.mutedForeground} />}
               title="No reviews yet"
-              description="Tenants can review you after a tenancy ends. Reviews feed your trust score."
+              description="Tenants can review you once they have moved out. Reviews feed your trust score."
             />
           }
         />
@@ -151,7 +155,9 @@ function ReviewCard({ review: r }: { review: LandlordReview }) {
         </View>
 
         <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-          {r.tenantName} · {r.propertyName}
+          {[r.tenantName, r.propertyName, r.category === 'PROPERTY' ? 'Rated the home' : 'Rated you']
+            .filter(Boolean)
+            .join(' · ')}
         </Text>
 
         {r.comment ? (

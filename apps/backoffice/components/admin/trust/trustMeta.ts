@@ -128,7 +128,6 @@ export const VERIFICATION_STATUS_META: Record<string, { label: string; text: str
     EXPIRED: { label: 'Expired', text: 'text-muted-foreground', bg: 'bg-muted' },
   };
 
-/** Diaspora identity cases: decided through their own endpoint, with their uploads shown to staff. */
 export const FOREIGN_PURPOSE_LABEL: Record<ForeignPurpose, string> = {
   FOREIGN_IDENTITY: 'Passport (diaspora)',
   FOREIGN_ADDRESS: 'Proof of address abroad',

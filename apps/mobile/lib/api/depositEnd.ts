@@ -2,8 +2,6 @@ import type { BadgeTone } from '@sureground/ui-native';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 
-/** D-6 end of tenancy: move-out, a claim within 14 days, the tenant's answer within 7, then settlement. */
-
 /** Mirrors the backend's `DepositEndStage`. */
 export type DepositEndStage =
   | 'TENANCY'
@@ -67,7 +65,6 @@ export interface DepositClaim {
   items: DepositClaimItem[];
 }
 
-/** The deposit in the end-of-tenancy flow, as the landlord and the tenant see it. */
 export interface DepositEndView {
   holdId: string;
   leaseId: string;
@@ -97,7 +94,6 @@ export interface DepositClaimItemInput {
   evidenceKeys?: string[];
 }
 
-/** The API's limits, so the button only lights up for a claim it will take. */
 export const CLAIM_REASON_MIN = 10;
 export const DISPUTE_REASON_MIN = 10;
 export const CLAIM_MAX_ITEMS = 20;
@@ -106,7 +102,6 @@ export const CLAIM_MAX_FILES = 10;
 export interface ClaimDraftItem {
   key: string;
   reason: string;
-  /** Raw digits from the number field. */
   amount: string;
   files: PickedFile[];
 }
@@ -114,7 +109,6 @@ export interface ClaimDraftItem {
 export const claimTotal = (items: Pick<ClaimDraftItem, 'amount'>[]) =>
   items.reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
 
-/** Why the claim cannot be sent yet, or null when it can. */
 export function claimBlocker(items: ClaimDraftItem[], funded: number): string | null {
   if (items.length === 0) return 'Add at least one deduction.';
   for (const [i, item] of items.entries()) {
@@ -129,7 +123,6 @@ export function claimBlocker(items: ClaimDraftItem[], funded: number): string | 
   return null;
 }
 
-/** The settlement as one sentence, from the landlord's or the tenant's side. */
 export function settlementText(
   view: DepositEndView,
   side: 'landlord' | 'tenant',
@@ -148,7 +141,6 @@ export function settlementText(
   return `${how}${naira(s.refundAmount)} refunded to you${refund}${toLandlord}.`;
 }
 
-/** Whether the tenancy has ended, which is when the tenant may say they have moved out. */
 export function leaseHasEnded(leaseStatus: string, leaseEnd?: string | null, now = Date.now()) {
   if (leaseStatus === 'EXPIRED') return true;
   return leaseEnd ? new Date(leaseEnd).getTime() <= now : false;
@@ -158,7 +150,6 @@ export function leaseHasEnded(leaseStatus: string, leaseEnd?: string | null, now
 export const moveOutInstant = (day: string) => new Date(`${day}T12:00:00+01:00`).toISOString();
 
 export const depositEndApi = {
-  // Landlord, owner or manager.
   view: (depositId: string) => apiFetch<DepositEndView>(`/deposits/${depositId}/end-of-tenancy`),
   recordMoveOut: (depositId: string, moveOutAt?: string) =>
     apiFetch<DepositEndView>(`/deposits/${depositId}/move-out`, {
@@ -173,7 +164,6 @@ export const depositEndApi = {
   fileClaim: (depositId: string, items: DepositClaimItemInput[]) =>
     apiFetch<DepositEndView>(`/deposits/${depositId}/claim`, { method: 'POST', body: { items } }),
 
-  // Tenant.
   tenantView: (holdId: string) =>
     apiFetch<DepositEndView>(`/renter/deposits/${holdId}/end-of-tenancy`),
   movedOut: (holdId: string) =>

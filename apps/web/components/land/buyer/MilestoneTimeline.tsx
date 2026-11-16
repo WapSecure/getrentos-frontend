@@ -39,21 +39,18 @@ export const MilestoneTimeline = ({
   /** Resales only block on earlier required steps. */
   requiredOnly?: boolean;
   showRelease?: boolean;
-  /** Without both, the steps are read only (a seller's or representative's view). */
   onConfirm?: (key: string) => Promise<unknown>;
   onDispute?: (key: string, reason: string) => Promise<unknown>;
   pendingKey?: string | null;
   ariaLabel?: string;
   empty?: { title: string; description: string };
   disputeDescription?: string;
-  /** The badge on a delivered step, when the viewer is not the one to confirm it. */
   awaitingLabel?: string;
 }) => {
   const canAct = Boolean(onConfirm && onDispute);
   const [confirming, setConfirming] = useState<LandMilestone | null>(null);
   const [disputing, setDisputing] = useState<LandMilestone | null>(null);
   const ordered = [...milestones].sort((a, b) => a.sequence - b.sequence);
-  // One current step: the earliest awaiting confirmation, else the next to be delivered.
   const states = milestoneStates(ordered.map((m) => m.status));
 
   if (ordered.length === 0) {
@@ -183,7 +180,6 @@ export const MilestoneTimeline = ({
         maxLength={REASON_MAX}
         tone="danger"
         confirmLabel="Dispute step"
-        // The caller reports the API's message.
         onSubmit={({ reason }) =>
           onDispute ? onDispute(disputing!.key, reason) : Promise.resolve()
         }

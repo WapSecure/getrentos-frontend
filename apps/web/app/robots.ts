@@ -5,6 +5,7 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
+      // Filtered market views are not blocked: a crawler must fetch them to see their noindex,follow.
       // Robots rules match by prefix: '/agent' would also block '/agents', and '/estate' '/estates'. The longer allow wins.
       allow: ['/', '/agents', '/estates', '/landlords', '/renters', '/buyers'],
       disallow: [
@@ -22,8 +23,11 @@ export default function robots(): MetadataRoute.Robots {
         '/admin',
         '/oauth',
         '/magic-link',
-        '/shortlets?',
-        '/land?',
+        '/payments',
+        '/billing',
+        '/agency-invite',
+        '/auth',
+        '/representing',
       ],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,

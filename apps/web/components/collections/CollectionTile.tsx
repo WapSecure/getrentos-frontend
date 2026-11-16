@@ -8,7 +8,6 @@ import { toMarketCard } from '@/lib/marketCards';
 import { collectionPath, curatorLine, type PublicCollectionSummary } from '@/lib/collections';
 import { SponsoredBadge } from './SponsoredBadge';
 
-/** A collection on a landing page or storefront: its cover, title, who picked it and how many homes. */
 export function CollectionTile({
   collection,
   className,

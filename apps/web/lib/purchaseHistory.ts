@@ -1,5 +1,4 @@
-// The purchase History labels each actor by their role in this sale. Older API responses tag any
-// renter account as TENANT (a property-management label), which means nothing on a purchase.
+// Older API responses tag any renter as TENANT, which means nothing on a purchase.
 
 type Kind =
   | 'MANAGER'

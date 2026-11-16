@@ -35,8 +35,7 @@ import { FactGrid, IconTile } from '@/components/admin/ops/OpsParts';
 const sumOf = (rows: { amount: number }[] | undefined) =>
   (rows ?? []).reduce((total, row) => total + row.amount, 0);
 
-// The API lists only the newest 100 per rail in each group (TAKE in admin-payout-issues.service), so
-// these figures cover the lists below, not every payout. A rail at the cap means there may be more.
+// The API caps each rail at 100 (TAKE in admin-payout-issues.service), so these totals cover the lists below only.
 const LISTED_PER_RAIL = 100;
 
 const atCap = (rows: { rail?: string; kind?: string }[] | undefined) => {
@@ -51,7 +50,6 @@ const atCap = (rows: { rail?: string; kind?: string }[] | undefined) => {
 const countFigure = (rows: { amount: number }[] | undefined, loaded: boolean, capped: boolean) =>
   loaded ? `${rows?.length ?? 0}${capped ? '+' : ''}` : '–';
 
-/** "₦X refused by the bank", or "At least ₦X …" when a rail hit the cap. */
 const moneyLine = (rows: { amount: number }[], capped: boolean, rest: string) =>
   `${capped ? 'At least ' : ''}${formatCurrency(sumOf(rows))} ${rest}${capped ? '; only the newest 100 per rail are listed' : ''}`;
 

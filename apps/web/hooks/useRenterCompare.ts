@@ -36,13 +36,11 @@ const subscribe = (onChange: () => void) => {
   return () => listeners.delete(onChange);
 };
 
-// Session-scoped so the property page and Discover share one comparison list.
 export function useRenterCompare() {
   const list = useSyncExternalStore(subscribe, read, () => EMPTY);
   return {
     list,
     has: (id: string) => list.some((p) => p.id === id),
-    /** Adds the property; returns false when the list is already full. */
     add: (property: Property): boolean => {
       const current = read();
       if (current.some((p) => p.id === property.id)) return true;

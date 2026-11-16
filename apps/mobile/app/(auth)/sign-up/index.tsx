@@ -289,7 +289,7 @@ function EmailForm(props: Shared) {
             render={({ field: { onChange, onBlur, value } }) => (
               <TextField
                 label="Full name"
-                placeholder="Ada Lovelace"
+                placeholder="Adaeze Okafor"
                 leftIcon={<User size={18} color={colors.mutedForeground} />}
                 autoCapitalize="words"
                 autoComplete="name"
@@ -450,7 +450,7 @@ function PhoneForm(props: Shared) {
             render={({ field: { onChange, onBlur, value } }) => (
               <TextField
                 label="Full name"
-                placeholder="Ada Lovelace"
+                placeholder="Adaeze Okafor"
                 leftIcon={<User size={18} color={colors.mutedForeground} />}
                 autoCapitalize="words"
                 autoComplete="name"

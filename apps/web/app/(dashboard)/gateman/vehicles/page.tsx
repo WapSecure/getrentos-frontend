@@ -37,7 +37,7 @@ const purposeLabel = (purpose: string) =>
   purposeOptions.find((option) => option.value === purpose.toUpperCase())?.label ?? 'Other';
 
 const formatTime = (value: string) =>
-  new Intl.DateTimeFormat('en-NG', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
+  new Intl.DateTimeFormat('en-NG', { hour: '2-digit', minute: '2-digit' }).format(new Date(value));
 
 export default function GatemanVehiclesPage() {
   const queryClient = useQueryClient();
@@ -329,7 +329,6 @@ export default function GatemanVehiclesPage() {
   );
 }
 
-/** Decorative bolt heads, so the plate field reads as a number plate. */
 const PlateBolt = () => (
   <span aria-hidden="true" className="block h-1.5 w-1.5 rounded-full bg-foreground/25" />
 );

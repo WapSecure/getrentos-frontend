@@ -106,7 +106,7 @@ const priorityOptions: Array<{ value: HomeManagementWorkOrder['priority']; label
   { value: 'URGENT', label: 'Urgent' },
 ];
 
-type WorkOrderForm = {
+export type WorkOrderForm = {
   propertyId: string;
   unitId: string;
   assetId: string;
@@ -223,16 +223,12 @@ interface HomeManagementWorkOrderQueueProps {
   pageSize: number;
   total: number;
   onPageChange: (page: number) => void;
-  /** Who is looking: the owner can rate a finished job. */
   viewerRole?: 'owner' | 'landlord' | 'manager';
-  /** Inside a page that already titles the section: drops the heading and the page counts. */
   compact?: boolean;
-  /** An owner looking at a property someone else manages: the jobs and their evidence, no actions. */
   readOnly?: boolean;
-  /** Off where the page header already offers "Create work order", so the action is not shown twice. */
   showCreateAction?: boolean;
-  /** Set by the page header's "Create work order"; see useCreateRequest. */
   createRequest?: number;
+  createPrefill?: Partial<WorkOrderForm>;
   onCreateRequestHandled?: () => void;
 }
 
@@ -252,6 +248,7 @@ export function HomeManagementWorkOrderQueue({
   readOnly = false,
   showCreateAction = true,
   createRequest,
+  createPrefill,
   onCreateRequestHandled,
 }: HomeManagementWorkOrderQueueProps) {
   const queryClient = useQueryClient();
@@ -445,14 +442,18 @@ export function HomeManagementWorkOrderQueue({
         ? cancelWorkOrder.isPending
         : false;
 
-  const openCreateDialog = () => {
-    setForm(initialWorkOrderForm);
+  const openCreateDialog = (prefill?: Partial<WorkOrderForm>) => {
+    setForm({ ...initialWorkOrderForm, ...prefill });
     setUnitForm(initialUnitForm);
     setIsCreateUnitOpen(false);
     setIsCreateOpen(true);
   };
 
-  useCreateRequest(readOnly ? undefined : createRequest, openCreateDialog, onCreateRequestHandled);
+  useCreateRequest(
+    readOnly ? undefined : createRequest,
+    () => openCreateDialog(createPrefill),
+    onCreateRequestHandled
+  );
 
   const closeCreateDialog = () => {
     if (!createWorkOrder.isPending && !createUnit.isPending) {
@@ -567,7 +568,7 @@ export function HomeManagementWorkOrderQueue({
             ? 'Add a property and unit before creating a work order'
             : undefined
       }
-      onClick={openCreateDialog}
+      onClick={() => openCreateDialog()}
     >
       Create work order
     </Button>
@@ -609,7 +610,7 @@ export function HomeManagementWorkOrderQueue({
             }
             action={
               !readOnly && properties.length > 0 ? (
-                <Button size="sm" rounded="md" onClick={openCreateDialog}>
+                <Button size="sm" rounded="md" onClick={() => openCreateDialog()}>
                   Create the first work order
                 </Button>
               ) : undefined
@@ -666,7 +667,6 @@ export function HomeManagementWorkOrderQueue({
                   !approvalPending &&
                   workOrder.approvedCost !== null &&
                   workOrder.approvedCost !== undefined;
-                // Until spend is approved, the estimate entered on creation is the figure to show.
                 const hasEstimateOnly =
                   !approvalPending &&
                   !hasApprovedCost &&

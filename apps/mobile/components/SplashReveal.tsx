@@ -98,7 +98,7 @@ export function SplashReveal() {
             Sureground
           </Text>
           <Text variant="caption" color="mutedForeground">
-            Rent, buy and manage: safely
+            Rent, buy and manage safely
           </Text>
         </Animated.View>
       </View>

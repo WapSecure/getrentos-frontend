@@ -9,7 +9,7 @@ import { FaqList } from '@/components/marketing/FaqList';
 import { availableGuides } from '@/components/resources/availableGuides';
 import { LegalNote } from '@/components/resources/LegalNote';
 import { JsonLd } from '@/components/seo/JsonLd';
-import { breadcrumbJsonLd } from '@/lib/structuredData';
+import { articleJsonLd, breadcrumbJsonLd } from '@/lib/structuredData';
 import { Eyebrow } from '@/components/marketing/Eyebrow';
 
 interface GuidePageProps {
@@ -47,6 +47,7 @@ export default async function GuidePage({ params }: GuidePageProps) {
           { name: guide.title, path },
         ])}
       />
+      <JsonLd data={articleJsonLd({ title: guide.title, summary: guide.summary, path })} />
       <Navigation />
       <main id="main" className="bg-background">
         <article aria-labelledby="page-title">

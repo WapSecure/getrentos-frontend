@@ -28,7 +28,6 @@ type CheckState = 'idle' | 'checking' | 'eligible' | 'ineligible' | 'notfound' |
 interface AddClientModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** The client's phone number or email, as typed. */
   onSubmit: (contact: string) => void;
   isSubmitting?: boolean;
   error?: string | null;

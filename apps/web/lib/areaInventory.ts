@@ -10,10 +10,7 @@ import {
 import type { Paginated } from '@/lib/apiHelpers';
 import { areaSlug } from '@/lib/areaSlug';
 
-/**
- * An area page is published only when this many live listings match it. Below that the page
- * would be a thin search result dressed up as a guide, so it 404s and stays out of the sitemap.
- */
+/** Below this many live listings an area page would be thin, so it 404s and stays out of the sitemap. */
 export const MIN_AREA_LISTINGS = 3;
 
 const SHOWN_PER_MARKET = 6;
@@ -37,7 +34,6 @@ async function fetchPage<T>(path: string, search: string, pageSize: number) {
   return (await res.json()) as Paginated<T>;
 }
 
-/** Live rent and sale listings matching an area; null when the API cannot answer. */
 export async function areaInventory(
   area: Area,
   pageSize = SHOWN_PER_MARKET
@@ -62,7 +58,6 @@ export async function areaInventory(
 export const inventoryTotal = (inventory: AreaInventory) =>
   inventory.rentTotal + inventory.saleTotal;
 
-/** Areas with enough live listings for a page of their own, with their slugs. */
 export async function publishedAreas(): Promise<Array<Area & { slug: string }>> {
   const results = await Promise.all(AREAS.map((area) => areaInventory(area, 1)));
   return results

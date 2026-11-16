@@ -20,6 +20,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { buyerService } from '@/services/buyerService';
 import { videoCallAvailabilityQuery, videoCallService } from '@/services/videoCallService';
+import { VIEWING_MAX_HOUR, VIEWING_MIN_HOUR, viewingMinDate } from '@/lib/viewingSlots';
 
 interface RequestViewingModalProps {
   isOpen: boolean;
@@ -153,11 +154,16 @@ export const RequestViewingModal = ({
           </Field>
 
           <Field label="Date">
-            <DatePicker value={date} onChange={setDate} />
+            <DatePicker value={date} onChange={setDate} min={viewingMinDate()} />
           </Field>
 
           <Field label="Time">
-            <TimePicker value={time} onChange={setTime} />
+            <TimePicker
+              value={time}
+              onChange={setTime}
+              minHour={VIEWING_MIN_HOUR}
+              maxHour={VIEWING_MAX_HOUR}
+            />
           </Field>
 
           {canVideo && (

@@ -320,7 +320,22 @@ export interface PollDraft {
   options: string[];
 }
 
+export interface EstateNotification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+  actionUrl?: string;
+}
+
 export const estateManagerApi = {
+  notifications: () => apiFetch<EstateNotification[]>('/estate/notifications'),
+  markNotificationRead: (id: string) =>
+    apiFetch<void>(`/estate/notifications/${id}/read`, { method: 'PATCH' }),
+  markAllNotificationsRead: () =>
+    apiFetch<void>('/estate/notifications/read-all', { method: 'POST' }),
   importHouseholds: (estateId: string, file: PickedFile) => {
     const form = new FormData();
     appendFile(form, 'file', file);
@@ -372,7 +387,6 @@ export const estateManagerApi = {
     apiFetch<Household>(`/estate/${estateId}/households/${householdId}`, { method: 'PATCH', body }),
   removeHousehold: (estateId: string, householdId: string) =>
     apiFetch<void>(`/estate/${estateId}/households/${householdId}`, { method: 'DELETE' }),
-  /** By the resident's phone number or email on Sureground. */
   linkResident: (estateId: string, householdId: string, contact: string) =>
     apiFetch<Household>(`/estate/${estateId}/households/${householdId}/resident`, {
       method: 'POST',

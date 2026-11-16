@@ -14,7 +14,6 @@ const isEditable = (el: Element | null) =>
   el instanceof HTMLElement &&
   (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName));
 
-/** "/" outside a field focuses the visible record search; skipped while an overlay has focus. */
 function useSlashToSearch(scope: RefObject<HTMLElement | null>) {
   useEffect(() => {
     scope.current
@@ -64,7 +63,7 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
       >
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-3">
-            {/* As in the web navbars: the wordmark is too wide for a phone top bar and pushed the profile menu over the menu button. */}
+            {/* The wordmark is too wide for a phone top bar and pushed the profile menu over the menu button. */}
             <div className="flex min-w-0 shrink-0 items-center gap-3">
               <Logo
                 href={ROUTES.ADMIN_DASHBOARD}

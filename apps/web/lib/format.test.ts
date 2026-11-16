@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { formatDualTime, isValidTimeZone, timeZoneCity } from './format';
+import { formatDualTime, getInitials, isValidTimeZone, timeZoneCity } from './format';
 
 // 2026-11-11 09:00 UTC is 10:00 in Lagos (UTC+1, no daylight saving).
 const NOV = '2026-11-11T09:00:00Z';
@@ -42,4 +42,11 @@ test('zone helpers', () => {
   assert.equal(timeZoneCity('America/Argentina/Buenos_Aires'), 'Buenos Aires');
   assert.equal(isValidTimeZone('Europe/London'), true);
   assert.equal(isValidTimeZone('Nowhere/Else'), false);
+});
+
+test('initials skip words that do not start with a letter', () => {
+  assert.equal(getInitials('Tunde Bakare (demo)'), 'TB');
+  assert.equal(getInitials('Amaka Obi'), 'AO');
+  assert.equal(getInitials('Ọlá  Adé'), 'ỌA');
+  assert.equal(getInitials('(x)'), 'U');
 });

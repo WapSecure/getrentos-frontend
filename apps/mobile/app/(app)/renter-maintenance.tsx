@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AlertTriangle, Ban, Plus, Star, Wrench } from '@sureground/icons/native';
+import { AlertTriangle, Ban, CalendarClock, Plus, Star, Wrench } from '@sureground/icons/native';
 import {
   Badge,
   Card,
@@ -24,7 +24,7 @@ import {
   type MaintenanceRequest,
 } from '@/lib/api/maintenance';
 import { errorMessage } from '@/lib/api/client';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatDateTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -154,6 +154,17 @@ export default function Maintenance() {
                   <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
                     Vendor: {item.assignedVendorName}
                   </Text>
+                ) : null}
+
+                {item.scheduledFor && item.status !== 'resolved' && item.status !== 'cancelled' ? (
+                  <View
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: spacing.xs }}
+                    accessible
+                    accessibilityLabel={`Repair visit ${formatDateTime(item.scheduledFor)}`}
+                  >
+                    <CalendarClock size={14} color={colors.primary} />
+                    <Text variant="caption">Visit {formatDateTime(item.scheduledFor)}</Text>
+                  </View>
                 ) : null}
 
                 <View style={{ flexDirection: 'row', gap: spacing.md, marginTop: spacing.sm }}>

@@ -11,7 +11,6 @@ export interface ActivityFeedItem {
   icon: ElementType;
   title: string;
   detail?: string;
-  /** ISO date-time. */
   at: string;
   href?: string;
 }
@@ -21,9 +20,7 @@ interface ActivityFeedCardProps {
   items: ActivityFeedItem[];
   isLoading?: boolean;
   emptyIcon: SgIcon;
-  /** The role's full activity page, when it has one. */
   viewAllHref?: string;
-  /** Rows shown before "Show more"; the dashboard should stay a glance, not a log. */
   initialCount?: number;
 }
 
@@ -66,7 +63,6 @@ function Row({ item }: { item: ActivityFeedItem }) {
   );
 }
 
-/** The dashboard's "Recent activity" for every role: compact rows, the latest few, then more on request. */
 export function ActivityFeedCard({
   description,
   items,

@@ -239,12 +239,12 @@ export default function EstateMicrositePage() {
       <div className="max-w-2xl">
         <PageHeader
           title="Microsite"
-          description="A public page showcasing your estate: share one link with prospective residents."
+          description="A public page showcasing your estate, with one link to share with prospective residents."
         />
         <ProFeatureGate
           entitled={isPro}
           title="Microsite is a Pro feature"
-          description="Upgrade to Pro to get a public page showcasing your estate: one link to share with residents and prospective buyers."
+          description="Upgrade to Pro to get a public page showcasing your estate, with one link to share with residents and prospective buyers."
         >
           <div />
         </ProFeatureGate>

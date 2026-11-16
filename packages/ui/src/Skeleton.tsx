@@ -32,7 +32,6 @@ export const PageLoadingState = () => {
   );
 };
 
-// Shaped like DataTable: header band, wider first column, amounts on the right.
 const TableFrame = ({ rows, columns }: { rows: number; columns: number }) => (
   <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
     <div className="flex items-center gap-6 border-b border-border bg-secondary/40 px-5 py-3">
@@ -200,7 +199,6 @@ const StatGroupFrame = ({ items }: { items: number }) => (
   </div>
 );
 
-/** Shaped like StatGroup panels; `groups` gives the number of figures in each panel. */
 export const StatGroupSkeleton = ({
   groups = [4],
   className,

@@ -11,9 +11,9 @@ export type NavItem<Id extends string = string> = NavLabel & {
   id: Id;
   href: string;
   icon: ElementType;
+  phoneBarLabel?: string;
   /** Shown with a lock badge below this plan; the page itself still enforces it. */
   plan?: NavPlan;
-  /** Hidden while this feature is switched off. */
   flag?: NavFlag;
 };
 
@@ -28,14 +28,13 @@ export interface RoleNavigationConfig<Id extends string = string> {
   dashboardHref: string;
   items: readonly NavItem<Id>[];
   groups: readonly NavGroupConfig<Id>[];
-  /** Pinned above the groups, in the rail and (first five) in the phone bar. */
   primary: readonly Id[];
-  /** Moved out of their groups into a closing "Account and preferences" group. */
   utility?: readonly Id[];
 }
 
 export interface GroupedSidebarItem {
   label?: ReactNode;
+  phoneBarLabel?: string;
   href: string;
   icon: ElementType;
   locked?: boolean;
@@ -53,6 +52,5 @@ export interface GroupedSidebarGroup {
 
 export interface NavigationGates {
   isLocked?: (plan: NavPlan) => boolean;
-  /** Omitted means nothing is hidden. */
   flags?: Record<NavFlag, boolean>;
 }

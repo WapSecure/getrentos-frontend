@@ -15,9 +15,6 @@ import RenterTabs from '@/app/(app)/(renter)/_layout';
 import ResidentTabs from '@/app/(app)/(resident)/_layout';
 import { MIN_TOUCH_TARGET, renderWithTheme, type HostElement } from './helpers/a11y';
 
-// The real tab bar is React Navigation's: it names each tab from `title` and gives it the tab
-// role. What the app controls is the options it passes, so the layouts render their screens'
-// options into plain views here.
 jest.mock('expo-router', () => {
   const { createElement } = jest.requireActual<typeof import('react')>('react');
   const { View } = jest.requireActual<typeof import('react-native')>('react-native');
@@ -76,7 +73,6 @@ describe.each(LAYOUTS)('%s tab bar', (_role, Layout) => {
         spoken: expect.any(String),
       });
       expect({ name, icon: typeof options.tabBarIcon }).toEqual({ name, icon: 'function' });
-      // A hidden label leaves the icon alone, so the tab then needs its own accessibility label.
       if ((options.tabBarShowLabel ?? bar.tabBarShowLabel) === false) {
         expect({ name, label: options.tabBarAccessibilityLabel }).toEqual({
           name,

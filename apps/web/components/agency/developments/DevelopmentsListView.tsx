@@ -60,7 +60,6 @@ export function DevelopmentsListView() {
     },
   });
 
-  // Best effort: the list still works when the counts do not load.
   const counts = useQuery({
     queryKey: ENQUIRY_COUNTS_KEY,
     queryFn: async () => {

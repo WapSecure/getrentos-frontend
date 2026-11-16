@@ -16,6 +16,12 @@ describe('notification routes', () => {
     expect(routeForActionUrl('/owner/viewings')).toBe('/(app)/owner-viewings');
   });
 
+  it("opens a renter's viewing request on an owner's own viewings screen", () => {
+    const n = { type: 'VIEWING_REQUESTED', actionUrl: '/landlord/viewing-requests' };
+    expect(routeForNotification(n, 'owner')).toBe('/(app)/owner-viewings?tab=renters');
+    expect(routeForNotification(n, 'landlord')).toBe('/(app)/landlord-viewings');
+  });
+
   it('falls back by type when the action has no native screen', () => {
     expect(routeForNotification({ type: 'ESCROW_RELEASED' }, 'buyer')).toBe(
       '/(app)/buyer-transactions'
@@ -250,5 +256,28 @@ describe('realtor and client updates', () => {
       '/(app)/agency-invite-claim?token=xyz'
     );
     expect(routeForActionUrl('/agency-invite/claim')).toBeNull();
+  });
+});
+
+describe('buyer representatives', () => {
+  it('takes an appointed representative to the buyers they represent, whatever their role', () => {
+    expect(routeForNotification({ actionUrl: '/representing' }, 'renter')).toBe(
+      '/(app)/land-representing'
+    );
+    expect(routeForNotification({ actionUrl: '/land/representing' }, 'landlord')).toBe(
+      '/(app)/land-representing'
+    );
+    expect(routeForActionUrl('/representing/transactions/T1')).toBe(
+      '/(app)/land-represented?kind=transaction&id=T1'
+    );
+    expect(routeForActionUrl('/land/representing/purchases/P1')).toBe(
+      '/(app)/land-represented?kind=purchase&id=P1'
+    );
+  });
+
+  it('takes the buyer to their representatives', () => {
+    expect(routeForNotification({ actionUrl: '/buyer/representatives' }, 'buyer')).toBe(
+      '/(app)/buyer-land-representatives'
+    );
   });
 });

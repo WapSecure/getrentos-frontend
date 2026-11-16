@@ -12,21 +12,15 @@ import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useDepositIdentityNotice } from '@/components/purchases/DepositIdentityNotice';
 
-/**
- * Paying a sale's deposit into Payment Protection: the provider choice, the checkout and what to
- * say afterwards. Used by the transactions list and the purchase workspace.
- */
 export function DepositPaySheet({
   tx,
   open,
   onClose,
   onSettled,
 }: {
-  /** Kept by the caller while the sheet slides away. */
   tx: BuyerTransaction | null;
   open: boolean;
   onClose: () => void;
-  /** After the checkout returns or the payment is recorded, so the caller can refresh. */
   onSettled: () => void;
 }) {
   const toast = useToast();

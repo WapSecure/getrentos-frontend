@@ -8,7 +8,6 @@ import type {
   RoleNavigationConfig,
 } from './types';
 
-/** Typed ids: a group, primary or utility entry naming an unknown item fails to compile. */
 export const defineRoleNavigation = <const Id extends string>(config: {
   ariaLabel: string;
   workspaceLabel: string;
@@ -29,6 +28,7 @@ export function resolveRoleNavigation(
     const locked = Boolean(item.plan && gates?.isLocked?.(item.plan));
     return {
       label: item.labelKey ? translate(item.labelKey) : item.label,
+      phoneBarLabel: item.phoneBarLabel,
       href: item.href,
       icon: item.icon,
       locked,

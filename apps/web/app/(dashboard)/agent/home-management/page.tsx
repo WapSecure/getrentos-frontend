@@ -6,7 +6,7 @@ import { HomeManagementWorkspace } from '@/components/home-management/HomeManage
 export default function AgentHomeManagementPage() {
   return (
     <div className="p-6">
-      <HomeManagementWorkspace role="manager" eyebrow="Work" />
+      <HomeManagementWorkspace role="manager" eyebrow="Work" recordOnly />
     </div>
   );
 }

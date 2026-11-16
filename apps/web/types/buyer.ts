@@ -95,7 +95,6 @@ export interface BuyerOfferMessage {
   timestamp: string;
 }
 
-/** Recorded history; `actor` is a display name, and staff show as "Sureground". */
 export interface EscrowActivityLogEntry {
   id: string;
   actor: string;
@@ -115,7 +114,6 @@ export interface BuyerEscrowTransaction {
   /** The agreed deposit, else the price. */
   depositAmount?: number;
   escrowStatus: BuyerEscrowStatus;
-  /** Operational stage, deposit status and legal status, kept separate. */
   statuses?: AcquisitionStatuses;
   nextAction?: NextAction | null;
   /** The sale's steps (tracking only: no step moves money). */

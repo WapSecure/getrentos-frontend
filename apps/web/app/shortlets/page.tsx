@@ -5,6 +5,7 @@ import { ShortletMarketplaceBrowser } from '@/components/shortlet/ShortletMarket
 import { ListingItemListJsonLd } from '@/components/seo/ListingItemListJsonLd';
 import { fetchFirstPage, isFilteredView, shortletFirstPagePath } from '@/lib/marketFirstPage';
 import type { ShortletListing } from '@/types/shortlet';
+import { SITE_OG_IMAGES } from '@/lib/site';
 
 const baseMetadata: Metadata = {
   title: 'Shortlets: Furnished Short-Stay Apartments',
@@ -12,15 +13,16 @@ const baseMetadata: Metadata = {
     'Book furnished short-stay apartments and homes in Nigeria. See the total before you pay; Sureground holds your payment until at least 24 hours after check-in.',
   alternates: { canonical: '/shortlets' },
   openGraph: {
+    images: SITE_OG_IMAGES,
     title: 'Shortlets: Furnished Short-Stay Apartments',
-    description: 'Book verified, furnished short-stay apartments and homes on Sureground.',
+    description:
+      'Book furnished short-stay apartments and homes in Nigeria. See the total before you pay, with your payment held until after check-in.',
     url: '/shortlets',
     type: 'website',
   },
 };
 
-// Filtered and searched views share the unfiltered page's canonical and stay out of the index,
-// so query strings can't multiply into thin duplicate pages; links on them are still followed.
+// Query-string views share the unfiltered canonical and stay noindex, so they can't multiply into thin duplicates.
 export async function generateMetadata({
   searchParams,
 }: {
@@ -36,7 +38,6 @@ export default async function ShortletMarketplacePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  // The browser only uses it for the unfiltered view; the item list is only for the indexable page.
   const [filtered, initialData] = await Promise.all([
     searchParams.then(isFilteredView),
     fetchFirstPage(shortletFirstPagePath(), (item: ShortletListing) => item),

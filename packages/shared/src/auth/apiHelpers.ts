@@ -244,10 +244,7 @@ export async function authFetch<T>(
   }
 }
 
-/**
- * `authFetch` for a multipart POST that reports upload progress and can be cancelled.
- * Same bearer and one refresh-and-retry on a 401 (progress restarts from 0); no step-up, which no upload route asks for.
- */
+/** One refresh-and-retry on a 401 (progress restarts from 0); no step-up, which no upload route asks for. */
 export async function authUpload<T>(
   path: string,
   body: FormData,

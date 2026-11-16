@@ -7,7 +7,6 @@ import {
 import { ListingCard } from '@sureground/ui';
 import { developmentPath } from '@/lib/publicDevelopments';
 
-/** A live development in a grid: the shared listing card, worded for off-plan. */
 export function DevelopmentCard({
   development: d,
   eager = false,

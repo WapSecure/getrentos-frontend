@@ -5,9 +5,7 @@ export type AgencyOwnerInviteStatus = 'PENDING' | 'CLAIMED' | 'REVOKED' | 'EXPIR
 
 export interface AgencyOwnerInvite {
   id: string;
-  /** Empty when the invite went by phone number to an account with no email. */
   email: string;
-  /** The owner's number, masked ("+234 803 *** 4567"), when the invite has no email. */
   phoneMasked?: string | null;
   name: string | null;
   note: string | null;
@@ -16,15 +14,12 @@ export interface AgencyOwnerInvite {
   claimedAt: string | null;
   expiresAt: string;
   createdAt: string;
-  /** Only on a new invite: how it reached them (IN_APP is a notification in their app). */
   deliveredBy?: ('EMAIL' | 'IN_APP')[];
 }
 
 export interface AgencyOwnerInviteClaimInfo {
   organizationName: string;
-  /** Empty for an invite sent by phone number. */
   email: string;
-  /** Set instead of email for a phone invite: the invited number, masked. */
   phoneMasked?: string | null;
   status: AgencyOwnerInviteStatus;
   expired: boolean;

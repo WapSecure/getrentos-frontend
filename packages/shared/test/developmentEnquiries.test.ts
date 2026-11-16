@@ -56,7 +56,6 @@ test('drops malformed questions rather than guessing', () => {
   assert.equal(buyerDevelopmentEnquiryOf(buyerApi({ createdAt: 'yesterday' })), undefined);
   assert.equal(buyerDevelopmentEnquiryOf(buyerApi({ message: '   ' })), undefined);
   assert.equal(buyerDevelopmentEnquiryOf(buyerApi({ development: { id: 'dev-1' } })), undefined);
-  // "Answered" without an answer would promise something that is not there.
   assert.equal(buyerDevelopmentEnquiryOf(buyerApi({ status: 'ANSWERED' })), undefined);
   assert.equal(
     buyerDevelopmentEnquiriesOf([buyerApi(), buyerApi({ status: 'X' }), 'junk']).length,
@@ -90,7 +89,6 @@ test('reads a developer inbox item without contact details', () => {
   assert.equal(e.buyerName, 'Ada Buyer');
   assert.equal('buyerEmail' in e, false);
   assert.equal('buyerPhone' in e, false);
-  // A name for who answered only appears with an answer.
   assert.equal(e.answeredByName, undefined);
   assert.equal(
     developerDevelopmentEnquiryOf(developerApi({ buyerName: '' }))?.buyerName,

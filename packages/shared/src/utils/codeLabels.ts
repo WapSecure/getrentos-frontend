@@ -25,10 +25,8 @@ const CODE_LABELS: Record<string, string> = {
   ESCROW_REVIEW_REQUESTED: 'Escrow review requested',
 };
 
-// Kept in capitals when a code is humanised word by word.
 const ACRONYMS = new Set(['NIN', 'BVN', 'CAC', 'ID', 'KYC', 'AML', 'VAT', 'NGN', 'TIN', 'PEP']);
 
-/** A code such as "C_OF_O" or "ACCEPTED" as a sentence-case label; unknown codes are humanised. */
 export const codeLabel = (code: string | null | undefined): string => {
   if (!code) return '';
   const trimmed = code.trim();
@@ -47,11 +45,10 @@ export const codeLabel = (code: string | null | undefined): string => {
 
 const EMBEDDED_CODE = /\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/g;
 
-/** Replaces UPPER_SNAKE codes inside a sentence, e.g. "Ownership proof (C_OF_O)". */
 export const humaniseCodesInText = (text: string | null | undefined): string =>
   text ? text.replace(EMBEDDED_CODE, (code) => codeLabel(code)) : '';
 
-/** An unambiguous date and time, e.g. "9 Nov 2026, 14:05", never "09/11/2026". */
+/** Unambiguous: "9 Nov 2026, 14:05", never "09/11/2026". */
 export const formatDateTime = (value: string | Date): string => {
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return '';

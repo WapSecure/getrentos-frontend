@@ -30,6 +30,7 @@ import { useProSettings } from '@/hooks/useProSettings';
 import { ProfileCard } from '@/components/account/AccountParts';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { RepresentingGroup } from '@/components/account/RepresentingGroup';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -198,6 +199,7 @@ export default function RealtorAccount() {
       <ProfileCard role="Realtor" fallbackName="Sureground realtor" />
 
       <WorkspaceSwitcher />
+      <RepresentingGroup />
 
       <SettingsGroup title="Your business" items={business} />
       <SettingsGroup title="Trust & reputation" items={trust} />

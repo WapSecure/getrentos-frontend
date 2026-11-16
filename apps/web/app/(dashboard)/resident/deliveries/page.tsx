@@ -24,7 +24,7 @@ const formatDateTime = (value: string) =>
   new Intl.DateTimeFormat('en-NG', {
     day: 'numeric',
     month: 'short',
-    hour: 'numeric',
+    hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(value));
 
@@ -39,7 +39,12 @@ export default function ResidentDeliveriesPage() {
     <>
       <PageHeader
         title="Deliveries"
-        description={<>{data?.total ?? 0} deliveries for your household</>}
+        description={
+          <>
+            {data?.total ?? 0} {(data?.total ?? 0) === 1 ? 'delivery' : 'deliveries'} for your
+            household
+          </>
+        }
       />
 
       <div className="mb-8">

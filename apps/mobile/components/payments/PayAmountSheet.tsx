@@ -70,16 +70,22 @@ export function PayAmountSheet({ payment, onClose, onPay, providers, providerErr
       busy={busy}
       howMuch={
         <View style={{ gap: spacing.md }}>
-          <RadioGroup
-            accessibilityLabel="How much to pay"
-            variant="card"
-            value={mode}
-            onChange={setMode}
-            options={[
-              { value: 'full', label: 'Pay in full', description: formatNaira(owed) },
-              { value: 'part', label: 'Pay part', description: 'Choose an amount' },
-            ]}
-          />
+          {payment?.fullPaymentOnly ? (
+            <Text variant="caption" color="mutedForeground">
+              This is your first rent, so it is paid in full: your keys follow once it is held.
+            </Text>
+          ) : (
+            <RadioGroup
+              accessibilityLabel="How much to pay"
+              variant="card"
+              value={mode}
+              onChange={setMode}
+              options={[
+                { value: 'full', label: 'Pay in full', description: formatNaira(owed) },
+                { value: 'part', label: 'Pay part', description: 'Choose an amount' },
+              ]}
+            />
+          )}
           {mode === 'part' ? (
             <View style={{ gap: spacing.xs }}>
               <CurrencyField

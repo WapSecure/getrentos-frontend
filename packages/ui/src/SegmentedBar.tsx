@@ -17,12 +17,10 @@ const TONE: Record<SegmentedBarSegment['tone'], string> = {
 
 interface SegmentedBarProps {
   segments: SegmentedBarSegment[];
-  /** What the whole bar measures, for screen readers ("Units by status"). */
   label: string;
   className?: string;
 }
 
-/** Parts of a whole (occupied, reserved, vacant) as one bar with a legend. */
 export function SegmentedBar({ segments, label, className }: SegmentedBarProps) {
   const total = segments.reduce((sum, s) => sum + Math.max(0, s.value), 0);
   const summary = segments.map((s) => `${s.label} ${s.value}`).join(', ');

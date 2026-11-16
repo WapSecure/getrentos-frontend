@@ -80,7 +80,6 @@ describe('renter maintenance cards', () => {
   it('every card action has a role, a name and a 44pt target', async () => {
     await renderScreen();
     const pressables = expectAccessiblePressables(root());
-    // Back, report, cancel on the open request, rate on the unrated repair.
     expect(pressables).toHaveLength(4);
     expect(screen.getByRole('button', { name: 'Report an issue' })).toBeTruthy();
     for (const name of [

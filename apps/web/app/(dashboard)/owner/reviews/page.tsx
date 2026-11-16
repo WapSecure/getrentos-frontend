@@ -8,6 +8,7 @@ import { getInitials, formatDate } from '@/lib/format';
 import { ownerService, type OwnerReview } from '@/services/ownerService';
 import { ownerKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
+import { TenantReviewsCard } from '@/components/shared/reviews/TenantReviewsCard';
 
 const StarRow = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
@@ -58,45 +59,49 @@ export default function OwnerReviewsPage() {
         description="See how buyers rate their experience with you"
       />
 
-      <div className="grid lg:grid-cols-3 gap-6 mb-6">
-        <div className="bg-card rounded-2xl border border-border p-6 flex flex-col items-center justify-center text-center">
-          <p className="text-4xl font-bold text-foreground">{overallRating.toFixed(1)}</p>
-          <StarRow rating={Math.round(overallRating)} />
-          <p className="text-xs text-muted-foreground mt-2">
-            Based on {summary?.reviewCount ?? total} review
-            {summary?.reviewCount === 1 ? '' : 's'}
-          </p>
-        </div>
-
-        <div className="lg:col-span-2 bg-card rounded-2xl border border-border p-6 space-y-4">
-          {categories.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No category ratings yet
+      {(summary?.reviewCount ?? total) > 0 && (
+        <div className="grid lg:grid-cols-3 gap-6 mb-6">
+          <div className="bg-card rounded-2xl border border-border p-6 flex flex-col items-center justify-center text-center">
+            <p className="text-4xl font-bold text-foreground">{overallRating.toFixed(1)}</p>
+            <StarRow rating={Math.round(overallRating)} />
+            <p className="text-xs text-muted-foreground mt-2">
+              Based on {summary?.reviewCount ?? total} review
+              {summary?.reviewCount === 1 ? '' : 's'}
             </p>
-          ) : (
-            categories.map((category) => {
-              const Icon = category.icon;
-              return (
-                <div key={category.label} className="flex items-center gap-3">
-                  <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span className="text-sm text-muted-foreground w-36 shrink-0">
-                    {category.label}
-                  </span>
-                  <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-primary"
-                      style={{ width: `${(category.value / 5) * 100}%` }}
-                    />
+          </div>
+
+          <div className="lg:col-span-2 bg-card rounded-2xl border border-border p-6 space-y-4">
+            {categories.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No category ratings yet
+              </p>
+            ) : (
+              categories.map((category) => {
+                const Icon = category.icon;
+                return (
+                  <div key={category.label} className="flex items-center gap-3">
+                    <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <span className="text-sm text-muted-foreground w-36 shrink-0">
+                      {category.label}
+                    </span>
+                    <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${(category.value / 5) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-foreground w-8 text-right">
+                      {category.value.toFixed(1)}
+                    </span>
                   </div>
-                  <span className="text-sm font-medium text-foreground w-8 text-right">
-                    {category.value.toFixed(1)}
-                  </span>
-                </div>
-              );
-            })
-          )}
+                );
+              })
+            )}
+          </div>
         </div>
-      </div>
+      )}
+
+      <TenantReviewsCard />
 
       {isLoading ? (
         <ListSkeleton rows={3} variant="cards" label="Loading reviews" />

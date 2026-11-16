@@ -51,7 +51,6 @@ export const formatLagosDate = (dateString: string, style: 'short' | 'long' = 's
   });
 };
 
-// Moved to @sureground/shared so the mobile app shows the same Lagos and local times.
 export { formatDualTime, isValidTimeZone, timeZoneCity } from '@sureground/shared';
 
 export const formatRelativeTime = (dateString: string): string => {
@@ -69,7 +68,10 @@ export const formatRelativeTime = (dateString: string): string => {
 };
 
 export const getInitials = (fullName: string): string => {
-  const parts = fullName.trim().split(' ').filter(Boolean);
+  const parts = fullName
+    .trim()
+    .split(/\s+/)
+    .filter((w) => /^\p{L}/u.test(w));
   const first = parts[0]?.[0] || '';
   const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
   return `${first}${last}`.toUpperCase() || 'U';

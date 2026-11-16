@@ -1,6 +1,7 @@
-import { formatLocation } from '@sureground/shared';
+import { formatLocation, RENT_PROTECTION_RULE } from '@sureground/shared';
 import { Badge } from '@sureground/ui/Badge';
 import type { Metadata } from 'next';
+import { listingPageTitle, metaDescription } from '@/lib/seoText';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import {
@@ -42,7 +43,7 @@ const MARKET_NOUN: Record<PublicDetailMarket, string> = {
 };
 
 const PROTECTION_LINE: Record<PublicDetailMarket, string> = {
-  rent: 'Pay through Sureground: we hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
+  rent: RENT_PROTECTION_RULE,
   sale: 'Pay through Sureground: we hold your deposit until the seller hands over the keys and you confirm.',
   land: 'Pay through Sureground: we hold your money and only release it to the seller once the conveyance steps are confirmed.',
 };
@@ -54,15 +55,18 @@ export async function publicListingMetadata(
   const listing = await fetchPublicListingBySegment(market, segment);
   if (!listing) return { title: 'Listing not found', robots: { index: false } };
   const path = publicListingPath(listing);
-  const description =
-    listing.description?.slice(0, 160) ||
-    `${listing.title} in ${formatLocation(listing.location)}: verified listing on Sureground with payment protection.`;
+  const location = formatLocation(listing.location);
+  const description = metaDescription(
+    listing.description ||
+      `${listing.title} in ${location}. See what has been checked and pay through Sureground Payment Protection.`
+  );
+  const title = listingPageTitle(listing.title, location);
   return {
-    title: `${listing.title}: ${formatLocation(listing.location)}`,
+    title,
     description,
     alternates: { canonical: path },
     openGraph: {
-      title: `${listing.title}: ${formatLocation(listing.location)}`,
+      title,
       description,
       url: `${SITE_URL}${path}`,
       type: 'website',
@@ -104,7 +108,6 @@ export async function PublicListingPage({
           <div className="space-y-10">
             <header className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
-                {/* Same trust chain as the browse card; the bare flag only where there is none. */}
                 {listing.trustChain ? (
                   <TrustChainBadge chain={listing.trustChain} />
                 ) : (

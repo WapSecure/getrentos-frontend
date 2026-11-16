@@ -9,10 +9,7 @@ import { offerComparisonService } from '@/services/offerComparisonService';
 import { formatCurrency } from '@/lib/format';
 import type { ComparedOffer, OfferComparison } from '@/types/offerComparison';
 
-/**
- * After the seller counters, the offer is the buyer's turn straight away. The comparison is slow
- * to rebuild (and rate limited), so the cached copy is updated before it refetches.
- */
+// The comparison is slow to rebuild (and rate limited), so the cached copy is updated before it refetches.
 export function markCounterSent(queryClient: QueryClient, offerId: string, amount: number): void {
   queryClient.setQueryData<OfferComparison>(sellerOfferKeys.comparison, (current) =>
     current

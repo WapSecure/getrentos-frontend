@@ -7,7 +7,6 @@ import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 
 const CAPSULE = 'rounded-full';
 
-/** Shown only while Diaspora Invest is switched on (checked server-side by the page). */
 export const DiasporaFeature = () => (
   <section aria-labelledby="diaspora-title" className="py-20 md:py-28">
     <Container className="grid items-center gap-14 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:gap-20">

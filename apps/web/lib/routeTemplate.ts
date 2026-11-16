@@ -12,10 +12,7 @@ const decode = (segment: string) => {
   }
 };
 
-/**
- * The route pattern of the current page (`/rent/[id]`), built from the path and the route's dynamic
- * params. Never the address bar: no query string, no ids, no slugs. Anything unexpected becomes `[id]`.
- */
+/** Never the address bar: no query string, ids or slugs leave the page. */
 export function routeTemplate(pathname: string, params: RouteParams | null | undefined): string {
   const names = new Map<string, string>();
   for (const [name, value] of Object.entries(params ?? {})) {
@@ -27,7 +24,6 @@ export function routeTemplate(pathname: string, params: RouteParams | null | und
     const segment = decode(raw);
     const named = names.get(segment);
     const next = named ?? (SAFE_SEGMENT.test(segment) && !ID_LIKE.test(segment) ? segment : '[id]');
-    // A catch-all fills several segments; it is one segment of the pattern.
     if (next.startsWith('[...') && out[out.length - 1] === next) continue;
     out.push(next);
   }

@@ -153,7 +153,6 @@ export const DiscoverCompareDrawer = ({
                       );
                     })}
                   </tr>
-                  {/* One row, read from the trust chain the cards show, so it cannot contradict them. */}
                   <tr>
                     <td className="py-3 px-4 text-sm text-muted-foreground">Verification</td>
                     {properties.map((property) => {

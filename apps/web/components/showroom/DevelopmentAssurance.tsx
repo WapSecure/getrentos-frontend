@@ -9,7 +9,6 @@ import { ShowroomSection as Section } from './ShowroomSection';
 const day = (iso: string) =>
   new Date(iso).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' });
 
-/** What Sureground staff checked before this development went live, and what nobody checked. */
 export function DevelopmentChecks({ development }: { development: ShowroomDevelopment }) {
   return (
     <Section id="checks" title="What we checked">
@@ -48,7 +47,6 @@ export function DevelopmentChecks({ development }: { development: ShowroomDevelo
   );
 }
 
-/** Said plainly, near the top of the price information: the developer takes the money, not Sureground. */
 export function DevelopmentPaymentNotice({ compact = false }: { compact?: boolean }) {
   return (
     <div

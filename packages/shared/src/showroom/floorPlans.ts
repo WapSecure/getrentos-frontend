@@ -1,9 +1,5 @@
 import type { MediaItem } from './types';
 
-/**
- * How far a floor plan's sizes can be trusted. `estimated`: the lister's own figures. `checked`: a
- * Sureground staff member checked them. A size is never shown without one of these labels.
- */
 export type FloorPlanMeasurement = 'estimated' | 'checked';
 
 export interface ShowroomFloorPlanRoom {
@@ -12,7 +8,6 @@ export interface ShowroomFloorPlanRoom {
   /** Metres. Both sides or neither. */
   widthM?: number;
   lengthM?: number;
-  /** The `id` of a photo in the listing's media. */
   photoMediaId?: string;
   /** The room's tap target on the plan image, as percentages from the top left. Both or neither. */
   x?: number;
@@ -22,15 +17,12 @@ export interface ShowroomFloorPlanRoom {
 export interface ShowroomFloorPlan {
   id: string;
   levelName: string;
-  /** The `id` of the plan image in the listing's media. */
   imageMediaId: string;
   measurement: FloorPlanMeasurement;
-  /** Checked plans only. */
   checkedAt?: string;
   rooms: ShowroomFloorPlanRoom[];
 }
 
-/** As the API sends it; read only through `floorPlansOf`. */
 export interface FloorPlanDto {
   id: string;
   levelName: string;
@@ -61,11 +53,6 @@ const metres = (v: unknown) =>
 const percent = (v: unknown) =>
   typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 100 ? v : undefined;
 
-/**
- * The API's structured floor plans, checked against the listing's media. A level shows only when
- * its plan image is in `media`; a room's photo link only when that photo is. Anything malformed is
- * dropped, and a plan is only `checked` when the API says CHECKED with a check time.
- */
 export function floorPlansOf(raw: unknown, media: MediaItem[]): ShowroomFloorPlan[] {
   if (!Array.isArray(raw)) return [];
   const images = new Set(media.filter((m) => m.kind === 'image').map((m) => m.id));
@@ -113,19 +100,14 @@ export function floorPlansOf(raw: unknown, media: MediaItem[]): ShowroomFloorPla
   return plans;
 }
 
-/** "4.2", "3.85", "4": at most two decimals, no trailing zeros. */
 export const formatMetres = (n: number) => String(Number(n.toFixed(2)));
 
-/** The plan-level label. These are the only two wordings a size may carry. */
 export const FLOOR_PLAN_MEASUREMENT_LABEL: Record<FloorPlanMeasurement, string> = {
   estimated: 'Estimated',
   checked: 'Measured, checked by Sureground',
 };
 
-/**
- * One room's size with its label, or undefined when the room has no size. Never an area: an area
- * worked out from estimates would look more exact than it is.
- */
+/** Never an area: one worked out from estimates would look more exact than it is. */
 export function roomSizeLabel(
   room: Pick<ShowroomFloorPlanRoom, 'widthM' | 'lengthM'>,
   measurement: FloorPlanMeasurement
@@ -137,6 +119,5 @@ export function roomSizeLabel(
     : `about ${size} (estimated)`;
 }
 
-/** The structured plan drawn on the media item at `mediaId`, if any. */
 export const floorPlanFor = (plans: ShowroomFloorPlan[] | undefined, mediaId: string) =>
   plans?.find((p) => p.imageMediaId === mediaId);

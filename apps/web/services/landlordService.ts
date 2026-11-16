@@ -263,9 +263,7 @@ export interface TenantReview {
   tenantName: string;
   propertyName: string;
   rating: number;
-  communication: number;
-  propertyCondition: number;
-  responsiveness: number;
+  category: string;
   comment: string;
   createdAt: string;
 }
@@ -273,9 +271,32 @@ export interface TenantReview {
 export interface LandlordReviewSummary {
   averageRating: number;
   reviewCount: number;
-  averageCommunication: number;
-  averagePropertyCondition: number;
-  averageResponsiveness: number;
+  averageAsLandlord: number | null;
+  averagePropertyCondition: number | null;
+  landlordReviewCount: number;
+  propertyReviewCount: number;
+}
+
+export interface PendingTenantReview {
+  leaseId: string;
+  tenantName: string;
+  propertyName: string;
+  leaseEnd: string;
+}
+
+export interface WrittenTenantReview {
+  id: string;
+  leaseId: string | null;
+  tenantName: string;
+  propertyName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
+export interface TenantReviewsResponse {
+  pending: PendingTenantReview[];
+  written: WrittenTenantReview[];
 }
 
 export interface LandlordMaintenanceSummary {
@@ -409,13 +430,11 @@ export const landlordService = {
     );
   },
 
-  /** With `upload` options it goes over XHR so it can report progress and be cancelled. */
   async uploadPropertyMedia(
     kind: 'image' | 'video',
     file: File,
     upload?: UploadOptions
   ): Promise<ApiResponse<{ key: string; kind: 'image' | 'video' }>> {
-    // Videos go straight to storage, so a large tour never passes through the API.
     if (kind === 'video')
       return safeCall(() => uploadVideoDirect('/landlord/properties', file, upload));
     const form = new FormData();
@@ -612,7 +631,7 @@ export const landlordService = {
   },
 
   async listLeases(
-    params: { status?: string; page?: number; pageSize?: number } = {}
+    params: { status?: string; leaseId?: string; page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<Lease>>> {
     return safeCall(() => authFetch<Paginated<Lease>>(`/landlord/leases${toQuery(params)}`));
   },
@@ -1311,6 +1330,20 @@ export const landlordService = {
 
   async getReviewSummary(): Promise<ApiResponse<LandlordReviewSummary>> {
     return safeCall(() => authFetch('/landlord/reviews/summary'));
+  },
+
+  async getTenantReviews(): Promise<ApiResponse<TenantReviewsResponse>> {
+    return safeCall(() => authFetch('/landlord/reviews/tenants'));
+  },
+
+  async reviewTenant(input: {
+    leaseId: string;
+    rating: number;
+    comment?: string;
+  }): Promise<ApiResponse<WrittenTenantReview>> {
+    return safeCall(() =>
+      authFetch('/landlord/reviews/tenants', { method: 'POST', body: JSON.stringify(input) })
+    );
   },
 
   async listConversations(

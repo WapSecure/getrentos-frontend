@@ -14,15 +14,19 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/renter/documents': '/(app)/documents',
   '/renter/saved': '/(app)/saved',
   '/renter/trust-score': '/(app)/trust-score',
+  '/renter/reviews': '/(app)/reviews',
   '/renter/viewings': '/(app)/viewings',
   '/renter/roommates': '/(app)/roommates',
   '/buyer/offers': '/(app)/(buyer)/offers',
   '/buyer/transactions': '/(app)/buyer-transactions',
   '/buyer/viewings': '/(app)/buyer-viewings',
   '/buyer/messages': '/(app)/(buyer)/messages',
-  // The answered notification links buyers here; anyone else gets `/developments/<id>`.
+  '/buyer/representatives': '/(app)/buyer-land-representatives',
+  '/representing': '/(app)/land-representing',
+  '/land/representing': '/(app)/land-representing',
   [ROUTES.BUYER_DEVELOPER_QUESTIONS]: DEVELOPER_QUESTIONS_ROUTE,
   '/landlord/applications': '/(app)/landlord-applications',
+  '/landlord/reviews': '/(app)/landlord-reviews',
   '/landlord/payments': '/(app)/landlord-payments',
   '/landlord/maintenance': '/(app)/landlord-maintenance',
   '/landlord/leases': '/(app)/landlord-leases',
@@ -170,6 +174,11 @@ const ESTATE_FALLBACK: [prefix: string, route: string][] = [
   ['ESTATE_POLL_', '/(app)/estate-polls'],
 ];
 
+/** Screens the backend links any property controller to. Mirrors PORTAL_LINKS in apps/web/lib/portalLinks.ts. */
+const OWNER_LANDLORD_LINKS: Record<string, string> = {
+  '/(app)/landlord-viewings': '/(app)/owner-viewings?tab=renters',
+};
+
 const HOST_PORTALS = new Set<Portal>(['owner', 'landlord']);
 
 // Others (confirmed, cancelled) go to whichever side didn't act, so they can't be routed by type alone.
@@ -195,11 +204,21 @@ export function routeForActionUrl(url?: string | null): string | null {
     .replace(/^\/dashboard/, '')
     .replace(/\/$/, '');
   if (WEB_PATH_TO_ROUTE[path]) return WEB_PATH_TO_ROUTE[path];
-  // Invitations carry their token: a phone-only invitee accepts from the notification itself.
   const token = url.match(/[?&]token=([^&#\s]+)/)?.[1];
   if (token && path === '/agency/join') return `/(app)/agency-join?token=${token}`;
   if (token && path === '/agency-invite/claim') return `/(app)/agency-invite-claim?token=${token}`;
   if (path.startsWith('/owner/land/')) return '/(app)/owner-land';
+  const represented = path.match(/^(?:\/land)?\/representing\/(purchases|transactions)\/([^/]+)$/);
+  if (represented) {
+    const kind = represented[1] === 'purchases' ? 'purchase' : 'transaction';
+    let id = represented[2];
+    try {
+      id = decodeURIComponent(id);
+    } catch {
+      // Keep the id as it came.
+    }
+    return `/(app)/land-represented?kind=${kind}&id=${encodeURIComponent(id)}`;
+  }
   return developmentRouteForPath(path);
 }
 
@@ -246,10 +265,7 @@ export function routeForNotification(
     return `/(app)/shortlet-stay/${bookingId}`;
   }
   const direct = routeForActionUrl(actionUrl);
-  if (direct) return direct;
-  // The developer answered: their answer shows under "Your questions" on the development screen.
-  // DEVELOPMENT_ENQUIRY_REMINDER (to the developer's firm) is left to the notification list: the
-  // app has no developer inbox, and the public page cannot answer a question.
+  if (direct) return (portal === 'owner' && OWNER_LANDLORD_LINKS[direct]) || direct;
   if (type === 'DEVELOPMENT_ENQUIRY_ANSWERED' && isDevelopmentId(developmentId)) {
     return developmentRoute(developmentId);
   }

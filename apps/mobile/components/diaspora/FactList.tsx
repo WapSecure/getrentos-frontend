@@ -4,12 +4,10 @@ import { Divider, Text, useTheme } from '@sureground/ui-native';
 
 export interface Fact {
   label: string;
-  /** Text, or a badge. Rows with no value are left out. */
   value: ReactNode;
   hint?: string;
 }
 
-/** Label and value rows, the native form of the web's DescriptionList "rows" layout. */
 export function FactList({ facts }: { facts: Fact[] }) {
   const { spacing } = useTheme();
   const shown = facts.filter((f) => f.value !== null && f.value !== undefined && f.value !== '');

@@ -18,7 +18,6 @@ const NAME_MATCH_STYLE: Record<
   UNREADABLE: { label: 'Name unreadable', variant: 'neutral' },
 };
 
-/** What a reviewer must weigh before approving: every problem the cross-check raised, in words. */
 export function docCheckIssues(result: OwnershipDocCheck, documentLabel: string): string[] {
   if (!result.coverage.documentRead) {
     return [`${documentLabel}: the document could not be read automatically.`];

@@ -114,7 +114,7 @@ export default function RealtorHome() {
     <DashboardHeader
       eyebrow={dashboardGreeting()}
       title={firstName(profile?.legalName)}
-      roleBadge="RL"
+      roleBadge="Realtor"
       subtitle={
         today.length
           ? `${today.length} ${today.length === 1 ? 'viewing' : 'viewings'} today`
@@ -153,7 +153,7 @@ export default function RealtorHome() {
           {
             label: 'Live listings',
             value: d.publishedListings,
-            subtitle: 'Published on your behalf',
+            subtitle: 'Published for your clients',
             Icon: Megaphone,
             onPress: () => router.push('/(app)/(realtor)/listings'),
           },
@@ -237,7 +237,6 @@ export default function RealtorHome() {
     <Screen refreshing={dashboard.isRefetching} onRefresh={refresh}>
       {header}
 
-      {/* The first nudge leads with a blue button; the rest stay as compact cards. */}
       {nudges.map((n, i) => (
         <AttentionCard
           key={n.key}
@@ -282,6 +281,9 @@ export default function RealtorHome() {
         )}
       </View>
 
+      <IdentityNudge unlocks="client invites and publishing listings" />
+      <IdentityNudge requirement="licence" unlocks="listings and clients" />
+
       <Earnings
         loading={earnings.isPending}
         locked={proLocked}
@@ -290,9 +292,6 @@ export default function RealtorHome() {
         showMoney={showMoney}
         onToggle={toggleMoney}
       />
-
-      <IdentityNudge unlocks="client invites and publishing listings" />
-      <IdentityNudge requirement="licence" unlocks="listings and clients" />
 
       <QueryState
         query={dashboard}

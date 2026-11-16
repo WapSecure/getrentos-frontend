@@ -34,7 +34,6 @@ export const collectionsService = {
   },
 };
 
-/** For listers: the Sureground collections their listings are in, and a way out of them. */
 export const listingCollectionsService = {
   list(): Promise<ApiResponse<ListingCollectionFeatures>> {
     return safeCall(() => authFetch<ListingCollectionFeatures>('/me/listing-collections'));
@@ -61,10 +60,6 @@ export const listingCollectionsService = {
   },
 };
 
-/**
- * The management API for one curator. `base` is where that curator's collections live:
- * `/estates/:estateId/collections`, `/agency/collections` or `/realtor/collections`.
- */
 export function collectionsManager(base: string) {
   return {
     list(): Promise<ApiResponse<ManagedCollection[]>> {

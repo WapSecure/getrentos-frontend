@@ -11,18 +11,12 @@ import {
 
 type ViewableInfo = Parameters<typeof visibleCards>[0];
 
-/**
- * `property_impression` and `property_card_click` for one list of listing cards, named as on the web
- * (surface `rent_list`, `discover`, `sale_similar`…). Spread `listProps` on the FlashList or FlatList,
- * call `click(id, index)` on tap. Events go through the batched showroom sender: anonymous, no user id.
- */
+/** Events go through the batched showroom sender: anonymous, no user id. */
 export function useCardAnalytics(
   market: ShowroomEventMarket,
   surface: string,
   { inView = true }: { inView?: boolean } = {}
 ) {
-  // One tracker per list and surface. `inView` is the starting state (a constant per list); later
-  // changes go through setInView.
   const tracker = useMemo(
     () =>
       new CardImpressionTracker(
