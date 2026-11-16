@@ -42,7 +42,7 @@ export default function EstateHouseholdsPage() {
   const [importResult, setImportResult] = useState<ImportHouseholdsResult | null>(null);
   const [page, setPage] = useState(1);
   const [confirming, setConfirming] = useState<{
-    kind: 'remove' | 'unlink';
+    kind: 'remove' | 'unlink' | 'deactivate';
     household: Household;
   } | null>(null);
 
@@ -112,6 +112,20 @@ export default function EstateHouseholdsPage() {
       if (confirming) toast.success(`${confirming.household.unitLabel} removed.`);
     },
     onError: (error: Error) => toast.error(error.message || 'Unable to remove this household.'),
+  });
+
+  const setStatus = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: 'ACTIVE' | 'INACTIVE' }) =>
+      unwrap(estateService.updateHousehold(estate!.id, id, { status })),
+    onSuccess: (household) => {
+      invalidate();
+      toast.success(
+        household.status === 'inactive'
+          ? `${household.unitLabel} marked inactive.`
+          : `${household.unitLabel} is active again.`
+      );
+    },
+    onError: (error: Error) => toast.error(error.message || 'Unable to update this household.'),
   });
 
   const linkResident = useMutation({
@@ -243,6 +257,12 @@ export default function EstateHouseholdsPage() {
                     setIsModalOpen(true);
                   }}
                   onRemove={() => setConfirming({ kind: 'remove', household })}
+                  onToggleActive={() =>
+                    household.status === 'active'
+                      ? setConfirming({ kind: 'deactivate', household })
+                      : setStatus.mutate({ id: household.id, status: 'ACTIVE' })
+                  }
+                  isUpdatingStatus={setStatus.isPending && setStatus.variables?.id === household.id}
                   onLinkResident={() => setLinkingHousehold(household)}
                   onUnlinkResident={() => setConfirming({ kind: 'unlink', household })}
                 />
@@ -300,23 +320,38 @@ export default function EstateHouseholdsPage() {
           if (!open) setConfirming(null);
         }}
         title={
-          confirming?.kind === 'unlink' ? 'Unlink this resident account?' : 'Remove this household?'
+          confirming?.kind === 'unlink'
+            ? 'Unlink this resident account?'
+            : confirming?.kind === 'deactivate'
+              ? 'Mark this household inactive?'
+              : 'Remove this household?'
         }
         description={
           !confirming
             ? ''
             : confirming.kind === 'unlink'
               ? `${confirming.household.residentName}'s account is unlinked from ${confirming.household.unitLabel}. The household stays, and you can link an account again later.`
-              : `${confirming.household.unitLabel} (${confirming.household.residentName}) is removed from ${estate.name}. This can't be undone.`
+              : confirming.kind === 'deactivate'
+                ? `Use this when the resident of ${confirming.household.unitLabel} moves out. New charges and announcements skip it, and its payment history is kept.`
+                : `${confirming.household.unitLabel} (${confirming.household.residentName}) is removed from ${estate.name}. This can't be undone.`
         }
-        confirmLabel={confirming?.kind === 'unlink' ? 'Unlink' : 'Remove'}
-        onConfirm={() =>
-          confirming &&
-          (confirming.kind === 'unlink' ? unlinkResident : removeHousehold).mutateAsync(
+        confirmLabel={
+          confirming?.kind === 'unlink'
+            ? 'Unlink'
+            : confirming?.kind === 'deactivate'
+              ? 'Mark inactive'
+              : 'Remove'
+        }
+        onConfirm={() => {
+          if (!confirming) return;
+          if (confirming.kind === 'deactivate') {
+            return setStatus.mutateAsync({ id: confirming.household.id, status: 'INACTIVE' });
+          }
+          return (confirming.kind === 'unlink' ? unlinkResident : removeHousehold).mutateAsync(
             confirming.household.id
-          )
-        }
-        isLoading={removeHousehold.isPending || unlinkResident.isPending}
+          );
+        }}
+        isLoading={removeHousehold.isPending || unlinkResident.isPending || setStatus.isPending}
       />
     </>
   );

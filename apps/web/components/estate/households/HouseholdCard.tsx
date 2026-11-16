@@ -1,6 +1,15 @@
 'use client';
 
-import { Mail, Phone, Pencil, Trash2, UserPlus, UserMinus } from '@sureground/icons';
+import {
+  Archive,
+  ArchiveRestore,
+  Mail,
+  Phone,
+  Pencil,
+  Trash2,
+  UserPlus,
+  UserMinus,
+} from '@sureground/icons';
 import { Badge, IconButton } from '@sureground/ui';
 import { EstateRow, RowAvatar } from '@/components/estate/shared/EstateListSection';
 import type { Household } from '@/types/estate';
@@ -11,6 +20,8 @@ interface HouseholdCardProps {
   onRemove: () => void;
   onLinkResident: () => void;
   onUnlinkResident: () => void;
+  onToggleActive: () => void;
+  isUpdatingStatus?: boolean;
 }
 
 export const HouseholdCard = ({
@@ -19,6 +30,8 @@ export const HouseholdCard = ({
   onRemove,
   onLinkResident,
   onUnlinkResident,
+  onToggleActive,
+  isUpdatingStatus,
 }: HouseholdCardProps) => {
   const isActive = household.status === 'active';
   return (
@@ -79,6 +92,17 @@ export const HouseholdCard = ({
             icon={<Pencil />}
             size="sm"
             onClick={onEdit}
+          />
+          <IconButton
+            label={
+              isActive
+                ? `Mark ${household.unitLabel} inactive`
+                : `Mark ${household.unitLabel} active again`
+            }
+            icon={isActive ? <Archive /> : <ArchiveRestore />}
+            size="sm"
+            onClick={onToggleActive}
+            isLoading={isUpdatingStatus}
           />
           <IconButton
             label={`Remove ${household.unitLabel}`}
