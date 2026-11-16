@@ -327,9 +327,7 @@ function MobilePrimaryNavigation({ ariaLabel, dashboardHref, groups }: GroupedSi
             key={item.href}
             href={item.href}
             aria-current={active ? 'page' : undefined}
-            aria-label={
-              item.phoneBarLabel && typeof item.label === 'string' ? item.label : undefined
-            }
+            aria-label={phoneBarAccessibleName(item)}
             className="mobile-primary-nav-item"
           >
             <Icon className="h-5 w-5" aria-hidden="true" />
@@ -339,6 +337,14 @@ function MobilePrimaryNavigation({ ariaLabel, dashboardHref, groups }: GroupedSi
       })}
     </nav>
   );
+}
+
+// The short phone-bar word must stay in the accessible name (WCAG 2.5.3), so voice users can say what they see.
+function phoneBarAccessibleName(item: { label?: unknown; phoneBarLabel?: string }) {
+  if (!item.phoneBarLabel || typeof item.label !== 'string') return undefined;
+  return item.label.toLowerCase().includes(item.phoneBarLabel.toLowerCase())
+    ? item.label
+    : `${item.phoneBarLabel}, ${item.label}`;
 }
 
 export function GroupedSidebar({
