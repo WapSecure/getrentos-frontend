@@ -66,7 +66,7 @@ export default function AgentWorkOrders() {
       invalidate();
       setCompletingId(null);
       setReport('');
-      toast.show('Reported done — the owner can review it.', 'success');
+      toast.show('Reported done. The owner can review it.', 'success');
     },
     onError: (e) => toast.show(errorMessage(e, 'Unable to complete.'), 'error'),
   });
@@ -107,7 +107,7 @@ export default function AgentWorkOrders() {
         <DetailHeader
           eyebrow="Field operations"
           title="Work orders"
-          subtitle="On-site jobs assigned to you. Start, add photos, report done — the owner closes it."
+          subtitle="On-site jobs assigned to you. Start, add photos, report done, and the owner closes it."
           onBack={() => goBack()}
         />
       </View>

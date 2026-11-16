@@ -33,7 +33,7 @@ export const ASSIGNABLE_ROLES: {
   {
     value: 'ACCOUNTANT',
     label: 'Accountant',
-    hint: 'Finance only — no access to client properties',
+    hint: 'Finance only, with no access to client properties',
   },
   { value: 'STAFF', label: 'Staff', hint: 'General team member' },
 ];

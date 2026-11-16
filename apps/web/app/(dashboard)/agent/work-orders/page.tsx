@@ -64,7 +64,7 @@ export default function AgentWorkOrdersPage() {
       invalidate();
       setCompleting(null);
       setReport('');
-      toast.success('Reported done — the owner can review it.');
+      toast.success('Reported done. The owner can review it.');
     },
     onError: (e: Error) => toast.error(e.message || 'Unable to complete.'),
   });
@@ -87,7 +87,7 @@ export default function AgentWorkOrdersPage() {
       <PageHeader
         eyebrow="Work"
         title="Work orders"
-        description="On-site maintenance jobs assigned to you. Start a job, add photos, and report it done — the property owner reviews and closes it."
+        description="On-site maintenance jobs assigned to you. Start a job, add photos, and report it done, and the property owner reviews and closes it."
       />
 
       {isLoading ? (

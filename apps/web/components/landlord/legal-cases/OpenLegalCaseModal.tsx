@@ -19,8 +19,8 @@ import type { LegalCaseKind } from '@/types/legal-case';
 // A possession claim needs a tenancy (the server refuses one without); court and suit number are asked for at filing, when they exist.
 
 export const CASE_KIND_OPTIONS: { value: LegalCaseKind; label: string }[] = [
-  { value: 'EVICTION', label: 'Eviction — recovering possession' },
-  { value: 'RENT_RECOVERY', label: 'Rent recovery — the money, not the property' },
+  { value: 'EVICTION', label: 'Eviction (recovering possession)' },
+  { value: 'RENT_RECOVERY', label: 'Rent recovery (the money, not the property)' },
   { value: 'INJUNCTION', label: 'Injunction' },
   { value: 'TITLE_DISPUTE', label: 'Title dispute' },
   { value: 'DEBT_RECOVERY', label: 'Debt recovery' },

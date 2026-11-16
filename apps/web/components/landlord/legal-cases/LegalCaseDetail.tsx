@@ -53,7 +53,7 @@ const OUTCOMES: { value: LegalCaseOutcome; label: string }[] = [
 const ENFORCEMENT: { value: EnforcementMethod; label: string }[] = [
   { value: 'BAILIFF', label: 'Court bailiff' },
   { value: 'POLICE', label: 'Police assistance' },
-  { value: 'NONE', label: 'Not needed — the other side complied' },
+  { value: 'NONE', label: 'Not needed, the other side complied' },
 ];
 
 const HEARING_RESULTS: { value: HearingOutcome; label: string }[] = [
