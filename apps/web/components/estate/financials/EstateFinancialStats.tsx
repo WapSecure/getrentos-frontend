@@ -36,6 +36,6 @@ export const EstateFinancialStats = ({
       label="Late fees collected"
       value={formatCurrency(lateFeesCollected, { compact: true })}
     />
-    <StatCard icon={Users} label="Households billed" value={String(householdsBilled)} />
+    <StatCard icon={Users} label="Households that paid" value={String(householdsBilled)} />
   </div>
 );
