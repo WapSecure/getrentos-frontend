@@ -4,7 +4,7 @@ import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEsta
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Vote, Plus } from '@sureground/icons';
-import { Button, CardSkeleton, EmptyState, PageHeader } from '@sureground/ui';
+import { Button, CardSkeleton, ConfirmDialog, EmptyState, PageHeader } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -20,6 +20,7 @@ import {
 export default function EstatePollsPage() {
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [closing, setClosing] = useState<{ id: string; question: string } | null>(null);
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
@@ -45,7 +46,10 @@ export default function EstatePollsPage() {
 
   const closePoll = useMutation({
     mutationFn: (pollId: string) => unwrap(estateService.closePoll(estate!.id, pollId)),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      setClosing(null);
+    },
   });
 
   if (isEstateLoading) {
@@ -103,7 +107,7 @@ export default function EstatePollsPage() {
               <li key={poll.id}>
                 <PollCard
                   poll={poll}
-                  onClose={() => closePoll.mutate(poll.id)}
+                  onClose={() => setClosing({ id: poll.id, question: poll.question })}
                   isUpdating={closePoll.isPending}
                 />
               </li>
@@ -111,6 +115,22 @@ export default function EstatePollsPage() {
           </EstateRowList>
         )}
       </EstateListSection>
+
+      <ConfirmDialog
+        open={closing !== null}
+        onOpenChange={(open) => {
+          if (!open) setClosing(null);
+        }}
+        title="Close this poll?"
+        description={
+          closing
+            ? `Voting on "${closing.question}" stops and the result is final. A closed poll can't be reopened.`
+            : ''
+        }
+        confirmLabel="Close poll"
+        onConfirm={() => closing && closePoll.mutate(closing.id)}
+        isLoading={closePoll.isPending}
+      />
 
       <CreatePollModal
         estateId={estate?.id}
