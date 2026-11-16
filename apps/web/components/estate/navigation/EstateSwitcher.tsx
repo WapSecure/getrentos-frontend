@@ -12,11 +12,13 @@ import {
 } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
+import { usePlanTier } from '@/hooks/usePlanTier';
 
 export const EstateSwitcher = () => {
   const { estate, estates, selectEstate } = useSelectedEstate();
+  const { isPro } = usePlanTier();
 
-  if (estates.length <= 1) return null;
+  if (estates.length === 0) return null;
 
   return (
     <DropdownMenu>
@@ -51,9 +53,10 @@ export const EstateSwitcher = () => {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="text-primary">
-          <Link href={ROUTES.ESTATE_SETUP}>
+          {/* The API refuses a second estate on Free, so Free goes to the plan instead of a form that fails. */}
+          <Link href={isPro ? ROUTES.ESTATE_SETUP : ROUTES.ESTATE_BILLING}>
             <Plus className="w-4 h-4" aria-hidden="true" />
-            Add another estate
+            {isPro ? 'Add another estate' : 'Add another estate with Pro'}
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>

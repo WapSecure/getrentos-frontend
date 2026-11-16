@@ -24,6 +24,7 @@ import { buyerKeys } from '@/lib/queryKeys';
 import type { BuyerEscrowStatus } from '@/types/buyer';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/types/payments';
+import { BuyerPurchaseNav } from '@/components/shared/navigation/WorkflowNavs';
 
 type StatusFilter = 'all' | BuyerEscrowStatus;
 
@@ -104,6 +105,7 @@ export default function BuyerTransactionsPage() {
           )
         }
       />
+      <BuyerPurchaseNav />
 
       <RecordToolbar>
         <SearchInput

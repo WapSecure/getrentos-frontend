@@ -25,6 +25,7 @@ import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import type { Lease, LeaseStatus } from '@/types/landlord';
+import { LandlordTenanciesNav } from '@/components/shared/navigation/WorkflowNavs';
 
 const statusFilters: { value: 'all' | LeaseStatus; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -235,6 +236,7 @@ function LandlordLeasesPageContent() {
           </Button>
         }
       />
+      <LandlordTenanciesNav />
 
       {onlyLeaseId && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">

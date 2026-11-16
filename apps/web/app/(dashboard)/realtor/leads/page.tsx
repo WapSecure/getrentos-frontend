@@ -30,6 +30,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { nameOnly } from '@/lib/validations/input';
 import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorLead, realtorService, type RealtorListingApi } from '@/services/realtorService';
+import { RealtorPipelineNav } from '@/components/shared/navigation/WorkflowNavs';
 
 type StageFilter = 'all' | LeadStage;
 
@@ -191,6 +192,7 @@ export default function RealtorLeadsPage() {
           </Button>
         }
       />
+      <RealtorPipelineNav />
 
       <FollowUpsPanel />
 

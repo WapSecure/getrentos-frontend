@@ -20,6 +20,7 @@ import type { ViewingAppointment } from '@/types/realtor';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorViewing, realtorService } from '@/services/realtorService';
+import { RealtorPipelineNav } from '@/components/shared/navigation/WorkflowNavs';
 
 const PAGE_SIZE = 10;
 
@@ -86,11 +87,7 @@ function RealtorViewingsPageContent() {
       <PageHeader
         eyebrow="Work"
         title="Viewings"
-        description={
-          data
-            ? `${total} scheduled tour${total === 1 ? '' : 's'}`
-            : 'Scheduled tours'
-        }
+        description={data ? `${total} scheduled tour${total === 1 ? '' : 's'}` : 'Scheduled tours'}
         actions={
           <Button
             variant="primary"
@@ -101,6 +98,7 @@ function RealtorViewingsPageContent() {
           </Button>
         }
       />
+      <RealtorPipelineNav />
 
       {isLoading ? (
         <ListSkeleton variant="cards" rows={3} label="Loading viewings" />

@@ -25,6 +25,7 @@ import { VerificationRequiredNotice } from '@/components/shared/verification/Ver
 import { ROUTES } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 import type { BuyerOffer, BuyerOfferStatus, BuyerOfferMessage } from '@/types/buyer';
+import { BuyerPurchaseNav } from '@/components/shared/navigation/WorkflowNavs';
 
 type StatusFilter = 'all' | BuyerOfferStatus;
 
@@ -198,6 +199,7 @@ function BuyerOffersPageContent() {
           </Button>
         }
       />
+      <BuyerPurchaseNav />
 
       {createMutation.error && (
         <div className="mb-6">

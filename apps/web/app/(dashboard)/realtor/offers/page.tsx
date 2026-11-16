@@ -20,6 +20,7 @@ import {
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorOffer, realtorService, type RealtorOfferApi } from '@/services/realtorService';
+import { RealtorPipelineNav } from '@/components/shared/navigation/WorkflowNavs';
 
 type StatusFilter = 'all' | RealtorOfferStatus;
 
@@ -102,6 +103,7 @@ export default function RealtorOffersPage() {
             : 'Offers made on behalf of your clients'
         }
       />
+      <RealtorPipelineNav />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <SearchInput

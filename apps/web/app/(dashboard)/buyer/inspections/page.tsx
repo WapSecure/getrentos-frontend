@@ -2,6 +2,7 @@ import { BuyerInspections } from '@/components/shared/inspections/BuyerInspectio
 import { ArrowRight } from '@sureground/icons';
 import { Button, PageHeader } from '@sureground/ui';
 import { findPropertyHref } from '@/lib/constants/visitRoutes';
+import { BuyerPurchaseNav } from '@/components/shared/navigation/WorkflowNavs';
 
 export default function BuyerInspectionsPage() {
   return (
@@ -20,6 +21,7 @@ export default function BuyerInspectionsPage() {
           </Button>
         }
       />
+      <BuyerPurchaseNav />
       <BuyerInspections scope="all" />
     </div>
   );

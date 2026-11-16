@@ -18,6 +18,7 @@ import { landlordKeys } from '@/lib/queryKeys';
 import { ListState } from '@/components/shared/ListState';
 import { RecordGridSkeleton, RecordToolbar } from '@/components/shared/records/RecordParts';
 import type { RentPaymentStatus } from '@/types/landlord';
+import { LandlordTenanciesNav } from '@/components/shared/navigation/WorkflowNavs';
 
 const rentStatusFilters: { value: 'all' | RentPaymentStatus; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -69,6 +70,7 @@ export default function LandlordTenantsPage() {
           </>
         }
       />
+      <LandlordTenanciesNav />
 
       <RecordToolbar>
         <SearchInput

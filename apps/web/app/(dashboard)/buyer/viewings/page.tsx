@@ -10,6 +10,7 @@ import { Button, Pagination, QueryState, Skeleton, useToast, PageHeader } from '
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
+import { BuyerPurchaseNav } from '@/components/shared/navigation/WorkflowNavs';
 
 function BuyerViewingsPageContent() {
   const searchParams = useSearchParams();
@@ -96,6 +97,7 @@ function BuyerViewingsPageContent() {
           </Button>
         }
       />
+      <BuyerPurchaseNav />
 
       <QueryState
         isLoading={viewingsQuery.isLoading}
