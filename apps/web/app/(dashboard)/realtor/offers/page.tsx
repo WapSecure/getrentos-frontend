@@ -97,9 +97,9 @@ export default function RealtorOffersPage() {
         eyebrow="Clients"
         title="Offers"
         description={
-          <>
-            {total} offer{total === 1 ? '' : 's'} on behalf of your clients
-          </>
+          data
+            ? `${total} offer${total === 1 ? '' : 's'} on behalf of your clients`
+            : 'Offers made on behalf of your clients'
         }
       />
 
