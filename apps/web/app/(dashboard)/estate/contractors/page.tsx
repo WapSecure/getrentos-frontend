@@ -24,6 +24,8 @@ import {
   ToggleChip,
   PageHeader,
 } from '@sureground/ui';
+import { PLAN_TIER_LABELS, tierAtLeast } from '@sureground/shared';
+import { ROUTES } from '@/lib/constants/auth';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -67,6 +69,8 @@ export default function EstateContractorPassesPage() {
   const [page, setPage] = useState(1);
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
+  // Creating needs Enterprise; listing and revoking do not, so passes issued earlier stay manageable.
+  const canAuthorise = !estate?.planTier || tierAtLeast(estate.planTier, 'ENTERPRISE');
   const status = toApiStatus(statusFilter);
 
   const { data, isLoading } = useQuery({
@@ -125,19 +129,33 @@ export default function EstateContractorPassesPage() {
           </>
         }
         actions={
-          <Button
-            variant="primary"
-            className="gap-2"
-            onClick={() => {
-              createPass.reset();
-              setIsAddOpen(true);
-            }}
-          >
-            <Plus className="w-4 h-4" />
-            Authorise somebody
-          </Button>
+          canAuthorise ? (
+            <Button
+              variant="primary"
+              className="gap-2"
+              onClick={() => {
+                createPass.reset();
+                setIsAddOpen(true);
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              Authorise somebody
+            </Button>
+          ) : (
+            <Button variant="primary" href={ROUTES.ESTATE_BILLING}>
+              See plans
+            </Button>
+          )
         }
       />
+
+      {!canAuthorise && estate.planTier && (
+        <Alert variant="warning" className="mb-6" title="Regular visitors is an Enterprise feature">
+          {estate.name} is on {PLAN_TIER_LABELS[estate.planTier]}. Upgrade to Enterprise to
+          authorise new regular visitors. Any authorisations made earlier keep working and can still
+          be revoked here.
+        </Alert>
+      )}
 
       <Alert variant="neutral" className="mb-6">
         <p>
