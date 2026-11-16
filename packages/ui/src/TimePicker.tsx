@@ -63,13 +63,18 @@ export const TimePicker = ({
   const valueId = `${baseId}-value`;
   const listboxId = `${baseId}-listbox`;
   const hasSelected = options.some((option) => option.value === value);
+  // With nothing chosen, start at the working day (09:00) rather than midnight; the first option if 09:00 is out of range.
+  const defaultIndex = Math.max(
+    0,
+    options.findIndex((option) => option.value >= '09:00')
+  );
 
   // Runs from onOpenAutoFocus: the list is portaled and only exists by then.
   const focusInitialOption = () => {
     const list = listRef.current;
     const target =
       list?.querySelector<HTMLButtonElement>('[aria-selected="true"]') ??
-      list?.querySelector<HTMLButtonElement>('[role="option"]');
+      list?.querySelectorAll<HTMLButtonElement>('[role="option"]')[defaultIndex];
     target?.scrollIntoView({ block: 'center' });
     target?.focus({ preventScroll: true });
   };
@@ -188,7 +193,7 @@ export const TimePicker = ({
                         type="button"
                         role="option"
                         aria-selected={isSelected}
-                        tabIndex={isSelected || (!hasSelected && index === 0) ? 0 : -1}
+                        tabIndex={isSelected || (!hasSelected && index === defaultIndex) ? 0 : -1}
                         onClick={() => handleSelect(option.value)}
                         className={cn(
                           'w-full rounded-lg px-3 py-2 text-left text-sm tabular-nums transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
