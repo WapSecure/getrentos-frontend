@@ -20,7 +20,7 @@ export function RenterReviewsAboutYou() {
     <section className="rounded-xl border border-border bg-card p-5">
       <h2 className="text-base font-semibold text-foreground">What landlords say about you</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Landlords can review you once a tenancy ends. Landlords you apply to later see these
+        Landlords can review you once you have moved out. Landlords you apply to later see these
         reviews.
       </p>
       {isLoading ? null : reviews.length === 0 ? (

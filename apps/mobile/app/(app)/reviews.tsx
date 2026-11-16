@@ -31,7 +31,7 @@ const TABS: { value: Tab; label: string }[] = [
 const EMPTY: Record<Tab, { title: string; description: string }> = {
   pending: {
     title: 'Nothing to review',
-    description: 'When a tenancy ends you can rate the landlord and the property here.',
+    description: 'Once you have moved out you can rate the landlord and the property here.',
   },
   written: {
     title: 'No reviews yet',
@@ -172,7 +172,7 @@ export default function Reviews() {
                       <Badge label={p.type === 'landlord' ? 'Landlord' : 'Property'} tone="info" />
                     </View>
                     <Text variant="caption" color="mutedForeground">
-                      Tenancy ended {formatDate(p.moveOutDate)}
+                      Lease ended {formatDate(p.moveOutDate)}
                     </Text>
                     <Button
                       label="Write a review"

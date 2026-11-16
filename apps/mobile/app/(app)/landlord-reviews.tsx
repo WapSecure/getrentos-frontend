@@ -107,7 +107,7 @@ export default function LandlordReviews() {
             <EmptyState
               icon={<Star size={32} color={colors.mutedForeground} />}
               title="No reviews yet"
-              description="Tenants can review you after a tenancy ends. Reviews feed your trust score."
+              description="Tenants can review you once they have moved out. Reviews feed your trust score."
             />
           }
         />

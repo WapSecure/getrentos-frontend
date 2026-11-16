@@ -17,7 +17,7 @@ const RATING_HINT: Record<number, string> = {
   5: 'Excellent',
 };
 
-/** Landlords and owners rate a tenant once the tenancy ends; screening shows these to the next landlord. */
+/** Landlords and owners rate a tenant once they have moved out; screening shows these to the next landlord. */
 export function TenantReviewsSection() {
   const { spacing } = useTheme();
   const [target, setTarget] = useState<PendingTenantReview | null>(null);
@@ -33,7 +33,7 @@ export function TenantReviewsSection() {
       <Card elevated style={{ gap: spacing.sm }}>
         <Text variant="subheading">Review your tenants</Text>
         <Text variant="caption" color="mutedForeground">
-          Rate a tenant once their tenancy ends. Other landlords see these when the tenant applies
+          Rate a tenant once they have moved out. Other landlords see these when the tenant applies
           to rent again, and the tenant can read what you wrote.
         </Text>
         {pending.map((p) => (
@@ -46,7 +46,7 @@ export function TenantReviewsSection() {
                 {p.tenantName}
               </Text>
               <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                {p.propertyName} · ended {formatDate(p.leaseEnd, 'short')}
+                {p.propertyName} · lease ended {formatDate(p.leaseEnd, 'short')}
               </Text>
             </View>
             <Button
