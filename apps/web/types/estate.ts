@@ -38,6 +38,8 @@ export interface Household {
   status: HouseholdStatus;
   residentUserId?: string;
   residentLinked: boolean;
+  /** The linked account's own name, which can differ from residentName. */
+  residentAccountName?: string;
   createdAt: string;
 }
 

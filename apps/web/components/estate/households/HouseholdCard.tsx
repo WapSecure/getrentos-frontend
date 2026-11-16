@@ -36,6 +36,9 @@ export const HouseholdCard = ({
       meta={
         <>
           <p className="truncate">{household.residentName}</p>
+          {household.residentAccountName && (
+            <p className="truncate">Linked account: {household.residentAccountName}</p>
+          )}
           {(household.contactPhone || household.contactEmail) && (
             <p className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5">
               {household.contactPhone && (
