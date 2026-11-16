@@ -97,7 +97,8 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
             {payout.label}
           </Badge>
         ) : (
-          <span className="text-muted-foreground">None</span>
+          // "None" read as if the landlord got nothing, even beside "Released to landlord".
+          <span className="text-muted-foreground">Not yet</span>
         );
       },
     },
