@@ -1,3 +1,4 @@
+import { ROLES } from '@sureground/shared';
 import type { BackendRole } from './api/auth';
 
 // Mirrors the web app's role groups.
@@ -134,62 +135,34 @@ export interface SignupRole {
 }
 
 export const VERIFICATION_LABEL: Record<VerificationReq, string> = {
-  identity: 'ID verified',
-  property: 'Property docs',
-  license: 'License',
+  identity: 'Needs ID check',
+  property: 'Needs property documents',
+  license: 'Needs licence',
 };
 
-export const SIGNUP_ROLES: SignupRole[] = [
-  {
-    id: 'renter',
-    name: 'Renter',
-    tagline: 'Search verified homes, apply digitally, pay rent securely.',
-    icon: 'Home',
-    requires: ['identity'],
-  },
-  {
-    id: 'landlord',
-    name: 'Landlord',
-    tagline: 'List properties, vet tenants, collect rent safely through Sureground.',
-    icon: 'Building2',
-    requires: ['identity', 'property'],
-  },
-  {
-    id: 'owner',
-    name: 'Property owner',
-    tagline: 'List for sale, accept offers, track property value.',
-    icon: 'TrendingUp',
-    requires: ['identity', 'property'],
-  },
-  {
-    id: 'buyer',
-    name: 'Property buyer',
-    tagline: 'Save, compare, tour properties, make offers securely.',
-    icon: 'Search',
-    requires: ['identity'],
-  },
-  {
-    id: 'realtor',
-    name: 'Realtor',
-    tagline: 'Bring listings, arrange viewings and negotiate for your clients.',
-    icon: 'Users',
-    requires: ['identity', 'license'],
-  },
-  {
-    id: 'agent',
-    name: 'Agent',
-    tagline: 'Act for landlords and owners, with only the permissions they give you.',
-    icon: 'UserCheck',
-    requires: ['identity'],
-  },
-  {
-    id: 'estate',
-    name: 'Estate manager',
-    tagline: 'Manage a gated community: households, dues, and access.',
-    icon: 'Briefcase',
-    requires: ['identity'],
-  },
-];
+const SIGNUP_ROLE_IDS: readonly string[] = [
+  'renter',
+  'landlord',
+  'owner',
+  'buyer',
+  'realtor',
+  'agent',
+  'estate',
+] satisfies SignupRoleId[];
+
+export const SIGNUP_ROLES: SignupRole[] = Object.values(ROLES)
+  .filter((r) => SIGNUP_ROLE_IDS.includes(r.id))
+  .sort((a, b) => a.order - b.order)
+  .map((r) => ({
+    id: r.id as SignupRoleId,
+    name: r.name,
+    tagline: r.description,
+    icon: r.icon as SignupRole['icon'],
+    requires: [...r.requiresVerification] as VerificationReq[],
+  }));
+
+export const REALTOR_VS_AGENT =
+  'Realtors find clients and close deals. Agents act for one landlord or owner, with the permissions they give.';
 
 /** Group segments are not in URLs, so open the screen in the user's own portal. Keep in step with app/(app)/(<portal>)/<screen>.tsx. */
 const SHARED_TAB_SCREENS: Record<string, readonly Portal[]> = {

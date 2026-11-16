@@ -67,7 +67,11 @@ export const TextField = forwardRef<TextInputInstance, TextFieldProps>(function 
   return (
     <View style={[styles.container, containerStyle]}>
       {label ? (
-        <View style={styles.labelRow} importantForAccessibility="no-hide-descendants">
+        <View
+          style={styles.labelRow}
+          importantForAccessibility="no-hide-descendants"
+          accessibilityElementsHidden
+        >
           <Text variant="callout" color="mutedForeground" style={styles.label}>
             {label}
             {required ? (

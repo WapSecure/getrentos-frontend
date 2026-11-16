@@ -12,7 +12,7 @@ interface AgentDashboardHeaderProps {
 
 export const AgentDashboardHeader = ({ greeting, firstName }: AgentDashboardHeaderProps) => (
   <DashboardHeader
-    title={`${greeting}, ${firstName}`}
+    title={firstName ? `${greeting}, ${firstName}` : greeting}
     description="Review today's assigned visits, inspections, and work in progress."
     action={
       <Button href={ROUTES.AGENT_TASKS} variant="primary" size="lg" icon={<ClipboardList />}>

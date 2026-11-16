@@ -1,8 +1,18 @@
-// Only a path on this site: a single leading "/", since browsers read "//" or "/\" as another host.
+const SENTINEL_ORIGIN = 'https://sureground.invalid';
+// Browsers drop tabs and newlines and read a backslash as "/", so "/\t/evil.com" would become "//evil.com".
+const UNSAFE_CHARACTERS = /[\u0000-\u001f\u007f\\]/;
+
+// Only a path on this site, checked the way the browser will resolve it.
 export function safeNextPath(value: string | null | undefined): string | null {
-  if (!value) return null;
-  if (!value.startsWith('/') || value.startsWith('//') || value.startsWith('/\\')) return null;
-  return value;
+  if (!value || !value.startsWith('/') || value.startsWith('//')) return null;
+  if (UNSAFE_CHARACTERS.test(value)) return null;
+  try {
+    const url = new URL(value, SENTINEL_ORIGIN);
+    if (url.origin !== SENTINEL_ORIGIN) return null;
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return null;
+  }
 }
 
 export function withNext(

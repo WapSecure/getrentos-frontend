@@ -1,6 +1,6 @@
 import { apiFetch, CLIENT_APP } from './apiClient';
 import { installIdHeader } from './installId';
-import { safeCall } from './apiHelpers';
+import { authFetch, safeCall } from './apiHelpers';
 import type { ApiResponse } from './apiHelpers';
 
 export interface AuthUser {
@@ -19,9 +19,12 @@ export interface AuthResult extends AuthUser {
   // Delivered via httpOnly cookie.
   refreshToken?: string;
   expiresIn: number;
+  // Set when an OAuth or Apple sign-in created the account in that call.
+  isNewUser?: boolean;
 }
 
-export interface TwoFactorChallenge extends AuthUser {
+// Nothing about the account is sent until the second factor is passed.
+export interface TwoFactorChallenge {
   requiresTwoFactor: true;
   challengeToken: string;
   expiresIn: number;
@@ -30,6 +33,8 @@ export interface TwoFactorChallenge extends AuthUser {
 export type LoginResult = AuthResult | TwoFactorChallenge;
 
 type OtpPurpose = 'signup' | 'password_reset';
+
+export type SignupPrecheckField = 'password' | 'referralCode';
 
 export const authService = {
   async sendOtp(
@@ -41,6 +46,30 @@ export const authService = {
       apiFetch('/auth/otp/send', {
         method: 'POST',
         body: JSON.stringify({ identifier, method, purpose }),
+      })
+    );
+  },
+
+  // Checks step-one answers before a code is sent. Older APIs answer 404; callers then carry on.
+  async signupPrecheck(body: {
+    password?: string;
+    referralCode?: string;
+  }): Promise<ApiResponse<{ ok: true }>> {
+    return safeCall(() =>
+      apiFetch<{ ok: true }>(
+        '/auth/signup/precheck',
+        { method: 'POST', body: JSON.stringify(body) },
+        false
+      )
+    );
+  },
+
+  // Only open for a short while after a social sign-in created the account.
+  async setInitialRoles(selectedRoles: string[]): Promise<ApiResponse<AuthUser>> {
+    return safeCall(() =>
+      authFetch<AuthUser>('/auth/initial-roles', {
+        method: 'POST',
+        body: JSON.stringify({ selectedRoles }),
       })
     );
   },

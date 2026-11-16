@@ -1,5 +1,12 @@
-import type { ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useState, type ReactNode } from 'react';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { ChevronLeft } from '@sureground/icons/native';
@@ -20,6 +27,22 @@ export interface AuthScaffoldProps {
   progress?: number;
   progressLabel?: string;
   footer?: ReactNode;
+  /** Shown under the footer only while the keyboard is down, so the main action stays in view. */
+  footerSecondary?: ReactNode;
+}
+
+function useKeyboardVisible(): boolean {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const show = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hide = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const subs = [
+      Keyboard.addListener(show, () => setVisible(true)),
+      Keyboard.addListener(hide, () => setVisible(false)),
+    ];
+    return () => subs.forEach((s) => s.remove());
+  }, []);
+  return visible;
 }
 
 export function AuthScaffold({
@@ -31,10 +54,12 @@ export function AuthScaffold({
   progress,
   progressLabel,
   footer,
+  footerSecondary,
 }: AuthScaffoldProps) {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
+  const keyboardUp = useKeyboardVisible();
 
   return (
     <KeyboardAvoidingView
@@ -69,6 +94,7 @@ export function AuthScaffold({
       <ScrollView
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
+        automaticallyAdjustKeyboardInsets
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: spacing.xl,
@@ -105,12 +131,12 @@ export function AuthScaffold({
         </Animated.View>
       </ScrollView>
 
-      {footer ? (
+      {footer || footerSecondary ? (
         <View
           style={{
             paddingHorizontal: spacing.xl,
             paddingTop: spacing.md,
-            paddingBottom: insets.bottom + spacing.md,
+            paddingBottom: (keyboardUp ? 0 : insets.bottom) + spacing.md,
             gap: spacing.xs,
             borderTopWidth: StyleSheet.hairlineWidth,
             borderTopColor: colors.border,
@@ -118,6 +144,7 @@ export function AuthScaffold({
           }}
         >
           {footer}
+          {keyboardUp ? null : footerSecondary}
         </View>
       ) : null}
     </KeyboardAvoidingView>

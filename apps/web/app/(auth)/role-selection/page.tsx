@@ -1,128 +1,200 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight } from '@sureground/icons';
+import { Alert, Button, Field, RadioGroup, ThemeToggle } from '@sureground/ui';
 import { RoleCard } from '@/components/auth/RoleSelection/RoleCard';
-import { MultiRoleToggle } from '@/components/auth/RoleSelection/MultiRoleToggle';
 import { Logo } from '@/components/ui/Logo';
-import { Button, ThemeToggle } from '@sureground/ui';
 import { useSignup } from '@/hooks/useSignup';
-import { ROLES } from '@/lib/constants/auth';
+import { useSignupStore } from '@/lib/store/signupStore';
+import { getStoredUser, isAuthenticated } from '@/lib/authStorage';
+import { ROLES, ROUTES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';
+import { isSocialSignupPending } from '@/lib/socialSignup';
 
-// Never disable a card: signup pre-selects Renter, so a disabled gate made every other role unpickable.
+const noSubscribe = () => () => {};
+
+// Admin, gateman, resident and property manager are provisioned out of band, never offered at self-serve signup.
+const ROLE_LIST = Object.values(ROLES)
+  .filter(
+    (role) =>
+      role.id !== 'admin' &&
+      role.id !== 'gateman' &&
+      role.id !== 'resident' &&
+      role.id !== 'manager'
+  )
+  .sort((a, b) => a.order - b.order);
+
+const roleName = (id: string) => ROLE_LIST.find((role) => role.id === id)?.name ?? id;
+
+function signedInDashboard(): string {
+  const user = getStoredUser<{ roles?: string[] }>();
+  return getDashboardRoute(resolvePrimaryRoleId(user?.roles));
+}
+
 export default function RoleSelectionPage() {
   const router = useRouter();
+  const headingId = useId();
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [pickError, setPickError] = useState<string | null>(null);
   const {
     signupData,
     addRole,
     removeRole,
-    canAddMoreRoles,
-    setCanAddMoreRoles,
+    setPrimaryRole,
     createAccount,
+    finishSocialSignup,
+    goToDetails,
     isLoading,
+    error,
   } = useSignup();
+  const otpReference = useSignupStore((state) => state.otpReference);
+
+  const mounted = useSyncExternalStore(
+    noSubscribe,
+    () => true,
+    () => false
+  );
+  // A Google sign-up arrives already signed in, with no code step behind it.
+  const social = mounted && !otpReference && isSocialSignupPending() && isAuthenticated();
+
+  // Read once on arrival: only a verified sign-up or a new Google account belongs here.
+  useEffect(() => {
+    const { otpReference: reference, data } = useSignupStore.getState();
+    const verified = Boolean(reference && data.isVerified);
+    if (!verified && !(isSocialSignupPending() && isAuthenticated())) {
+      router.replace(ROUTES.SIGNUP);
+    }
+  }, [router]);
+
+  const selected = signupData.selectedRoles;
+
+  const toggle = (roleId: string) => {
+    setPickError(null);
+    if (selected.includes(roleId)) removeRole(roleId);
+    else addRole(roleId);
+  };
 
   const handleContinue = async () => {
-    if (signupData.selectedRoles.length === 0) return;
-    await createAccount();
+    if (selected.length === 0) {
+      setPickError('Pick at least one way you will use Sureground.');
+      gridRef.current?.querySelector<HTMLButtonElement>('[role=checkbox]')?.focus();
+      return;
+    }
+    if (social) await finishSocialSignup();
+    else await createAccount();
   };
 
-  const handleBack = () => {
-    router.back();
-  };
-
-  // Admin, gateman, resident and property manager are provisioned out of band, never offered at self-serve signup.
-  const roleList = Object.values(ROLES)
-    .filter(
-      (role) =>
-        role.id !== 'admin' &&
-        role.id !== 'gateman' &&
-        role.id !== 'resident' &&
-        role.id !== 'manager'
-    )
-    .sort((a, b) => a.order - b.order);
+  const errorAction =
+    error?.action === 'details' ? (
+      <Button variant="outline" size="sm" onClick={() => goToDetails(error.notice)}>
+        Back to your details
+      </Button>
+    ) : error?.action === 'signin' ? (
+      <Button href={ROUTES.LOGIN} variant="outline" size="sm">
+        Sign in instead
+      </Button>
+    ) : error?.action === 'dashboard' ? (
+      <Button href={signedInDashboard()} variant="outline" size="sm">
+        Go to your dashboard
+      </Button>
+    ) : undefined;
 
   return (
     <div className="relative flex h-dvh flex-col overflow-hidden bg-background">
-      <motion.button
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3 }}
-        onClick={handleBack}
-        className="fixed left-6 top-6 z-30 flex items-center gap-2 rounded-lg border border-border bg-card/80 px-3 py-2 shadow-sm backdrop-blur-sm transition-all hover:bg-secondary"
-        aria-label="Go back"
-      >
-        <ArrowLeft className="w-4 h-4 text-foreground" />
-        <span className="text-sm text-foreground">Back</span>
-      </motion.button>
+      {!social && (
+        <Button
+          variant="outline"
+          rounded="lg"
+          onClick={() => goToDetails(null)}
+          icon={<ArrowLeft className="h-4 w-4" aria-hidden="true" />}
+          className="fixed left-4 top-4 z-30 min-h-11 bg-card/90 px-3 font-medium text-muted-foreground backdrop-blur sm:left-6 sm:top-6"
+        >
+          Back
+        </Button>
+      )}
 
-      <div className="fixed right-6 top-6 z-30">
+      <div className="fixed right-4 top-4 z-30 sm:right-6 sm:top-6">
         <ThemeToggle />
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <main className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto max-w-6xl px-4 pb-8 pt-24 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-8 text-center"
-          >
-            <div className="flex justify-center mb-4">
+          <div className="mb-8 text-center">
+            <div className="mb-6 flex justify-center">
               <Logo size="lg" />
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Choose your role(s)</h1>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+              {social ? 'One last thing' : 'Step 3 of 3'}
+            </p>
+            <h1 id={headingId} className="mb-2 text-3xl font-bold text-foreground">
+              How will you use Sureground?
+            </h1>
             <p className="text-lg text-muted-foreground">
-              Select how you&apos;ll use Sureground to get a personalized experience
+              Pick all that apply. Each one gets a personalised space.
             </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              You can add more roles later with supporting documents
+            <p className="mt-2 text-sm text-muted-foreground">
+              We don&rsquo;t ask for documents now, only when you list, pay or sign. You can add
+              roles later in settings.
             </p>
-          </motion.div>
+          </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {roleList.map((role, index) => (
-              <motion.div
+          <div
+            ref={gridRef}
+            role="group"
+            aria-labelledby={headingId}
+            className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3"
+          >
+            {ROLE_LIST.map((role) => (
+              <RoleCard
                 key={role.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05, duration: 0.4 }}
-              >
-                <RoleCard
-                  role={role}
-                  isSelected={signupData.selectedRoles.includes(role.id)}
-                  onSelect={() => addRole(role.id)}
-                  onDeselect={() => removeRole(role.id)}
-                />
-              </motion.div>
+                role={role}
+                isSelected={selected.includes(role.id)}
+                onToggle={() => toggle(role.id)}
+              />
             ))}
+          </div>
+
+          {selected.length > 1 && (
+            <Field label="Which do you want to start with?" className="mt-8">
+              <RadioGroup
+                value={selected[0]}
+                onValueChange={setPrimaryRole}
+                orientation="horizontal"
+                options={selected.map((id) => ({ value: id, label: roleName(id) }))}
+              />
+            </Field>
+          )}
+        </div>
+      </main>
+
+      <div className="relative z-20 border-t border-border/70 bg-background/90 shadow-[0_-10px_30px_-18px_rgba(20,24,31,0.2)] backdrop-blur-xl">
+        <div className="mx-auto max-w-6xl space-y-3 px-4 py-4 sm:px-6 lg:px-8">
+          {(error || pickError) && (
+            <Alert variant="danger" action={pickError ? undefined : errorAction}>
+              {pickError ?? error?.message}
+            </Alert>
+          )}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground" aria-live="polite">
+              {selected.length === 0
+                ? 'Nothing picked yet.'
+                : `${selected.length} picked. You will start as ${roleName(selected[0])}.`}
+            </p>
+            <Button
+              onClick={() => void handleContinue()}
+              isLoading={isLoading}
+              size="lg"
+              rounded="lg"
+              icon={<ArrowRight className="h-4 w-4" aria-hidden="true" />}
+              iconPosition="right"
+              className="w-full px-8 text-sm sm:w-auto"
+            >
+              {social ? 'Continue' : 'Create account'}
+            </Button>
           </div>
         </div>
       </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.4 }}
-        className="relative z-20 border-t border-border/70 bg-white/85 shadow-[0_-10px_30px_-18px_rgba(20,24,31,0.2)] backdrop-blur-xl supports-backdrop-filter:bg-white/75 dark:bg-background/85"
-      >
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <MultiRoleToggle enabled={canAddMoreRoles} onToggle={setCanAddMoreRoles} variant="bar" />
-          <Button
-            onClick={handleContinue}
-            disabled={signupData.selectedRoles.length === 0}
-            isLoading={isLoading}
-            size="lg"
-            rounded="lg"
-            icon={<ArrowRight className="h-4 w-4" />}
-            iconPosition="right"
-            className="w-full px-8 text-sm sm:w-auto"
-          >
-            Create account
-          </Button>
-        </div>
-      </motion.div>
     </div>
   );
 }

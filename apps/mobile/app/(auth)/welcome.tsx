@@ -66,8 +66,8 @@ export default function Welcome() {
             }}
           >
             <BadgeCheck size={13} color={colors.primary} />
-            <Text variant="caption" color="primary" style={{ fontWeight: '700' }}>
-              PROPERTY SERVICES YOU CAN VERIFY
+            <Text variant="caption" color="primary" uppercase style={{ fontWeight: '700' }}>
+              Property services you can verify
             </Text>
           </View>
           <Text
@@ -122,12 +122,18 @@ export default function Welcome() {
                 rowGap: spacing.sm,
               }}
             >
-              <TrustPoint icon={<BadgeCheck size={14} color={colors.success} />} label="Verified" />
+              <TrustPoint
+                icon={<BadgeCheck size={14} color={colors.success} />}
+                label="Verified people"
+              />
               <TrustPoint
                 icon={<ShieldCheck size={14} color={colors.primary} />}
-                label="Protected"
+                label="Protected payments"
               />
-              <TrustPoint icon={<BadgeCheck size={14} color={colors.primary} />} label="Clear" />
+              <TrustPoint
+                icon={<BadgeCheck size={14} color={colors.primary} />}
+                label="Clear prices"
+              />
             </View>
           </Card>
         </Animated.View>

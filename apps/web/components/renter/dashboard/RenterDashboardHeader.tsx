@@ -17,7 +17,7 @@ export const RenterDashboardHeader = ({ greeting, firstName }: RenterDashboardHe
 
   return (
     <DashboardHeader
-      title={`${greetingText}, ${firstName}`}
+      title={firstName ? `${greetingText}, ${firstName}` : greetingText}
       description={t('dashboard.subtitle')}
       action={
         <Button href={ROUTES.RENTER_DISCOVER} variant="primary" size="lg" icon={<Search />}>

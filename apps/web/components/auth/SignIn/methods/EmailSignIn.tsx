@@ -41,21 +41,10 @@ interface EmailSignInProps {
   isLoading: boolean;
   setIsLoading: (value: boolean) => void;
   showToast: (message: string, variant: ToastVariant) => void;
-  onLoginAttempt: () => void;
-  isLocked: boolean;
-  lockoutTimer: number | null;
   nextPath?: string | null;
 }
 
-export const EmailSignIn = ({
-  isLoading,
-  setIsLoading,
-  showToast,
-  onLoginAttempt,
-  isLocked,
-  lockoutTimer,
-  nextPath,
-}: EmailSignInProps) => {
+export const EmailSignIn = ({ isLoading, setIsLoading, showToast, nextPath }: EmailSignInProps) => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -134,11 +123,6 @@ export const EmailSignIn = ({
   }, [setValue, showToast]);
 
   const onSubmit = async (data: EmailFormData) => {
-    if (isLocked) {
-      showToast(`Too many failed attempts. Please try again in ${lockoutTimer} seconds.`, 'error');
-      return;
-    }
-
     setIsLoading(true);
     const response = await loginMutation.mutateAsync(data);
 
@@ -154,7 +138,6 @@ export const EmailSignIn = ({
       finishLogin(response.data, data.identifier);
       showToast('Successfully signed in! Redirecting...', 'success');
     } else {
-      onLoginAttempt();
       showToast(response.message || 'Invalid email or password. Please try again.', 'error');
     }
 
@@ -263,7 +246,7 @@ export const EmailSignIn = ({
             variant="primary"
             size="lg"
             fullWidth
-            disabled={!isValid || isLoading || loginMutation.isPending || isLocked}
+            disabled={!isValid || isLoading || loginMutation.isPending}
             isLoading={isLoading || loginMutation.isPending}
           >
             <LogIn className="w-4 h-4" />

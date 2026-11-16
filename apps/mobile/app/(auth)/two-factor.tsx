@@ -62,7 +62,7 @@ export default function TwoFactor() {
       }}
       footer={
         <Button
-          label="Verify & sign in"
+          label="Verify and sign in"
           disabled={!isSecondFactorCode(code)}
           loading={submitting}
           onPress={() => submit()}

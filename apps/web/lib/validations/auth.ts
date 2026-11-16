@@ -1,43 +1,24 @@
 import { z } from 'zod';
-import { AUTH_CONSTANTS, ERROR_MESSAGES, VALIDATION_PATTERNS } from '../constants/auth';
+import { CONTACT_INVALID_EMAIL, CONTACT_INVALID_PHONE, toE164Phone } from '@sureground/shared';
+import { AUTH_CONSTANTS, ERROR_MESSAGES } from '../constants/auth';
 
-export const emailSchema = z
-  .object({
-    email: z.string().email(ERROR_MESSAGES.INVALID_EMAIL),
-    fullName: z.string().min(1, ERROR_MESSAGES.REQUIRED_FIELD),
+export const SIGNUP_PASSWORD_HINT = 'At least 12 characters. A short phrase works well.';
+
+export const signupDetailsSchema = (channel: 'email' | 'phone') =>
+  z.object({
+    fullName: z.string().trim().min(1, 'Enter your full name.'),
+    // Both are kept so switching between email and phone loses nothing; only the shown one is checked.
+    email: channel === 'email' ? z.string().trim().email(CONTACT_INVALID_EMAIL) : z.string(),
+    phone:
+      channel === 'phone'
+        ? z.string().refine((value) => toE164Phone(value) !== null, CONTACT_INVALID_PHONE)
+        : z.string(),
     password: z
       .string()
       .min(AUTH_CONSTANTS.PASSWORD_MIN_LENGTH, ERROR_MESSAGES.PASSWORD_TOO_SHORT)
       .max(AUTH_CONSTANTS.PASSWORD_MAX_LENGTH, ERROR_MESSAGES.PASSWORD_TOO_LONG),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: ERROR_MESSAGES.PASSWORD_MISMATCH,
-    path: ['confirmPassword'],
+    referralCode: z.string().trim().max(32, 'Referral codes are shorter than this.'),
+    terms: z.boolean().refine(Boolean, 'Agree to the Terms and Privacy Policy to continue.'),
   });
 
-export const phoneSchema = z
-  .object({
-    phone: z
-      .string()
-      .min(10, ERROR_MESSAGES.INVALID_PHONE)
-      .regex(VALIDATION_PATTERNS.PHONE, ERROR_MESSAGES.INVALID_PHONE),
-    fullName: z.string().min(1, ERROR_MESSAGES.REQUIRED_FIELD),
-    password: z
-      .string()
-      .min(AUTH_CONSTANTS.PASSWORD_MIN_LENGTH, ERROR_MESSAGES.PASSWORD_TOO_SHORT)
-      .max(AUTH_CONSTANTS.PASSWORD_MAX_LENGTH, ERROR_MESSAGES.PASSWORD_TOO_LONG),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: ERROR_MESSAGES.PASSWORD_MISMATCH,
-    path: ['confirmPassword'],
-  });
-
-export const otpSchema = z.object({
-  otp: z.string().length(AUTH_CONSTANTS.OTP_LENGTH, ERROR_MESSAGES.INVALID_OTP),
-});
-
-export type EmailFormData = z.infer<typeof emailSchema>;
-export type PhoneFormData = z.infer<typeof phoneSchema>;
-export type OtpFormData = z.infer<typeof otpSchema>;
+export type SignupDetailsData = z.infer<ReturnType<typeof signupDetailsSchema>>;
