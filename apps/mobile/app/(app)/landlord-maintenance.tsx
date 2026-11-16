@@ -5,7 +5,7 @@ import { Alert, Pressable, RefreshControl, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CircleCheck, HardHat, Sparkles, TriangleAlert, Wrench } from '@sureground/icons/native';
+import { CalendarClock, CircleCheck, HardHat, Sparkles, TriangleAlert, Wrench } from '@sureground/icons/native';
 import {
   Badge,
   Button,
@@ -27,7 +27,7 @@ import {
   type LandlordMaintenance,
 } from '@/lib/api/landlord';
 import { errorMessage } from '@/lib/api/client';
-import { relativeTime } from '@/lib/format';
+import { formatDateTime, relativeTime } from '@/lib/format';
 import { AssignVendorSheet } from '@/components/landlord/AssignVendorSheet';
 import { TriageSheet } from '@/components/landlord/TriageSheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -212,7 +212,7 @@ function RequestCard({
             disabled={busy}
             accessibilityRole="button"
             accessibilityLabel={
-              m.vendorName
+              m.assignedVendorName
                 ? `Change vendor for ${m.issueTitle}`
                 : `Assign a vendor to ${m.issueTitle}`
             }
@@ -225,13 +225,24 @@ function RequestCard({
           >
             <HardHat size={13} color={colors.primary} />
             <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
-              {m.vendorName ? `Vendor: ${m.vendorName}` : 'Assign a vendor'}
+              {m.assignedVendorName ? `Vendor: ${m.assignedVendorName}` : 'Assign a vendor'}
             </Text>
           </Pressable>
-        ) : m.vendorName ? (
+        ) : m.assignedVendorName ? (
           <Text variant="caption" color="mutedForeground">
-            Vendor: {m.vendorName}
+            Vendor: {m.assignedVendorName}
           </Text>
+        ) : null}
+
+        {m.scheduledFor && m.status !== 'resolved' ? (
+          <View
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+            accessible
+            accessibilityLabel={`Repair visit ${formatDateTime(m.scheduledFor)}`}
+          >
+            <CalendarClock size={13} color={colors.mutedForeground} />
+            <Text variant="caption">Visit {formatDateTime(m.scheduledFor)}</Text>
+          </View>
         ) : null}
 
         {m.workOrderScope ? (

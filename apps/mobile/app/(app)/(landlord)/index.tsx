@@ -237,7 +237,11 @@ export default function LandlordOverview() {
             Icon={Wrench}
             tone="warning"
             title={`${s.activeMaintenanceRequests} open maintenance ${s.activeMaintenanceRequests === 1 ? 'request' : 'requests'}`}
-            detail="Assign a vendor or mark them resolved"
+            detail={
+              s.activeMaintenanceRequests === 1
+                ? 'Assign a vendor, book a visit or mark it resolved'
+                : 'Assign vendors, book visits or mark them resolved'
+            }
             // The lead card only when no rent is outstanding: one blue button per screen.
             eyebrow={s.outstandingPayments > 0 ? undefined : 'Repairs'}
             actionLabel={s.outstandingPayments > 0 ? undefined : 'See maintenance'}
