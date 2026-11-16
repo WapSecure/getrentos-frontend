@@ -57,7 +57,11 @@ export const formatRelativeTime = (dateString: string): string => {
 };
 
 export const getInitials = (fullName: string): string => {
-  const parts = fullName.trim().split(' ').filter(Boolean);
+  // Words like "(demo)" or "&" would give initials such as "T(".
+  const parts = fullName
+    .trim()
+    .split(/\s+/)
+    .filter((w) => /^\p{L}/u.test(w));
   const first = parts[0]?.[0] || '';
   const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
   return `${first}${last}`.toUpperCase() || 'U';
