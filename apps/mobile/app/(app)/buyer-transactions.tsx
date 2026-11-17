@@ -29,7 +29,7 @@ import {
   type BuyerTransaction,
 } from '@/lib/api/buyerTransactions';
 import { releaseOutcome } from '@sureground/shared';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatNaira } from '@/lib/format';
 import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -54,9 +54,9 @@ const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] =
   },
   {
     key: 'funds_held',
-    label: 'Funds held',
+    label: 'Deposit held',
     description:
-      'Your payment is held by Sureground. Once the seller has handed over and you have the property and its documents, confirm receipt to release the funds.',
+      'Your deposit is held by Sureground. Once the seller has handed over and you have the property and its documents, confirm receipt to release it.',
   },
   {
     key: 'released',
@@ -313,7 +313,20 @@ function TransactionCard({
         />
       </View>
 
-      <Price amount={tx.purchasePrice} variant="heading" />
+      <View style={{ gap: 2 }}>
+        <Text variant="caption" color="mutedForeground">
+          Purchase price
+        </Text>
+        <Price amount={tx.purchasePrice} variant="heading" />
+        {tx.depositAmount !== undefined && tx.depositAmount < tx.purchasePrice ? (
+          // Only the deposit passes through Sureground; the full price next to "held" read as fully protected.
+          <Text variant="caption" color="mutedForeground">
+            {tx.escrowStatus === 'deposit_pending' || tx.escrowStatus === 'funds_held'
+              ? `Protected by Sureground: ${formatNaira(tx.depositAmount)}, your deposit. The balance is paid to the seller directly: only pay it once you have the keys and the documents.`
+              : `Paid through Sureground: ${formatNaira(tx.depositAmount)}, your deposit. The balance was settled with the seller directly.`}
+          </Text>
+        ) : null}
+      </View>
 
       {frozen ? (
         <View

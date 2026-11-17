@@ -12,7 +12,7 @@ export type BuyerEscrowStatus =
 
 export const BUYER_ESCROW_STATUS_LABEL: Record<BuyerEscrowStatus, string> = {
   deposit_pending: 'Deposit pending',
-  funds_held: 'Funds held',
+  funds_held: 'Deposit held',
   released: 'Released',
   frozen: 'Frozen',
   refunded: 'Refunded',

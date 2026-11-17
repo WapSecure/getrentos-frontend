@@ -28,7 +28,8 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 import { AddressInput } from '@/components/forms/AddressInput';
 
-const PROPERTY_TYPES = ['Apartment', 'House', 'Duplex', 'Bungalow', 'Land', 'Commercial'];
+// The listing types that exist; 'House' and 'Bungalow' could never match a listing.
+const PROPERTY_TYPES = ['Apartment', 'Duplex', 'Condo', 'Commercial', 'Land', 'Shared apartment'];
 
 const splitAreas = (stored: string | null | undefined): string[] =>
   (stored ?? '')
@@ -201,11 +202,13 @@ function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
       </View>
 
       <Card elevated>
+        {/* Nothing sends match alerts yet; the switch stays off rather than promise them. */}
         <SwitchRow
-          label="Notify me on match"
-          description="Get alerted when a new listing matches these preferences."
-          value={notifyOnMatch}
+          label="Match alerts"
+          description="Coming soon: we will tell you when a new listing matches these preferences."
+          value={false}
           onValueChange={setNotifyOnMatch}
+          disabled
         />
       </Card>
 
