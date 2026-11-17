@@ -49,6 +49,16 @@ function classify(path, tag, markup) {
         'Native file/hidden input used as a browser integration point; the visible control must remain shared.',
     };
   }
+  if (
+    tag === 'input' &&
+    /tabIndex=\{-1\}/.test(markup) &&
+    /autoComplete=["']off["']/.test(markup)
+  ) {
+    return {
+      classification: 'platform-bridge',
+      rationale: 'Off-screen bot-trap field that people never see or reach; not a visible control.',
+    };
+  }
   if (/OtpInput\.tsx$/.test(path)) {
     return {
       classification: 'specialized-control',

@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useState, type BaseSyntheticEvent } from 'react';
 import { Controller, useForm, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Eye, EyeOff, Gift, Lock, Mail, Phone, User } from '@sureground/icons';
 import { Button, Checkbox, Field, IconButton, Input } from '@sureground/ui';
-import { toE164Phone } from '@sureground/shared';
+import { toE164Phone, type OtpBotCheck } from '@sureground/shared';
 import {
   SIGNUP_PASSWORD_HINT,
   signupDetailsSchema,
@@ -22,11 +22,12 @@ export interface SignupDetails {
   identifier: string;
   password: string;
   referralCode: string;
+  botCheck: OtpBotCheck;
 }
 
 interface SignupDetailsFormProps {
   channel: 'email' | 'phone';
-  defaults: Omit<SignupDetails, 'identifier'>;
+  defaults: Omit<SignupDetails, 'identifier' | 'botCheck'>;
   /** Set when an invitation fixed the email: shown, not editable. */
   lockedEmail?: string;
   notice: StepOneNotice | null;
@@ -50,6 +51,8 @@ export const SignupDetailsForm = ({
   const [showReferral, setShowReferral] = useState(
     Boolean(defaults.referralCode) || notice?.field === 'referralCode'
   );
+  // Same clock as an event's timeStamp.
+  const [openedAt] = useState(() => performance.now());
 
   const {
     register,
@@ -93,7 +96,8 @@ export const SignupDetailsForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onValid = async (values: SignupDetailsData) => {
+  const onValid = async (values: SignupDetailsData, event?: BaseSyntheticEvent) => {
+    const form = event?.target instanceof HTMLFormElement ? new FormData(event.target) : null;
     const identifier =
       channel === 'email' ? values.email.trim() : (toE164Phone(values.phone) ?? values.phone);
     const problem = await onContinue({
@@ -103,6 +107,10 @@ export const SignupDetailsForm = ({
       identifier,
       password: values.password,
       referralCode: values.referralCode.trim().toUpperCase(),
+      botCheck: {
+        website: String(form?.get('website') ?? '') || undefined,
+        formElapsedMs: event ? Math.round(event.timeStamp - openedAt) : undefined,
+      },
     });
     if (problem) showFieldNotice(problem);
   };
@@ -121,6 +129,13 @@ export const SignupDetailsForm = ({
       onSubmit={handleSubmit(onValid, onInvalid)}
       className="space-y-5"
     >
+      {/* Off-screen rather than display:none, which bots skip; people and screen readers never reach it. */}
+      <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+        <label>
+          Website
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+        </label>
+      </div>
       <Field label="Full name" error={errors.fullName?.message}>
         <Input
           type="text"

@@ -6,6 +6,7 @@ import {
   authErrorField,
   authErrorMessage,
   toE164Phone,
+  type OtpBotCheck,
   type SignupMethod,
 } from '@sureground/shared';
 import { useSignupStore, type StepOneNotice } from '@/lib/store/signupStore';
@@ -73,8 +74,15 @@ export const useSignup = () => {
   const [error, setError] = useState<SignupError | null>(null);
 
   const sendOtpMutation = useMutation({
-    mutationFn: ({ identifier, method }: { identifier: string; method: SignupMethod }) =>
-      authService.sendOtp(identifier, method, 'signup'),
+    mutationFn: ({
+      identifier,
+      method,
+      botCheck,
+    }: {
+      identifier: string;
+      method: SignupMethod;
+      botCheck?: OtpBotCheck;
+    }) => authService.sendOtp(identifier, method, 'signup', botCheck),
   });
   const verifyOtpMutation = useMutation({
     mutationFn: (otp: string) => authService.verifyOtp(otp, otpReference || ''),
@@ -113,11 +121,11 @@ export const useSignup = () => {
     return { field, message: authErrorMessage(res, res.message || '') } satisfies StepOneNotice;
   };
 
-  const sendOtp = async (identifier: string, method: SignupMethod) => {
+  const sendOtp = async (identifier: string, method: SignupMethod, botCheck?: OtpBotCheck) => {
     setError(null);
     setNotice(null);
 
-    const response = await sendOtpMutation.mutateAsync({ identifier, method });
+    const response = await sendOtpMutation.mutateAsync({ identifier, method, botCheck });
 
     if (response.success && response.data) {
       setOtpReference(response.data.reference);

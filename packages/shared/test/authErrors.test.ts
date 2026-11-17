@@ -33,6 +33,11 @@ test('wait codes say how long to wait', () => {
     authErrorMessage(capped, 'x'),
     'We have sent several codes already. Try again in 25 minutes.'
   );
+  const daily = { details: { code: 'TOO_MANY_CODES', retryAfterSeconds: 80_000 } };
+  assert.equal(
+    authErrorMessage(daily, 'x'),
+    'We have sent several codes already. Try again in 23 hours.'
+  );
 });
 
 test('an unknown code falls back to the server message, then the fallback', () => {

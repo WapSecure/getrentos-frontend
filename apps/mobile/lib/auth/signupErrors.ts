@@ -28,7 +28,9 @@ export function retryAfterSeconds(err: unknown): number | null {
 function waitPhrase(seconds: number): string {
   if (seconds < 60) return `${seconds} second${seconds === 1 ? '' : 's'}`;
   const minutes = Math.ceil(seconds / 60);
-  return `${minutes} minute${minutes === 1 ? '' : 's'}`;
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'}`;
+  const hours = Math.ceil(minutes / 60);
+  return `${hours} hour${hours === 1 ? '' : 's'}`;
 }
 
 export function isAccountExists(err: unknown): boolean {

@@ -30,13 +30,17 @@ export function retryAfterSeconds(res: ErrorSource): number | undefined {
 export function formatWait(seconds: number): string {
   if (seconds < 60) return `${seconds} second${seconds === 1 ? '' : 's'}`;
   const minutes = Math.ceil(seconds / 60);
-  return `${minutes} minute${minutes === 1 ? '' : 's'}`;
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'}`;
+  const hours = Math.ceil(minutes / 60);
+  return `${hours} hour${hours === 1 ? '' : 's'}`;
 }
 
 export const AUTH_ERROR_COPY: Record<string, string> = {
   ACCOUNT_EXISTS: 'There is already an account with these details. Sign in instead.',
   TOO_MANY_CODES: 'We have sent several codes already. Wait a while before asking for another.',
   RESEND_TOO_SOON: 'Wait a moment before asking for a new code.',
+  TEXT_CODES_PAUSED:
+    "We can't send codes by text right now. Use email instead, or try again later.",
   PASSWORD_TOO_SHORT: 'Use at least 12 characters. A short phrase works well.',
   PASSWORD_BREACHED:
     'This password has appeared in a data breach elsewhere. Choose a different one.',
