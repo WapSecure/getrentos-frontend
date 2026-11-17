@@ -8,6 +8,7 @@ export const landlordKeys = {
   renewalAdvice: (leaseId: string, language: string) =>
     ['landlord', 'leases', leaseId, 'renewal-advice', language] as const,
   dashboardStats: ['landlord', 'dashboardStats'] as const,
+  payoutAccount: ['landlord', 'settings', 'payout'] as const,
   dashboardActivity: ['landlord', 'dashboardActivity'] as const,
   revenueTrend: ['landlord', 'revenueTrend'] as const,
   notifications: ['landlord', 'notifications'] as const,

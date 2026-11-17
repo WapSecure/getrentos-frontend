@@ -2,8 +2,8 @@
 
 import { useSyncExternalStore, type ElementType } from 'react';
 import Link from 'next/link';
-import { ChevronRight } from '@sureground/icons';
-import { Button, Card, CardDescription, CardHeader, CardTitle } from '@sureground/ui';
+import { CheckCircle2, ChevronRight } from '@sureground/icons';
+import { Button, Card, CardDescription, CardHeader, CardTitle, Progress } from '@sureground/ui';
 
 export interface GetStartedStep {
   title: string;
@@ -11,6 +11,8 @@ export interface GetStartedStep {
   icon: ElementType;
   /** Without one the step only explains something. */
   href?: string;
+  /** Set on every step to track progress; the card hides itself once all are done. */
+  done?: boolean;
 }
 
 interface GetStartedCardProps {
@@ -18,6 +20,7 @@ interface GetStartedCardProps {
   id: string;
   description: string;
   steps: GetStartedStep[];
+  className?: string;
 }
 
 const listeners = new Set<() => void>();
@@ -40,6 +43,14 @@ const isDismissed = (id: string) => {
   }
 };
 
+export function useGetStartedDismissed(id: string) {
+  return useSyncExternalStore(
+    subscribe,
+    () => isDismissed(id),
+    () => true
+  );
+}
+
 const dismiss = (id: string) => {
   try {
     window.localStorage.setItem(keyFor(id), '1');
@@ -51,6 +62,19 @@ const dismiss = (id: string) => {
 
 function StepRow({ step }: { step: GetStartedStep }) {
   const Icon = step.icon;
+  if (step.done) {
+    return (
+      <div className="flex min-h-16 items-center gap-3 px-3 py-2.5">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-success/10 text-success">
+          <CheckCircle2 className="h-[18px] w-[18px]" aria-hidden="true" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-medium text-muted-foreground">{step.title}</span>
+          <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">Done</span>
+        </span>
+      </div>
+    );
+  }
   const content = (
     <>
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -78,17 +102,15 @@ function StepRow({ step }: { step: GetStartedStep }) {
 }
 
 // Shown on a new account's first visits until the person says they have it.
-export function GetStartedCard({ id, description, steps }: GetStartedCardProps) {
+export function GetStartedCard({ id, description, steps, className }: GetStartedCardProps) {
   // Hidden on the server render so a dismissed card never flashes.
-  const hidden = useSyncExternalStore(
-    subscribe,
-    () => isDismissed(id),
-    () => true
-  );
-  if (hidden) return null;
+  const hidden = useGetStartedDismissed(id);
+  const tracked = steps.every((step) => step.done !== undefined);
+  const doneCount = steps.filter((step) => step.done).length;
+  if (hidden || (tracked && doneCount === steps.length)) return null;
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader
         className="pb-2"
         action={
@@ -99,6 +121,15 @@ export function GetStartedCard({ id, description, steps }: GetStartedCardProps) 
       >
         <CardTitle as="h2">Get started</CardTitle>
         <CardDescription>{description}</CardDescription>
+        {tracked && (
+          <Progress
+            className="mt-3 max-w-sm"
+            size="sm"
+            label={`${doneCount} of ${steps.length} done`}
+            value={doneCount}
+            max={steps.length}
+          />
+        )}
       </CardHeader>
       <ul className="grid gap-0.5 p-2.5 pt-2 md:grid-cols-2">
         {steps.map((step) => (

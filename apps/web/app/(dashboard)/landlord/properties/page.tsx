@@ -65,8 +65,8 @@ export default function LandlordPropertiesPage() {
   }, [searchQuery]);
 
   const [filter, setFilter] = useState<VerificationFilter>('all');
-  const [isAddModalOpen, setIsAddModalOpen] = useState(() =>
-    hasSessionDraft(ADD_PROPERTY_DRAFT_KEY)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(
+    () => searchParams.get('add') === '1' || hasSessionDraft(ADD_PROPERTY_DRAFT_KEY)
   );
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);

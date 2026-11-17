@@ -93,6 +93,10 @@ export const OtpVerification = ({
         The code expires in {AUTH_CONSTANTS.OTP_EXPIRY_MINUTES} minutes.
         {channel === 'email' ? ' Not there? Check your spam folder.' : ''}
       </p>
+      <p className="text-center text-sm text-muted-foreground">
+        Already have an account with this {channel === 'email' ? 'email' : 'number'}? We&apos;ll
+        send sign-in help instead of a code.
+      </p>
 
       <Button
         type="submit"

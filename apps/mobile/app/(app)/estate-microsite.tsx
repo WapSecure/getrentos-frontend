@@ -46,6 +46,8 @@ import { pickPhoto } from '@/lib/filePicker';
 import { haptics } from '@/lib/haptics';
 import { goBack } from '@/lib/goBack';
 import { errorMessage } from '@/lib/api/client';
+import { readGate } from '@/lib/verificationGate';
+import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 
 export default function EstateMicrosite() {
   const { colors, spacing, radius } = useTheme();
@@ -166,6 +168,7 @@ function MicrositeForm({ estateId, initial }: { estateId: string; initial: Micro
     },
     onError: (e, next) => {
       setEnabled(!next);
+      if (readGate(e)) return;
       toast.show(errorMessage(e, 'Could not change that.'), 'error');
     },
   });
@@ -254,6 +257,7 @@ function MicrositeForm({ estateId, initial }: { estateId: string; initial: Micro
           }}
         />
       </Card>
+      <VerificationGateNotice error={publish.error} />
 
       <View style={{ gap: spacing.sm }}>
         <Text variant="caption" color="mutedForeground" numberOfLines={1}>

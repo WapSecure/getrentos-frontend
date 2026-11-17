@@ -20,7 +20,7 @@ import { landlordService, type LandlordDashboardStats } from '@/services/landlor
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
-import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
+import { LandlordGetStarted } from '@/components/landlord/dashboard/LandlordGetStarted';
 import { ROUTES } from '@/lib/constants/auth';
 
 const LandlordRevenueChart = dynamic(
@@ -73,11 +73,7 @@ export default function LandlordDashboardPage() {
   return (
     <>
       <LandlordDashboardHeader greeting={greeting} firstName={firstName} />
-      <IdentityNudge
-        verificationHref={ROUTES.LANDLORD_VERIFICATION}
-        unlocks="publish listings, sign leases and receive payouts"
-        className="mb-6"
-      />
+      <LandlordGetStarted stats={data} />
       <AttentionFeed persona="landlord" />
 
       {isLoading ? (
@@ -101,7 +97,7 @@ export default function LandlordDashboardPage() {
           title="No properties yet"
           description="Add your first property to start managing units, tenants, and rent collection in one place."
           action={
-            <Button href={ROUTES.LANDLORD_PROPERTIES} variant="primary">
+            <Button href={`${ROUTES.LANDLORD_PROPERTIES}?add=1`} variant="primary">
               Add your first property
             </Button>
           }

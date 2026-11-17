@@ -1,7 +1,8 @@
 'use client';
 
 import { useLandlordUser } from '../layout';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { User, Bell, Landmark, Zap, Lock, Download } from '@sureground/icons';
 import { Card, PageHeader } from '@sureground/ui';
 import { ProfileSettings } from '@/components/landlord/settings/ProfileSettings';
@@ -22,9 +23,15 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'data', label: 'Your data', icon: Download },
 ];
 
-export default function LandlordSettingsPage() {
+const isSettingsTab = (value: string | null): value is SettingsTab =>
+  tabs.some((tab) => tab.id === value);
+
+function LandlordSettingsPageContent() {
   const user = useLandlordUser();
-  const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+  const requestedTab = useSearchParams().get('tab');
+  const [activeTab, setActiveTab] = useState<SettingsTab>(
+    isSettingsTab(requestedTab) ? requestedTab : 'profile'
+  );
 
   const renderContent = () => {
     switch (activeTab) {
@@ -85,5 +92,14 @@ export default function LandlordSettingsPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function LandlordSettingsPage() {
+  // useSearchParams needs a Suspense boundary on a statically rendered page.
+  return (
+    <Suspense fallback={null}>
+      <LandlordSettingsPageContent />
+    </Suspense>
   );
 }

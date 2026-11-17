@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2 } from '@sureground/icons';
 import { Alert, Button, Card, SaveButton, useToast } from '@sureground/ui';
 import { landlordService } from '@/services/landlordService';
@@ -9,6 +10,7 @@ import {
   isVerificationGateError,
 } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
+import { landlordKeys } from '@/lib/queryKeys';
 import {
   PAYOUT_CHANGE_COOLDOWN_HINT,
   PayoutHoldNotice,
@@ -50,6 +52,7 @@ export const PayoutSettings = ({
   const [loadFailed, setLoadFailed] = useState(false);
   const [reloads, setReloads] = useState(0);
   const toast = useToast();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const fetchPayoutAccount = async () => {
@@ -89,6 +92,7 @@ export const PayoutSettings = ({
       setHoldUntil(response.data.payoutHoldUntil ?? null);
       setBankCode('');
       setAccountNumber('');
+      void queryClient.invalidateQueries({ queryKey: landlordKeys.payoutAccount });
       toast.success(`Rent now pays out to ${response.data.accountName || 'your new account'}.`);
       return true;
     }
