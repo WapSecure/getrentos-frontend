@@ -12,6 +12,7 @@ import { RentScheduleModal } from '@/components/landlord/leases/RentScheduleModa
 import { SignLeaseModal } from '@/components/landlord/leases/SignLeaseModal';
 import {
   Button,
+  ConfirmDialog,
   EmptyState,
   ListSkeleton,
   PageErrorState,
@@ -22,6 +23,8 @@ import {
   PageHeader,
 } from '@sureground/ui';
 import { landlordService } from '@/services/landlordService';
+import { formatCurrency, formatDate } from '@/lib/format';
+import { leaseRentSuffix } from '@/lib/leaseTerm';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import type { Lease, LeaseStatus } from '@/types/landlord';
@@ -50,6 +53,7 @@ function LandlordLeasesPageContent() {
   const [renewingLease, setRenewingLease] = useState<Lease | null>(null);
   const [signingLease, setSigningLease] = useState<Lease | null>(null);
   const [billingLease, setBillingLease] = useState<Lease | null>(null);
+  const [sendingLease, setSendingLease] = useState<Lease | null>(null);
   const toast = useToast();
 
   const {
@@ -135,7 +139,12 @@ function LandlordLeasesPageContent() {
 
   const sendLeaseMutation = useMutation({
     mutationFn: (id: string) => unwrap(landlordService.sendLease(id)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['landlord', 'leases'] }),
+    onSuccess: () => {
+      setSendingLease(null);
+      toast.success('Lease sent. The tenant is asked to sign it.');
+      return queryClient.invalidateQueries({ queryKey: ['landlord', 'leases'] });
+    },
+    onError: (error: Error) => toast.error(error.message || 'Unable to send this lease.'),
   });
 
   const signLeaseMutation = useMutation({
@@ -193,7 +202,7 @@ function LandlordLeasesPageContent() {
     }
   };
 
-  const handleSendLease = (id: string) => sendLeaseMutation.mutate(id);
+  const handleSendLease = (id: string) => setSendingLease(leases.find((l) => l.id === id) ?? null);
 
   const handleSignLease = (id: string, signatureData: string) =>
     signLeaseMutation.mutate({ id, signatureData });
@@ -316,6 +325,22 @@ function LandlordLeasesPageContent() {
           className="mt-6"
         />
       )}
+
+      <ConfirmDialog
+        open={sendingLease !== null}
+        onOpenChange={(open) => {
+          if (!open) setSendingLease(null);
+        }}
+        title="Send this lease for signature?"
+        description={
+          sendingLease
+            ? `${sendingLease.tenantName} is asked to sign the lease for ${sendingLease.propertyName} · ${sendingLease.unitName}: ${formatCurrency(sendingLease.rentAmount)}${leaseRentSuffix(sendingLease.rentPeriod, sendingLease.leaseStart, sendingLease.leaseEnd)}, ${formatDate(sendingLease.leaseStart, 'long')} to ${formatDate(sendingLease.leaseEnd, 'long')}. Check the rent and dates before you send it.`
+            : ''
+        }
+        confirmLabel="Send lease"
+        onConfirm={() => sendingLease && sendLeaseMutation.mutateAsync(sendingLease.id)}
+        isLoading={sendLeaseMutation.isPending}
+      />
 
       <CreateLeaseModal
         isOpen={isCreateModalOpen}
