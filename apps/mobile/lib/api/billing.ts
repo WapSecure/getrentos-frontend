@@ -60,12 +60,24 @@ export const billingApi = {
 /** Kobo → naira, for the Price component. */
 export const naira = (kobo: number) => kobo / 100;
 
+export const planName = (b: Pick<MyBilling, 'tier'>) =>
+  b.tier === 'ENTERPRISE' ? 'Enterprise' : 'Pro';
+
+/** A comped or staff-granted plan has a snapshot price but no period end: nothing is charged. */
+export const isBilled = (b: Pick<MyBilling, 'priceKobo' | 'currentPeriodEnd'>) =>
+  Boolean(b.priceKobo && b.currentPeriodEnd);
+
 export function planHeadline(b: MyBilling, date: (iso: string) => string): string {
+  const name = planName(b);
   if (b.status === 'TRIALING')
     return b.trialEndsAt ? `Trial ends ${date(b.trialEndsAt)}` : 'Pro trial active';
   if (b.status === 'PAST_DUE') return 'Payment failed: update your card';
   if (!b.isActive) return 'Free plan';
   if (b.cancelAtPeriodEnd)
-    return b.currentPeriodEnd ? `Pro until ${date(b.currentPeriodEnd)}` : 'Pro until period end';
-  return b.currentPeriodEnd ? `Pro renews ${date(b.currentPeriodEnd)}` : 'Pro';
+    return b.currentPeriodEnd
+      ? `${name} until ${date(b.currentPeriodEnd)}`
+      : `${name} until period end`;
+  return b.currentPeriodEnd
+    ? `${name} renews ${date(b.currentPeriodEnd)}`
+    : 'No card charge is scheduled for this plan.';
 }

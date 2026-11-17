@@ -1,4 +1,4 @@
-import { planHeadline, type MyBilling } from '@/lib/api/billing';
+import { isBilled, planHeadline, planName, type MyBilling } from '@/lib/api/billing';
 import { claimOutcome } from '@/lib/api/propertyAuthority';
 import { routeForActionUrl } from '@/lib/notificationRoutes';
 
@@ -26,6 +26,14 @@ describe('planHeadline', () => {
       planHeadline({ ...base, status: 'TRIALING', trialEndsAt: '2026-10-04T00:00:00.000Z' }, d)
     ).toBe('Trial ends 2026-10-04');
     expect(planHeadline({ ...base, status: 'PAST_DUE' }, d)).toMatch(/Payment failed/);
+  });
+
+  it('names Enterprise, and promises no charge for a granted plan with no period', () => {
+    const granted = { ...base, tier: 'ENTERPRISE' as const, currentPeriodEnd: null };
+    expect(planHeadline(granted, d)).toBe('No card charge is scheduled for this plan.');
+    expect(isBilled(granted)).toBe(false);
+    expect(planName(granted)).toBe('Enterprise');
+    expect(planHeadline({ ...base, tier: 'ENTERPRISE' }, d)).toBe('Enterprise renews 2026-10-27');
   });
 
   it('calls a lapsed plan Free', () => {
