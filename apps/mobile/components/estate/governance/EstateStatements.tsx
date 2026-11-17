@@ -296,8 +296,8 @@ function GenerateForm({ estateId, onDone }: { estateId: string; onDone: () => vo
   return (
     <View style={{ gap: spacing.md }}>
       <Text variant="callout" color="mutedForeground">
-        Worked out from the dues actually paid in the period. It starts as a draft; nothing is paid
-        out until you issue it.
+        Worked out from the dues residents paid online in the period. Cash or bank transfers you
+        recorded are left out. It starts as a draft; nothing is paid out until you issue it.
       </Text>
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
         <View style={{ flex: 1 }}>

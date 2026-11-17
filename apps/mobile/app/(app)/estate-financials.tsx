@@ -280,8 +280,8 @@ export default function EstateFinancials() {
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
                 <FileBarChart size={20} color={colors.mutedForeground} />
                 <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-                  No statements yet. Generate one for a period to see what was collected and pay it
-                  out to the estate.
+                  No statements yet. Generate one for a period to see what residents paid online and
+                  pay it out to the estate.
                 </Text>
               </Card>
             ) : (
