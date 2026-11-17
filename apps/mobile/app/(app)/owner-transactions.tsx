@@ -17,7 +17,12 @@ import {
 } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerEscrowStatus, type OwnerTransaction } from '@/lib/api/owner';
-import { formatDate } from '@/lib/format';
+import {
+  payoutWaitsOnAccount,
+  sellerPayoutApi,
+  type SellerPayoutAccount,
+} from '@/lib/api/sellerPayout';
+import { formatDate, formatNaira } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -33,7 +38,7 @@ const STAGES: { key: OwnerEscrowStatus; label: string; now: string }[] = [
     label: 'Funds held',
     now: 'The deposit is held safely by Sureground. It is released to you once you have handed over and the buyer confirms.',
   },
-  { key: 'released', label: 'Completed', now: 'The sale is complete.' },
+  { key: 'released', label: 'Deposit released to you', now: 'The sale is complete.' },
 ];
 
 const PAYOUT: Record<
@@ -54,6 +59,15 @@ export default function OwnerTransactions() {
     queryFn: () => ownerApi.transactions(),
   });
   const items = query.data?.items ?? [];
+  const account = useQuery({
+    queryKey: qk.seller.payoutAccount,
+    queryFn: sellerPayoutApi.account,
+  });
+  const payouts = useQuery({
+    queryKey: qk.seller.payouts,
+    queryFn: () => sellerPayoutApi.payouts(),
+  });
+  const paidOut = new Map((payouts.data?.items ?? []).map((p) => [p.transactionId, p.amount]));
 
   const refresh = (
     <RefreshControl
@@ -104,18 +118,40 @@ export default function OwnerTransactions() {
               description="When you accept an offer, the sale and its protected payment show up here."
             />
           }
-          renderItem={({ item: t }: { item: OwnerTransaction }) => <SaleCard t={t} />}
+          renderItem={({ item: t }: { item: OwnerTransaction }) => (
+            <SaleCard
+              t={t}
+              account={account.data}
+              accountLoaded={!account.isPending}
+              heldAmount={t.heldAmount ?? paidOut.get(t.id)}
+            />
+          )}
         />
       </QueryState>
     </View>
   );
 }
 
-function SaleCard({ t }: { t: OwnerTransaction }) {
+function SaleCard({
+  t,
+  account,
+  accountLoaded,
+  heldAmount,
+}: {
+  t: OwnerTransaction;
+  account: SellerPayoutAccount | null | undefined;
+  accountLoaded: boolean;
+  heldAmount: number | undefined;
+}) {
   const { colors, spacing, radius } = useTheme();
   const frozen = t.escrowStatus === 'frozen';
   const current = STAGES.findIndex((s) => s.key === t.escrowStatus);
-  const payout = t.sellerPayoutStatus ? PAYOUT[t.sellerPayoutStatus] : null;
+  const needsAccount = accountLoaded && payoutWaitsOnAccount(t.sellerPayoutStatus, account);
+  const payout = needsAccount
+    ? ({ label: 'Add payout account', tone: 'warning' } as const)
+    : t.sellerPayoutStatus
+      ? PAYOUT[t.sellerPayoutStatus]
+      : null;
 
   return (
     <Card elevated style={{ gap: spacing.md }}>
@@ -130,7 +166,17 @@ function SaleCard({ t }: { t: OwnerTransaction }) {
         </View>
         {payout ? <Badge label={payout.label} tone={payout.tone} /> : null}
       </View>
-      <Price amount={t.salePrice} variant="heading" />
+      <View style={{ gap: 2 }}>
+        <Text variant="caption" color="mutedForeground">
+          Sale price
+        </Text>
+        <Price amount={t.salePrice} variant="heading" />
+        {heldAmount !== undefined && heldAmount < t.salePrice ? (
+          <Text variant="caption" color="mutedForeground">
+            {`Deposit through Sureground: ${formatNaira(heldAmount)}. The buyer pays you the balance directly, as you agreed.`}
+          </Text>
+        ) : null}
+      </View>
 
       {frozen ? (
         <View
@@ -227,7 +273,19 @@ function SaleCard({ t }: { t: OwnerTransaction }) {
         />
       ) : null}
 
-      {t.sellerPayoutStatus === 'FAILED' ? (
+      {needsAccount ? (
+        <View style={{ gap: spacing.xs }}>
+          <Text variant="caption" style={{ color: colors.warning }}>
+            {heldAmount !== undefined
+              ? `Add a payout account to receive ${formatNaira(heldAmount)}. We can’t send it until you do.`
+              : 'Add a payout account to receive this money. We can’t send it until you do.'}
+          </Text>
+          <LinkButton
+            label="Add payout account"
+            onPress={() => router.push('/(app)/seller-payout')}
+          />
+        </View>
+      ) : t.sellerPayoutStatus === 'FAILED' ? (
         <View style={{ gap: spacing.xs }}>
           <Text variant="caption" style={{ color: colors.destructive }}>
             Your payout didn’t go through. Check your payout account, then contact support.

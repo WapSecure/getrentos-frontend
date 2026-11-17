@@ -164,8 +164,11 @@ export const SIGNUP_ROLES: SignupRole[] = Object.values(ROLES)
 export { REALTOR_VS_AGENT } from '@sureground/shared';
 
 /** Group segments are not in URLs, so open the screen in the user's own portal. Keep in step with app/(app)/(<portal>)/<screen>.tsx. */
-const SHARED_TAB_SCREENS: Record<string, readonly Portal[]> = {
+export const SHARED_TAB_SCREENS: Record<string, readonly Portal[]> = {
+  clients: ['agent', 'manager'],
   discover: ['buyer', 'renter'],
+  offers: ['buyer', 'owner'],
+  properties: ['landlord', 'owner'],
   messages: ['agent', 'buyer', 'landlord', 'owner', 'realtor', 'renter'],
   account: [
     'agent',

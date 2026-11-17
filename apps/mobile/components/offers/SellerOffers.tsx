@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FileSignature } from '@sureground/icons/native';
 import {
   Badge,
+  Button,
   Card,
   Chip,
   EmptyState,
@@ -63,6 +64,10 @@ export function SellerOffers({
   const query = useQuery({ queryKey: api.keys.list, queryFn: () => api.list() });
   const all = useMemo(() => query.data?.items ?? [], [query.data]);
   const match = FILTERS.find((f) => f.value === filter)!.match;
+  // Points an empty filter at the first one that has offers, rather than "try another filter".
+  const elsewhere = FILTERS.filter((f) => f.value !== filter && f.value !== 'all')
+    .map((f) => ({ ...f, count: all.filter(f.match).length }))
+    .find((f) => f.count > 0);
   const items = all.filter(match);
 
   const refresh = (
@@ -120,9 +125,22 @@ export function SellerOffers({
               icon={<FileSignature size={34} color={colors.mutedForeground} />}
               title={filter === 'open' ? 'Nothing waiting on you' : 'No offers here'}
               description={
-                all.length
-                  ? 'Try another filter.'
-                  : 'When buyers make offers on your listings, they appear here.'
+                elsewhere
+                  ? `You have ${elsewhere.count} ${elsewhere.count === 1 ? 'offer' : 'offers'} in “${elsewhere.label}”.`
+                  : all.length
+                    ? 'Try another filter.'
+                    : 'When buyers make offers on your listings, they appear here.'
+              }
+              action={
+                elsewhere ? (
+                  <Button
+                    label={`Open ${elsewhere.label}`}
+                    size="sm"
+                    variant="secondary"
+                    fullWidth={false}
+                    onPress={() => setFilter(elsewhere.value)}
+                  />
+                ) : undefined
               }
             />
           </ScrollView>

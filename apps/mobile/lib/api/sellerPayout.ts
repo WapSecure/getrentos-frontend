@@ -14,6 +14,14 @@ export interface SellerPayoutAccount {
 
 export type SellerPayoutStatus = 'PENDING' | 'PROCESSING' | 'PAID' | 'FAILED';
 
+/** The hourly run skips sellers without a verified account, so a queued payout waits on the owner. */
+export function payoutWaitsOnAccount(
+  status: SellerPayoutStatus | undefined,
+  account: Pick<SellerPayoutAccount, 'verified'> | null | undefined
+): boolean {
+  return status === 'PENDING' && !account?.verified;
+}
+
 export interface SellerSalePayout {
   transactionId: string;
   amount: number;

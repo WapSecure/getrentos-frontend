@@ -18,6 +18,7 @@ import {
 } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
+  payoutWaitsOnAccount,
   sellerPayoutApi,
   type SellerPayoutStatus,
   type SellerSalePayout,
@@ -41,7 +42,10 @@ import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
-const STATUS: Record<SellerPayoutStatus, { label: string; tone: 'info' | 'success' | 'danger' }> = {
+const STATUS: Record<
+  SellerPayoutStatus,
+  { label: string; tone: 'info' | 'success' | 'warning' | 'danger' }
+> = {
   PENDING: { label: 'Queued for the next hourly payout', tone: 'info' },
   PROCESSING: { label: 'On its way', tone: 'info' },
   PAID: { label: 'Paid', tone: 'success' },
@@ -140,7 +144,13 @@ export default function SellerPayout() {
               No released sales yet.
             </Text>
           ) : (
-            payouts.data.items.map((p) => <PayoutRow key={p.transactionId} p={p} />)
+            payouts.data.items.map((p) => (
+              <PayoutRow
+                key={p.transactionId}
+                p={p}
+                waitsOnAccount={!account.isPending && payoutWaitsOnAccount(p.payoutStatus, a)}
+              />
+            ))
           )}
         </View>
       </ScrollView>
@@ -207,9 +217,11 @@ function AccountForm({ hasAccount }: { hasAccount: boolean }) {
   );
 }
 
-function PayoutRow({ p }: { p: SellerSalePayout }) {
+function PayoutRow({ p, waitsOnAccount }: { p: SellerSalePayout; waitsOnAccount: boolean }) {
   const { spacing } = useTheme();
-  const s = STATUS[p.payoutStatus];
+  const s = waitsOnAccount
+    ? ({ label: 'Waiting for your payout account', tone: 'warning' } as const)
+    : STATUS[p.payoutStatus];
   const when =
     p.payoutStatus === 'PAID' && p.paidAt
       ? `Paid ${formatDate(p.paidAt, 'medium')}`
@@ -220,7 +232,7 @@ function PayoutRow({ p }: { p: SellerSalePayout }) {
   return (
     <Card elevated style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
       <View style={{ flex: 1, gap: 2 }}>
-        <Text variant="bodyStrong" numberOfLines={1}>
+        <Text variant="bodyStrong" numberOfLines={2}>
           {p.propertyTitle ?? 'Property sale'}
         </Text>
         <Text variant="caption" color="mutedForeground">

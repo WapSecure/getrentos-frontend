@@ -37,8 +37,9 @@ import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
 import { qk } from '@/lib/query/keys';
 import { ownerApi } from '@/lib/api/owner';
+import { payoutWaitsOnAccount, sellerPayoutApi } from '@/lib/api/sellerPayout';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { firstName } from '@/lib/format';
+import { firstName, formatNaira } from '@/lib/format';
 import { IdentityNudge } from '@/components/trust/IdentityNudge';
 
 const ACTIVITY_ICON: Record<string, SgIcon> = {
@@ -55,6 +56,19 @@ export default function OwnerHome() {
   const d = dashboard.data;
   // Same query as the leads screen, so the figure and the list it opens always agree.
   const leads = useQuery({ queryKey: qk.owner.leads, queryFn: () => ownerApi.leads() });
+  const payoutAccount = useQuery({
+    queryKey: qk.seller.payoutAccount,
+    queryFn: sellerPayoutApi.account,
+  });
+  const salePayouts = useQuery({
+    queryKey: qk.seller.payouts,
+    queryFn: () => sellerPayoutApi.payouts(),
+  });
+  const waitingOnAccount = payoutAccount.isPending
+    ? 0
+    : (salePayouts.data?.items ?? [])
+        .filter((p) => payoutWaitsOnAccount(p.payoutStatus, payoutAccount.data))
+        .reduce((sum, p) => sum + p.amount, 0);
   // Pro only: a Free plan's upgrade error is final, so don't retry it.
   const trend = useQuery({
     queryKey: qk.owner.portfolioTrend,
@@ -203,7 +217,25 @@ export default function OwnerHome() {
         errorTitle="We couldn't load your dashboard"
         errorDescription="Check your connection and try again."
       >
-        <IdentityNudge unlocks="sale listings and offers" />
+        <IdentityNudge
+          unlocks={
+            d && (d.activeListings > 0 || d.completedSales > 0)
+              ? 'new sale listings and your payouts'
+              : 'sale listings and offers'
+          }
+        />
+        {waitingOnAccount > 0 ? (
+          <AttentionCard
+            Icon={Wallet}
+            tone="warning"
+            eyebrow="Sale money"
+            title={`${formatNaira(waitingOnAccount)} is waiting for you`}
+            detail="Add a payout account so we can send it."
+            accessibilityLabel={`${formatNaira(waitingOnAccount)} from your sales is waiting. Add a payout account so we can send it.`}
+            actionLabel="Add payout account"
+            onPress={() => router.push('/(app)/seller-payout')}
+          />
+        ) : null}
         {d?.pendingOffers ? (
           <AttentionCard
             Icon={FileSignature}

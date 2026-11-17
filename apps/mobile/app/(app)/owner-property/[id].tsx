@@ -21,6 +21,7 @@ import {
   useToast,
 } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
+import { PROPERTY_TYPE_LABEL, type PropertyType } from '@/lib/api/properties';
 import {
   ownerApi,
   OWNER_LISTING_LABEL,
@@ -198,7 +199,7 @@ export default function OwnerPropertyDetail() {
                       label={OWNER_VERIFICATION_LABEL[p.verificationStatus]}
                       tone={OWNER_VERIFICATION_TONE[p.verificationStatus]}
                     />
-                    <Badge label={p.propertyType.replace(/_/g, ' ').toLowerCase()} tone="neutral" />
+                    <Badge label={propertyTypeLabel(p.propertyType)} tone="neutral" />
                   </View>
                 </View>
 
@@ -217,7 +218,7 @@ export default function OwnerPropertyDetail() {
 
                 <Card elevated style={{ gap: spacing.sm }}>
                   <Fact
-                    label="Estimated value"
+                    label="Your estimate"
                     value={
                       p.estimatedValue ? (
                         <Price amount={p.estimatedValue} variant="callout" />
@@ -288,6 +289,11 @@ export default function OwnerPropertyDetail() {
                           />
                         </View>
                         <Price amount={listing.askingPrice} variant="heading" />
+                        {p.estimatedValue && listing.askingPrice > p.estimatedValue * 3 ? (
+                          <Text variant="caption" color="mutedForeground">
+                            {`This is over three times your estimate of ${formatNaira(p.estimatedValue)}. Check the price, or update your estimate.`}
+                          </Text>
+                        ) : null}
                         <View
                           style={{
                             flexDirection: stackActions ? 'column' : 'row',
@@ -555,4 +561,10 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
       />
     </View>
   );
+}
+
+function propertyTypeLabel(type: string): string {
+  if (type in PROPERTY_TYPE_LABEL) return PROPERTY_TYPE_LABEL[type as PropertyType];
+  const words = type.replace(/_/g, ' ').toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
 }

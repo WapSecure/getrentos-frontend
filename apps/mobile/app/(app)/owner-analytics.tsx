@@ -153,7 +153,7 @@ function MetricCard({ m }: { m: OwnerInvestmentMetric }) {
         </View>
       ) : (
         <Text variant="caption" color="mutedForeground">
-          Not valued
+          No valuer’s report yet
         </Text>
       )}
       {m.rentalYield != null ? (
