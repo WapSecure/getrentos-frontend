@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, RefreshControl, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -28,7 +28,7 @@ import {
   type LandlordLease,
   type LeaseStatus,
 } from '@/lib/api/landlord';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatNaira } from '@/lib/format';
 import { errorMessage } from '@/lib/api/client';
 import { RenewLeaseSheet } from '@/components/landlord/RenewLeaseSheet';
 import { SignLeaseSheet } from '@/components/landlord/SignLeaseSheet';
@@ -132,7 +132,16 @@ export default function LandlordLeases() {
             <LeaseCard
               lease={item}
               busy={busyId === item.id}
-              onSend={() => send.mutate(item.id)}
+              onSend={() =>
+                Alert.alert(
+                  'Send this lease for signature?',
+                  `${item.tenantName} is asked to sign the lease for ${item.propertyName}${item.unitName ? ` · ${item.unitName}` : ''}: ${formatNaira(item.rentAmount)}${item.rentPeriod === 'year' ? ' a year' : item.rentPeriod === 'month' ? ' a month' : ''}, ${formatDate(item.leaseStart, 'medium')} to ${formatDate(item.leaseEnd, 'medium')}. Check the rent and dates before you send it.`,
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Send lease', onPress: () => send.mutate(item.id) },
+                  ]
+                )
+              }
               onSign={() => setSigning(item)}
               onRenew={() => setRenewing(item)}
               onDownload={() => downloadPdf.mutate(item)}
