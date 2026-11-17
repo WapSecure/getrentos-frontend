@@ -53,7 +53,7 @@ import { qk } from '@/lib/query/keys';
 import { realtorApi, viewingBuckets } from '@/lib/api/realtor';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { firstName } from '@/lib/format';
-import { IdentityNudge } from '@/components/trust/IdentityNudge';
+import { ProfessionalSetupCard } from '@/components/trust/ProfessionalSetupCard';
 
 type SheetKind = 'lead' | 'viewing' | 'invite' | null;
 
@@ -281,8 +281,7 @@ export default function RealtorHome() {
         )}
       </View>
 
-      <IdentityNudge unlocks="client invites and publishing listings" />
-      <IdentityNudge requirement="licence" unlocks="listings and clients" />
+      <ProfessionalSetupCard unlocks="client invites and publishing listings" />
 
       <Earnings
         loading={earnings.isPending}

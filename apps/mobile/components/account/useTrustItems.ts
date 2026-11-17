@@ -18,6 +18,8 @@ const TRUST_SCREEN: Record<AccountPortal, Href> = {
   estate: '/(app)/estate-trust-profile',
 };
 
+const NEW_ACCOUNT_SCORE = 20;
+
 export function useTrustItems(
   portal: AccountPortal,
   { identityHint, audience }: { identityHint?: string; audience: string }
@@ -42,9 +44,14 @@ export function useTrustItems(
     {
       key: 'trust',
       label: 'Trust score',
-      description: `Your score and what ${audience} see`,
+      // A brand-new account scores near zero; a bare "4 / 100" reads as a warning to the people who see it.
+      description:
+        score != null && score < NEW_ACCOUNT_SCORE
+          ? `Verify and complete your first deals to build what ${audience} see`
+          : `Your score and what ${audience} see`,
       icon: Gauge,
-      value: score != null ? `${score} / 100` : undefined,
+      value:
+        score == null ? undefined : score < NEW_ACCOUNT_SCORE ? 'Just starting' : `${score} / 100`,
       onPress: () => router.push(TRUST_SCREEN[portal]),
     },
   ];
