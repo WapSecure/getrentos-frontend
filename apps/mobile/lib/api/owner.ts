@@ -219,6 +219,8 @@ export interface OwnerTransaction {
   propertyType?: string;
   buyerName: string;
   salePrice: number;
+  /** What Sureground holds and pays out: the deposit. Older APIs leave it out. */
+  heldAmount?: number;
   escrowStatus: OwnerEscrowStatus;
   milestones?: { label: string; completed: boolean }[];
   activityLog?: { id: string; actor: string; action: string; timestamp: string }[];
