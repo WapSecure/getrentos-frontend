@@ -30,6 +30,7 @@ import {
   useTheme,
 } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import {
   LISTING_STATUS,
   listingTitle,
@@ -65,6 +66,9 @@ export default function RealtorListings() {
   const [sheet, setSheet] = useState<'actions' | 'lead' | 'viewing' | 'commercial' | null>(null);
   const qc = useQueryClient();
   const query = useQuery({ queryKey: qk.realtor.listings, queryFn: () => realtorApi.listings() });
+  const clients = useQuery({ queryKey: qk.realtor.clients, queryFn: () => realtorApi.clients() });
+  // With no clients there is nothing to list yet; the first step is an invite, not a dead-end form.
+  const noClients = clients.data?.items.length === 0;
 
   const all = useMemo(() => query.data?.items ?? [], [query.data]);
   const count = (f: Filter) =>
@@ -95,21 +99,18 @@ export default function RealtorListings() {
           gap: spacing.md,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <View style={{ flex: 1 }}>
-            <Text variant="title" accessibilityRole="header">
-              Listings
-            </Text>
-            <Text variant="callout" color="mutedForeground">
-              Homes you market for your clients
-            </Text>
-          </View>
-          <IconButton
-            accessibilityLabel="New listing"
-            icon={<Plus size={20} color={colors.primary} />}
-            onPress={() => router.push('/(app)/realtor-new-listing')}
-          />
-        </View>
+        <DashboardHeader
+          eyebrow="Marketplace"
+          title="Listings"
+          subtitle="Homes you market for your clients"
+          accessory={
+            <IconButton
+              accessibilityLabel="New listing"
+              icon={<Plus size={20} color={colors.primary} />}
+              onPress={() => router.push('/(app)/realtor-new-listing')}
+            />
+          }
+        />
         {all.length ? (
           <ScrollView
             horizontal
@@ -170,12 +171,23 @@ export default function RealtorListings() {
             <EmptyState
               icon={<Megaphone size={34} color={colors.mutedForeground} />}
               title="No listings yet"
-              description="Once a client assigns you a property, draft its listing here and they publish it."
+              description={
+                noClients
+                  ? 'Listings come from the owners and landlords you represent. Invite your first client to start.'
+                  : 'Once a client assigns you a property, draft its listing here and they publish it.'
+              }
               action={
-                <Button
-                  label="Create a listing"
-                  onPress={() => router.push('/(app)/realtor-new-listing')}
-                />
+                noClients ? (
+                  <Button
+                    label="Invite a client"
+                    onPress={() => router.push('/(app)/realtor-clients')}
+                  />
+                ) : (
+                  <Button
+                    label="Create a listing"
+                    onPress={() => router.push('/(app)/realtor-new-listing')}
+                  />
+                )
               }
             />
           }

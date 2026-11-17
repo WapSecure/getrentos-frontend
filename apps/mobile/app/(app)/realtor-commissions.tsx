@@ -15,6 +15,7 @@ import { BadgeCheck, ChevronRight, Landmark, Sparkles, Wallet } from '@suregroun
 import {
   Button,
   Card,
+  LinkButton,
   Chip,
   FormAlert,
   Price,
@@ -79,6 +80,7 @@ export default function RealtorCommissions() {
     queryKey: qk.realtor.trend,
     queryFn: realtorApi.commissionTrend,
     enabled: ready,
+    retry: (n, e) => !isUpgradeError(e) && n < 2,
   });
   const payouts = useQuery({
     queryKey: qk.realtor.payouts,
@@ -336,7 +338,21 @@ function Ledger() {
     queryFn: () => realtorApi.commissions(filter === 'all' ? undefined : filter),
     // Keep the last list on screen while another filter loads.
     placeholderData: keepPreviousData,
+    retry: (n, e) => !isUpgradeError(e) && n < 2,
   });
+  // The ledger is Pro reporting; withdrawing above works on any plan.
+  if (isUpgradeError(query.error)) {
+    return (
+      <Card elevated style={{ gap: spacing.sm }}>
+        <Text variant="bodyStrong">Commission reports are part of Pro</Text>
+        <Text variant="callout" color="mutedForeground">
+          Your commission is always yours to withdraw. Pro adds a deal-by-deal ledger and monthly
+          trends.
+        </Text>
+        <LinkButton label="See Pro" onPress={() => router.push('/(app)/billing')} />
+      </Card>
+    );
+  }
   return (
     <View style={{ gap: spacing.sm }}>
       <Text variant="heading" headingLevel={2}>

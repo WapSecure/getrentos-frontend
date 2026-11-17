@@ -36,6 +36,8 @@ export default function RealtorMessages() {
   const insets = useSafeAreaInsets();
   const [search, setSearch] = useState('');
   const [picking, setPicking] = useState(false);
+  const clients = useQuery({ queryKey: qk.realtor.clients, queryFn: () => realtorApi.clients() });
+  const noClients = clients.data?.items.length === 0;
   const query = useQuery({
     queryKey: qk.realtor.conversations,
     queryFn: realtorApi.conversations,
@@ -128,10 +130,17 @@ export default function RealtorMessages() {
               description={
                 search
                   ? 'Try a name or a word from the message.'
-                  : 'Message a client about their property, an offer or a viewing.'
+                  : noClients
+                    ? 'Conversations with the owners and landlords you represent appear here. Invite your first client to start.'
+                    : 'Message a client about their property, an offer or a viewing.'
               }
               action={
-                search ? undefined : (
+                search ? undefined : noClients ? (
+                  <Button
+                    label="Invite a client"
+                    onPress={() => router.push('/(app)/realtor-clients')}
+                  />
+                ) : (
                   <Button label="Message a client" onPress={() => setPicking(true)} />
                 )
               }

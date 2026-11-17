@@ -25,6 +25,7 @@ import {
   useToast,
 } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { FollowUpsCard } from '@/components/realtor/FollowUpsCard';
 import {
   LEAD_STAGES,
@@ -64,16 +65,18 @@ export default function RealtorPipeline() {
           gap: spacing.md,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text variant="title" accessibilityRole="header" style={{ flex: 1 }}>
-            Pipeline
-          </Text>
-          <IconButton
-            accessibilityLabel={tab === 'leads' ? 'Add a lead' : 'Book a viewing'}
-            icon={<Plus size={20} color={colors.primary} />}
-            onPress={() => setSheet(tab === 'leads' ? 'lead' : 'viewing')}
-          />
-        </View>
+        <DashboardHeader
+          eyebrow="Your book"
+          title="Pipeline"
+          subtitle="Leads and viewings"
+          accessory={
+            <IconButton
+              accessibilityLabel={tab === 'leads' ? 'Add a lead' : 'Book a viewing'}
+              icon={<Plus size={20} color={colors.primary} />}
+              onPress={() => setSheet(tab === 'leads' ? 'lead' : 'viewing')}
+            />
+          }
+        />
         <SegmentedControl
           accessibilityLabel="Leads or viewings"
           value={tab}

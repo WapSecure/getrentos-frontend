@@ -240,17 +240,18 @@ export default function RealtorCommissionsPage() {
       />
       <RealtorPipelineNav />
 
+      {/* Outside the Pro gate: earned commission is always the realtor's to withdraw; Pro adds the reporting below. */}
+      <RealtorPayoutSection />
+
       <ProFeatureGate
-        title="Commission tracking is a Pro feature"
-        description="Upgrade to Pro to track earnings from closed deals, see totals by status, and export your commission report."
+        title="Commission reports are a Pro feature"
+        description="Your commission is always yours to withdraw above. Pro adds totals by status, the deal-by-deal ledger and a spreadsheet export."
       >
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {stats.map((stat) => (
             <StatCard key={stat.label} {...stat} />
           ))}
         </div>
-
-        <RealtorPayoutSection />
 
         <section>
           <h3 className="mb-3 text-sm font-semibold text-foreground">Earned commission</h3>

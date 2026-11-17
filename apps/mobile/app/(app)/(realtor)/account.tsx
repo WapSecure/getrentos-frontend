@@ -134,8 +134,8 @@ export default function RealtorAccount() {
     },
     {
       key: 'sale-payouts',
-      label: 'Sale payouts',
-      description: 'Where money from properties you sell is paid',
+      label: 'Payouts for your own sales',
+      description: 'When you sell a property you own. Commission is withdrawn from Commissions',
       icon: Landmark,
       onPress: go('/(app)/seller-payout'),
     },
