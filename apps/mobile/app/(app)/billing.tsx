@@ -22,7 +22,9 @@ import { qk } from '@/lib/query/keys';
 import {
   billingApi,
   naira,
+  isBilled,
   planHeadline,
+  planName,
   type MyBilling,
   type PlanEntitlementRow,
   type PlanPersona,
@@ -46,6 +48,8 @@ import { goBack } from '@/lib/goBack';
 const PERSONA: Partial<Record<string, PlanPersona>> = {
   landlord: 'landlord',
   owner: 'owner',
+  estate: 'estate',
+  realtor: 'realtor',
 };
 
 const date = (iso: string) => formatDate(iso, 'medium');
@@ -54,8 +58,12 @@ const date = (iso: string) => formatDate(iso, 'medium');
 export default function Billing() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
-  const { usablePortal } = useAuth();
-  const persona = PERSONA[usablePortal ?? ''] ?? 'owner';
+  const { usablePortal, workspaces } = useAuth();
+  // A gate or resident workspace has no plan of its own; show the plan of a workspace the account runs.
+  const persona =
+    PERSONA[usablePortal ?? ''] ??
+    workspaces.map((w) => PERSONA[w]).find((p): p is PlanPersona => !!p) ??
+    'owner';
 
   const mine = useQuery({ queryKey: qk.billing.mine, queryFn: billingApi.mine });
   const pricing = useQuery({
@@ -165,12 +173,12 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
   const accessEnds = trialing ? b.trialEndsAt : b.currentPeriodEnd;
   const confirmCancel = () =>
     Alert.alert(
-      trialing ? 'Cancel your trial?' : 'Cancel Pro?',
+      trialing ? 'Cancel your trial?' : `Cancel ${planName(b)}?`,
       trialing
         ? `Nothing will be charged.${accessEnds ? ` You keep Pro until ${date(accessEnds)}.` : ''}`
-        : `You keep Pro${accessEnds ? ` until ${date(accessEnds)}` : ' until the period ends'}, then move to Free.`,
+        : `You keep ${planName(b)}${accessEnds ? ` until ${date(accessEnds)}` : ' until the period ends'}, then move to Free.`,
       [
-        { text: 'Keep Pro', style: 'cancel' },
+        { text: `Keep ${planName(b)}`, style: 'cancel' },
         { text: 'Cancel plan', style: 'destructive', onPress: () => cancel.mutate() },
       ]
     );
@@ -180,7 +188,7 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <BadgeCheck size={20} color={pro ? colors.primary : colors.mutedForeground} />
         <Text variant="heading" style={{ flex: 1 }}>
-          {pro ? 'Pro' : 'Free'}
+          {pro ? planName(b) : 'Free'}
         </Text>
         {trialing ? <Badge label="Trial" tone="info" /> : null}
         {b.cancelAtPeriodEnd ? <Badge label="Won’t renew" tone="warning" /> : null}
@@ -188,7 +196,7 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
       <Text variant="callout" color="mutedForeground">
         {planHeadline(b, date)}
       </Text>
-      {pro && b.priceKobo && !b.cancelAtPeriodEnd ? (
+      {pro && b.priceKobo && isBilled(b) && !b.cancelAtPeriodEnd ? (
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
           <Price amount={naira(b.priceKobo)} variant="bodyStrong" />
           <Text variant="caption" color="mutedForeground">
