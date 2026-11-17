@@ -36,16 +36,23 @@ type OtpPurpose = 'signup' | 'password_reset';
 
 export type SignupPrecheckField = 'password' | 'referralCode';
 
+/** Signs of a form filled by a bot; the API then answers as usual but sends no code. */
+export interface OtpBotCheck {
+  website?: string;
+  formElapsedMs?: number;
+}
+
 export const authService = {
   async sendOtp(
     identifier: string,
     method: 'email' | 'phone' | 'whatsapp',
-    purpose: OtpPurpose = 'signup'
+    purpose: OtpPurpose = 'signup',
+    botCheck: OtpBotCheck = {}
   ): Promise<ApiResponse<{ reference: string }>> {
     return safeCall(() =>
       apiFetch('/auth/otp/send', {
         method: 'POST',
-        body: JSON.stringify({ identifier, method, purpose }),
+        body: JSON.stringify({ identifier, method, purpose, ...botCheck }),
       })
     );
   },

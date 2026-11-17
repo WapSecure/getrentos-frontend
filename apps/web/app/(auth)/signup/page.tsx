@@ -91,7 +91,7 @@ export default function SignupPage() {
     });
     const problem = await precheck(details.password, details.referralCode || undefined);
     if (problem) return problem;
-    await sendOtp(details.identifier, channel);
+    await sendOtp(details.identifier, channel, details.botCheck);
     return null;
   };
 

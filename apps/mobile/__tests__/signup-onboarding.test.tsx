@@ -77,6 +77,9 @@ describe('sign-up refusal codes (contract 4)', () => {
     expect(
       codeSendErrorCopy(refusal(429, { code: 'TOO_MANY_CODES', retryAfterSeconds: 3000 }), 'x')
     ).toBe('Too many codes sent. Try again in 50 minutes.');
+    expect(
+      codeSendErrorCopy(refusal(429, { code: 'TOO_MANY_CODES', retryAfterSeconds: 7200 }), 'x')
+    ).toBe('Too many codes sent. Try again in 2 hours.');
   });
 });
 
