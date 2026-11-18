@@ -6,6 +6,7 @@ import { track } from '@/lib/analytics';
 import { MARKET_STATUS, type CardMarket, type MarketCard } from '@/lib/marketCards';
 import { SaveListingButton } from './SaveListingButton';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
+import { BoostedBadge } from '@/components/shared/boosts/BoostedBadge';
 import { listingPath } from '@/lib/listingSlug';
 
 export function MarketListingCard({
@@ -47,7 +48,12 @@ export function MarketListingCard({
       eager={eager}
       status={MARKET_STATUS[market]}
       // The chain pill says "Verified" only when every check is met; a passed property check alone never does.
-      badges={<TrustChainBadge chain={listing.trustChain} fallbackVerified={listing.verified} />}
+      badges={
+        <>
+          <TrustChainBadge chain={listing.trustChain} fallbackVerified={listing.verified} />
+          {listing.boosted && <BoostedBadge />}
+        </>
+      }
       facts={{ beds: listing.beds, baths: listing.baths, size: listing.size, type: listing.type }}
       meta={meta}
       actions={

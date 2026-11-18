@@ -25,6 +25,7 @@ export default function robots(): MetadataRoute.Robots {
         '/magic-link',
         '/payments',
         '/billing',
+        '/boosts',
         '/agency-invite',
         '/auth',
         '/representing',

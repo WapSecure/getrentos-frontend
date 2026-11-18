@@ -67,6 +67,7 @@ test('dashboards and other signed-in areas are not public', () => {
     '/admin/dashboard',
     '/dashboard',
     '/billing/return',
+    '/boosts/return',
     '/payments/return',
     '/representing',
     '/representing/transactions/1',

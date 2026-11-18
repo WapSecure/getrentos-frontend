@@ -14,6 +14,7 @@ import {
   Banknote,
   Building2,
   KeyRound,
+  Rocket,
 } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
 import { listingStatusBadges } from '@/lib/statusBadge';
@@ -28,6 +29,7 @@ interface ListingCardProps {
   onPreview: (listing: Listing) => void;
   onEditFees?: (listing: Listing) => void;
   onEditCommercial?: (listing: Listing) => void;
+  onBoost?: (listing: Listing) => void;
   isUpdating?: boolean;
 }
 
@@ -37,6 +39,7 @@ export const ListingCard = ({
   onPreview,
   onEditFees,
   onEditCommercial,
+  onBoost,
   isUpdating = false,
 }: ListingCardProps) => {
   const status = statusConfig[listing.status];
@@ -179,6 +182,18 @@ export const ListingCard = ({
             </Button>
           )}
         </div>
+        {onBoost && listing.status === 'published' && !isLet && (
+          <Button
+            variant="outline"
+            size="sm"
+            fullWidth
+            className="mt-2 gap-1.5"
+            onClick={() => onBoost(listing)}
+          >
+            <Rocket className="w-3.5 h-3.5" />
+            Boost in search
+          </Button>
+        )}
       </div>
     </article>
   );
