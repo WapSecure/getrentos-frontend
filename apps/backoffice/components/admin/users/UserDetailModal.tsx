@@ -193,7 +193,13 @@ function PlanControl({
           ) : null}
         </div>
       </div>
-      {canManage ? (
+      {canManage && user.planBilledByCard ? (
+        <p className="text-xs text-muted-foreground">
+          This customer pays by card, so the plan can’t be changed here. They can change or cancel
+          it from billing in their account.
+        </p>
+      ) : null}
+      {canManage && !user.planBilledByCard ? (
         <>
           <Field
             label="End date for Pro or Enterprise"
