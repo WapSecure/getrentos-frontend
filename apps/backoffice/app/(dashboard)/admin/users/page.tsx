@@ -27,7 +27,7 @@ import { useAdminSearchParam } from '@/lib/readAdminSearchParam';
 import type { PlanTier, PlatformUser, UserAccountStatus, PlatformRole } from '@/types/admin';
 import { roleLabel } from '@/lib/roleLabels';
 import { hasAdminPermission } from '@/lib/adminAccess';
-import { endOfLagosDay, planLabel } from '@/lib/planDates';
+import { endOfLagosDay, MAX_GRANT_REASON, MIN_GRANT_REASON, planLabel } from '@/lib/planDates';
 import { useAdminUser } from '../layout';
 
 const statusConfig: Record<
@@ -62,6 +62,7 @@ export default function AdminUsersPage() {
     tier: PlanTier;
     endDate?: string;
   } | null>(null);
+  const [subscriptionReason, setSubscriptionReason] = useState('');
   const toast = useToast();
   const adminUser = useAdminUser();
   const canManageSubscriptions = hasAdminPermission(adminUser?.roles, 'subscriptions.manage');
@@ -118,11 +119,22 @@ export default function AdminUsersPage() {
   };
 
   const changeSubscriptionMutation = useMutation({
-    mutationFn: ({ userId, tier, endDate }: { userId: string; tier: PlanTier; endDate?: string }) =>
+    mutationFn: ({
+      userId,
+      tier,
+      endDate,
+      reason,
+    }: {
+      userId: string;
+      tier: PlanTier;
+      endDate?: string;
+      reason: string;
+    }) =>
       unwrap(
         adminService.updateUserSubscription(
           userId,
           tier,
+          reason,
           endDate ? endOfLagosDay(endDate) : undefined
         )
       ),
@@ -334,6 +346,7 @@ export default function AdminUsersPage() {
         onChangeSubscription={(userId, tier, endDate) => {
           const user = users.find((item) => item.id === userId) ?? activeUser;
           if (user && !changeSubscriptionMutation.isPending) {
+            setSubscriptionReason('');
             setPendingSubscription({ user, tier, endDate });
           }
         }}
@@ -409,14 +422,14 @@ export default function AdminUsersPage() {
               ? `${pendingSubscription.user.fullName} stays on ${planLabel(pendingSubscription.tier)}${
                   pendingSubscription.endDate
                     ? ` until ${formatDate(pendingSubscription.endDate)}`
-                    : ' with no end date'
+                    : ''
                 }.`
               : `${pendingSubscription.user.fullName}'s plan will change from ${planLabel(pendingSubscription.user.planTier)} to ${planLabel(pendingSubscription.tier)}${
                   pendingSubscription.tier === 'FREE'
                     ? ''
                     : pendingSubscription.endDate
                       ? ` until ${formatDate(pendingSubscription.endDate)}`
-                      : ' with no end date'
+                      : ''
                 }. This changes their product entitlements immediately.`
         }
         confirmLabel={
@@ -427,6 +440,12 @@ export default function AdminUsersPage() {
               : `Upgrade to ${planLabel(pendingSubscription?.tier ?? 'PRO')}`
         }
         tone={pendingSubscription?.tier === 'FREE' ? 'danger' : 'primary'}
+        promptLabel="Reason"
+        promptPlaceholder="Why this plan is changing, for the audit log"
+        promptValue={subscriptionReason}
+        onPromptChange={(value) => setSubscriptionReason(value.slice(0, MAX_GRANT_REASON))}
+        promptRequired
+        promptMinLength={MIN_GRANT_REASON}
         isLoading={changeSubscriptionMutation.isPending}
         onConfirm={() =>
           pendingSubscription && !changeSubscriptionMutation.isPending
@@ -434,6 +453,7 @@ export default function AdminUsersPage() {
                 userId: pendingSubscription.user.id,
                 tier: pendingSubscription.tier,
                 endDate: pendingSubscription.endDate,
+                reason: subscriptionReason.trim(),
               })
             : undefined
         }

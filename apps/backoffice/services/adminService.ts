@@ -418,12 +418,13 @@ export const adminService = {
   async updateUserSubscription(
     userId: string,
     tier: PlanTier,
+    reason: string,
     expiresAt?: string
   ): Promise<ApiResponse<PlatformUser>> {
     return safeCall(() =>
       authFetch(`/admin/users/${userId}/subscription`, {
         method: 'PATCH',
-        body: JSON.stringify({ tier, expiresAt }),
+        body: JSON.stringify({ tier, expiresAt, reason }),
       })
     );
   },

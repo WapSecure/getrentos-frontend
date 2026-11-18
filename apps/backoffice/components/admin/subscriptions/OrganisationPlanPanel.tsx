@@ -24,7 +24,16 @@ import {
 import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '@/app/(dashboard)/admin/layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
-import { endOfLagosDay, lagosDayOf, planLabel, todayInLagos } from '@/lib/planDates';
+import {
+  endOfLagosDay,
+  initialStaffGrantDay,
+  isStaffGrantDayAllowed,
+  latestStaffGrantDay,
+  MAX_GRANT_REASON,
+  MIN_GRANT_REASON,
+  planLabel,
+  tomorrowInLagos,
+} from '@/lib/planDates';
 import { adminSubscriptionService } from '@/services/adminSubscriptionService';
 import type { PlanTier } from '@/types/admin';
 import type { AdminOrganizationPlan, SetOrganizationPlanInput } from '@/types/subscription';
@@ -181,15 +190,14 @@ function EditPlanDialog({
   const [priceNaira, setPriceNaira] = useState<number | ''>(
     plan.monthlyPriceKobo == null ? '' : Math.round(plan.monthlyPriceKobo / 100)
   );
-  const [endDate, setEndDate] = useState(
-    plan.currentPeriodEnd ? lagosDayOf(plan.currentPeriodEnd) : ''
-  );
+  const [endDate, setEndDate] = useState(() => initialStaffGrantDay(plan.currentPeriodEnd));
+  const [reason, setReason] = useState('');
   const [notes, setNotes] = useState(plan.notes ?? '');
   const [confirming, setConfirming] = useState(false);
 
   const paid = tier !== 'FREE';
-  const today = todayInLagos();
-  const endDateInPast = paid && endDate !== '' && endDate < today;
+  const endDateInvalid = paid && !isStaffGrantDayAllowed(endDate);
+  const reasonInvalid = reason.trim().length < MIN_GRANT_REASON;
   const invalidCount =
     paid && [seats, units, estates].some((v) => v.trim() !== '' && toWhole(v) === undefined);
 
@@ -201,6 +209,7 @@ function EditPlanDialog({
     estateAllowance: paid ? toWhole(estates) : undefined,
     monthlyPriceKobo: priceNaira === '' ? undefined : priceNaira * 100,
     expiresAt: paid && endDate ? endOfLagosDay(endDate) : undefined,
+    reason: reason.trim(),
     notes: notes.trim(),
   };
 
@@ -231,7 +240,7 @@ function EditPlanDialog({
     input.monthlyPriceKobo != null
       ? `${formatCurrency(input.monthlyPriceKobo / 100)} a month`
       : null,
-    paid ? (endDate ? `ends ${formatDate(endDate)}` : 'no end date') : null,
+    paid && endDate ? `ends ${formatDate(endDate)}` : null,
   ]
     .filter(Boolean)
     .join(', ');
@@ -314,19 +323,36 @@ function EditPlanDialog({
             {paid ? (
               <Field
                 label="End date"
-                optionalLabel="Optional"
-                hint="Leave empty to keep the plan until someone changes it."
-                error={endDateInPast ? 'Choose an end date in the future.' : undefined}
+                required
+                hint="A plan granted by staff must end within 12 months."
+                error={
+                  endDate && endDateInvalid
+                    ? 'Choose a date from tomorrow up to 12 months from today.'
+                    : undefined
+                }
               >
                 <DatePicker
                   value={endDate}
                   onChange={setEndDate}
-                  min={today}
-                  clearable
-                  placeholder="No end date"
+                  min={tomorrowInLagos()}
+                  max={latestStaffGrantDay()}
+                  placeholder="Choose an end date"
                 />
               </Field>
             ) : null}
+            <Field
+              label="Reason"
+              required
+              hint={`Recorded in the audit trail. At least ${MIN_GRANT_REASON} characters.`}
+            >
+              <Textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                maxLength={MAX_GRANT_REASON}
+                placeholder="Why this plan is changing"
+                className="min-h-[60px]"
+              />
+            </Field>
             <Field label="Notes" optionalLabel="Optional" hint="Only staff can see these.">
               <Textarea
                 value={notes}
@@ -340,7 +366,10 @@ function EditPlanDialog({
             <Button variant="ghost" onClick={onClose}>
               Cancel
             </Button>
-            <Button onClick={() => setConfirming(true)} disabled={invalidCount || endDateInPast}>
+            <Button
+              onClick={() => setConfirming(true)}
+              disabled={invalidCount || endDateInvalid || reasonInvalid}
+            >
               Review change
             </Button>
           </div>

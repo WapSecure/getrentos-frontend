@@ -84,7 +84,9 @@ export interface SetOrganizationPlanInput {
   unitAllowance?: number;
   estateAllowance?: number;
   monthlyPriceKobo?: number;
+  /** Required for Pro and Enterprise, at most 12 months away. */
   expiresAt?: string;
+  reason: string;
   notes?: string;
 }
 

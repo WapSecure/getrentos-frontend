@@ -16,7 +16,13 @@ import { FactGrid } from '@/components/admin/ops/OpsParts';
 import { getInitials, formatDate, formatRelativeTime } from '@sureground/shared';
 import type { PlanTier, PlatformUser, UserAccountStatus } from '@/types/admin';
 import { roleLabel } from '@/lib/roleLabels';
-import { lagosDayOf, planLabel, todayInLagos } from '@/lib/planDates';
+import {
+  initialStaffGrantDay,
+  isStaffGrantDayAllowed,
+  latestStaffGrantDay,
+  planLabel,
+  tomorrowInLagos,
+} from '@/lib/planDates';
 import { UserSecurityActions } from './UserSecurityActions';
 import { UserLegalNameAction } from './UserLegalNameAction';
 
@@ -192,7 +198,8 @@ function PlanControl({
   isChanging: boolean;
   onChange: (userId: string, tier: PlanTier, endDate?: string) => void;
 }) {
-  const [endDate, setEndDate] = useState(user.planExpiresAt ? lagosDayOf(user.planExpiresAt) : '');
+  const [endDate, setEndDate] = useState(() => initialStaffGrantDay(user.planExpiresAt));
+  const endDateValid = isStaffGrantDayAllowed(endDate);
   const paid = user.planTier !== 'FREE';
 
   return (
@@ -220,19 +227,24 @@ function PlanControl({
         <>
           <Field
             label="End date for Pro or Enterprise"
-            optionalLabel="Optional"
+            required
             hint={
               paid
-                ? 'Leave empty for no end date. Use Change end date to update the current plan.'
-                : 'Leave empty to keep the plan until someone changes it.'
+                ? 'At most 12 months from today. Use Change end date to update the current plan.'
+                : 'A plan granted by staff must end within 12 months.'
+            }
+            error={
+              endDate && !endDateValid
+                ? 'Choose a date from tomorrow up to 12 months from today.'
+                : undefined
             }
           >
             <DatePicker
               value={endDate}
               onChange={setEndDate}
-              min={todayInLagos()}
-              clearable
-              placeholder="No end date"
+              min={tomorrowInLagos()}
+              max={latestStaffGrantDay()}
+              placeholder="Choose an end date"
             />
           </Field>
           <div className="flex flex-wrap gap-2">
@@ -242,7 +254,8 @@ function PlanControl({
                 size="sm"
                 className="gap-1"
                 isLoading={isChanging}
-                onClick={() => onChange(user.id, user.planTier, endDate || undefined)}
+                disabled={!endDateValid}
+                onClick={() => onChange(user.id, user.planTier, endDate)}
               >
                 <CalendarDays className="h-3.5 w-3.5" />
                 Change end date
@@ -255,9 +268,8 @@ function PlanControl({
                 size="sm"
                 className="gap-1"
                 isLoading={isChanging}
-                onClick={() =>
-                  onChange(user.id, tier, tier === 'FREE' ? undefined : endDate || undefined)
-                }
+                disabled={tier !== 'FREE' && !endDateValid}
+                onClick={() => onChange(user.id, tier, tier === 'FREE' ? undefined : endDate)}
               >
                 <BadgeCheck className="h-3.5 w-3.5" />
                 Move to {planLabel(tier)}
