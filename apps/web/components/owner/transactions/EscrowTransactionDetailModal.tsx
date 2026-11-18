@@ -152,6 +152,11 @@ export const EscrowTransactionDetailModal = ({
   const payout = transaction.sellerPayoutStatus
     ? payoutStatusMeta[transaction.sellerPayoutStatus]
     : null;
+  const needsOwnership =
+    transaction.ownershipVerified === false &&
+    !isRefunded &&
+    transaction.sellerPayoutStatus !== 'PAID' &&
+    transaction.sellerPayoutStatus !== 'PROCESSING';
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -250,6 +255,23 @@ export const EscrowTransactionDetailModal = ({
             <p className="text-center text-xs text-muted-foreground">
               Funds released on {formatDate(transaction.releasedAt)}
             </p>
+          )}
+
+          {needsOwnership && (
+            <Alert variant="warning" icon={ShieldAlert} title="Verify your ownership to be paid">
+              <p>
+                Sureground holds the deposit until your ownership of this property is verified.
+                Upload your ownership document from Properties.
+              </p>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="mt-2"
+                onClick={() => router.push(ROUTES.OWNER_PROPERTIES)}
+              >
+                Go to Properties
+              </Button>
+            </Alert>
           )}
 
           {payout && (

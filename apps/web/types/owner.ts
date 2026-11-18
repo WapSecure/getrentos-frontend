@@ -159,6 +159,8 @@ export interface EscrowSaleTransaction {
   propertyType?: string;
   buyerName: string;
   salePrice: number;
+  /** Sureground holds the deposit, and pays nothing out, until this is true. */
+  ownershipVerified?: boolean;
   escrowStatus: SaleEscrowStatus;
   milestones: EscrowMilestone[];
   activityLog: EscrowActivityLogEntry[];
