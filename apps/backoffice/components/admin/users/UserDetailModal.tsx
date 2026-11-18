@@ -1,12 +1,22 @@
 'use client';
 
 import { Ban, CheckCircle2, ShieldAlert, BadgeCheck } from '@sureground/icons';
-import { Dialog, DialogContent, DialogTitle } from '@sureground/ui';
-import { Badge, Button, type BadgeVariant } from '@sureground/ui';
+import { useState } from 'react';
+import {
+  Badge,
+  Button,
+  DatePicker,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Field,
+  type BadgeVariant,
+} from '@sureground/ui';
 import { FactGrid } from '@/components/admin/ops/OpsParts';
 import { getInitials, formatDate, formatRelativeTime } from '@sureground/shared';
 import type { PlanTier, PlatformUser, UserAccountStatus } from '@/types/admin';
 import { roleLabel } from '@/lib/roleLabels';
+import { planLabel, todayInLagos } from '@/lib/planDates';
 import { UserSecurityActions } from './UserSecurityActions';
 
 interface UserDetailModalProps {
@@ -15,8 +25,9 @@ interface UserDetailModalProps {
   onChangeStatus: (userId: string, status: UserAccountStatus) => void;
   isChangingStatus?: boolean;
   pendingStatus?: UserAccountStatus;
-  onChangeSubscription: (userId: string, tier: PlanTier) => void;
+  onChangeSubscription: (userId: string, tier: PlanTier, endDate?: string) => void;
   isChangingSubscription?: boolean;
+  canManageSubscription?: boolean;
 }
 
 const STATUS: Record<UserAccountStatus, { label: string; variant: BadgeVariant }> = {
@@ -29,9 +40,6 @@ const STATUS: Record<UserAccountStatus, { label: string; variant: BadgeVariant }
 // Enterprise is staff-granted (no self-serve checkout), so every tier must be reachable here.
 const PLAN_TIERS: PlanTier[] = ['FREE', 'PRO', 'ENTERPRISE'];
 
-const planLabel = (tier: PlanTier) =>
-  tier === 'ENTERPRISE' ? 'Enterprise' : tier === 'PRO' ? 'Pro' : 'Free';
-
 export const UserDetailModal = ({
   user,
   onClose,
@@ -40,6 +48,7 @@ export const UserDetailModal = ({
   pendingStatus,
   onChangeSubscription,
   isChangingSubscription = false,
+  canManageSubscription = false,
 }: UserDetailModalProps) => {
   return (
     <Dialog open={!!user} onOpenChange={(open) => !open && onClose()}>
@@ -91,27 +100,13 @@ export const UserDetailModal = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm">
-              <span className="text-muted-foreground">Plan</span>
-              <div className="flex items-center gap-2">
-                <Badge variant={user.planTier === 'FREE' ? 'neutral' : 'primary'}>
-                  {planLabel(user.planTier)}
-                </Badge>
-                {PLAN_TIERS.filter((tier) => tier !== user.planTier).map((tier) => (
-                  <Button
-                    key={tier}
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1 h-6 px-2 text-xs"
-                    isLoading={isChangingSubscription}
-                    onClick={() => onChangeSubscription(user.id, tier)}
-                  >
-                    <BadgeCheck className="w-3 h-3" />
-                    Move to {planLabel(tier)}
-                  </Button>
-                ))}
-              </div>
-            </div>
+            <PlanControl
+              key={user.id}
+              user={user}
+              canManage={canManageSubscription}
+              isChanging={isChangingSubscription}
+              onChange={onChangeSubscription}
+            />
           </div>
 
           <UserSecurityActions userId={user.id} />
@@ -168,3 +163,69 @@ export const UserDetailModal = ({
     </Dialog>
   );
 };
+
+function PlanControl({
+  user,
+  canManage,
+  isChanging,
+  onChange,
+}: {
+  user: PlatformUser;
+  canManage: boolean;
+  isChanging: boolean;
+  onChange: (userId: string, tier: PlanTier, endDate?: string) => void;
+}) {
+  const [endDate, setEndDate] = useState('');
+
+  return (
+    <div className="space-y-3 rounded-lg border border-border px-3 py-2 text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-muted-foreground">Plan</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant={user.planTier === 'FREE' ? 'neutral' : 'primary'}>
+            {planLabel(user.planTier)}
+          </Badge>
+          {user.planTier !== 'FREE' ? (
+            <span className="text-xs text-muted-foreground">
+              {user.planExpiresAt ? `Ends ${formatDate(user.planExpiresAt)}` : 'No end date'}
+            </span>
+          ) : null}
+        </div>
+      </div>
+      {canManage ? (
+        <>
+          <Field
+            label="End date for Pro or Enterprise"
+            optionalLabel="Optional"
+            hint="Leave empty to keep the plan until someone changes it."
+          >
+            <DatePicker
+              value={endDate}
+              onChange={setEndDate}
+              min={todayInLagos()}
+              clearable
+              placeholder="No end date"
+            />
+          </Field>
+          <div className="flex flex-wrap gap-2">
+            {PLAN_TIERS.filter((tier) => tier !== user.planTier).map((tier) => (
+              <Button
+                key={tier}
+                variant="outline"
+                size="sm"
+                className="gap-1"
+                isLoading={isChanging}
+                onClick={() =>
+                  onChange(user.id, tier, tier === 'FREE' ? undefined : endDate || undefined)
+                }
+              >
+                <BadgeCheck className="h-3.5 w-3.5" />
+                Move to {planLabel(tier)}
+              </Button>
+            ))}
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+}

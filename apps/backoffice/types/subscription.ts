@@ -1,3 +1,5 @@
+import type { PlanTier } from './admin';
+
 export type SubscriptionStatus = 'NONE' | 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'CANCELLED';
 export type BillingCycle = 'MONTHLY' | 'ANNUAL';
 
@@ -50,4 +52,50 @@ export interface AdminSubscriptionInvoice {
   // Credited while reconciling, not a confirmed charge.
   inferred: boolean;
   createdAt: string;
+}
+
+export interface AdminOrganizationPlan {
+  organizationId: string;
+  organizationName: string;
+  tier: PlanTier;
+  seats: number;
+  seatsUsed: number;
+  units: number;
+  unitsUsed: number;
+  estates: number;
+  // False while agency plan limits are not applied yet.
+  enforced: boolean;
+  enforcedFrom: string | null;
+  currentPeriodEnd: string | null;
+  monthlyPriceKobo: number | null;
+  notes: string | null;
+}
+
+export interface SetOrganizationPlanInput {
+  tier: PlanTier;
+  seats?: number;
+  unitAllowance?: number;
+  estateAllowance?: number;
+  monthlyPriceKobo?: number;
+  expiresAt?: string;
+  notes?: string;
+}
+
+export type EnterpriseLeadStatus = 'NEW' | 'CONTACTED' | 'WON' | 'LOST';
+export type EnterpriseLeadType = 'AGENCY' | 'ESTATE' | 'DEVELOPER' | 'OWNER' | 'OTHER';
+
+export interface EnterpriseLead {
+  id: string;
+  organizationName: string;
+  organizationType: EnterpriseLeadType;
+  contactName: string;
+  email: string;
+  phone: string | null;
+  size: string | null;
+  message: string | null;
+  status: EnterpriseLeadStatus;
+  notes: string | null;
+  handledById: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

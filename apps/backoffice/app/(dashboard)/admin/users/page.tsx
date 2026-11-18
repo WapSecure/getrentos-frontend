@@ -26,6 +26,9 @@ import { adminKeys } from '@/lib/queryKeys';
 import { useAdminSearchParam } from '@/lib/readAdminSearchParam';
 import type { PlanTier, PlatformUser, UserAccountStatus, PlatformRole } from '@/types/admin';
 import { roleLabel } from '@/lib/roleLabels';
+import { hasAdminPermission } from '@/lib/adminAccess';
+import { endOfLagosDay, planLabel } from '@/lib/planDates';
+import { useAdminUser } from '../layout';
 
 const statusConfig: Record<
   UserAccountStatus,
@@ -36,9 +39,6 @@ const statusConfig: Record<
   suspended: { label: 'Suspended', icon: ShieldAlert, variant: 'warning' },
   banned: { label: 'Banned', icon: Ban, variant: 'danger' },
 };
-
-const planLabel = (tier: PlanTier) =>
-  tier === 'ENTERPRISE' ? 'Enterprise' : tier === 'PRO' ? 'Pro' : 'Free';
 
 type StatusFilter = 'all' | UserAccountStatus;
 type RoleFilter = 'all' | PlatformRole;
@@ -60,8 +60,11 @@ export default function AdminUsersPage() {
   const [pendingSubscription, setPendingSubscription] = useState<{
     user: PlatformUser;
     tier: PlanTier;
+    endDate?: string;
   } | null>(null);
   const toast = useToast();
+  const adminUser = useAdminUser();
+  const canManageSubscriptions = hasAdminPermission(adminUser?.roles, 'subscriptions.manage');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -114,8 +117,14 @@ export default function AdminUsersPage() {
   };
 
   const changeSubscriptionMutation = useMutation({
-    mutationFn: ({ userId, tier }: { userId: string; tier: PlanTier }) =>
-      unwrap(adminService.updateUserSubscription(userId, tier)),
+    mutationFn: ({ userId, tier, endDate }: { userId: string; tier: PlanTier; endDate?: string }) =>
+      unwrap(
+        adminService.updateUserSubscription(
+          userId,
+          tier,
+          endDate ? endOfLagosDay(endDate) : undefined
+        )
+      ),
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       setActiveUser(updated);
@@ -321,13 +330,14 @@ export default function AdminUsersPage() {
         pendingStatus={
           changeStatusMutation.isPending ? changeStatusMutation.variables?.status : undefined
         }
-        onChangeSubscription={(userId, tier) => {
+        onChangeSubscription={(userId, tier, endDate) => {
           const user = users.find((item) => item.id === userId) ?? activeUser;
           if (user && !changeSubscriptionMutation.isPending) {
-            setPendingSubscription({ user, tier });
+            setPendingSubscription({ user, tier, endDate });
           }
         }}
         isChangingSubscription={changeSubscriptionMutation.isPending}
+        canManageSubscription={canManageSubscriptions}
       />
 
       <ConfirmDialog
@@ -377,7 +387,13 @@ export default function AdminUsersPage() {
         }
         description={
           pendingSubscription
-            ? `${pendingSubscription.user.fullName}'s plan will change from ${planLabel(pendingSubscription.user.planTier)} to ${planLabel(pendingSubscription.tier)}. This changes their product entitlements immediately.`
+            ? `${pendingSubscription.user.fullName}'s plan will change from ${planLabel(pendingSubscription.user.planTier)} to ${planLabel(pendingSubscription.tier)}${
+                pendingSubscription.tier === 'FREE'
+                  ? ''
+                  : pendingSubscription.endDate
+                    ? ` until ${formatDate(pendingSubscription.endDate)}`
+                    : ' with no end date'
+              }. This changes their product entitlements immediately.`
             : ''
         }
         confirmLabel={
@@ -391,6 +407,7 @@ export default function AdminUsersPage() {
             ? changeSubscriptionMutation.mutateAsync({
                 userId: pendingSubscription.user.id,
                 tier: pendingSubscription.tier,
+                endDate: pendingSubscription.endDate,
               })
             : undefined
         }

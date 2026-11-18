@@ -5,6 +5,10 @@ import type {
   AdminSubscription,
   AdminSubscriptionInvoice,
   AdminSubscriptionOverview,
+  AdminOrganizationPlan,
+  EnterpriseLead,
+  EnterpriseLeadStatus,
+  SetOrganizationPlanInput,
 } from '@/types/subscription';
 
 export interface SubscriptionQuery {
@@ -41,5 +45,33 @@ export const adminSubscriptionService = {
           pageSize: params.pageSize,
         })}`
       )
+    ),
+
+  getOrganizationPlan: (organizationId: string): Promise<ApiResponse<AdminOrganizationPlan>> =>
+    safeCall(() => authFetch<AdminOrganizationPlan>(`/admin/organizations/${organizationId}/plan`)),
+
+  setOrganizationPlan: (
+    organizationId: string,
+    input: SetOrganizationPlanInput
+  ): Promise<ApiResponse<AdminOrganizationPlan>> =>
+    safeCall(() =>
+      authFetch<AdminOrganizationPlan>(`/admin/organizations/${organizationId}/plan`, {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      })
+    ),
+
+  listEnterpriseLeads: (status?: EnterpriseLeadStatus): Promise<ApiResponse<EnterpriseLead[]>> =>
+    safeCall(() => authFetch<EnterpriseLead[]>(`/admin/enterprise-leads${toQuery({ status })}`)),
+
+  updateEnterpriseLead: (
+    id: string,
+    input: { status?: EnterpriseLeadStatus; notes?: string }
+  ): Promise<ApiResponse<EnterpriseLead>> =>
+    safeCall(() =>
+      authFetch<EnterpriseLead>(`/admin/enterprise-leads/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(input),
+      })
     ),
 };

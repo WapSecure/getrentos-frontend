@@ -144,6 +144,7 @@ export interface PlatformUser {
   status: UserAccountStatus;
   trustScore: number;
   planTier: PlanTier;
+  planExpiresAt?: string | null;
   joinedDate: string;
   lastActiveAt: string;
 }
