@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import Link from 'next/link';
-import { useMutation } from '@tanstack/react-query';
+import { usePathname } from 'next/navigation';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   ArrowRight,
   MessageCircleQuestion,
@@ -31,6 +32,9 @@ import {
 } from '@/lib/replyLanguage';
 import { useReadAloud, useVoiceInput } from '@/lib/voice';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { unwrap } from '@/lib/apiHelpers';
+import { billingHrefFor } from '@/lib/planGate';
+import { subscriptionService, type AssistantAllowance } from '@/services/subscriptionService';
 
 interface ChatMessage extends AssistantTurn {
   links?: AssistantLink[];
@@ -61,11 +65,19 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
   const [override, setOverride] = useState<ReplyLanguage | null>(savedReplyLanguage);
   const language = override ?? appLanguage;
   const logRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const allowance = useQuery({
+    queryKey: ['assistant-allowance'],
+    queryFn: () => unwrap(subscriptionService.getAssistantAllowance()),
+    enabled: open,
+    staleTime: 30_000,
+  });
 
   const ask = useMutation({
     mutationFn: ({ question, history }: { question: string; history: AssistantTurn[] }) =>
       askFn(question, history, language),
-    onSuccess: (reply) =>
+    onSuccess: (reply) => {
+      void allowance.refetch();
       setMessages((prev) => [
         ...prev,
         {
@@ -79,7 +91,8 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
               ? reply.requestedLanguage
               : undefined,
         },
-      ]),
+      ]);
+    },
   });
 
   useEffect(() => {
@@ -150,6 +163,7 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
                 className="w-32"
               />
             </div>
+            <AllowanceNote allowance={allowance.data} upgradeHref={billingHrefFor(pathname)} />
           </div>
 
           <div
@@ -289,3 +303,31 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
     </>
   );
 };
+
+function AllowanceNote({
+  allowance,
+  upgradeHref,
+}: {
+  allowance: AssistantAllowance | undefined;
+  upgradeHref: string;
+}) {
+  if (!allowance?.enforced || allowance.limit === null || allowance.remaining === null) return null;
+  if (allowance.remaining > 0) {
+    return (
+      <p className="mt-2 text-xs text-muted-foreground">
+        {allowance.remaining} of {allowance.limit} detailed answers left today.
+      </p>
+    );
+  }
+  return (
+    <p role="status" className="mt-2 text-xs text-muted-foreground">
+      You&apos;ve used today&apos;s {allowance.limit} detailed answers, so replies come from simple
+      rules until tomorrow.{' '}
+      {allowance.tier === 'FREE' && (
+        <Link href={upgradeHref} className="font-medium text-primary hover:underline">
+          Pro includes 200 a day
+        </Link>
+      )}
+    </p>
+  );
+}

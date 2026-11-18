@@ -7,6 +7,17 @@ export type { PlanTier };
 export type BillingCycle = 'MONTHLY' | 'ANNUAL';
 export type PlanPersona = 'landlord' | 'estate' | 'owner' | 'realtor';
 
+export interface AssistantAllowance {
+  /** False until per-plan allowances are switched on; nothing should be shown then. */
+  enforced: boolean;
+  tier: PlanTier;
+  /** Null means no personal cap. */
+  limit: number | null;
+  usedToday: number;
+  remaining: number | null;
+  resetsAt: string;
+}
+
 export interface MySubscription {
   tier: PlanTier;
 }
@@ -87,6 +98,10 @@ export const subscriptionService = {
         body: JSON.stringify(input),
       })
     );
+  },
+
+  async getAssistantAllowance(): Promise<ApiResponse<AssistantAllowance>> {
+    return safeCall(() => authFetch<AssistantAllowance>('/assistant/allowance'));
   },
 
   async getAgencyPlan(): Promise<ApiResponse<OrganizationPlan>> {

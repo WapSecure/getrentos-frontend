@@ -26,6 +26,7 @@ import { qk } from '@/lib/query/keys';
 import {
   assistantApi,
   mobileRouteFor,
+  type AssistantAllowance,
   type AssistantPersona,
   type AssistantLink,
   type AssistantTurn,
@@ -163,10 +164,18 @@ export default function AskScreen() {
     void saveReplyLanguage(next);
   };
 
+  const allowance = useQuery({
+    queryKey: qk.billing.assistantAllowance,
+    queryFn: assistantApi.allowance,
+    staleTime: 30_000,
+  });
+  const allowanceNote = describeAllowance(allowance.data);
+
   const ask = useMutation({
     mutationFn: ({ question, history }: { question: string; history: AssistantTurn[] }) =>
       assistantApi.ask(question, history, persona, params.estateId, language),
-    onSuccess: (reply) =>
+    onSuccess: (reply) => {
+      void allowance.refetch();
       setMessages((prev) => [
         ...prev,
         {
@@ -180,7 +189,8 @@ export default function AskScreen() {
               ? reply.requestedLanguage
               : undefined,
         },
-      ]),
+      ]);
+    },
   });
 
   useEffect(() => {
@@ -240,6 +250,11 @@ export default function AskScreen() {
           <Text variant="caption" color="mutedForeground" numberOfLines={2}>
             Answers come from your account. Nothing is changed for you.
           </Text>
+          {allowanceNote ? (
+            <Text variant="caption" color="mutedForeground">
+              {allowanceNote}
+            </Text>
+          ) : null}
         </View>
       </View>
       <ScrollView
@@ -457,4 +472,11 @@ export default function AskScreen() {
       </View>
     </KeyboardAvoidingView>
   );
+}
+
+function describeAllowance(allowance: AssistantAllowance | undefined): string | null {
+  if (!allowance?.enforced || allowance.limit === null || allowance.remaining === null) return null;
+  return allowance.remaining > 0
+    ? `${allowance.remaining} of ${allowance.limit} detailed answers left today.`
+    : `You've used today's ${allowance.limit} detailed answers, so replies come from simple rules until tomorrow.`;
 }
