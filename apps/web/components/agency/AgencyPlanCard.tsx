@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { Card } from '@sureground/ui';
-import { PLAN_TIER_LABELS } from '@sureground/shared';
+import { PLAN_TIER_LABELS, formatCurrency } from '@sureground/shared';
 import { formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
@@ -21,6 +21,8 @@ export function AgencyPlanCard() {
   const p = plan.data;
   if (!p) return null;
 
+  // An agreed plan shows its own terms even before agency limits apply.
+  const showTerms = p.enforced || Boolean(p.agreedTier);
   const nearSeats = p.seatsUsed >= p.seats;
   const nearUnits = p.unitsUsed >= p.units * 0.8;
 
@@ -28,7 +30,7 @@ export function AgencyPlanCard() {
     <Card className="mb-6 p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <h2 className="text-sm font-semibold text-foreground">
-          {p.enforced ? `${PLAN_TIER_LABELS[p.tier]} plan` : 'Your plan'}
+          {showTerms ? `${PLAN_TIER_LABELS[p.agreedTier ?? p.tier]} plan` : 'Your plan'}
         </h2>
         <Link
           href={`${ROUTES.PRICING}#enterprise`}
@@ -37,7 +39,7 @@ export function AgencyPlanCard() {
           {p.tier === 'ENTERPRISE' ? 'Change your plan' : 'See Enterprise'}
         </Link>
       </div>
-      {p.enforced ? (
+      {showTerms ? (
         <dl className="mt-3 grid gap-3 sm:grid-cols-2">
           <div>
             <dt className="text-xs text-muted-foreground">Team seats</dt>
@@ -55,8 +57,23 @@ export function AgencyPlanCard() {
               {p.unitsUsed} of {p.units} used
             </dd>
           </div>
+          {p.monthlyPriceKobo !== null && (
+            <div>
+              <dt className="text-xs text-muted-foreground">Agreed price</dt>
+              <dd className="text-sm tabular-nums text-foreground">
+                {formatCurrency(p.monthlyPriceKobo / 100)} a month
+              </dd>
+            </div>
+          )}
         </dl>
-      ) : (
+      ) : null}
+      {showTerms && !p.enforced && (
+        <p className="mt-3 text-sm text-muted-foreground">
+          Limits apply once agency plans start
+          {p.enforcedFrom ? ` on ${formatDate(p.enforcedFrom)}` : ''}.
+        </p>
+      )}
+      {showTerms ? null : (
         <p className="mt-2 text-sm text-muted-foreground">
           Your firm has every Enterprise feature while agency plans are introduced
           {p.enforcedFrom ? `. Plans apply from ${formatDate(p.enforcedFrom)}` : ''}. You use{' '}
