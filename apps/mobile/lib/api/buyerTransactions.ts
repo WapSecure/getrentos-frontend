@@ -39,6 +39,7 @@ export interface BuyerTransaction {
   purchasePrice: number;
   /** What the buyer pays in for this sale: the agreed deposit, else the price. */
   depositAmount?: number;
+  sellerOwnershipVerified?: boolean;
   escrowStatus: BuyerEscrowStatus;
   milestones?: { id: string; key: string; label: string; status: string }[];
   activityLog?: { id: string; actor: string; action: string; timestamp: string }[];

@@ -326,6 +326,12 @@ function TransactionCard({
               : `Paid through Sureground: ${formatNaira(tx.depositAmount)}, your deposit. The balance was settled with the seller directly.`}
           </Text>
         ) : null}
+        {tx.sellerOwnershipVerified === false &&
+        (tx.escrowStatus === 'deposit_pending' || tx.escrowStatus === 'funds_held') ? (
+          <Text variant="caption" style={{ color: colors.warning }}>
+            Sureground hasn’t verified the seller’s ownership yet. Your deposit stays held until it does, so don’t pay the balance before then.
+          </Text>
+        ) : null}
       </View>
 
       {frozen ? (

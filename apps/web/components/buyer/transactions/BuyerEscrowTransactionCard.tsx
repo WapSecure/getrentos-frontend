@@ -108,6 +108,14 @@ export const BuyerEscrowTransactionCard = ({
             : `${depositLabels[transaction.escrowStatus]}: ${formatCurrency(deposit, { compact: true })}`}
         </p>
 
+        {transaction.sellerOwnershipVerified === false &&
+          (transaction.escrowStatus === 'deposit_pending' ||
+            transaction.escrowStatus === 'funds_held') && (
+            <p className="mt-2 text-xs font-medium text-warning">
+              Sureground hasn’t verified the seller’s ownership yet. Your deposit stays held until it
+              does, so don’t pay the balance before then.
+            </p>
+          )}
         {statuses && <AcquisitionStatusBadges statuses={statuses} className="mt-3" />}
         {transaction.nextAction && (
           <p

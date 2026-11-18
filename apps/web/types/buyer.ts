@@ -113,6 +113,7 @@ export interface BuyerEscrowTransaction {
   purchasePrice: number;
   /** The agreed deposit, else the price. */
   depositAmount?: number;
+  sellerOwnershipVerified?: boolean;
   escrowStatus: BuyerEscrowStatus;
   statuses?: AcquisitionStatuses;
   nextAction?: NextAction | null;

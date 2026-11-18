@@ -147,7 +147,14 @@ function SaleCard({
   const frozen = t.escrowStatus === 'frozen';
   const current = STAGES.findIndex((s) => s.key === t.escrowStatus);
   const needsAccount = accountLoaded && payoutWaitsOnAccount(t.sellerPayoutStatus, account);
-  const payout = needsAccount
+  const needsOwnership =
+    t.ownershipVerified === false &&
+    t.escrowStatus !== 'refunded' &&
+    t.sellerPayoutStatus !== 'PAID' &&
+    t.sellerPayoutStatus !== 'PROCESSING';
+  const payout = needsOwnership
+    ? ({ label: 'Verify ownership', tone: 'warning' } as const)
+    : needsAccount
     ? ({ label: 'Add payout account', tone: 'warning' } as const)
     : t.sellerPayoutStatus
       ? PAYOUT[t.sellerPayoutStatus]
@@ -271,6 +278,20 @@ function SaleCard({
           label="Land conveyance: deed, survey and possession steps"
           onPress={() => router.push(`/(app)/owner-land-resale/${t.id}?property=${t.propertyId}`)}
         />
+      ) : null}
+
+      {needsOwnership ? (
+        <View style={{ gap: spacing.xs }}>
+          <Text variant="caption" style={{ color: colors.warning }}>
+            {heldAmount !== undefined
+              ? `Verify that you own this property to receive ${formatNaira(heldAmount)}. Sureground holds the deposit until your ownership is verified.`
+              : 'Verify that you own this property to receive this money. Sureground holds the deposit until your ownership is verified.'}
+          </Text>
+          <LinkButton
+            label="Verify ownership"
+            onPress={() => router.push(`/(app)/owner-property/${t.propertyId}`)}
+          />
+        </View>
       ) : null}
 
       {needsAccount ? (
