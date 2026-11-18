@@ -140,17 +140,23 @@ export function EnterpriseSection({ pricing }: { pricing?: PlanPricing }) {
           ) : (
             <form onSubmit={submit} noValidate className="flex flex-col gap-4">
               <h3 className="text-lg font-semibold text-foreground">Talk to us about Enterprise</h3>
-              <Field label="Organisation" error={errors.organizationName}>
+              <Field
+                label="Organisation"
+                error={errors.organizationName}
+                htmlFor="enterprise-organizationName"
+              >
                 <Input
-                  id="enterprise-organizationName"
                   autoComplete="organization"
                   value={form.organizationName}
                   onChange={(e) => set('organizationName')(e.target.value)}
                 />
               </Field>
-              <Field label="What kind of organisation is it?" error={errors.organizationType}>
+              <Field
+                label="What kind of organisation is it?"
+                error={errors.organizationType}
+                htmlFor="enterprise-organizationType"
+              >
                 <Select
-                  id="enterprise-organizationType"
                   value={form.organizationType}
                   onValueChange={set('organizationType')}
                   options={TYPES}
@@ -159,26 +165,23 @@ export function EnterpriseSection({ pricing }: { pricing?: PlanPricing }) {
                   invalid={Boolean(errors.organizationType)}
                 />
               </Field>
-              <Field label="Your name" error={errors.contactName}>
+              <Field label="Your name" error={errors.contactName} htmlFor="enterprise-contactName">
                 <Input
-                  id="enterprise-contactName"
                   autoComplete="name"
                   value={form.contactName}
                   onChange={(e) => set('contactName')(e.target.value)}
                 />
               </Field>
-              <Field label="Email" error={errors.email}>
+              <Field label="Email" error={errors.email} htmlFor="enterprise-email">
                 <Input
-                  id="enterprise-email"
                   type="email"
                   autoComplete="email"
                   value={form.email}
                   onChange={(e) => set('email')(e.target.value)}
                 />
               </Field>
-              <Field label="Phone (optional)">
+              <Field label="Phone (optional)" htmlFor="enterprise-phone">
                 <Input
-                  id="enterprise-phone"
                   type="tel"
                   autoComplete="tel"
                   value={form.phone}
@@ -188,16 +191,12 @@ export function EnterpriseSection({ pricing }: { pricing?: PlanPricing }) {
               <Field
                 label="Size (optional)"
                 hint="For example: 350 units, or 3 estates with 900 homes"
+                htmlFor="enterprise-size"
               >
-                <Input
-                  id="enterprise-size"
-                  value={form.size}
-                  onChange={(e) => set('size')(e.target.value)}
-                />
+                <Input value={form.size} onChange={(e) => set('size')(e.target.value)} />
               </Field>
-              <Field label="Anything else (optional)">
+              <Field label="Anything else (optional)" htmlFor="enterprise-message">
                 <Textarea
-                  id="enterprise-message"
                   rows={3}
                   value={form.message}
                   onChange={(e) => set('message')(e.target.value)}
