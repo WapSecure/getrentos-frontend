@@ -71,7 +71,8 @@
       "shell-quote@>=1.0.0 <2.0.0": "^1.11.0",
       "node-forge@>=1.0.0 <2.0.0": "^1.4.1",
       "source-map-js@>=1.0.0 <2.0.0": "^1.2.2",
-      "compression@>=1.0.0 <2.0.0": "^1.8.2"
+      "compression@>=1.0.0 <2.0.0": "^1.8.2",
+      "baseline-browser-mapping@>=2.0.0 <2.11.0": "^2.11.0"
     },
     "packageExtensions": {
       "@hookform/resolvers": {
