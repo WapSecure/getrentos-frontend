@@ -21,6 +21,7 @@ import { StatusPill } from '@/components/host/HostUI';
 import { CommissionRow } from '@/components/realtor/CommissionRow';
 import { goBack } from '@/lib/goBack';
 import { PAYOUT_ARRIVAL_NOTE, PAYOUT_FAILED_NEXT_STEP } from '@sureground/shared';
+import { useSensitiveScreen } from '@/hooks/useSensitiveScreen';
 
 const LABEL = {
   pending: { label: 'On its way', tone: 'info' },
@@ -29,6 +30,7 @@ const LABEL = {
 } as const;
 
 export default function RealtorPayoutDetail() {
+  useSensitiveScreen();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

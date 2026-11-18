@@ -24,6 +24,7 @@ import { errorMessage } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { useLegalNameLock } from '@/hooks/useLegalNameLock';
 
 export default function RealtorProfileScreen() {
   const { colors, spacing, radius } = useTheme();
@@ -63,6 +64,7 @@ function ProfileForm({ initial }: { initial: RealtorProfile }) {
   const qc = useQueryClient();
   const toast = useToast();
   const [fullName, setFullName] = useState(initial.fullName);
+  const nameLock = useLegalNameLock();
   const [companyName, setCompanyName] = useState(initial.companyName ?? '');
   const [phone, setPhone] = useState(initial.phone ?? '');
   const changed =
@@ -83,7 +85,10 @@ function ProfileForm({ initial }: { initial: RealtorProfile }) {
       qc.invalidateQueries({ queryKey: qk.auth.me });
       qc.invalidateQueries({ queryKey: qk.security });
     },
-    onError: (err) => toast.show(errorMessage(err, 'Could not save your profile.'), 'error'),
+    onError: (err) => {
+      if (nameLock.lockedBy(err)) setFullName(initial.fullName);
+      toast.show(errorMessage(err, 'Could not save your profile.'), 'error');
+    },
   });
 
   const avatar = useMutation({
@@ -150,6 +155,7 @@ function ProfileForm({ initial }: { initial: RealtorProfile }) {
           required
           value={fullName}
           onChangeText={setFullName}
+          {...nameLock.fieldProps}
           autoComplete="name"
           textContentType="name"
         />

@@ -1,4 +1,4 @@
-import { resolveIncomingLink } from '@/lib/deepLinks';
+import { magicLinkToken, resolveIncomingLink } from '@/lib/deepLinks';
 
 const WEB = 'https://getsureground.io';
 const go = (url: string) => resolveIncomingLink(url, WEB);
@@ -80,6 +80,15 @@ describe('links into the app', () => {
   it('lets a sign-in link through to the root', () => {
     expect(go('https://getsureground.io/magic-link/verify?token=t')).toEqual({ route: '/' });
     expect(go('sureground://magic-link?token=t')).toEqual({ route: '/' });
+  });
+
+  it('reads a sign-in token only from a sign-in link', () => {
+    expect(magicLinkToken('sureground://magic-link?token=t')).toBe('t');
+    expect(magicLinkToken('https://getsureground.io/magic-link/verify?token=t')).toBe('t');
+    expect(magicLinkToken('sureground://?token=t')).toBeNull();
+    expect(magicLinkToken('sureground://agency-join?token=t')).toBeNull();
+    expect(magicLinkToken('https://getsureground.io/rent/1?token=t')).toBeNull();
+    expect(magicLinkToken('sureground://magic-link')).toBeNull();
   });
 
   it('leaves the app’s own routes and unrelated paths alone', () => {

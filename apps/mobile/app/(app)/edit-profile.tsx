@@ -26,6 +26,7 @@ import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { ChangeEmailSheet } from '@/components/account/ChangeEmailSheet';
 import { goBack } from '@/lib/goBack';
+import { useLegalNameLock } from '@/hooks/useLegalNameLock';
 
 export default function EditProfile() {
   const { colors, spacing } = useTheme();
@@ -76,6 +77,7 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
   const toast = useToast();
 
   const [fullName, setFullName] = useState(profile.fullName);
+  const nameLock = useLegalNameLock();
   const email = profile.email;
   const [phone, setPhone] = useState(profile.phone ?? '');
   // Saved as text; a picked area keeps its place id here only so the field shows it as checked.
@@ -101,7 +103,10 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
       toast.show('Profile updated.', 'success');
       router.back();
     },
-    onError: (err) => toast.show(errorMessage(err, 'Could not update your profile.'), 'error'),
+    onError: (err) => {
+      if (nameLock.lockedBy(err)) setFullName(profile.fullName);
+      toast.show(errorMessage(err, 'Could not update your profile.'), 'error');
+    },
   });
 
   const avatarMutation = useMutation({
@@ -176,6 +181,7 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
         required
         value={fullName}
         onChangeText={setFullName}
+        {...nameLock.fieldProps}
         returnKeyType="next"
         onSubmitEditing={() => phoneRef.current?.focus()}
       />

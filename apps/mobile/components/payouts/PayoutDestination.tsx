@@ -28,6 +28,7 @@ import { ownerPayoutApi, type ForeignBankAccount, type PayoutMethod } from '@/li
 import { qk } from '@/lib/query/keys';
 import { withStepUpSummary } from '@/lib/stepUp';
 import { SelectField } from '@/components/forms/SelectField';
+import { useSensitiveScreen } from '@/hooks/useSensitiveScreen';
 
 export function foreignAccountLabel(account: ForeignBankAccount): string {
   const country = FOREIGN_ACCOUNT_COUNTRIES.find((c) => c.code === account.country)?.name;
@@ -36,6 +37,7 @@ export function foreignAccountLabel(account: ForeignBankAccount): string {
 }
 
 export function PayoutDestination() {
+  useSensitiveScreen();
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();

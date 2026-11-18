@@ -53,10 +53,12 @@ import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
 import { HostFeeNote } from '@/components/host/HostUI';
 import { WITHHELD } from '@/lib/withdrawal';
 import { goBack } from '@/lib/goBack';
+import { useSensitiveScreen } from '@/hooks/useSensitiveScreen';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
 export default function HostEarnings() {
+  useSensitiveScreen();
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const [accountOpen, setAccountOpen] = useState(false);

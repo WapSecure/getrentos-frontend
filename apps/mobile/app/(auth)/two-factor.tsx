@@ -12,7 +12,7 @@ import {
   useTheme,
 } from '@sureground/ui-native';
 import { cleanSecondFactorInput, isSecondFactorCode } from '@sureground/shared';
-import { errorMessage } from '@/lib/api/client';
+import { signInErrorMessage } from '@/lib/auth/signupErrors';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { haptics } from '@/lib/haptics';
 
@@ -41,7 +41,7 @@ export default function TwoFactor() {
     } catch (err) {
       await haptics.error();
       setCode('');
-      setError(errorMessage(err, 'That code didn’t work. Try again.'));
+      setError(signInErrorMessage(err, 'That code didn’t work. Try again.'));
     } finally {
       setSubmitting(false);
     }

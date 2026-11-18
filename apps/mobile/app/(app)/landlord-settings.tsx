@@ -37,6 +37,7 @@ import { categorySendsEmail, maskAccountNumber } from '@sureground/shared';
 import { goBack } from '@/lib/goBack';
 import { PayoutAccountSheet } from '@/components/landlord/PayoutAccountSheet';
 import { PayoutHoldNotice } from '@/components/payouts/PayoutHoldNotice';
+import { useLegalNameLock } from '@/hooks/useLegalNameLock';
 
 export default function LandlordSettings() {
   const { colors, spacing, radius } = useTheme();
@@ -195,6 +196,7 @@ function ProfileForm({ initial }: { initial: LandlordProfile }) {
   });
 
   const [fullName, setFullName] = useState(initial.fullName);
+  const nameLock = useLegalNameLock();
   const [phone, setPhone] = useState(initial.phone ?? '');
   const [companyName, setCompanyName] = useState(initial.companyName ?? '');
 
@@ -208,7 +210,10 @@ function ProfileForm({ initial }: { initial: LandlordProfile }) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.landlord.profile });
     },
-    onError: (e) => toast.show(errorMessage(e, 'Could not save your profile.'), 'error'),
+    onError: (e) => {
+      if (nameLock.lockedBy(e)) setFullName(initial.fullName);
+      toast.show(errorMessage(e, 'Could not save your profile.'), 'error');
+    },
   });
 
   return (
@@ -252,7 +257,13 @@ function ProfileForm({ initial }: { initial: LandlordProfile }) {
         </View>
       </Pressable>
 
-      <TextField label="Full name" required value={fullName} onChangeText={setFullName} />
+      <TextField
+        label="Full name"
+        required
+        value={fullName}
+        onChangeText={setFullName}
+        {...nameLock.fieldProps}
+      />
       <VerifiedPhoneField
         label="Phone"
         placeholder="+234 801 234 5678"

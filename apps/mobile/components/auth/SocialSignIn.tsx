@@ -3,7 +3,8 @@ import { View } from 'react-native';
 import { router } from 'expo-router';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Button, Text, useTheme } from '@sureground/ui-native';
-import { errorMessage } from '@/lib/api/client';
+import { ApiError } from '@/lib/api/client';
+import { signInErrorMessage } from '@/lib/auth/signupErrors';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { OAuthCancelled } from '@/lib/auth/oauth';
 import { AppleSignInCancelled, appleSignInAvailable } from '@/lib/auth/apple';
@@ -30,7 +31,7 @@ export function SocialSignIn({ onError }: { onError: (message: string | null) =>
     } catch (err) {
       if (err instanceof AppleSignInCancelled) return;
       await haptics.error();
-      onError(errorMessage(err, 'Could not sign in with Apple. Try again.'));
+      onError(signInErrorMessage(err, 'Could not sign in with Apple. Try again.'));
     }
   };
 
@@ -46,9 +47,11 @@ export function SocialSignIn({ onError }: { onError: (message: string | null) =>
       if (!(err instanceof OAuthCancelled)) {
         await haptics.error();
         onError(
-          err instanceof Error && err.message
-            ? err.message
-            : 'Could not sign in with Google. Try again.'
+          err instanceof ApiError
+            ? signInErrorMessage(err, 'Could not sign in with Google. Try again.')
+            : err instanceof Error && err.message
+              ? err.message
+              : 'Could not sign in with Google. Try again.'
         );
       }
     } finally {

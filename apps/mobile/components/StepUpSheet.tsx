@@ -28,6 +28,7 @@ import {
   pinsMismatch,
   transactionPinBody,
 } from '@/lib/stepUpSetup';
+import { useSensitiveScreen } from '@/hooks/useSensitiveScreen';
 
 type SetupChoice = 'pin' | 'passkey';
 
@@ -42,6 +43,7 @@ export function StepUpSheet({
   const pending = useRef<((token: string | null) => void) | null>(null);
   const challenge = useRef<string | undefined>(undefined);
   const [open, setOpen] = useState(false);
+  useSensitiveScreen(open);
   const [requestSummary, setRequestSummary] = useState<string | null>(null);
   const [method, setMethod] = useState<StepUpMethod | null>(null);
   const [hasPassword, setHasPassword] = useState(true);

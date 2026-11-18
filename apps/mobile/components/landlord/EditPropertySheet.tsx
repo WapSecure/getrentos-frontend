@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
@@ -7,14 +7,32 @@ import { ChipSelect } from '@/components/landlord/ChipSelect';
 import {
   landlordApi,
   PROPERTY_TYPES,
+  PROPERTY_VERIFIED_FIELDS_LOCKED,
   PROPERTY_TYPE_LABEL,
   type LandlordProperty,
   type PropertyType,
 } from '@/lib/api/landlord';
-import { errorMessage } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
+import { apiErrorCode } from '@/lib/auth/signupErrors';
 import { AddressFields, type AddressFieldsValue } from '@/components/forms/AddressFields';
 import { LocationPicker } from '@/components/property/LocationPicker';
 import type { MapPoint } from '@/lib/api/geocode';
+
+const VERIFIED_FIELD_LABEL: Record<string, string> = {
+  title: 'name',
+  address: 'address',
+  city: 'city',
+  state: 'state',
+  country: 'country',
+  latitude: 'map pin',
+  longitude: 'map pin',
+};
+
+function lockedFields(e: unknown): string[] | null {
+  if (!(e instanceof ApiError) || apiErrorCode(e) !== PROPERTY_VERIFIED_FIELDS_LOCKED) return null;
+  const fields = e.details?.fields;
+  return Array.isArray(fields) ? fields.filter((f): f is string => typeof f === 'string') : [];
+}
 
 interface Props {
   open: boolean;
@@ -76,6 +94,47 @@ function EditForm({
   // does not re-confirm a location nobody looked at.
   const [pinMoved, setPinMoved] = useState(false);
 
+  const done = (message: string) => {
+    qc.invalidateQueries({ queryKey: ['landlord', 'properties'] });
+    toast.show(message, 'success');
+    onClose();
+  };
+
+  const requestChange = useMutation({
+    mutationFn: async () => {
+      await landlordApi.requestPropertyChange(property.id, {
+        title: name.trim(),
+        address: address.trim(),
+        city: city.trim(),
+        state: state.trim(),
+        country,
+        ...(location.placeId ? { placeId: location.placeId } : {}),
+        ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
+      });
+      return landlordApi.updateProperty(property.id, {
+        type,
+        description: description.trim() || undefined,
+      });
+    },
+    onMutate: () => onSubmittingChange(true),
+    onSuccess: () => done('Change sent. The property is back in review.'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send that change.'), 'error'),
+    onSettled: () => onSubmittingChange(false),
+  });
+
+  const offerChangeRequest = (fields: string[]) => {
+    const what = fields.map((f) => VERIFIED_FIELD_LABEL[f] ?? f);
+    const list = [...new Set(what)].join(', ') || 'name, address or map pin';
+    Alert.alert(
+      'Request a change?',
+      `This property is verified, so its ${list} can’t be edited directly. If you request the change, the property loses its verified status until we check it again.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Request change', style: 'destructive', onPress: () => requestChange.mutate() },
+      ]
+    );
+  };
+
   const save = useMutation({
     mutationFn: () =>
       landlordApi.updateProperty(property.id, {
@@ -91,12 +150,12 @@ function EditForm({
         ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
       }),
     onMutate: () => onSubmittingChange(true),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['landlord', 'properties'] });
-      toast.show('Property updated.', 'success');
-      onClose();
+    onSuccess: () => done('Property updated.'),
+    onError: (e) => {
+      const locked = lockedFields(e);
+      if (locked) offerChangeRequest(locked);
+      else toast.show(errorMessage(e, 'Could not update that property.'), 'error');
     },
-    onError: (e) => toast.show(errorMessage(e, 'Could not update that property.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 
@@ -152,8 +211,8 @@ function EditForm({
 
       <Button
         label="Save changes"
-        loading={save.isPending}
-        disabled={save.isPending || !name.trim() || !address.trim()}
+        loading={save.isPending || requestChange.isPending}
+        disabled={save.isPending || requestChange.isPending || !name.trim() || !address.trim()}
         onPress={() => save.mutate()}
       />
     </View>

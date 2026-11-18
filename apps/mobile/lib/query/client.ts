@@ -50,6 +50,6 @@ export const persister = createAsyncStoragePersister({
 export const queryPersistenceOptions = {
   persister,
   maxAge: 1000 * 60 * 60 * 12,
-  buster: 'sureground-mobile-v1',
+  buster: 'sureground-mobile-v2',
   dehydrateOptions: { shouldDehydrateQuery: shouldPersistQuery },
 };

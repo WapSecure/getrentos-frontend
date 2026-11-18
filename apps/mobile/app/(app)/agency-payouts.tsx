@@ -27,9 +27,11 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 import { withStepUpSummary } from '@/lib/stepUp';
 import { PAYOUT_ARRIVAL_NOTE, payoutAccountLabel, withdrawStepUpSummary } from '@sureground/shared';
+import { useSensitiveScreen } from '@/hooks/useSensitiveScreen';
 
 // Sections the API refuses for this person (the firm's payout, paying agents) are hidden, not shown as errors.
 export default function AgencyPayouts() {
+  useSensitiveScreen();
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();

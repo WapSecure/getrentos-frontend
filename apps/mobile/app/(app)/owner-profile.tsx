@@ -21,6 +21,7 @@ import { ownerApi, type OwnerProfile } from '@/lib/api/owner';
 import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { useLegalNameLock } from '@/hooks/useLegalNameLock';
 
 export default function OwnerProfileScreen() {
   const { colors, spacing, radius } = useTheme();
@@ -60,6 +61,7 @@ function ProfileForm({ initial }: { initial: OwnerProfile }) {
   const qc = useQueryClient();
   const toast = useToast();
   const [legalName, setLegalName] = useState(initial.legalName);
+  const nameLock = useLegalNameLock();
   const [companyName, setCompanyName] = useState(initial.companyName ?? '');
   const [phone, setPhone] = useState(initial.phone ?? '');
 
@@ -79,7 +81,10 @@ function ProfileForm({ initial }: { initial: OwnerProfile }) {
       qc.setQueryData(qk.owner.profile, saved);
       qc.invalidateQueries({ queryKey: qk.security });
     },
-    onError: (err) => toast.show(errorMessage(err, 'Could not save your profile.'), 'error'),
+    onError: (err) => {
+      if (nameLock.lockedBy(err)) setLegalName(initial.legalName);
+      toast.show(errorMessage(err, 'Could not save your profile.'), 'error');
+    },
   });
 
   return (
@@ -90,6 +95,7 @@ function ProfileForm({ initial }: { initial: OwnerProfile }) {
           value={legalName}
           onChangeText={setLegalName}
           required
+          {...nameLock.fieldProps}
           autoComplete="name"
           textContentType="name"
         />

@@ -41,6 +41,7 @@ import {
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { useSensitiveScreen } from '@/hooks/useSensitiveScreen';
 
 const STATUS: Record<
   SellerPayoutStatus,
@@ -53,6 +54,7 @@ const STATUS: Record<
 };
 
 export default function SellerPayout() {
+  useSensitiveScreen();
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const account = useQuery({

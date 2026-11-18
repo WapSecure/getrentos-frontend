@@ -19,6 +19,7 @@ import {
   useToast,
 } from '@sureground/ui-native';
 import { ApiError, errorMessage } from '@/lib/api/client';
+import { signInErrorMessage } from '@/lib/auth/signupErrors';
 import { authApi } from '@/lib/api/auth';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { consumeSessionExpired } from '@/lib/auth/sessionExpiry';
@@ -124,7 +125,7 @@ export default function SignIn() {
             err instanceof ApiError
               ? err.isNetwork
                 ? 'Can’t reach Sureground. Check your connection.'
-                : err.message
+                : signInErrorMessage(err, 'Sign-in failed. Please try again.')
               : 'Sign-in failed. Please try again.'
           );
           return;

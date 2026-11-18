@@ -32,6 +32,8 @@ export type GateWrite = {
     type: K;
     payload: GateWritePayloads[K];
     createdAt: string;
+    // The guard who recorded it: a write is only ever sent with that guard's session.
+    userId: string;
   };
 }[GateWriteType];
 
@@ -39,6 +41,7 @@ export type GateWrite = {
 // can't drift after a crash mid-write.
 let snapshot: GateWrite[] = [];
 const listeners = new Set<() => void>();
+let owner: string | null = null;
 
 function emit(next: GateWrite[]) {
   snapshot = next;
@@ -54,7 +57,7 @@ function serial<T>(fn: () => Promise<T>): Promise<T> {
   return next;
 }
 
-async function readStored(): Promise<GateWrite[]> {
+async function readAll(): Promise<GateWrite[]> {
   try {
     const raw = await AsyncStorage.getItem(KEY);
     if (!raw) return [];
@@ -64,6 +67,15 @@ async function readStored(): Promise<GateWrite[]> {
     // A corrupt queue must not crash the gate console.
     return [];
   }
+}
+
+async function readStored(): Promise<GateWrite[]> {
+  if (!owner) return [];
+  const all = await readAll();
+  const mine = all.filter((item) => item.userId === owner);
+  // Another guard's writes, or ones from before writes carried a user, can never be sent from this session.
+  if (mine.length !== all.length) await AsyncStorage.setItem(KEY, JSON.stringify(mine));
+  return mine;
 }
 
 // crypto.randomUUID isn't guaranteed under Hermes.
@@ -90,6 +102,19 @@ export const gateOfflineQueue = {
     return () => listeners.delete(listener);
   },
 
+  setOwner: (userId: string | null) =>
+    serial(async () => {
+      owner = userId;
+      emit(await readStored());
+    }),
+
+  clear: () =>
+    serial(async () => {
+      owner = null;
+      await AsyncStorage.removeItem(KEY).catch(() => undefined);
+      emit([]);
+    }),
+
   hydrate: () =>
     serial(async () => {
       const stored = await readStored();
@@ -101,11 +126,13 @@ export const gateOfflineQueue = {
 
   enqueue: <K extends GateWriteType>(type: K, payload: GateWritePayloads[K]) =>
     serial(async () => {
+      if (!owner) throw new Error('No signed-in guard to save this gate write for.');
       const item = {
         id: newId(),
         type,
         payload,
         createdAt: new Date().toISOString(),
+        userId: owner,
       } as GateWrite;
 
       const stored = await readStored();
@@ -227,6 +254,7 @@ export function replayGateQueue(): Promise<GateReplaySummary | null> {
     };
 
     for (const item of queued) {
+      if (item.userId !== owner) break;
       try {
         await dispatch(item);
         await gateOfflineQueue.remove(item.id);
