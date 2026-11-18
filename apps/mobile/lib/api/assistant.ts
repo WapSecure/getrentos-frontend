@@ -34,7 +34,19 @@ export type AssistantPersona =
   /** A property-management firm's staff, about the firm's book. */
   | 'agency';
 
+export interface AssistantAllowance {
+  /** False until per-plan allowances are switched on; nothing should be shown then. */
+  enforced: boolean;
+  tier: 'FREE' | 'PRO' | 'ENTERPRISE';
+  /** Null means no personal cap. */
+  limit: number | null;
+  usedToday: number;
+  remaining: number | null;
+  resetsAt: string;
+}
+
 export const assistantApi = {
+  allowance: () => apiFetch<AssistantAllowance>('/assistant/allowance'),
   /** `estateId` is required for the estate persona: an estate manager asks about one estate. */
   ask: (
     question: string,

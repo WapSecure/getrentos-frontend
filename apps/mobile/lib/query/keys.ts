@@ -212,6 +212,7 @@ export const qk = {
   billing: {
     mine: ['billing'] as const,
     pricing: ['me', 'subscription', 'pricing'] as const,
+    assistantAllowance: ['assistant', 'allowance'] as const,
     invoices: ['billing', 'invoices'] as const,
   },
   estateManager: {
