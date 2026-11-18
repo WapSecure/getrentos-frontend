@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   LayoutGrid,
   Megaphone,
+  MessageCircle,
   OctagonAlert,
   Package,
   PieChart,
@@ -57,6 +58,13 @@ export const estateNavigation = defineRoleNavigation({
       icon: Megaphone,
     },
     { id: 'households', label: 'Households', href: ROUTES.ESTATE_HOUSEHOLDS, icon: Users },
+    {
+      id: 'residentMessages',
+      label: 'Resident messages',
+      phoneBarLabel: 'Messages',
+      href: ROUTES.ESTATE_RESIDENT_MESSAGES,
+      icon: MessageCircle,
+    },
     { id: 'dues', label: 'Dues', href: ROUTES.ESTATE_DUES, icon: ReceiptText },
     {
       id: 'visitorPasses',
@@ -133,7 +141,7 @@ export const estateNavigation = defineRoleNavigation({
   groups: [
     { label: 'Overview', items: ['dashboard'] },
     { label: 'Marketplace', items: ['marketplace', 'leads'] },
-    { label: 'Residents', items: ['announcements', 'households', 'dues'] },
+    { label: 'Residents', items: ['announcements', 'residentMessages', 'households', 'dues'] },
     {
       label: 'Gate and visitors',
       items: [

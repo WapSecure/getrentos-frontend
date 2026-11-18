@@ -418,6 +418,9 @@ export const estateKeys = {
   announcements: (estateId: string) => ['estate', estateId, 'announcements'] as const,
   violations: (estateId: string, status?: string) =>
     ['estate', estateId, 'violations', status ?? 'all'] as const,
+  residentMessages: (estateId: string) => ['estate', estateId, 'resident-messages'] as const,
+  residentMessageThread: (estateId: string, threadId: string) =>
+    ['estate', estateId, 'resident-messages', threadId] as const,
   governanceRecords: (estateId: string, type?: string) =>
     ['estate', estateId, 'governanceRecords', type ?? 'all'] as const,
   vehicleLogs: (estateId: string, filter?: string) =>
@@ -495,6 +498,7 @@ export const estateResidentKeys = {
   dues: (status?: string) => ['estate', 'resident', 'dues', status ?? 'all'] as const,
   announcements: ['estate', 'resident', 'announcements'] as const,
   violations: ['estate', 'resident', 'violations'] as const,
+  officeMessages: ['estate', 'resident', 'office-messages'] as const,
   visitorPasses: (status?: string) =>
     ['estate', 'resident', 'visitorPasses', status ?? 'all'] as const,
   deliveries: (status?: string) => ['estate', 'resident', 'deliveries', status ?? 'all'] as const,

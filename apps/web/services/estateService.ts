@@ -18,6 +18,9 @@ import type {
   StaffMember,
   Announcement,
   Violation,
+  EstateOfficeMessage,
+  EstateResidentThread,
+  EstateResidentThreadSummary,
   GovernanceRecord,
   GovernanceRecordSignature,
   VehicleLog,
@@ -1019,6 +1022,30 @@ export const estateService = {
 
   async listViolations(estateId: string, status?: string): Promise<ApiResponse<Violation[]>> {
     return safeCall(() => authFetch(`/estate/${estateId}/violations${toQuery({ status })}`));
+  },
+
+  async listResidentThreads(estateId: string): Promise<ApiResponse<EstateResidentThreadSummary[]>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/resident-messages`));
+  },
+
+  async getResidentThread(
+    estateId: string,
+    threadId: string
+  ): Promise<ApiResponse<EstateResidentThread>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/resident-messages/${threadId}`));
+  },
+
+  async replyToResident(
+    estateId: string,
+    threadId: string,
+    body: string
+  ): Promise<ApiResponse<EstateOfficeMessage>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/resident-messages/${threadId}`, {
+        method: 'POST',
+        body: JSON.stringify({ body }),
+      })
+    );
   },
 
   async issueViolationWarning(

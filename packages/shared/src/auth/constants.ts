@@ -245,6 +245,7 @@ export const ROUTES = {
   ESTATE_MICROSITE: '/estate/microsite',
   ESTATE_FINANCIALS: '/estate/financials',
   ESTATE_BILLING: '/estate/billing',
+  ESTATE_RESIDENT_MESSAGES: '/estate/resident-messages',
   GATEMAN_DASHBOARD: '/gateman/verify',
   GATEMAN_VEHICLES: '/gateman/vehicles',
   GATEMAN_DELIVERIES: '/gateman/deliveries',
@@ -262,6 +263,7 @@ export const ROUTES = {
   RESIDENT_AMENITIES: '/resident/amenities',
   RESIDENT_COMMITTEE: '/resident/committee',
   RESIDENT_GOVERNANCE: '/resident/governance',
+  RESIDENT_MESSAGES: '/resident/messages',
 
   RENTER_DISCOVER: '/renter/discover',
   RENTER_SAVED: '/renter/saved',

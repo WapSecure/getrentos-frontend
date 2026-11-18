@@ -6,6 +6,7 @@ import {
   Landmark,
   LayoutDashboard,
   Megaphone,
+  MessageCircle,
   Package,
   ReceiptText,
   Siren,
@@ -28,6 +29,13 @@ export const residentNavigation = defineRoleNavigation({
       phoneBarLabel: 'Notices',
       href: ROUTES.RESIDENT_ANNOUNCEMENTS,
       icon: Megaphone,
+    },
+    {
+      id: 'messages',
+      label: 'Estate office',
+      phoneBarLabel: 'Office',
+      href: ROUTES.RESIDENT_MESSAGES,
+      icon: MessageCircle,
     },
     { id: 'dues', label: 'Dues', href: ROUTES.RESIDENT_DUES, icon: ReceiptText },
     {
@@ -59,7 +67,7 @@ export const residentNavigation = defineRoleNavigation({
     { id: 'emergency', label: 'Emergency', href: ROUTES.RESIDENT_EMERGENCY, icon: Siren },
   ],
   groups: [
-    { label: 'Overview', items: ['dashboard', 'announcements'] },
+    { label: 'Overview', items: ['dashboard', 'announcements', 'messages'] },
     {
       label: 'Access and services',
       items: ['dues', 'visitorPasses', 'deliveries', 'violations', 'directory', 'maintenance'],
