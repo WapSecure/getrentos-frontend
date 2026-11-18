@@ -38,3 +38,4 @@ export * from './careTemplates';
 export * from './offerFigures';
 export * from './geoInsights';
 export * from './clock';
+export * from './verifiedLocks';

@@ -10,6 +10,7 @@ import { buyerKeys } from '@/lib/queryKeys';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
 import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';
+import { useLegalNameLock } from '@/hooks/useLegalNameLock';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string; role?: string } | null;
@@ -39,6 +40,7 @@ const ProfileSettingsForm = ({
 }) => {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState(initial);
+  const nameLock = useLegalNameLock();
 
   const updateMutation = useMutation({
     mutationFn: () =>
@@ -49,6 +51,11 @@ const ProfileSettingsForm = ({
         })
       ),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.profile }),
+    onError: (error) => {
+      if (nameLock.handleError(error))
+        setFormData((form) => ({ ...form, fullName: initial.fullName }));
+    },
+    meta: { showGlobalError: true },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -82,9 +89,10 @@ const ProfileSettingsForm = ({
           </div>
         </div>
 
-        <Field label="Full name">
+        <Field label="Full name" hint={nameLock.note}>
           <Input
             value={formData.fullName}
+            readOnly={nameLock.locked}
             onChange={(e) => setFormData({ ...formData, fullName: nameOnly(e.target.value) })}
             leadingIcon={<User className="h-4 w-4" />}
           />

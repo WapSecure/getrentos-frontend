@@ -42,6 +42,18 @@ export interface OtpBotCheck {
   formElapsedMs?: number;
 }
 
+export const SIGN_IN_UNAVAILABLE_CODES = ['SIGN_IN_UNAVAILABLE', 'TWO_FACTOR_UNAVAILABLE'] as const;
+export const SIGN_IN_UNAVAILABLE_COPY = 'Sign-in is temporarily unavailable. Try again shortly.';
+
+// The API answers 503 with these when it can't count attempts; the generic 5xx copy would read as an outage.
+function withSignInCopy<T>(response: ApiResponse<T>): ApiResponse<T> {
+  if (response.success) return response;
+  if (!(SIGN_IN_UNAVAILABLE_CODES as readonly (string | undefined)[]).includes(response.code)) {
+    return response;
+  }
+  return { ...response, error: SIGN_IN_UNAVAILABLE_COPY, message: SIGN_IN_UNAVAILABLE_COPY };
+}
+
 export const authService = {
   async sendOtp(
     identifier: string,
@@ -127,12 +139,14 @@ export const authService = {
     clientApp?: string
   ): Promise<ApiResponse<LoginResult>> {
     const app = clientApp ?? CLIENT_APP;
-    return safeCall(() =>
-      apiFetch<LoginResult>('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ identifier, password, rememberMe }),
-        headers: app ? { 'x-client-app': app } : undefined,
-      })
+    return withSignInCopy(
+      await safeCall(() =>
+        apiFetch<LoginResult>('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ identifier, password, rememberMe }),
+          headers: app ? { 'x-client-app': app } : undefined,
+        })
+      )
     );
   },
 
@@ -155,12 +169,14 @@ export const authService = {
     clientApp?: string
   ): Promise<ApiResponse<AuthResult>> {
     const app = clientApp ?? CLIENT_APP;
-    return safeCall(() =>
-      apiFetch<AuthResult>('/auth/login/2fa', {
-        method: 'POST',
-        body: JSON.stringify({ challengeToken, token }),
-        headers: app ? { 'x-client-app': app } : undefined,
-      })
+    return withSignInCopy(
+      await safeCall(() =>
+        apiFetch<AuthResult>('/auth/login/2fa', {
+          method: 'POST',
+          body: JSON.stringify({ challengeToken, token }),
+          headers: app ? { 'x-client-app': app } : undefined,
+        })
+      )
     );
   },
 

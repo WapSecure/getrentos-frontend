@@ -5,3 +5,4 @@ export * from './auth';
 export * from './showroom';
 export * from './diaspora';
 export * from './homeUtilities';
+export * from './realtime';

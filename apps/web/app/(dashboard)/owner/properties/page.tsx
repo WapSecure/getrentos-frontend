@@ -25,10 +25,14 @@ import {
   type OwnerPropertySubmissionResult,
 } from '@/components/owner/properties/AddOwnerPropertyModal';
 import { OwnerVerificationStatusModal } from '@/components/owner/properties/OwnerVerificationStatusModal';
-import { EditOwnerPropertyModal } from '@/components/owner/properties/EditOwnerPropertyModal';
+import {
+  EditOwnerPropertyModal,
+  type OwnerPropertyUpdates,
+  type SaveOwnerProperty,
+} from '@/components/owner/properties/EditOwnerPropertyModal';
 import { ownerService } from '@/services/ownerService';
 import { landService } from '@/services/landService';
-import { unwrap } from '@/lib/apiHelpers';
+import { unwrap, type PropertyChangeRequestBody } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import type { OwnerProperty, OwnershipVerificationStatus } from '@/types/owner';
 import type { LandOwnershipProofInput } from '@/types/land';
@@ -79,13 +83,31 @@ export default function OwnerPropertiesPage() {
     onSuccess: invalidate,
   });
   const updateMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Partial<OwnerProperty> }) =>
-      unwrap(ownerService.updateProperty(id, updates)),
-    onSuccess: () => {
-      invalidate();
-      toast.success('Property details updated.');
+    mutationFn: async ({
+      id,
+      updates,
+      changeRequest,
+    }: {
+      id: string;
+      updates: OwnerPropertyUpdates;
+      changeRequest?: PropertyChangeRequestBody;
+    }) => {
+      await unwrap(ownerService.updateProperty(id, updates));
+      if (changeRequest) await unwrap(ownerService.requestPropertyChange(id, changeRequest));
+      return { sentForVerification: Boolean(changeRequest) };
     },
-    onError: (reason: Error) => toast.error(reason.message),
+    onSuccess: ({ sentForVerification }) => {
+      invalidate();
+      if (sentForVerification) {
+        toast.info(
+          'Changes saved. The property is back with us for verification until we check the new details.'
+        );
+      } else {
+        toast.success('Property details updated.');
+      }
+    },
+    // The edit form stays open and shows the error, or the lock with a change request.
+    onError: () => undefined,
   });
 
   useEffect(() => {
@@ -151,14 +173,8 @@ export default function OwnerPropertiesPage() {
     setStatusModalProperty(null);
   };
 
-  const handleEditSave = async (
-    id: string,
-    updates: Pick<
-      OwnerProperty,
-      'name' | 'propertyType' | 'address' | 'city' | 'state' | 'estimatedValue'
-    >
-  ) => {
-    await updateMutation.mutateAsync({ id, updates });
+  const handleEditSave: SaveOwnerProperty = async (id, updates, changeRequest) => {
+    await updateMutation.mutateAsync({ id, updates, changeRequest });
     setEditingProperty(null);
   };
 

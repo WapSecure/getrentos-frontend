@@ -19,7 +19,7 @@ import type {
 } from '@/types/owner';
 import type { TrustProfile } from '@/types/trust-score';
 import type { AssistantReply, AssistantTurn } from '@/types/assistant';
-import type { VideoCallJoin } from '@sureground/shared';
+import type { PropertyChangeRequestBody, VideoCallJoin } from '@sureground/shared';
 import { toApiPropertyType, toDisplayPropertyType } from '@/lib/propertyTypes';
 import type { CommercialDetails } from '@sureground/shared/showroom';
 import type { CommercialUpdatePayload } from '@/lib/commercialDetails';
@@ -209,6 +209,15 @@ export const ownerService = {
         await authFetch<OwnerPropertyApi>(`/owner/properties/${id}`, {
           method: 'PATCH',
           body: JSON.stringify(toOwnerPropertyPayload(data)),
+        })
+      )
+    ),
+  requestPropertyChange: (id: string, change: PropertyChangeRequestBody) =>
+    safeCall(async () =>
+      mapOwnerProperty(
+        await authFetch<OwnerPropertyApi>(`/owner/properties/${id}/change-requests`, {
+          method: 'POST',
+          body: JSON.stringify(change),
         })
       )
     ),

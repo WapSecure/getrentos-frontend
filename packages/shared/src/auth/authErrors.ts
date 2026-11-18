@@ -50,6 +50,8 @@ export const AUTH_ERROR_COPY: Record<string, string> = {
   OAUTH_FAILED: 'We could not sign you in with Google. Try again, or use your email.',
   ACCOUNT_SUSPENDED: 'This account is suspended. Contact support if you think this is a mistake.',
   EMAIL_UNVERIFIED: 'Google has not confirmed this email address yet. Verify it with Google first.',
+  SIGN_IN_UNAVAILABLE: 'Sign-in is temporarily unavailable. Try again shortly.',
+  TWO_FACTOR_UNAVAILABLE: 'Sign-in is temporarily unavailable. Try again shortly.',
 };
 
 const WAIT_COPY: Record<string, (wait: string) => string> = {

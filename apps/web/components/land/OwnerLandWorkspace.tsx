@@ -1,6 +1,6 @@
 'use client';
 
-import { formatLocation } from '@sureground/shared';
+import { formatLocation, lockedVerifiedFields } from '@sureground/shared';
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -83,13 +83,35 @@ export const OwnerLandWorkspace = () => {
   };
 
   const saveParcel = useMutation({
-    mutationFn: ({ propertyId, parcel }: { propertyId: string; parcel: LandParcelInput }) =>
-      unwrap(landService.upsertParcel(propertyId, parcel)),
-    onSuccess: () => {
+    mutationFn: ({
+      propertyId,
+      parcel,
+      changeRequest,
+    }: {
+      propertyId: string;
+      parcel: LandParcelInput;
+      changeRequest: boolean;
+    }) =>
+      unwrap(
+        changeRequest
+          ? landService.requestParcelChange(propertyId, parcel)
+          : landService.upsertParcel(propertyId, parcel)
+      ),
+    onSuccess: (_, { changeRequest }) => {
       invalidate();
-      toast.success('Land parcel record saved.');
+      if (changeRequest) {
+        toast.info(
+          'Parcel changes saved. The land is back with us for verification until we check the new details.'
+        );
+      } else {
+        toast.success('Land parcel record saved.');
+      }
     },
-    onError: (reason: Error) => toast.error(reason.message),
+    onError: (reason: Error) => {
+      // The parcel editor shows the lock and offers a change request instead.
+      if (lockedVerifiedFields(reason)) return;
+      toast.error(reason.message);
+    },
   });
 
   const submitForReview = useMutation({
@@ -322,11 +344,13 @@ export const OwnerLandWorkspace = () => {
                 key={selected.property.id}
                 record={selected}
                 isSaving={saveParcel.isPending}
-                onSave={async (parcel) => {
-                  // onError already tells the owner what went wrong.
+                onSave={async (parcel, { changeRequest }) => {
+                  // onError already tells the owner what went wrong; only the lock goes back to the editor.
                   await saveParcel
-                    .mutateAsync({ propertyId: selected.property.id, parcel })
-                    .catch(() => undefined);
+                    .mutateAsync({ propertyId: selected.property.id, parcel, changeRequest })
+                    .catch((reason: unknown) => {
+                      if (lockedVerifiedFields(reason)) throw reason;
+                    });
                 }}
                 onUploadProof={async (proof) => {
                   await uploadProof.mutateAsync({ propertyId: selected.property.id, proof });

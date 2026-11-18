@@ -65,6 +65,7 @@ export default function AdminUsersPage() {
   const toast = useToast();
   const adminUser = useAdminUser();
   const canManageSubscriptions = hasAdminPermission(adminUser?.roles, 'subscriptions.manage');
+  const canManageUsers = hasAdminPermission(adminUser?.roles, 'users.manage');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -338,6 +339,18 @@ export default function AdminUsersPage() {
         }}
         isChangingSubscription={changeSubscriptionMutation.isPending}
         canManageSubscription={canManageSubscriptions}
+        canCorrectLegalName={
+          canManageUsers &&
+          !!activeUser &&
+          activeUser.id !== adminUser?.id &&
+          activeUser.email !== adminUser?.email
+        }
+        onLegalNameChanged={(userId, legalName) => {
+          queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+          setActiveUser((current) =>
+            current?.id === userId ? { ...current, fullName: legalName } : current
+          );
+        }}
       />
 
       <ConfirmDialog

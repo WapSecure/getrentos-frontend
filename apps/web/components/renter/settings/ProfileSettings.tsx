@@ -14,6 +14,7 @@ import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
 import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';
 import { AddressInput } from '@/components/shared/location/AddressInput';
+import { useLegalNameLock } from '@/hooks/useLegalNameLock';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string; role?: string } | null;
@@ -55,6 +56,7 @@ const ProfileSettingsForm = ({
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState(initial);
+  const nameLock = useLegalNameLock();
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
   const [isOtpOpen, setIsOtpOpen] = useState(false);
   const [otpReference, setOtpReference] = useState('');
@@ -72,6 +74,11 @@ const ProfileSettingsForm = ({
         })
       ),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: renterKeys.profile }),
+    onError: (error) => {
+      if (nameLock.handleError(error))
+        setFormData((form) => ({ ...form, fullName: initial.fullName }));
+    },
+    meta: { showGlobalError: true },
   });
 
   const avatarMutation = useMutation({
@@ -185,11 +192,12 @@ const ProfileSettingsForm = ({
           </div>
         </div>
 
-        <Field label="Full name">
+        <Field label="Full name" hint={nameLock.note}>
           <Input
             leadingIcon={<User className="w-4 h-4" />}
             type="text"
             value={formData.fullName}
+            readOnly={nameLock.locked}
             onChange={(e) => setFormData({ ...formData, fullName: nameOnly(e.target.value) })}
           />
         </Field>

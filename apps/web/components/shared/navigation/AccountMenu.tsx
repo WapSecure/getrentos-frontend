@@ -1,9 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronDown, LogOut, type SgIcon } from '@sureground/icons';
 import {
+  ConfirmDialog,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -27,16 +29,34 @@ interface AccountMenuProps {
   roleId: string;
   roleLabel: string;
   links?: AccountMenuLink[];
+  /** A warning to confirm before signing out (unsent work on this device), or null to sign out at once. */
+  signOutWarning?: () => Promise<string | null>;
 }
 
-export const AccountMenu = ({ user, roleId, roleLabel, links = [] }: AccountMenuProps) => {
+export const AccountMenu = ({
+  user,
+  roleId,
+  roleLabel,
+  links = [],
+  signOutWarning,
+}: AccountMenuProps) => {
   const router = useRouter();
   const fullName = user?.fullName || 'User';
   const initials = getInitials(fullName);
 
-  const handleSignOut = async () => {
+  const [warning, setWarning] = useState<string | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
+
+  const signOut = async () => {
+    setSigningOut(true);
     await logoutSession();
     router.push(ROUTES.LOGIN);
+  };
+
+  const handleSignOut = async () => {
+    const message = signOutWarning ? await signOutWarning().catch(() => null) : null;
+    if (message) setWarning(message);
+    else await signOut();
   };
 
   return (
@@ -97,6 +117,15 @@ export const AccountMenu = ({ user, roleId, roleLabel, links = [] }: AccountMenu
           Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
+      <ConfirmDialog
+        open={warning !== null}
+        onOpenChange={(open) => !open && setWarning(null)}
+        title="Sign out and delete unsent work?"
+        description={warning ?? ''}
+        confirmLabel="Sign out"
+        isLoading={signingOut}
+        onConfirm={signOut}
+      />
     </DropdownMenu>
   );
 };

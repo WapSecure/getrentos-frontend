@@ -24,11 +24,14 @@ import {
   AddPropertyModal,
   type LandlordPropertySubmission,
 } from '@/components/landlord/properties/AddPropertyModal';
-import { EditPropertyModal } from '@/components/landlord/properties/EditPropertyModal';
+import {
+  EditPropertyModal,
+  type SaveProperty,
+} from '@/components/landlord/properties/EditPropertyModal';
 import { LandlordVerificationStatusModal } from '@/components/landlord/properties/LandlordVerificationStatusModal';
 import { landlordService } from '@/services/landlordService';
 import { landService } from '@/services/landService';
-import { unwrap } from '@/lib/apiHelpers';
+import { unwrap, type PropertyChangeRequestBody } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import type { Property, PropertyUpdatePayload } from '@/types/landlord';
 import type { LandOwnershipProofInput } from '@/types/land';
@@ -164,10 +167,33 @@ export default function LandlordPropertiesPage() {
     toast.error(error.message || fallback);
 
   const editMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: PropertyUpdatePayload }) =>
-      unwrap(landlordService.updateProperty(id, updates)),
-    onSuccess: invalidateProperties,
-    onError: notifyPropertyError('We could not save these changes. Please try again.'),
+    mutationFn: async ({
+      id,
+      updates,
+      changeRequest,
+    }: {
+      id: string;
+      updates: PropertyUpdatePayload;
+      changeRequest?: PropertyChangeRequestBody;
+    }) => {
+      const saved = await unwrap(landlordService.updateProperty(id, updates));
+      if (!changeRequest) return { saved, sentForVerification: false };
+      return {
+        saved: await unwrap(landlordService.requestPropertyChange(id, changeRequest)),
+        sentForVerification: true,
+      };
+    },
+    onSuccess: ({ sentForVerification }) => {
+      invalidateProperties();
+      if (sentForVerification) {
+        toast.show(
+          'Changes saved. The property is back with us for verification until we check the new details.',
+          'info'
+        );
+      }
+    },
+    // The edit form stays open and shows the error, or the lock with a change request.
+    onError: () => undefined,
   });
 
   const toggleArchiveMutation = useMutation({
@@ -185,8 +211,8 @@ export default function LandlordPropertiesPage() {
   const handlePublish = (submission: LandlordPropertySubmission) =>
     publishMutation.mutateAsync(submission).then(() => undefined);
 
-  const handleEditSave = (id: string, updates: PropertyUpdatePayload) =>
-    editMutation.mutate({ id, updates });
+  const handleEditSave: SaveProperty = (id, updates, changeRequest) =>
+    editMutation.mutateAsync({ id, updates, changeRequest }).then(() => undefined);
 
   const handleToggleArchive = (id: string) => toggleArchiveMutation.mutate(id);
 

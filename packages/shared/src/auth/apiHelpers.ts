@@ -4,6 +4,8 @@ import {
   ApiError,
   apiUpload,
   currentAccessToken,
+  endStaffSession,
+  isStaffSessionEnded,
   refreshSession,
   type UploadOptions,
 } from './apiClient';
@@ -230,6 +232,11 @@ export async function authFetch<T>(
       }
     }
     if (isStaffMfaRequired(err)) notifyStaffMfaRequired();
+    // A refresh would be refused for the same reason, so end the session now.
+    if (isStaffSessionEnded(err)) {
+      endStaffSession();
+      throw err;
+    }
     if (
       err instanceof ApiError &&
       err.status === 401 &&

@@ -20,7 +20,10 @@ import {
   boundaryCorners,
   boundaryGeometry,
   fromWgs84,
+  isVerifiedPropertyStatus,
+  lockedVerifiedFields,
   toWgs84,
+  VERIFIED_PARCEL_FIELDS,
   type BoundaryCorner,
   type CrsCode,
 } from '@sureground/shared';
@@ -33,6 +36,7 @@ import {
 import { LandDiligenceBadge } from './LandDiligenceBadge';
 import { OwnerDiligenceConditions } from './conditions/OwnerDiligenceConditions';
 import { ParcelBoundaryMap, formatArea } from '@/components/maps/ParcelBoundaryMap';
+import { VerifiedDetailsLock } from '@/components/shared/property/VerifiedDetailsLock';
 import {
   LAND_AREA_UNIT_LABELS,
   LAND_TITLE_TYPE_LABELS,
@@ -45,7 +49,8 @@ import {
 interface LandParcelEditorProps {
   record: OwnerLandRecord;
   isSaving?: boolean;
-  onSave: (parcel: LandParcelInput) => Promise<void>;
+  /** Rejects only with the verified-fields lock; other failures are reported by the caller. */
+  onSave: (parcel: LandParcelInput, options: { changeRequest: boolean }) => Promise<void>;
   onUploadProof: (proof: LandOwnershipProofInput) => Promise<void>;
 }
 
@@ -86,6 +91,10 @@ export const LandParcelEditor = ({
   const [utilitiesText, setUtilitiesText] = useState((record.parcel?.utilities ?? []).join(', '));
   const [uploadOpen, setUploadOpen] = useState(false);
   const [confirmingArea, setConfirmingArea] = useState(false);
+  const [lockedFields, setLockedFields] = useState<string[] | null>(null);
+  const [changeMode, setChangeMode] = useState(false);
+  const guarded = isVerifiedPropertyStatus(record.property.verificationStatus) || !!lockedFields;
+  const detailsLocked = guarded && !changeMode;
   const savedCorners = useMemo(
     () => boundaryCorners(record.parcel?.boundaryGeometry),
     [record.parcel?.boundaryGeometry]
@@ -170,18 +179,42 @@ export const LandParcelEditor = ({
       mode === 'survey'
         ? (surveyOutline ?? (savedCorners ? null : undefined))
         : (boundaryGeometry(corners) ?? (savedCorners ? null : undefined));
-    await onSave({
-      ...parcel,
-      boundaryGeometry: outline,
-      ...(mode === 'survey' && surveyOutline ? { boundaryCrs: crs } : {}),
-      areaValue: Number(parcel.areaValue) || 0,
-      frontage: parcel.frontage ? Number(parcel.frontage) : undefined,
-      depth: parcel.depth ? Number(parcel.depth) : undefined,
-      utilities: utilitiesText
-        .split(',')
-        .map((utility) => utility.trim())
-        .filter(Boolean),
-    });
+    // Re-sending an unedited outline could round differently and read as a change to the verified boundary.
+    const sendOutline = !detailsLocked;
+    // While locked, the verified fields go back as they were saved, so other edits still save.
+    const savedVerified: Partial<LandParcelInput> =
+      detailsLocked && record.parcel
+        ? Object.fromEntries(
+            VERIFIED_PARCEL_FIELDS.filter((field) => field !== 'boundaryGeometry').map((field) => [
+              field,
+              (record.parcel as unknown as Record<string, unknown>)[field] ?? undefined,
+            ])
+          )
+        : {};
+    const save = onSave(
+      {
+        ...parcel,
+        ...savedVerified,
+        boundaryGeometry: sendOutline ? outline : undefined,
+        ...(sendOutline && mode === 'survey' && surveyOutline ? { boundaryCrs: crs } : {}),
+        areaValue: Number(savedVerified.areaValue ?? parcel.areaValue) || 0,
+        frontage: parcel.frontage ? Number(parcel.frontage) : undefined,
+        depth: parcel.depth ? Number(parcel.depth) : undefined,
+        utilities: utilitiesText
+          .split(',')
+          .map((utility) => utility.trim())
+          .filter(Boolean),
+      },
+      { changeRequest: guarded && changeMode }
+    );
+    try {
+      await save;
+    } catch (error) {
+      const refused = lockedVerifiedFields(error);
+      if (!refused) throw error;
+      setLockedFields(refused);
+      setChangeMode(false);
+    }
   };
 
   const requestSave = () => {
@@ -245,10 +278,22 @@ export const LandParcelEditor = ({
           </p>
         </div>
 
+        {guarded && (
+          <div className="mb-5">
+            <VerifiedDetailsLock
+              lockedFields={lockedFields}
+              changeMode={changeMode}
+              onStartChange={() => setChangeMode(true)}
+              coverage="plot, area, outline and title details"
+            />
+          </div>
+        )}
+
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Plot number" hint="Use the plot number on the survey or allocation letter.">
             <Input
               value={textValue(parcel.plotNumber)}
+              disabled={detailsLocked}
               onChange={(event) => update('plotNumber', event.target.value || undefined)}
               placeholder="e.g. 24B"
             />
@@ -256,6 +301,7 @@ export const LandParcelEditor = ({
           <Field label="Block / phase">
             <Input
               value={textValue(parcel.block)}
+              disabled={detailsLocked}
               onChange={(event) => update('block', event.target.value || undefined)}
               placeholder="e.g. Phase 2, Block A"
             />
@@ -270,6 +316,7 @@ export const LandParcelEditor = ({
           <Field label="Survey number">
             <Input
               value={textValue(parcel.surveyNumber)}
+              disabled={detailsLocked}
               onChange={(event) => update('surveyNumber', event.target.value || undefined)}
               placeholder="Reference on the survey plan"
             />
@@ -279,6 +326,7 @@ export const LandParcelEditor = ({
               integer={false}
               min="0"
               value={textValue(parcel.areaValue || '')}
+              disabled={detailsLocked}
               onValueChange={(value) => update('areaValue', Number(value) || 0)}
               placeholder="e.g. 600"
             />
@@ -286,6 +334,7 @@ export const LandParcelEditor = ({
           <Field label="Area unit" required>
             <Select
               value={parcel.areaUnit}
+              disabled={detailsLocked}
               onValueChange={(value) => update('areaUnit', value as LandParcelInput['areaUnit'])}
               options={Object.entries(LAND_AREA_UNIT_LABELS).map(([value, label]) => ({
                 value,
@@ -327,6 +376,7 @@ export const LandParcelEditor = ({
           <Field label="Title type">
             <Select
               value={parcel.titleType}
+              disabled={detailsLocked}
               onValueChange={(value) => update('titleType', value as LandParcelInput['titleType'])}
               options={Object.entries(LAND_TITLE_TYPE_LABELS).map(([value, label]) => ({
                 value,
@@ -339,6 +389,7 @@ export const LandParcelEditor = ({
           <Field label="Title / file number">
             <Input
               value={textValue(parcel.titleNumber)}
+              disabled={detailsLocked}
               onChange={(event) => update('titleNumber', event.target.value || undefined)}
               placeholder="Registry reference"
             />
@@ -346,6 +397,7 @@ export const LandParcelEditor = ({
           <Field label="Registry authority">
             <Input
               value={textValue(parcel.registryAuthority)}
+              disabled={detailsLocked}
               onChange={(event) => update('registryAuthority', event.target.value || undefined)}
               placeholder="e.g. Lagos State Lands Bureau"
             />
@@ -353,6 +405,7 @@ export const LandParcelEditor = ({
           <Field label="Tenure">
             <Input
               value={textValue(parcel.tenure)}
+              disabled={detailsLocked}
               onChange={(event) => update('tenure', event.target.value || undefined)}
               placeholder="e.g. Statutory right of occupancy"
             />
@@ -415,22 +468,28 @@ export const LandParcelEditor = ({
           className="mt-4"
           label="Plot outline"
           hint={
-            mode === 'draw'
-              ? 'Click each corner of the plot on the map, following your survey plan. Drag a corner to adjust it. Buyers see the outline once the land is verified.'
-              : 'Enter the beacon coordinates exactly as the survey plan gives them. We convert them for the map and keep the plan’s numbers on record.'
+            detailsLocked
+              ? 'The outline we verified. Request a change to redraw it.'
+              : mode === 'draw'
+                ? 'Click each corner of the plot on the map, following your survey plan. Drag a corner to adjust it. Buyers see the outline once the land is verified.'
+                : 'Enter the beacon coordinates exactly as the survey plan gives them. We convert them for the map and keep the plan’s numbers on record.'
           }
         >
-          <SegmentedControl
-            aria-label="How to enter the outline"
-            className="mb-3"
-            value={mode}
-            onValueChange={setMode}
-            segments={[
-              { value: 'draw', label: 'Draw on the map' },
-              { value: 'survey', label: 'Survey plan coordinates' },
-            ]}
-          />
-          {mode === 'draw' ? (
+          {!detailsLocked && (
+            <SegmentedControl
+              aria-label="How to enter the outline"
+              className="mb-3"
+              value={mode}
+              onValueChange={setMode}
+              segments={[
+                { value: 'draw', label: 'Draw on the map' },
+                { value: 'survey', label: 'Survey plan coordinates' },
+              ]}
+            />
+          )}
+          {detailsLocked ? (
+            <ParcelBoundaryMap corners={savedCorners ?? []} center={pin} />
+          ) : mode === 'draw' ? (
             <>
               <ParcelBoundaryMap corners={corners} onChange={setCorners} center={pin} />
               {corners.length > 0 && corners.length < 3 && (
@@ -480,7 +539,11 @@ export const LandParcelEditor = ({
             isLoading={isSaving}
             icon={<Save className="h-4 w-4" />}
           >
-            {isSaving ? 'Saving parcel…' : 'Save parcel record'}
+            {isSaving
+              ? 'Saving parcel…'
+              : changeMode
+                ? 'Save and send for verification'
+                : 'Save parcel record'}
           </Button>
         </div>
       </section>

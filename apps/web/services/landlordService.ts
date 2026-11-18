@@ -10,7 +10,7 @@ import {
   type UploadOptions,
 } from '@/lib/apiHelpers';
 import type { AssistantReply, AssistantTurn } from '@/types/assistant';
-import type { ApiResponse } from '@/lib/apiHelpers';
+import type { ApiResponse, PropertyChangeRequestBody } from '@/lib/apiHelpers';
 import type { SpendApproval } from './spendApprovalService';
 import type {
   Property,
@@ -460,6 +460,18 @@ export const landlordService = {
   async updateProperty(id: string, updates: PropertyUpdatePayload): Promise<ApiResponse<Property>> {
     return safeCall(() =>
       authFetch(`/landlord/properties/${id}`, { method: 'PATCH', body: JSON.stringify(updates) })
+    );
+  },
+
+  async requestPropertyChange(
+    id: string,
+    change: PropertyChangeRequestBody
+  ): Promise<ApiResponse<Property>> {
+    return safeCall(() =>
+      authFetch(`/landlord/properties/${id}/change-requests`, {
+        method: 'POST',
+        body: JSON.stringify(change),
+      })
     );
   },
 

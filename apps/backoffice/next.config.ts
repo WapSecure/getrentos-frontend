@@ -30,6 +30,7 @@ function imageRemotePatterns(): ImageRemotePattern[] {
 }
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   distDir: process.env.NEXT_DIST_DIR ?? '.next',
   transpilePackages: ['@sureground/shared', '@sureground/ui', '@sureground/icons'],
   // The API namespaces its refresh cookie per app: the back office and web app share a host, so without this they rotated each other's session.

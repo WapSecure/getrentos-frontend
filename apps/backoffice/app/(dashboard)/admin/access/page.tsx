@@ -14,6 +14,7 @@ import { useAdminUser } from '../layout';
 import { CreateStaffModal } from '@/components/admin/access/CreateStaffModal';
 import { ResetPasswordModal } from '@/components/admin/access/ResetPasswordModal';
 import { StaffApprovalsPanel } from '@/components/admin/access/StaffApprovalsPanel';
+import { RoleGrantsPanel, roleGrantErrorMessage } from '@/components/admin/access/RoleGrantsPanel';
 import { StaffStatusBadge } from '@/components/admin/access/StaffStatusBadge';
 import { Alert, Badge, PageHeader } from '@sureground/ui';
 import { Button } from '@sureground/ui';
@@ -83,13 +84,21 @@ export default function AdminAccessPage() {
   const updateRoleMutation = useMutation({
     mutationFn: ({ id, role }: { id: string; role: AdminStaffRole }) =>
       unwrap(adminService.updateStaffRoles(id, [role])),
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: adminKeys.staff });
-      notify('Staff role updated.', 'success');
+      if (result.status === 'PENDING_APPROVAL') {
+        queryClient.invalidateQueries({ queryKey: adminKeys.staffRoleGrants });
+        notify(
+          'Sent for approval. Another super admin has to approve this role change before it applies.',
+          'info'
+        );
+      } else {
+        notify('Staff role updated.', 'success');
+      }
       setRoleTarget(null);
     },
     onError: (err) => {
-      notify(err instanceof Error ? err.message : 'Failed to update role.', 'error');
+      notify(roleGrantErrorMessage(err, 'Failed to update role.'), 'error');
     },
   });
 
@@ -146,6 +155,12 @@ export default function AdminAccessPage() {
       {canApprove && (
         <div className="mb-6">
           <StaffApprovalsPanel notify={notify} />
+        </div>
+      )}
+
+      {canManage && (
+        <div className="mb-6">
+          <RoleGrantsPanel currentUserId={user?.id} notify={notify} />
         </div>
       )}
 

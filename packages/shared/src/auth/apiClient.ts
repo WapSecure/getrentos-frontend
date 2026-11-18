@@ -69,7 +69,19 @@ const FRIENDLY_ERROR_CODES: Record<string, string> = {
   // feature needs, and a fixed sentence here would hide it.
   PLAN_LIMIT_REACHED:
     "You've reached the limit for your current plan. Upgrade to Pro to remove it.",
+  SIGN_IN_UNAVAILABLE: 'Sign-in is temporarily unavailable. Try again shortly.',
+  TWO_FACTOR_UNAVAILABLE: "Codes can't be checked right now. Try again shortly.",
+  STAFF_SESSION_IDLE: 'Your session ended. Sign in again.',
+  STAFF_SESSION_EXPIRED: 'Your session ended. Sign in again.',
 };
+
+export const STAFF_SESSION_ENDED_CODES = ['STAFF_SESSION_IDLE', 'STAFF_SESSION_EXPIRED'] as const;
+
+export function isStaffSessionEnded(err: unknown): boolean {
+  if ((err as { status?: number } | null)?.status !== 401) return false;
+  const code = (err as { code?: unknown }).code;
+  return (STAFF_SESSION_ENDED_CODES as readonly unknown[]).includes(code);
+}
 
 // Client-side backstop for raw technical text (exception names, Prisma codes, stack frames).
 const TECHNICAL_MESSAGE_PATTERN =
@@ -153,6 +165,9 @@ function postRefresh(): Promise<Response> {
 
 const SESSION_EXPIRED_KEY = 'gr_session_expired';
 
+// 'ended': the server closed a staff session (idle or past its limit); 'expired': anything else.
+export type SessionEndReason = 'expired' | 'ended';
+
 type SessionExpiredListener = () => void;
 const sessionExpiredListeners = new Set<SessionExpiredListener>();
 
@@ -163,9 +178,9 @@ export function onSessionExpired(listener: SessionExpiredListener): () => void {
   };
 }
 
-export function markSessionExpired() {
+export function markSessionExpired(reason: SessionEndReason = 'expired') {
   if (typeof window === 'undefined') return;
-  sessionStorage.setItem(SESSION_EXPIRED_KEY, '1');
+  sessionStorage.setItem(SESSION_EXPIRED_KEY, reason === 'ended' ? 'ended' : '1');
   // One throwing listener must not stop the rest being told.
   for (const listener of sessionExpiredListeners) {
     try {
@@ -176,11 +191,36 @@ export function markSessionExpired() {
   }
 }
 
+export function peekSessionEndReason(): SessionEndReason | null {
+  if (typeof window === 'undefined') return null;
+  const value = sessionStorage.getItem(SESSION_EXPIRED_KEY);
+  return value === 'ended' ? 'ended' : value === '1' ? 'expired' : null;
+}
+
+export function consumeSessionEndReason(): SessionEndReason | null {
+  const reason = peekSessionEndReason();
+  if (reason) sessionStorage.removeItem(SESSION_EXPIRED_KEY);
+  return reason;
+}
+
 export function consumeSessionExpiredFlag(): boolean {
-  if (typeof window === 'undefined') return false;
-  const expired = sessionStorage.getItem(SESSION_EXPIRED_KEY) === '1';
-  if (expired) sessionStorage.removeItem(SESSION_EXPIRED_KEY);
-  return expired;
+  return consumeSessionEndReason() !== null;
+}
+
+/** Ends the local session without asking the API: it has already ended it. */
+export function endStaffSession() {
+  clearAuthSession();
+  markSessionExpired('ended');
+}
+
+async function refreshRefusalCode(res: Response): Promise<string | undefined> {
+  try {
+    const body = (await res.clone().json()) as { error?: unknown; code?: unknown } | null;
+    const code = body?.error ?? body?.code;
+    return typeof code === 'string' ? code : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 // A refused refresh is retried once: without Web Locks another tab may have just rotated the
@@ -216,8 +256,13 @@ export async function refreshSession(): Promise<boolean> {
       }
 
       if (!res.ok) {
+        const code = await refreshRefusalCode(res);
         clearAuthSession();
-        markSessionExpired();
+        markSessionExpired(
+          (STAFF_SESSION_ENDED_CODES as readonly (string | undefined)[]).includes(code)
+            ? 'ended'
+            : 'expired'
+        );
         return false;
       }
 
@@ -281,6 +326,22 @@ async function fetchSessionProfile(accessToken: string): Promise<Record<string, 
   }
 }
 
+type SignOutListener = () => void | Promise<void>;
+const signOutListeners = new Set<SignOutListener>();
+
+/** For data an app keeps on the device for the signed-in user, which must not outlive the sign-out. */
+export function onSignOut(listener: SignOutListener): () => void {
+  signOutListeners.add(listener);
+  return () => {
+    signOutListeners.delete(listener);
+  };
+}
+
+async function runSignOutListeners() {
+  // One failing cleanup must not keep the others from running.
+  await Promise.allSettled([...signOutListeners].map(async (listener) => listener()));
+}
+
 export async function logoutSession(): Promise<void> {
   if (typeof window !== 'undefined') {
     try {
@@ -298,6 +359,7 @@ export async function logoutSession(): Promise<void> {
     } finally {
       clearAuthSession();
       if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem(SESSION_EXPIRED_KEY);
+      await runSignOutListeners();
     }
   }
 }

@@ -37,6 +37,8 @@ import type {
   AdminStaffMember,
   AdminStaffApproval,
   AdminStaffRole,
+  StaffRoleGrantRequest,
+  StaffRoleUpdateResult,
 } from '@/types/admin';
 
 export interface DashboardStats {
@@ -102,6 +104,21 @@ interface RawApprovalRow {
     legalName: string;
     accountStatus: string;
     roles: { role: string }[];
+  };
+}
+
+interface RawRoleGrant extends Omit<StaffRoleGrantRequest, 'roles' | 'previousRoles'> {
+  roles: string[];
+  previousRoles: string[];
+}
+
+const toStaffRole = (role: string) => role.toLowerCase() as AdminStaffRole;
+
+function normalizeRoleGrant(row: RawRoleGrant): StaffRoleGrantRequest {
+  return {
+    ...row,
+    roles: row.roles.map(toStaffRole),
+    previousRoles: row.previousRoles.map(toStaffRole),
   };
 }
 
@@ -197,11 +214,51 @@ export const adminService = {
   async updateStaffRoles(
     id: string,
     roles: AdminStaffRole[]
-  ): Promise<ApiResponse<AdminStaffMember>> {
-    return safeCall(() =>
-      authFetch(`/admin/access/staff/${id}/roles`, {
+  ): Promise<ApiResponse<StaffRoleUpdateResult>> {
+    return safeCall(async () => {
+      const response = await authFetch<
+        RawStaffRow | { status: 'PENDING_APPROVAL'; request: RawRoleGrant }
+      >(`/admin/access/staff/${id}/roles`, {
         method: 'PUT',
         body: JSON.stringify({ roles: roles.map((role) => role.toUpperCase()) }),
+      });
+      if ('status' in response && response.status === 'PENDING_APPROVAL') {
+        return { status: 'PENDING_APPROVAL', request: normalizeRoleGrant(response.request) };
+      }
+      return { status: 'APPLIED', member: response as unknown as AdminStaffMember };
+    });
+  },
+
+  async listRoleGrants(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<StaffRoleGrantRequest>>> {
+    return safeCall(async () => {
+      const query = toQuery({
+        page: params.page?.toString(),
+        pageSize: params.pageSize?.toString(),
+      });
+      const response = await authFetch<Paginated<RawRoleGrant>>(
+        `/admin/access/role-grants${query}`
+      );
+      return { ...response, items: response.items.map(normalizeRoleGrant) };
+    });
+  },
+
+  async approveRoleGrant(id: string): Promise<ApiResponse<StaffRoleGrantRequest>> {
+    return safeCall(async () =>
+      normalizeRoleGrant(
+        await authFetch<RawRoleGrant>(`/admin/access/role-grants/${id}/approve`, {
+          method: 'POST',
+        })
+      )
+    );
+  },
+
+  async rejectRoleGrant(id: string, reason: string): Promise<ApiResponse<{ message: string }>> {
+    return safeCall(() =>
+      authFetch(`/admin/access/role-grants/${id}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
       })
     );
   },
@@ -329,6 +386,19 @@ export const adminService = {
       authFetch(`/admin/users/${userId}/security/logout-all`, {
         method: 'POST',
         body: JSON.stringify({ reason }),
+      })
+    );
+  },
+
+  async setUserLegalName(
+    userId: string,
+    legalName: string,
+    reason: string
+  ): Promise<ApiResponse<{ success: boolean; legalName: string }>> {
+    return safeCall(() =>
+      authFetch(`/admin/users/${userId}/legal-name`, {
+        method: 'POST',
+        body: JSON.stringify({ legalName, reason }),
       })
     );
   },
