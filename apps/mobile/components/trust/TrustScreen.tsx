@@ -52,6 +52,8 @@ const PROFILE_ROUTE: Record<ScreenPortal, Href> = {
   estate: '/(app)/edit-profile',
 };
 
+const VERIFY_IDENTITY_ROUTE: Href = '/(app)/verify-identity';
+
 const OWNERSHIP_ROUTE: Partial<Record<ScreenPortal, Href>> = {
   owner: '/(app)/(owner)/properties',
   landlord: '/(app)/(landlord)/properties',
@@ -63,10 +65,13 @@ function routeFor(portal: ScreenPortal, key: TrustRequirementKey): Href {
       return PROFILE_ROUTE[portal];
     case 'PROFESSIONAL_LICENCE':
       return '/(app)/license-verification';
-    case 'PROPERTY_OWNERSHIP':
-      return OWNERSHIP_ROUTE[portal] ?? '/(app)/verify-identity';
+    case 'PROPERTY_OWNERSHIP': {
+      const route = OWNERSHIP_ROUTE[portal];
+      if (route !== undefined) return route;
+      return VERIFY_IDENTITY_ROUTE;
+    }
     default:
-      return '/(app)/verify-identity';
+      return VERIFY_IDENTITY_ROUTE;
   }
 }
 

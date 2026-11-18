@@ -171,10 +171,4 @@ export const renterHomeApi = {
       method: 'POST',
       body: input,
     }),
-
-  deleteAccount: (password: string) =>
-    apiFetch<{ message: string }>('/renter/settings/account', {
-      method: 'DELETE',
-      body: { password },
-    }),
 };

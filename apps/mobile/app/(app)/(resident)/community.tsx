@@ -7,6 +7,7 @@ import {
   Contact,
   KeyRound,
   Landmark,
+  MessageCircle,
   Package,
   ReceiptText,
   TriangleAlert,
@@ -18,6 +19,12 @@ import { GroupLabel } from '@/components/resident/VisitorParts';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 const ROWS = [
+  {
+    href: '/(app)/estate-office-messages',
+    label: 'Message the estate office',
+    description: 'Questions about dues, violations, passes or anything else',
+    icon: MessageCircle,
+  },
   {
     href: '/(app)/dues',
     label: 'Dues',
@@ -78,7 +85,15 @@ const ROWS = [
 type Row = (typeof ROWS)[number];
 
 const GROUPS: { title: string; hrefs: Row['href'][] }[] = [
-  { title: 'Your home', hrefs: ['/(app)/dues', '/(app)/maintenance', '/(app)/violations'] },
+  {
+    title: 'Your home',
+    hrefs: [
+      '/(app)/estate-office-messages',
+      '/(app)/dues',
+      '/(app)/maintenance',
+      '/(app)/violations',
+    ],
+  },
   { title: 'At the gate', hrefs: ['/(app)/visitor-passes', '/(app)/deliveries'] },
   { title: 'Community life', hrefs: ['/(app)/amenities', '/(app)/directory', '/(app)/polls'] },
   { title: 'Running the estate', hrefs: ['/(app)/committee', '/(app)/governance'] },

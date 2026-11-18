@@ -13,6 +13,7 @@ import {
   useTheme,
 } from '@sureground/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { relativeTime } from '@/lib/format';
 
 export interface InboxConversation {
@@ -35,6 +36,9 @@ export function Inbox({
   onRefresh,
   onOpen,
   emptyDescription,
+  title = 'Messages',
+  onBack,
+  searchPlaceholder = 'Search people, properties or messages',
 }: {
   subtitle: string;
   conversations: InboxConversation[] | undefined;
@@ -44,6 +48,10 @@ export function Inbox({
   onRefresh: () => void;
   onOpen: (c: InboxConversation) => void;
   emptyDescription: string;
+  title?: string;
+  /** Set when the inbox is pushed rather than a tab, so it gets a back button. */
+  onBack?: () => void;
+  searchPlaceholder?: string;
 }) {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -83,10 +91,14 @@ export function Inbox({
           gap: spacing.md,
         }}
       >
-        <DashboardHeader eyebrow="Inbox" title="Messages" subtitle={subtitle} />
+        {onBack ? (
+          <DetailHeader eyebrow="Inbox" title={title} subtitle={subtitle} onBack={onBack} />
+        ) : (
+          <DashboardHeader eyebrow="Inbox" title={title} subtitle={subtitle} />
+        )}
         {conversations?.length ? (
           <TextField
-            placeholder="Search people, properties or messages"
+            placeholder={searchPlaceholder}
             accessibilityLabel="Search conversations"
             leftIcon={<Search size={18} color={colors.mutedForeground} />}
             autoCapitalize="none"

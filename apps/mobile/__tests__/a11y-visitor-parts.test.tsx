@@ -72,10 +72,11 @@ describe('resident services screen', () => {
   it('lists every service once, grouped, as reachable 44pt rows', async () => {
     await renderWithTheme(<ResidentCommunity />);
     const rows = expectAccessiblePressables(root());
-    expect(rows).toHaveLength(10);
+    expect(rows).toHaveLength(11);
     for (const title of ['Your home', 'At the gate', 'Community life', 'Running the estate']) {
       expect(screen.getByRole('header', { name: title })).toBeTruthy();
     }
     expect(screen.getByRole('button', { name: 'Visitor passes' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Message the estate office' })).toBeTruthy();
   });
 });

@@ -1,9 +1,10 @@
+import { router } from 'expo-router';
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useState } from 'react';
 import { View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ReceiptText, Repeat } from '@sureground/icons/native';
+import { MessageCircle, ReceiptText, Repeat } from '@sureground/icons/native';
 import {
   Badge,
   type BadgeTone,
@@ -15,6 +16,7 @@ import {
   Text,
   useTheme,
   useToast,
+  IconButton,
 } from '@sureground/ui-native';
 import { residentApi, type Due, type DueCategory, type DueStatus } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
@@ -103,6 +105,13 @@ export default function ResidentDues() {
         title="Dues"
         subtitle="Charges, payments and recurring obligations"
         onBack={() => goBack()}
+        accessory={
+          <IconButton
+            onPress={() => router.push('/(app)/estate-office-messages')}
+            accessibilityLabel="Message the estate office"
+            icon={<MessageCircle size={20} color={colors.primary} />}
+          />
+        }
       />
       <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
         <ServiceChargesEntry kind="resident" />
@@ -175,6 +184,11 @@ function DueCard({ due, onPay, paying }: { due: Due; onPay: () => void; paying: 
             <Text variant="bodyStrong">{CATEGORY_LABEL[due.category]}</Text>
             {due.isRecurring ? <Repeat size={12} color={colors.mutedForeground} /> : null}
           </View>
+          {due.description ? (
+            <Text variant="caption" color="mutedForeground" numberOfLines={2}>
+              {due.description}
+            </Text>
+          ) : null}
           <Text variant="title">{formatNaira(totalAmount)}</Text>
           {due.lateFeeApplied > 0 ? (
             <Text variant="caption" color="mutedForeground">

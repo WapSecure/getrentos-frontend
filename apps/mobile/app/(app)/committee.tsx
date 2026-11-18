@@ -1,8 +1,6 @@
-import { Pressable, View } from 'react-native';
-import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, Landmark } from '@sureground/icons/native';
+import { Landmark } from '@sureground/icons/native';
 import {
   Avatar,
   Badge,
@@ -16,6 +14,8 @@ import {
 } from '@sureground/ui-native';
 import { residentApi, type CommitteeTitle } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const TITLE_LABEL: Record<CommitteeTitle, string> = {
   president: 'President',
@@ -33,33 +33,6 @@ const TITLE_TONE: Record<CommitteeTitle, BadgeTone> = {
   member: 'neutral',
 };
 
-function BackHeader({ title }: { title: string }) {
-  const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        paddingHorizontal: spacing.xl,
-        paddingTop: insets.top + spacing.sm,
-        paddingBottom: spacing.md,
-      }}
-    >
-      <Pressable
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        hitSlop={10}
-      >
-        <ChevronLeft size={24} color={colors.foreground} />
-      </Pressable>
-      <Text variant="title">{title}</Text>
-    </View>
-  );
-}
-
 export default function ResidentCommittee() {
   const { colors, spacing } = useTheme();
   const query = useQuery({
@@ -69,7 +42,12 @@ export default function ResidentCommittee() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <BackHeader title="Committee" />
+      <DetailScreenHeader
+        eyebrow="Running the estate"
+        title="Committee"
+        subtitle="Who sits on your estate committee"
+        onBack={() => goBack()}
+      />
       <Screen>
         <QueryState
           query={query}

@@ -21,6 +21,12 @@ import { SettingsGroup } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { RepresentingGroup } from '@/components/account/RepresentingGroup';
 import { PostSwitcherSheet } from '@/components/gateman/PostSwitcherSheet';
+import {
+  deleteAccountItem,
+  editProfileItem,
+  notificationSettingsItem,
+  textMessagesItem,
+} from '@/components/account/accountItems';
 
 export default function GatemanAccount() {
   const { profile, signOut } = useAuth();
@@ -110,6 +116,9 @@ export default function GatemanAccount() {
         <SettingsGroup
           title="Account"
           items={[
+            editProfileItem,
+            notificationSettingsItem,
+            textMessagesItem,
             {
               key: 'security',
               label: 'Security',
@@ -117,6 +126,7 @@ export default function GatemanAccount() {
               icon: KeyRound,
               onPress: () => router.push('/(app)/security-settings'),
             },
+            deleteAccountItem,
           ]}
         />
 

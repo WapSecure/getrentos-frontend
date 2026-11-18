@@ -25,6 +25,12 @@ import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsL
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { RepresentingGroup } from '@/components/account/RepresentingGroup';
 import { AccountFooter, AppearanceFooter, ProfileCard } from '@/components/account/AccountParts';
+import {
+  deleteAccountItem,
+  editProfileItem,
+  notificationSettingsItem,
+  textMessagesItem,
+} from '@/components/account/accountItems';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -132,6 +138,9 @@ export default function AgencyAccount() {
       tone: verified ? 'success' : identityKnown ? 'warning' : undefined,
       onPress: go('/(app)/verify-identity'),
     },
+    editProfileItem,
+    notificationSettingsItem,
+    textMessagesItem,
     {
       key: 'security',
       label: 'Security',
@@ -139,6 +148,7 @@ export default function AgencyAccount() {
       icon: KeyRound,
       onPress: go('/(app)/security-settings'),
     },
+    deleteAccountItem,
     {
       key: 'help',
       label: 'Help centre',

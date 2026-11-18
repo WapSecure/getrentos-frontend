@@ -202,7 +202,7 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
       />
       <TextField
         label="Bio"
-        placeholder="A short note landlords will see"
+        placeholder="A short note about you"
         multiline
         numberOfLines={3}
         value={bio}

@@ -20,14 +20,14 @@ export interface UpdateProfileInput {
 }
 
 export const profileApi = {
-  get: () => apiFetch<RenterProfile>('/renter/profile'),
+  get: () => apiFetch<RenterProfile>('/users/me/profile'),
 
   update: (input: UpdateProfileInput) =>
-    apiFetch<RenterProfile>('/renter/profile', { method: 'PUT', body: input }),
+    apiFetch<RenterProfile>('/users/me/profile', { method: 'PUT', body: input }),
 
   uploadAvatar: (file: PickedFile) => {
     const form = new FormData();
     appendFile(form, 'file', file);
-    return apiUpload<RenterProfile>('/renter/profile/avatar', form);
+    return apiUpload<RenterProfile>('/users/me/profile/avatar', form);
   },
 };

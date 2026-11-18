@@ -220,6 +220,10 @@ export const qk = {
     collectionPlan: (estateId: string, language: string) =>
       ['estate-manager', estateId, 'collection-plan', language] as const,
     estates: ['estate-manager', 'estates'] as const,
+    residentThreads: (estateId: string) =>
+      ['estate-manager', estateId, 'resident-threads'] as const,
+    residentThread: (estateId: string, threadId: string) =>
+      ['estate-manager', estateId, 'resident-threads', threadId] as const,
     selected: ['estate-manager', 'selected'] as const,
     /** Invalidate this after a write. */
     estate: (estateId: string) => ['estate-manager', estateId] as const,
@@ -575,6 +579,7 @@ export const qk = {
     governance: ['resident', 'governance'] as const,
     /** Shared by the home banner and the answer screen, so answering on one can't leave the other stale. */
     emergency: ['resident', 'emergency'] as const,
+    officeMessages: ['resident', 'office-messages'] as const,
   },
   gateman: {
     /** The offline queue invalidates this prefix once queued writes land. */

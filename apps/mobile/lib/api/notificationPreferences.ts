@@ -20,10 +20,10 @@ export const NOTIFICATION_CATEGORY_LABEL: Record<NotificationCategory, string> =
 };
 
 export const NOTIFICATION_CATEGORY_DESCRIPTION: Record<NotificationCategory, string> = {
-  application: 'Status changes on your rental applications',
-  message: 'New messages from landlords and agents',
-  payment: 'Rent due dates, receipts and payment status',
-  maintenance: 'Updates on maintenance requests',
+  application: 'Rental applications you send or receive',
+  message: 'New messages from anyone you deal with on Sureground',
+  payment: 'Payments due, receipts and payment status',
+  maintenance: 'Repair requests and their updates',
   lease: 'Lease signing, renewals and terms',
   system: 'Security alerts and account changes',
 };
@@ -37,13 +37,13 @@ export interface NotificationPreference {
 }
 
 export const notificationPreferencesApi = {
-  list: () => apiFetch<NotificationPreference[]>('/renter/notifications/preferences'),
+  list: () => apiFetch<NotificationPreference[]>('/users/me/notification-preferences'),
 
   update: (
     category: NotificationCategory,
     patch: Partial<Pick<NotificationPreference, 'email' | 'push' | 'inApp'>>
   ) =>
-    apiFetch<NotificationPreference>(`/renter/notifications/preferences/${category}`, {
+    apiFetch<NotificationPreference>(`/users/me/notification-preferences/${category}`, {
       method: 'PATCH',
       body: patch,
     }),

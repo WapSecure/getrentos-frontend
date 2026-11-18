@@ -27,6 +27,7 @@ import { useInvestItems } from '@/components/account/useInvestItems';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { AccountFooter, AppearanceFooter, ProfileCard } from '@/components/account/AccountParts';
+import { deleteAccountItem, textMessagesItem } from '@/components/account/accountItems';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -172,6 +173,7 @@ export default function BuyerAccount() {
       icon: Bell,
       onPress: go('/(app)/buyer-notifications'),
     },
+    textMessagesItem,
     {
       key: 'security',
       label: 'Security',
@@ -179,6 +181,7 @@ export default function BuyerAccount() {
       icon: KeyRound,
       onPress: go('/(app)/security-settings'),
     },
+    deleteAccountItem,
     {
       key: 'help',
       label: 'Help centre',
