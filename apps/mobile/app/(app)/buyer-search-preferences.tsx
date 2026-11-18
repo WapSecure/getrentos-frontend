@@ -202,13 +202,11 @@ function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
       </View>
 
       <Card elevated>
-        {/* Nothing sends match alerts yet; the switch stays off rather than promise them. */}
         <SwitchRow
           label="Match alerts"
-          description="Coming soon: we will tell you when a new listing matches these preferences."
-          value={false}
+          description="We check new listings every hour and tell you when one matches. Set a budget, an area or a type first."
+          value={notifyOnMatch}
           onValueChange={setNotifyOnMatch}
-          disabled
         />
       </Card>
 
