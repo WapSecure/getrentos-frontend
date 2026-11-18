@@ -1,6 +1,8 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { BadgeCheck } from '@sureground/icons';
+import type { PlanTier } from '@sureground/shared';
 import { Alert, Card, TableSkeleton, PageHeader } from '@sureground/ui';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
@@ -20,12 +22,22 @@ export function BillingPage({
   description = "See what's included on Free and what Pro unlocks.",
   onUpgrade,
   upgrading,
+  planLabel = 'Your current plan',
+  planTier,
+  planNote,
+  children,
 }: {
   persona: PlanPersona;
   title?: string;
   description?: string;
   onUpgrade?: (cycle: BillingCycle) => void;
   upgrading?: boolean;
+  /** Whose plan the top card shows; checkout below always buys the viewer's own plan. */
+  planLabel?: string;
+  planTier?: PlanTier;
+  planNote?: string;
+  /** Extra offers shown after the comparison, such as the estate Enterprise card. */
+  children?: ReactNode;
 }) {
   const { isPro } = usePlanTier();
   const { pricing, entitlementsFor, isLoading } = usePlanPricing();
@@ -46,12 +58,13 @@ export function BillingPage({
             <BadgeCheck className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Your current plan</p>
+            <p className="text-sm text-muted-foreground">{planLabel}</p>
             <div className="mt-0.5">
-              <PlanBadge />
+              <PlanBadge tier={planTier} />
             </div>
           </div>
         </div>
+        {planNote && <p className="mt-3 text-sm text-muted-foreground">{planNote}</p>}
       </Card>
 
       {isPro && <ManageSubscriptionCard billing={billing} />}
@@ -75,6 +88,8 @@ export function BillingPage({
       ) : (
         <PlanComparisonTable rows={rows} />
       )}
+
+      {children}
 
       {/* Outside the tier checks on purpose: receipts are not a Pro feature. */}
       <BillingHistoryCard />

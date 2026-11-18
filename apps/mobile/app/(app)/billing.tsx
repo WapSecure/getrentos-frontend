@@ -209,7 +209,7 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
           message={
             storeManaged
               ? `Your last payment failed. Update your payment method in ${storeName} to keep Pro.`
-              : 'Your last payment failed. Update your card from your Sureground account on the web to keep Pro.'
+              : 'Your last payment failed. Update your payment method where you subscribed to keep Pro.'
           }
         />
       ) : null}

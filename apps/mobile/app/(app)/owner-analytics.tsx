@@ -3,7 +3,9 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BarChart3 } from '@sureground/icons/native';
+import { router } from 'expo-router';
 import {
+  Button,
   Card,
   EmptyState,
   Price,
@@ -62,7 +64,8 @@ export default function OwnerAnalytics() {
         <EmptyState
           icon={<BarChart3 size={34} color={colors.mutedForeground} />}
           title="Analytics are on the Pro plan"
-          description="Upgrade from the web dashboard to see prices and rental yield per property."
+          description="Pro shows prices and rental yield for each property."
+          action={<Button label="See Pro" onPress={() => router.push('/(app)/billing')} />}
         />
       ) : (
         <QueryState

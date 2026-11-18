@@ -1,8 +1,9 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { BadgeCheck } from '@sureground/icons';
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
-import type { PlanGateReason } from '@/lib/planGate';
+import { billingHrefFor, type PlanGateReason } from '@/lib/planGate';
 
 interface UpgradeToProModalProps {
   isOpen: boolean;
@@ -21,9 +22,9 @@ const COPY: Record<PlanGateReason, { title: string; description: string }> = {
   },
 };
 
-// No live checkout yet: the CTA opens a mailto so the team upgrades the account in the backoffice.
 export const UpgradeToProModal = ({ isOpen, onClose, reason }: UpgradeToProModalProps) => {
   const copy = COPY[reason ?? 'PLAN_UPGRADE_REQUIRED'];
+  const href = billingHrefFor(usePathname());
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -40,12 +41,8 @@ export const UpgradeToProModal = ({ isOpen, onClose, reason }: UpgradeToProModal
           </DialogDescription>
 
           <div className="mt-6 flex flex-col gap-2">
-            <Button
-              variant="primary"
-              fullWidth
-              href="mailto:hello@getsureground.io?subject=Upgrade%20to%20Pro"
-            >
-              Contact us to upgrade
+            <Button variant="primary" fullWidth href={href}>
+              {href === '/pricing' ? 'See plans' : 'See Pro and start a free trial'}
             </Button>
             <Button variant="ghost" fullWidth onClick={onClose}>
               Maybe later
