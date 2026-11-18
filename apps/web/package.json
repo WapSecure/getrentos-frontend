@@ -24,7 +24,7 @@
     "@sureground/ui": "workspace:*",
     "@tanstack/react-query": "^5.101.4",
     "clsx": "^2.1.1",
-    "date-fns": "^3.6.0",
+    "date-fns": "^4.4.0",
     "framer-motion": "^11.0.0",
     "jsqr": "^1.4.0",
     "leaflet": "^1.9.4",
