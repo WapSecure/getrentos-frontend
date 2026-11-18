@@ -17,7 +17,8 @@ import { buyerKeys } from '@/lib/queryKeys';
 import { buyerService } from '@/services/buyerService';
 import { AddressInput } from '@/components/shared/location/AddressInput';
 
-const propertyTypeOptions = ['Apartment', 'Duplex', 'Bungalow', 'Terrace', 'Land', 'Commercial'];
+// Match alerts compare against the real listing types, so anything outside this list could never match.
+const propertyTypeOptions = ['Apartment', 'Duplex', 'Condo', 'Commercial', 'Land', 'Shared apartment'];
 
 export const SearchPreferencesSettings = () => {
   const queryClient = useQueryClient();
