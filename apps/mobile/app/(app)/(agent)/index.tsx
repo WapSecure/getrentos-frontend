@@ -25,7 +25,6 @@ import {
   QueryState,
   Screen,
   SectionHeader,
-  SegmentedBar,
   Skeleton,
   StatGroup,
   StatGroupSkeleton,
@@ -127,18 +126,6 @@ export default function AgentHome() {
             onPress: toTasks,
           },
         ]}
-        footer={
-          openTasks > 0 ? (
-            <SegmentedBar
-              label="Open tasks by status"
-              segments={[
-                { label: 'Assigned', value: d.assignedTasks, tone: 'primary' },
-                { label: 'In progress', value: d.inProgressTasks, tone: 'warning' },
-                { label: 'Overdue', value: d.overdueTasks, tone: 'danger' },
-              ]}
-            />
-          ) : undefined
-        }
       />
       <StatGroup
         title="Properties"

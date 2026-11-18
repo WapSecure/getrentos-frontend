@@ -13,6 +13,7 @@ import {
   Wallet,
   Wrench,
   type SgIcon,
+  Bell,
 } from '@sureground/icons/native';
 import {
   Button,
@@ -45,6 +46,7 @@ import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { dashboardGreeting } from '@/components/dashboard/DashboardParts';
 import { CustodyBar } from '@/components/agency/CustodyBar';
 import { VerificationBanner } from '@/components/agency/VerificationBanner';
+import { landlordApi } from '@/lib/api/landlord';
 import { AgencyPlanCard } from '@/components/agency/AgencyPlanCard';
 
 export default function AgencyHome() {
@@ -62,6 +64,12 @@ export default function AgencyHome() {
     void queryClient.invalidateQueries({ queryKey: qk.agency.plan });
   };
 
+  const notifications = useQuery({
+    queryKey: qk.landlord.notifications,
+    queryFn: landlordApi.notifications,
+  });
+  const unread = (notifications.data ?? []).filter((n) => !n.read).length;
+
   return (
     <Screen refreshing={dashboard.isRefetching} onRefresh={refresh}>
       <DashboardHeader
@@ -70,11 +78,19 @@ export default function AgencyHome() {
         roleBadge="Property manager"
         subtitle={dashboard.data?.firmName ?? 'Your agency workspace'}
         accessory={
-          <IconButton
-            onPress={() => router.push({ pathname: '/(app)/ask', params: { persona: 'agency' } })}
-            accessibilityLabel="Ask Sureground"
-            icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
-          />
+          <View style={{ flexDirection: 'row', gap: 4 }}>
+            <IconButton
+              onPress={() => router.push({ pathname: '/(app)/ask', params: { persona: 'agency' } })}
+              accessibilityLabel="Ask Sureground"
+              icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
+            />
+            <IconButton
+              onPress={() => router.push('/(app)/landlord-notifications')}
+              accessibilityLabel="Notifications"
+              badge={unread}
+              icon={<Bell size={21} color={colors.foreground} />}
+            />
+          </View>
         }
       />
       <View style={{ gap: spacing.lg }}>
@@ -276,7 +292,7 @@ function FirmFigures() {
       Icon: Building2,
       label: 'Occupancy',
       value: pct(d.portfolio.occupancyRate),
-      note: `${d.portfolio.occupiedUnits} of ${d.portfolio.units} units · ${d.portfolio.properties} properties`,
+      note: `${d.portfolio.occupiedUnits} of ${d.portfolio.units} units · ${d.portfolio.properties} ${d.portfolio.properties === 1 ? 'property' : 'properties'}`,
     },
     {
       Icon: Banknote,
