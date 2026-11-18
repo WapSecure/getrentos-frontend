@@ -14,6 +14,7 @@ import { routeForNotification } from '@/lib/notificationRoutes';
 import { landlordApi, type LandlordNotification } from '@/lib/api/landlord';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { NotificationsInbox } from '@/components/notifications/NotificationsInbox';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 /** `type` is an open string: match on its prefix and fall back to a bell. */
 function iconFor(type: string) {
@@ -27,6 +28,7 @@ function iconFor(type: string) {
 }
 
 export default function LandlordNotifications() {
+  const { usablePortal } = useAuth();
   const query = useQuery({
     queryKey: qk.landlord.notifications,
     queryFn: landlordApi.notifications,
@@ -59,7 +61,7 @@ export default function LandlordNotifications() {
 
   return (
     <NotificationsInbox
-      eyebrow="Renting"
+      eyebrow={usablePortal === 'manager' ? 'Your firm' : 'Renting'}
       items={query.data ?? []}
       loading={query.isPending}
       error={query.isError && !query.data}
