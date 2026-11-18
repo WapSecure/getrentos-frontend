@@ -7,6 +7,7 @@ import {
   ApiError,
   consumeSessionExpiredFlag,
   onSessionExpired,
+  peekSessionEndReason,
   sessionExpiredRedirect,
 } from '@sureground/shared';
 import { ToastProvider, useToast, type ToastApi } from '../ToastProvider';
@@ -53,7 +54,12 @@ function QueryClientHost({
 
   useEffect(() => {
     return onSessionExpired(() => {
-      const target = sessionExpiredRedirect(window.location, loginPath, isPublicPath);
+      const target = sessionExpiredRedirect(
+        window.location,
+        loginPath,
+        isPublicPath,
+        peekSessionEndReason() ?? 'expired'
+      );
       if (target) {
         // A full navigation drops every in-memory cache rather than re-rendering it as an empty state.
         window.location.assign(target);

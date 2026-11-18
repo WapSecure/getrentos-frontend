@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff, Lock, ShieldCheck } from '@sureground/icons';
-import { Alert, Checkbox, Field, IconButton, Input } from '@sureground/ui';
+import { Alert, Field, IconButton, Input } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { useToast } from '@sureground/ui';
 import { SessionExpiredNotice } from '@sureground/ui';
@@ -22,12 +22,8 @@ import {
   isSecondFactorCode,
   SECOND_FACTOR_CODE_MAX_LENGTH,
 } from '@sureground/shared';
-import {
-  saveAuthSession,
-  getRememberedIdentifier,
-  saveRememberedIdentifier,
-} from '@sureground/shared';
-import { consumeSessionExpiredFlag } from '@sureground/shared';
+import { saveAuthSession, clearRememberedIdentifier } from '@sureground/shared';
+import { consumeSessionEndReason } from '@sureground/shared';
 import { authService } from '@sureground/shared';
 
 const adminSchema = z.object({
@@ -40,14 +36,13 @@ type AdminFormData = z.infer<typeof adminSchema>;
 export const AdminSignInForm = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [pendingChallenge, setPendingChallenge] = useState<string | null>(null);
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const toast = useToast();
 
   const loginMutation = useMutation({
     mutationFn: ({ identifier, password }: AdminFormData) =>
-      authService.login(identifier, password, rememberMe, 'backoffice'),
+      authService.login(identifier, password, false, 'backoffice'),
   });
   const twoFactorMutation = useMutation({
     mutationFn: ({ challengeToken, token }: { challengeToken: string; token: string }) =>
@@ -57,7 +52,6 @@ export const AdminSignInForm = () => {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors, isValid },
   } = useForm<AdminFormData>({
     resolver: zodResolver(adminSchema),
@@ -65,20 +59,14 @@ export const AdminSignInForm = () => {
   });
 
   useEffect(() => {
-    // Mount-time sync with persisted storage: intentional synchronous setState.
-    /* eslint-disable react-hooks/set-state-in-effect */
-    const remembered = getRememberedIdentifier();
-    if (remembered) {
-      setValue('identifier', remembered, { shouldValidate: true });
-      setRememberMe(true);
-    }
-    if (consumeSessionExpiredFlag()) {
-      toast.info('Your session has expired. Please sign in again.');
-    }
-    /* eslint-enable react-hooks/set-state-in-effect */
-  }, [setValue, toast]);
+    // Staff sessions are never remembered, so an email saved by an older build goes too.
+    clearRememberedIdentifier();
+    const ended = consumeSessionEndReason();
+    if (ended === 'ended') toast.info('Your session ended. Sign in again.');
+    else if (ended) toast.info('Your session has expired. Please sign in again.');
+  }, [toast]);
 
-  const completeSignIn = (result: AuthResult, identifier?: string) => {
+  const completeSignIn = (result: AuthResult) => {
     const isAdmin = (result.roles || []).some((r) => BACKEND_ROLE_TO_ID[r] === 'admin');
     if (!isAdmin) {
       toast.error('This account does not have administrator access.');
@@ -91,9 +79,8 @@ export const AdminSignInForm = () => {
         accessToken,
         user: { ...user, fullName: user.legalName, role: 'admin' },
       },
-      rememberMe
+      false
     );
-    if (rememberMe && identifier) saveRememberedIdentifier(identifier);
 
     router.push(ROUTES.ADMIN_DASHBOARD);
   };
@@ -118,7 +105,7 @@ export const AdminSignInForm = () => {
       return;
     }
 
-    completeSignIn(response.data, data.identifier);
+    completeSignIn(response.data);
   };
 
   const completeTwoFactorSignIn = async () => {
@@ -243,8 +230,6 @@ export const AdminSignInForm = () => {
                 }
               />
             </Field>
-
-            <Checkbox checked={rememberMe} onCheckedChange={setRememberMe} label="Remember me" />
 
             <Button
               type="submit"

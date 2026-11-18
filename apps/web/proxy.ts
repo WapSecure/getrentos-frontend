@@ -5,7 +5,6 @@ import {
   STRICT_TRANSPORT_SECURITY,
   buildContentSecurityPolicy,
   cspHeaderName,
-  isLocalHost,
   parseOriginList,
   cspReportUri,
 } from '@sureground/shared/csp';
@@ -14,14 +13,15 @@ import {
 const ENFORCE_CSP = process.env.NEXT_PUBLIC_CSP_ENFORCE === 'true';
 const LIVE_CAPTURE_PATH = /\/(verification|trust-score|trust-profile)(\/|$)/;
 const DEV = process.env.NODE_ENV !== 'production';
+// Server-only, read at runtime: lets a production build run over plain http on a developer machine.
+const LOCAL_HTTP = process.env.LOCAL_HTTP === 'true';
 
 // The nonce is set on the response and the forwarded request (Next reads it from there); `x-nonce` carries it to the root layout.
 // No auth gate: the access token lives in page memory and the refresh cookie is on the API origin with Path=/auth, so the role layouts enforce auth.
 export default function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-  // HTTPS-only behaviour stays off on localhost; `nextUrl.hostname` is the bind host, so read the public host.
-  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host');
-  const secure = !DEV && !isLocalHost(host);
+  // Decided by configuration, never a request header: any client can send `X-Forwarded-Host: localhost`.
+  const secure = !DEV && !LOCAL_HTTP;
   // Only the verification pages run Smile ID's live selfie: camera, WebAssembly
   // and Smile's hosts are allowed there and nowhere else.
   const liveCapture = LIVE_CAPTURE_PATH.test(request.nextUrl.pathname);

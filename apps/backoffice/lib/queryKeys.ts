@@ -144,6 +144,9 @@ export const adminKeys = {
   platformConfig: ['admin', 'platformConfig'] as const,
   staff: ['admin', 'staff'] as const,
   staffApprovals: ['admin', 'staffApprovals'] as const,
+  staffRoleGrants: ['admin', 'staffRoleGrants'] as const,
+  staffRoleGrantsList: (params?: { page?: number; pageSize?: number }) =>
+    ['admin', 'staffRoleGrants', params?.page ?? 1, params?.pageSize ?? 20] as const,
   staffList: (params?: { page?: number; pageSize?: number }) =>
     ['admin', 'staff', params?.page ?? 1, params?.pageSize ?? 20] as const,
   staffApprovalsList: (params?: { page?: number; pageSize?: number }) =>

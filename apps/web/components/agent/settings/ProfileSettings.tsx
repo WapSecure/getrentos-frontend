@@ -10,6 +10,7 @@ import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButto
 import { agentService } from '@/services/agentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
+import { useLegalNameLock } from '@/hooks/useLegalNameLock';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string } | null;
@@ -43,6 +44,7 @@ const ProfileForm = ({
   const [fullName, setFullName] = useState(initial.fullName);
   const [email, setEmail] = useState(initial.email);
   const [phone, setPhone] = useState(initial.phone);
+  const nameLock = useLegalNameLock();
 
   const save = useMutation({
     mutationFn: () =>
@@ -50,7 +52,10 @@ const ProfileForm = ({
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: agentKeys.profile });
     },
-    onError: (error: Error) => toast.error(error.message || 'Could not save your profile.'),
+    onError: (error: Error) => {
+      if (nameLock.handleError(error)) setFullName(initial.fullName);
+      toast.error(error.message || 'Could not save your profile.');
+    },
   });
 
   const dirty = fullName.trim() !== initial.fullName || phone.trim() !== initial.phone;
@@ -67,10 +72,11 @@ const ProfileForm = ({
       </div>
 
       <div className="space-y-4">
-        <Field label="Full name">
+        <Field label="Full name" hint={nameLock.note}>
           <Input
             type="text"
             value={fullName}
+            readOnly={nameLock.locked}
             onChange={(e) => setFullName(nameOnly(e.target.value))}
           />
         </Field>

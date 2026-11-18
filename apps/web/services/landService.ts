@@ -108,6 +108,16 @@ export const landService = {
       )
     ),
 
+  requestParcelChange: (propertyId: string, parcel: LandParcelInput) =>
+    safeCall(async () =>
+      mapOwnerLand(
+        await authFetch<OwnerLandApiRecord>(
+          `/owner/land/${encodeURIComponent(propertyId)}/parcel/change-requests`,
+          { method: 'POST', body: JSON.stringify(parcel) }
+        )
+      )
+    ),
+
   boundaryVersions: (propertyId: string) =>
     safeCall(() => authFetch<LandBoundaryVersion[]>(`/owner/land/${propertyId}/boundary/versions`)),
 

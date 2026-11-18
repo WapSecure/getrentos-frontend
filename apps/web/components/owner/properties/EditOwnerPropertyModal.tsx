@@ -4,7 +4,15 @@ import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@sureground/ui';
 import { Alert, Button, CurrencyInput, Field, Input, Select } from '@sureground/ui';
 import { Trash2, Video } from '@sureground/icons';
-import { tourSource } from '@sureground/shared';
+import {
+  formatLocation,
+  hasVerifiedPropertyChanges,
+  isVerifiedPropertyStatus,
+  lockedVerifiedFields,
+  tourSource,
+  verifiedPropertyChanges,
+  type PropertyChangeRequestBody,
+} from '@sureground/shared';
 import {
   mediaDetailsFor,
   photosFromKeys,
@@ -21,30 +29,42 @@ import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { videoFileProblem } from '@/lib/videoFile';
+import {
+  VerifiedDetailsLock,
+  VerifiedDetailsSummary,
+} from '@/components/shared/property/VerifiedDetailsLock';
 
-type OwnerPropertyUpdates = Pick<
-  OwnerProperty,
-  | 'name'
-  | 'propertyType'
-  | 'address'
-  | 'city'
-  | 'state'
-  | 'country'
-  | 'placeId'
-  | 'estimatedValue'
-  | 'coverImageKey'
-  | 'galleryImageKeys'
-  | 'videoTourKey'
-  | 'tourUrl'
-  | 'mediaDetails'
-  | 'latitude'
-  | 'longitude'
+export type OwnerPropertyUpdates = Partial<
+  Pick<
+    OwnerProperty,
+    | 'name'
+    | 'propertyType'
+    | 'address'
+    | 'city'
+    | 'state'
+    | 'country'
+    | 'placeId'
+    | 'estimatedValue'
+    | 'coverImageKey'
+    | 'galleryImageKeys'
+    | 'videoTourKey'
+    | 'tourUrl'
+    | 'mediaDetails'
+    | 'latitude'
+    | 'longitude'
+  >
 >;
+
+export type SaveOwnerProperty = (
+  id: string,
+  updates: OwnerPropertyUpdates,
+  changeRequest?: PropertyChangeRequestBody
+) => Promise<void>;
 
 interface EditOwnerPropertyModalProps {
   property: OwnerProperty | null;
   onClose: () => void;
-  onSave: (id: string, updates: OwnerPropertyUpdates) => Promise<void>;
+  onSave: SaveOwnerProperty;
 }
 
 export const EditOwnerPropertyModal = ({
@@ -74,7 +94,7 @@ const EditOwnerPropertyForm = ({
   onClose,
 }: {
   property: OwnerProperty;
-  onSave: (id: string, updates: OwnerPropertyUpdates) => Promise<void>;
+  onSave: SaveOwnerProperty;
   onClose: () => void;
 }) => {
   const [name, setName] = useState(property.name);
@@ -96,6 +116,12 @@ const EditOwnerPropertyForm = ({
   const [estimatedValue, setEstimatedValue] = useState(String(property.estimatedValue));
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lockedFields, setLockedFields] = useState<string[] | null>(null);
+  const [changeMode, setChangeMode] = useState(false);
+  const [changeReason, setChangeReason] = useState('');
+  const verified = isVerifiedPropertyStatus(property.verificationStatus);
+  const guarded = verified || lockedFields !== null;
+  const detailsLocked = guarded && !changeMode;
 
   // The API lists the cover first among the gallery keys.
   const [photos, setPhotos] = useState<EditablePhoto[]>(() =>
@@ -174,25 +200,45 @@ const EditOwnerPropertyForm = ({
       setIsSaving(false);
       return;
     }
-    const payload = {
-      ...media,
-      ...(tourUrl.trim() !== (property.tourUrl ?? '') ? { tourUrl: tourUrl.trim() || null } : {}),
+    const verifiedDetails = {
       name,
-      propertyType,
       address,
       city,
       state,
       country,
       ...(location.placeId ? { placeId: location.placeId } : {}),
-      estimatedValue: Number(estimatedValue) || property.estimatedValue,
-      ...(videoKey !== (property.videoTourKey ?? null) ? { videoTourKey: videoKey } : {}),
       // Only a pin the owner moved, so saving other details doesn't re-confirm a location nobody looked at.
       ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
     };
+    const payload = {
+      ...media,
+      ...(tourUrl.trim() !== (property.tourUrl ?? '') ? { tourUrl: tourUrl.trim() || null } : {}),
+      // A verified property's checked details only change through a change request.
+      ...(guarded ? {} : verifiedDetails),
+      propertyType,
+      estimatedValue: Number(estimatedValue) || property.estimatedValue,
+      ...(videoKey !== (property.videoTourKey ?? null) ? { videoTourKey: videoKey } : {}),
+    };
+    const changeRequest = guarded
+      ? {
+          ...verifiedPropertyChanges(property, verifiedDetails),
+          ...(changeReason.trim() ? { reason: changeReason.trim() } : {}),
+        }
+      : undefined;
     try {
-      await onSave(property.id, payload);
+      await onSave(
+        property.id,
+        payload,
+        changeRequest && hasVerifiedPropertyChanges(changeRequest) ? changeRequest : undefined
+      );
       onClose();
     } catch (reason) {
+      const refused = lockedVerifiedFields(reason);
+      if (refused) {
+        setLockedFields(refused);
+        setChangeMode(false);
+        return;
+      }
       setError(reason instanceof Error ? reason.message : 'Unable to update the property.');
     } finally {
       setIsSaving(false);
@@ -209,9 +255,34 @@ const EditOwnerPropertyForm = ({
       </div>
 
       <div className="p-4 sm:px-8 sm:py-6 space-y-3">
-        <Field label="Property name" required>
-          <Input value={name} onChange={(e) => setName(e.target.value)} />
-        </Field>
+        {guarded && (
+          <VerifiedDetailsLock
+            lockedFields={lockedFields}
+            changeMode={changeMode}
+            onStartChange={() => setChangeMode(true)}
+            coverage="property name, address and map pin"
+            reason={changeReason}
+            onReasonChange={setChangeReason}
+          />
+        )}
+
+        {detailsLocked ? (
+          <VerifiedDetailsSummary
+            rows={[
+              { label: 'Property name', value: property.name },
+              {
+                label: 'Address',
+                value: [property.address, formatLocation(property.city, property.state)]
+                  .filter(Boolean)
+                  .join(', '),
+              },
+            ]}
+          />
+        ) : (
+          <Field label="Property name" required>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </Field>
+        )}
 
         <Field label="Property type">
           <Select
@@ -222,28 +293,32 @@ const EditOwnerPropertyForm = ({
           />
         </Field>
 
-        <AddressFields
-          required
-          value={location}
-          onChange={(patch) => setLocation((prev) => ({ ...prev, ...patch }))}
-          onPin={(next) => {
-            setPin(next);
-            setPinMoved(true);
-          }}
-        />
+        {!detailsLocked && (
+          <>
+            <AddressFields
+              required
+              value={location}
+              onChange={(patch) => setLocation((prev) => ({ ...prev, ...patch }))}
+              onPin={(next) => {
+                setPin(next);
+                setPinMoved(true);
+              }}
+            />
 
-        <LocationPicker
-          address={address}
-          city={city}
-          state={state}
-          country={country}
-          value={pin}
-          guessed={!pinMoved && !property.locationConfirmedAt}
-          onChange={(next) => {
-            setPin(next);
-            setPinMoved(true);
-          }}
-        />
+            <LocationPicker
+              address={address}
+              city={city}
+              state={state}
+              country={country}
+              value={pin}
+              guessed={!pinMoved && !property.locationConfirmedAt}
+              onChange={(next) => {
+                setPin(next);
+                setPinMoved(true);
+              }}
+            />
+          </>
+        )}
 
         <Field label="Estimated value">
           <CurrencyInput
@@ -355,7 +430,7 @@ const EditOwnerPropertyForm = ({
           isLoading={isSaving}
           loadingText="Saving…"
         >
-          Save changes
+          {changeMode ? 'Save and send for verification' : 'Save changes'}
         </Button>
         {uploadsPending && (
           <p className="text-center text-xs text-muted-foreground">

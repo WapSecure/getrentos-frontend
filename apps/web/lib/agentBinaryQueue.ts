@@ -10,7 +10,8 @@ export type AgentBinaryOperation = {
   ownerId?: string;
 };
 
-const DATABASE = 'getrentos-agent-offline';
+export const AGENT_BINARY_DATABASE = 'getrentos-agent-offline';
+const DATABASE = AGENT_BINARY_DATABASE;
 const STORE = 'operations';
 
 function openDatabase(): Promise<IDBDatabase> {

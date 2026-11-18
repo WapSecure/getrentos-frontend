@@ -18,6 +18,7 @@ import type { PlanTier, PlatformUser, UserAccountStatus } from '@/types/admin';
 import { roleLabel } from '@/lib/roleLabels';
 import { lagosDayOf, planLabel, todayInLagos } from '@/lib/planDates';
 import { UserSecurityActions } from './UserSecurityActions';
+import { UserLegalNameAction } from './UserLegalNameAction';
 
 interface UserDetailModalProps {
   user: PlatformUser | null;
@@ -28,6 +29,9 @@ interface UserDetailModalProps {
   onChangeSubscription: (userId: string, tier: PlanTier, endDate?: string) => void;
   isChangingSubscription?: boolean;
   canManageSubscription?: boolean;
+  /** Holds users.manage and the user is not the signed-in staff member. */
+  canCorrectLegalName?: boolean;
+  onLegalNameChanged?: (userId: string, legalName: string) => void;
 }
 
 const STATUS: Record<UserAccountStatus, { label: string; variant: BadgeVariant }> = {
@@ -49,6 +53,8 @@ export const UserDetailModal = ({
   onChangeSubscription,
   isChangingSubscription = false,
   canManageSubscription = false,
+  canCorrectLegalName = false,
+  onLegalNameChanged,
 }: UserDetailModalProps) => {
   return (
     <Dialog open={!!user} onOpenChange={(open) => !open && onClose()}>
@@ -99,6 +105,17 @@ export const UserDetailModal = ({
                 ))}
               </div>
             </div>
+
+            {canCorrectLegalName && (
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm">
+                <span className="text-muted-foreground">Legal name</span>
+                <UserLegalNameAction
+                  userId={user.id}
+                  currentName={user.fullName}
+                  onChanged={(legalName) => onLegalNameChanged?.(user.id, legalName)}
+                />
+              </div>
+            )}
 
             <PlanControl
               key={user.id}

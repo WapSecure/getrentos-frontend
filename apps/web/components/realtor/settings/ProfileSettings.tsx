@@ -10,6 +10,7 @@ import { realtorService } from '@/services/realtorService';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
 import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';
+import { useLegalNameLock } from '@/hooks/useLegalNameLock';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string } | null;
@@ -23,6 +24,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
   const [companyName, setCompanyName] = useState('');
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const toast = useToast();
+  const nameLock = useLegalNameLock();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: profile } = useQuery({
@@ -57,7 +59,10 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.settingsProfile });
     },
-    onError: (error) => toast.error(error.message || 'Unable to update your profile.'),
+    onError: (error) => {
+      if (nameLock.handleError(error)) setFullName(profile?.fullName || '');
+      toast.error(error.message || 'Unable to update your profile.');
+    },
   });
 
   const uploadAvatar = useMutation({
@@ -114,10 +119,11 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       </div>
 
       <div className="space-y-4">
-        <Field label="Full name">
+        <Field label="Full name" hint={nameLock.note}>
           <Input
             type="text"
             value={fullName}
+            readOnly={nameLock.locked}
             onChange={(e) => setFullName(nameOnly(e.target.value))}
           />
         </Field>

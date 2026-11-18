@@ -4,7 +4,15 @@ import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@sureground/ui';
 import { Alert, Button, Field, Input, NumberInput, Select } from '@sureground/ui';
 import { Play, Video } from '@sureground/icons';
-import { tourSource } from '@sureground/shared';
+import {
+  formatLocation,
+  hasVerifiedPropertyChanges,
+  isVerifiedPropertyStatus,
+  lockedVerifiedFields,
+  tourSource,
+  verifiedPropertyChanges,
+  type PropertyChangeRequestBody,
+} from '@sureground/shared';
 import {
   mediaDetailsFor,
   photosFromKeys,
@@ -24,11 +32,21 @@ import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import type { Property, PropertyType, PropertyUpdatePayload } from '@/types/landlord';
 import { videoFileProblem } from '@/lib/videoFile';
+import {
+  VerifiedDetailsLock,
+  VerifiedDetailsSummary,
+} from '@/components/shared/property/VerifiedDetailsLock';
+
+export type SaveProperty = (
+  id: string,
+  updates: PropertyUpdatePayload,
+  changeRequest?: PropertyChangeRequestBody
+) => Promise<void>;
 
 interface EditPropertyModalProps {
   property: Property | null;
   onClose: () => void;
-  onSave: (id: string, updates: PropertyUpdatePayload) => void;
+  onSave: SaveProperty;
 }
 
 const propertyTypes: { value: PropertyType; label: string }[] = [
@@ -62,7 +80,7 @@ const EditPropertyForm = ({
   onClose,
 }: {
   property: Property;
-  onSave: (id: string, updates: PropertyUpdatePayload) => void;
+  onSave: SaveProperty;
   onClose: () => void;
 }) => {
   const [name, setName] = useState(property.name);
@@ -105,6 +123,12 @@ const EditPropertyForm = ({
   const tourInvalid = tourUrl.trim() !== '' && !tourSource(tourUrl.trim());
   const [saving, setSaving] = useState(false);
   const [mediaError, setMediaError] = useState<string | null>(null);
+  const [lockedFields, setLockedFields] = useState<string[] | null>(null);
+  const [changeMode, setChangeMode] = useState(false);
+  const [changeReason, setChangeReason] = useState('');
+  const verified = isVerifiedPropertyStatus(property.verificationStatus);
+  const guarded = verified || lockedFields !== null;
+  const detailsLocked = guarded && !changeMode;
   const objectUrls = useRef<string[]>([]);
 
   useEffect(
@@ -157,30 +181,53 @@ const EditPropertyForm = ({
         nextVideoKey = key;
       }
 
-      onSave(property.id, {
+      const verifiedDetails = {
         name,
-        type,
         address,
         city,
         state,
         country,
         ...(location.placeId ? { placeId: location.placeId } : {}),
         ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
-        totalUnits: Number(totalUnits) || property.totalUnits,
-        estimatedValue: toOptionalAmount(estimatedValue),
-        purchasePrice: toOptionalAmount(purchasePrice),
-        coverImageKey: galleryImageKeys[0] ?? null,
-        galleryImageKeys,
-        videoTourKey: nextVideoKey,
-        tourUrl: tourUrl.trim() || null,
-        mediaDetails,
-      });
+      };
+      const changeRequest = guarded
+        ? {
+            ...verifiedPropertyChanges(property, verifiedDetails),
+            ...(changeReason.trim() ? { reason: changeReason.trim() } : {}),
+          }
+        : undefined;
+
+      await onSave(
+        property.id,
+        {
+          // A verified property's checked details only change through a change request.
+          ...(guarded ? {} : verifiedDetails),
+          type,
+          totalUnits: Number(totalUnits) || property.totalUnits,
+          estimatedValue: toOptionalAmount(estimatedValue),
+          purchasePrice: toOptionalAmount(purchasePrice),
+          coverImageKey: galleryImageKeys[0] ?? null,
+          galleryImageKeys,
+          videoTourKey: nextVideoKey,
+          tourUrl: tourUrl.trim() || null,
+          mediaDetails,
+        },
+        changeRequest && hasVerifiedPropertyChanges(changeRequest) ? changeRequest : undefined
+      );
 
       // Detached blobs are left to the backend's GC: its DELETE refuses keys still attached, so deleting here would race the PATCH.
       onClose();
     } catch (error) {
+      const refused = lockedVerifiedFields(error);
+      if (refused) {
+        setLockedFields(refused);
+        setChangeMode(false);
+        return;
+      }
       setMediaError(
-        error instanceof Error ? error.message : 'We could not upload that media. Please try again.'
+        error instanceof Error
+          ? error.message
+          : 'We could not save these changes. Please try again.'
       );
     } finally {
       setSaving(false);
@@ -199,9 +246,34 @@ const EditPropertyForm = ({
       </div>
 
       <div className="p-4 sm:px-8 sm:py-6 space-y-3">
-        <Field label="Property name" required>
-          <Input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-        </Field>
+        {guarded && (
+          <VerifiedDetailsLock
+            lockedFields={lockedFields}
+            changeMode={changeMode}
+            onStartChange={() => setChangeMode(true)}
+            coverage="property name, address and map pin"
+            reason={changeReason}
+            onReasonChange={setChangeReason}
+          />
+        )}
+
+        {detailsLocked ? (
+          <VerifiedDetailsSummary
+            rows={[
+              { label: 'Property name', value: property.name },
+              {
+                label: 'Address',
+                value: [property.address, formatLocation(property.city, property.state)]
+                  .filter(Boolean)
+                  .join(', '),
+              },
+            ]}
+          />
+        ) : (
+          <Field label="Property name" required>
+            <Input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+          </Field>
+        )}
 
         <Field label="Property type">
           <Select
@@ -211,28 +283,32 @@ const EditPropertyForm = ({
           />
         </Field>
 
-        <AddressFields
-          required
-          value={location}
-          onChange={(patch) => setLocation((prev) => ({ ...prev, ...patch }))}
-          onPin={(next) => {
-            setPin(next);
-            setPinMoved(true);
-          }}
-        />
+        {!detailsLocked && (
+          <>
+            <AddressFields
+              required
+              value={location}
+              onChange={(patch) => setLocation((prev) => ({ ...prev, ...patch }))}
+              onPin={(next) => {
+                setPin(next);
+                setPinMoved(true);
+              }}
+            />
 
-        <LocationPicker
-          address={address}
-          city={city}
-          state={state}
-          country={country}
-          value={pin}
-          guessed={!pinMoved && !property.locationConfirmedAt}
-          onChange={(next) => {
-            setPin(next);
-            setPinMoved(true);
-          }}
-        />
+            <LocationPicker
+              address={address}
+              city={city}
+              state={state}
+              country={country}
+              value={pin}
+              guessed={!pinMoved && !property.locationConfirmedAt}
+              onChange={(next) => {
+                setPin(next);
+                setPinMoved(true);
+              }}
+            />
+          </>
+        )}
 
         <Field label="Number of units">
           <NumberInput min={1} value={totalUnits} onValueChange={setTotalUnits} />
@@ -348,7 +424,7 @@ const EditPropertyForm = ({
           isLoading={saving}
           loadingText="Saving…"
         >
-          Save changes
+          {changeMode ? 'Save and send for verification' : 'Save changes'}
         </Button>
         {uploadsPending && (
           <p className="text-center text-xs text-muted-foreground">

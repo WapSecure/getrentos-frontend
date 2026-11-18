@@ -2,21 +2,21 @@ import { NextResponse, type NextRequest } from 'next/server';
 import {
   STRICT_TRANSPORT_SECURITY,
   buildContentSecurityPolicy,
-  isLocalHost,
   parseOriginList,
   cspReportUri,
 } from '@sureground/shared/csp';
 
 const DEV = process.env.NODE_ENV !== 'production';
+// Server-only, read at runtime: lets a production build run over plain http on a developer machine.
+const LOCAL_HTTP = process.env.LOCAL_HTTP === 'true';
 
 // Security headers plus a per-request nonce CSP, enforced from the start (staff-only, nothing third-party).
 // The nonce also goes on the forwarded request because Next stamps rendered scripts from it, so pages must render dynamically.
 // Not an auth gate: the access token lives in page memory and the httpOnly gr_refresh cookie belongs to the API origin with Path=/auth, so no page request carries a session.
 export default function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-  // HTTPS-only headers stay off on localhost; nextUrl.hostname is the bind host, so read the host the request was addressed to.
-  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host');
-  const secure = !DEV && !isLocalHost(host);
+  // Decided by configuration, never a request header: any client can send `X-Forwarded-Host: localhost`.
+  const secure = !DEV && !LOCAL_HTTP;
   const policy = buildContentSecurityPolicy({
     nonce,
     dev: DEV,

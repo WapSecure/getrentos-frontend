@@ -102,6 +102,30 @@ export interface AdminStaffApproval {
   };
 }
 
+export interface StaffRoleGrantPerson {
+  id: string;
+  legalName: string;
+  email: string | null;
+}
+
+export interface StaffRoleGrantRequest {
+  id: string;
+  status: ApprovalStatus;
+  roles: AdminStaffRole[];
+  previousRoles: AdminStaffRole[];
+  expiresAt: string;
+  createdAt: string;
+  decidedAt: string | null;
+  rejectionReason: string | null;
+  targetUser: StaffRoleGrantPerson;
+  requestedBy: StaffRoleGrantPerson;
+  decidedBy: StaffRoleGrantPerson | null;
+}
+
+export type StaffRoleUpdateResult =
+  | { status: 'APPLIED'; member: AdminStaffMember }
+  | { status: 'PENDING_APPROVAL'; request: StaffRoleGrantRequest };
+
 export type UserAccountStatus = 'active' | 'suspended' | 'pending' | 'banned';
 export type VerificationRequestType = 'identity' | 'property' | 'license';
 export type VerificationRequestStatus =

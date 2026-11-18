@@ -1,4 +1,5 @@
 import type { agentService } from '@/services/agentService';
+import { AGENT_BINARY_DATABASE } from './agentBinaryQueue';
 import { notifyAgentQueueChanged } from './agentQueueEvents';
 import { currentAgentQueueOwner, requireAgentQueueOwner } from './agentQueueOwner';
 
@@ -62,3 +63,19 @@ export const agentOfflineQueue = {
     notifyAgentQueueChanged();
   },
 };
+
+/** Queued field records hold inspection, verification and message details, so they leave with the agent. */
+export async function clearAgentDeviceRecords(): Promise<void> {
+  try {
+    localStorage.removeItem(KEY);
+  } catch {
+    // Storage blocked: nothing was written to it.
+  }
+  if (typeof indexedDB !== 'undefined') {
+    await new Promise<void>((resolve) => {
+      const request = indexedDB.deleteDatabase(AGENT_BINARY_DATABASE);
+      request.onsuccess = request.onerror = request.onblocked = () => resolve();
+    });
+  }
+  notifyAgentQueueChanged();
+}

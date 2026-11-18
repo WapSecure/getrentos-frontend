@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { getInitials } from '@/lib/format';
-import { Button, Field, Input, SaveButton } from '@sureground/ui';
+import { Button, Field, Input, SaveButton, useToast } from '@sureground/ui';
 import { landlordService } from '@/services/landlordService';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
 import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';
+import { useLegalNameLock } from '@/hooks/useLegalNameLock';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string } | null;
@@ -15,6 +16,9 @@ interface ProfileSettingsProps {
 
 export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
   const [fullName, setFullName] = useState(user?.fullName || '');
+  const [savedName, setSavedName] = useState(user?.fullName || '');
+  const nameLock = useLegalNameLock();
+  const toast = useToast();
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState('');
   // A number already on the account changes only through the verified flow.
@@ -29,6 +33,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       const response = await landlordService.getProfile();
       if (response.success && response.data) {
         setFullName(response.data.fullName);
+        setSavedName(response.data.fullName);
         setEmail(response.data.email);
         setPhone(response.data.phone || '');
         setSavedPhone(response.data.phone || '');
@@ -42,9 +47,17 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
 
   // Resolves true only when it saved, so the button says "Saved" only then.
   const handleSave = () =>
-    landlordService
-      .updateProfile({ fullName, phone, companyName })
-      .then((response) => response.success);
+    landlordService.updateProfile({ fullName, phone, companyName }).then((response) => {
+      if (response.success) {
+        setSavedName(fullName);
+      } else if (nameLock.handleError(response)) {
+        setFullName(savedName);
+        toast.error(
+          response.message || 'Your legal name is locked because your identity is verified.'
+        );
+      }
+      return response.success;
+    });
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -96,10 +109,11 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       </div>
 
       <div className="space-y-4">
-        <Field label="Full name">
+        <Field label="Full name" hint={nameLock.note}>
           <Input
             type="text"
             value={fullName}
+            readOnly={nameLock.locked}
             onChange={(e) => setFullName(nameOnly(e.target.value))}
           />
         </Field>
