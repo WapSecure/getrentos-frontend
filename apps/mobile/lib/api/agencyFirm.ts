@@ -2,7 +2,7 @@ import type { BadgeTone } from '@sureground/ui-native';
 import { contactBody } from '@/lib/contact';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
-import type { PayoutSentTo } from '@sureground/shared';
+import type { PayoutSentTo, PlanTier } from '@sureground/shared';
 
 export type AgencyRole =
   | 'OWNER'
@@ -388,7 +388,26 @@ export function tokenFrom(input: string): string {
 const post = <T>(path: string, body?: unknown) =>
   apiFetch<T>(path, { method: 'POST', ...(body !== undefined ? { body } : {}) });
 
+export interface OrganizationPlan {
+  organizationId: string;
+  organizationName: string;
+  tier: PlanTier;
+  seats: number;
+  seatsUsed: number;
+  units: number;
+  unitsUsed: number;
+  estates: number;
+  /** The paid plan agreed with Sureground; null when none. Absent on an older API. */
+  agreedTier?: PlanTier | null;
+  /** False while agency limits are not applied yet. */
+  enforced: boolean;
+  enforcedFrom: string | null;
+  currentPeriodEnd: string | null;
+  monthlyPriceKobo: number | null;
+}
+
 export const agencyFirmApi = {
+  plan: () => apiFetch<OrganizationPlan>('/agency/plan'),
   members: () => apiFetch<TeamMember[]>('/agency/team/members'),
   invitations: () => apiFetch<TeamInvitation[]>('/agency/team/invitations'),
   invite: ({
