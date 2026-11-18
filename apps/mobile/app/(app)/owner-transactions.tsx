@@ -155,10 +155,10 @@ function SaleCard({
   const payout = needsOwnership
     ? ({ label: 'Verify ownership', tone: 'warning' } as const)
     : needsAccount
-    ? ({ label: 'Add payout account', tone: 'warning' } as const)
-    : t.sellerPayoutStatus
-      ? PAYOUT[t.sellerPayoutStatus]
-      : null;
+      ? ({ label: 'Add payout account', tone: 'warning' } as const)
+      : t.sellerPayoutStatus
+        ? PAYOUT[t.sellerPayoutStatus]
+        : null;
 
   return (
     <Card elevated style={{ gap: spacing.md }}>
@@ -283,9 +283,13 @@ function SaleCard({
       {needsOwnership ? (
         <View style={{ gap: spacing.xs }}>
           <Text variant="caption" style={{ color: colors.warning }}>
-            {heldAmount !== undefined
-              ? `Verify that you own this property to receive ${formatNaira(heldAmount)}. Sureground holds the deposit until your ownership is verified.`
-              : 'Verify that you own this property to receive this money. Sureground holds the deposit until your ownership is verified.'}
+            {`Verify that you own this property to receive ${
+              heldAmount !== undefined ? formatNaira(heldAmount) : 'this money'
+            }. ${
+              t.escrowStatus === 'released'
+                ? 'We send it to you once your ownership is verified.'
+                : 'Sureground holds the deposit until your ownership is verified.'
+            }`}
           </Text>
           <LinkButton
             label="Verify ownership"

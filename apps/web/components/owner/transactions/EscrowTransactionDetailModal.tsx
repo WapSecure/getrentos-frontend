@@ -260,7 +260,9 @@ export const EscrowTransactionDetailModal = ({
           {needsOwnership && (
             <Alert variant="warning" icon={ShieldAlert} title="Verify your ownership to be paid">
               <p>
-                Sureground holds the deposit until your ownership of this property is verified.
+                {transaction.escrowStatus === 'released'
+                  ? 'We send you the deposit once your ownership of this property is verified.'
+                  : 'Sureground holds the deposit until your ownership of this property is verified.'}{' '}
                 Upload your ownership document from Properties.
               </p>
               <Button
