@@ -103,6 +103,7 @@ export function EnterpriseSection({ pricing }: { pricing?: PlanPricing }) {
         <div>
           <SectionIntro
             id="pricing-enterprise"
+            layout="stacked"
             eyebrow="Enterprise"
             title="For agencies, estate operators and developers"
             lead="One plan for the whole organisation, with seats for your team. We agree the size with you and set it up together."
