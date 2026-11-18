@@ -9,6 +9,8 @@ import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
 import { subscriptionService } from '@/services/subscriptionService';
 
+const plural = (count: number, noun: string) => `${count} ${noun}${count === 1 ? '' : 's'}`;
+
 /** Renders nothing on an API without the plan endpoint, so older backends keep the page as it was. */
 export function AgencyPlanCard() {
   const plan = useQuery({
@@ -58,7 +60,7 @@ export function AgencyPlanCard() {
         <p className="mt-2 text-sm text-muted-foreground">
           Your firm has every Enterprise feature while agency plans are introduced
           {p.enforcedFrom ? `. Plans apply from ${formatDate(p.enforcedFrom)}` : ''}. You use{' '}
-          {p.seatsUsed} seats and {p.unitsUsed} managed units today.
+          {plural(p.seatsUsed, 'seat')} and {plural(p.unitsUsed, 'managed unit')} today.
         </p>
       )}
     </Card>
