@@ -60,6 +60,8 @@ export interface OrganizationPlan {
   units: number;
   unitsUsed: number;
   estates: number;
+  /** The paid plan agreed with Sureground; null when none. Absent on an older API. */
+  agreedTier?: PlanTier | null;
   /** False while agency limits are not applied yet. */
   enforced: boolean;
   enforcedFrom: string | null;

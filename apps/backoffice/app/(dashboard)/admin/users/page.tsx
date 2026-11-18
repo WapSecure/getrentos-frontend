@@ -413,6 +413,7 @@ export default function AdminUsersPage() {
               ? 'Move to Free'
               : `Upgrade to ${planLabel(pendingSubscription?.tier ?? 'PRO')}`
         }
+        tone={pendingSubscription?.tier === 'FREE' ? 'danger' : 'primary'}
         isLoading={changeSubscriptionMutation.isPending}
         onConfirm={() =>
           pendingSubscription && !changeSubscriptionMutation.isPending
