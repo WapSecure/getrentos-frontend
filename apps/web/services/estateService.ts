@@ -1090,12 +1090,14 @@ export const estateService = {
       category?: 'SECURITY' | 'MAINTENANCE' | 'SAFETY' | 'OTHER';
       priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
       photo?: File;
+      gateId?: string;
     }
   ): Promise<ApiResponse<Incident>> {
     const formData = new FormData();
     formData.append('description', data.description);
     if (data.category) formData.append('category', data.category);
     if (data.priority) formData.append('priority', data.priority);
+    if (data.gateId) formData.append('gateId', data.gateId);
     if (data.photo) formData.append('file', data.photo);
     return safeCall(() =>
       authFetch(`/estate/${estateId}/incidents`, { method: 'POST', body: formData })

@@ -412,12 +412,14 @@ export const gatemanApi = {
       category?: Uppercase<IncidentCategory>;
       priority?: Uppercase<IncidentPriority>;
       photo?: PickedFile;
+      gateId?: string;
     }
   ) => {
     const form = new FormData();
     form.append('description', data.description);
     if (data.category) form.append('category', data.category);
     if (data.priority) form.append('priority', data.priority);
+    if (data.gateId) form.append('gateId', data.gateId);
     if (data.photo) appendFile(form, 'file', data.photo);
     return apiUpload<Incident>(`/estate/${estateId}/incidents`, form);
   },

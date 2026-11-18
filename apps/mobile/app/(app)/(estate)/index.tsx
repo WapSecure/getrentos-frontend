@@ -10,6 +10,7 @@ import {
   ChevronRight,
   CircleAlert,
   Megaphone,
+  MessageCircle,
   MessageCircleQuestion,
   ShieldAlert,
   SlidersHorizontal,
@@ -49,6 +50,7 @@ import { useEstate } from '@/hooks/useEstate';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 import { estateManagerApi, isFreeEstate, isOpenItem } from '@/lib/api/estateManager';
 import { qk } from '@/lib/query/keys';
+import { estateOfficeApi } from '@/lib/api/estateOfficeMessages';
 
 type SheetKind = 'switch' | 'household' | 'announce' | null;
 
@@ -94,9 +96,15 @@ export default function EstateHome() {
     enabled: !!estateId,
   });
 
+  const residentThreads = useQuery({
+    queryKey: qk.estateManager.residentThreads(estateId),
+    queryFn: () => estateOfficeApi.threads(estateId),
+    enabled: !!estateId,
+  });
   const locked = free || isUpgradeError(stats.error);
   const late = overdue.data?.total ?? 0;
   const unread = (notifications.data ?? []).filter((n) => !n.read).length;
+  const awaitingReply = residentThreads.data?.filter((t) => t.unread).length ?? 0;
   const urgentIncidents =
     incidents.data?.filter(
       (i) => isOpenItem(i.status) && (i.priority === 'critical' || i.priority === 'high')
@@ -104,6 +112,7 @@ export default function EstateHome() {
   const refresh = () => {
     void refetch();
     void overdue.refetch();
+    void residentThreads.refetch();
     void incidents.refetch();
     void notifications.refetch();
     void stats.refetch();
@@ -224,6 +233,37 @@ export default function EstateHome() {
               </Text>
               <Text variant="caption" color="mutedForeground">
                 High or critical reports waiting on the office
+              </Text>
+            </View>
+            <ChevronRight size={18} color={colors.mutedForeground} />
+          </Card>
+        </PressableScale>
+      ) : null}
+
+      {awaitingReply ? (
+        <PressableScale
+          onPress={() => router.push('/(app)/estate-resident-messages')}
+          accessibilityRole="button"
+          accessibilityLabel={`${awaitingReply} ${awaitingReply === 1 ? 'household is' : 'households are'} waiting for a reply. Open resident messages`}
+        >
+          <Card
+            elevated
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing.md,
+              borderWidth: 1,
+              borderColor: colors.primary,
+            }}
+          >
+            <MessageCircle size={20} color={colors.primary} />
+            <View style={{ flex: 1 }}>
+              <Text variant="bodyStrong">
+                {awaitingReply} {awaitingReply === 1 ? 'household is' : 'households are'} waiting
+                for a reply
+              </Text>
+              <Text variant="caption" color="mutedForeground">
+                Messages from residents to the estate office
               </Text>
             </View>
             <ChevronRight size={18} color={colors.mutedForeground} />

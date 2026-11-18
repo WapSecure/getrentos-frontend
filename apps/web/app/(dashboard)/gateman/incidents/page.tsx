@@ -50,7 +50,7 @@ export default function GatemanIncidentsPage() {
   const [photo, setPhoto] = useState<File | null>(null);
   const [panicSent, setPanicSent] = useState(false);
 
-  const { estate, isLoading: isEstateLoading } = useGatemanPost();
+  const { estate, gate, isLoading: isEstateLoading } = useGatemanPost();
 
   const { data: openIncidents, isLoading: isOpenLoading } = useQuery({
     queryKey: estateKeys.incidents(estate?.id ?? '', 'open'),
@@ -86,6 +86,7 @@ export default function GatemanIncidentsPage() {
           category: 'SECURITY',
           priority: 'CRITICAL',
           description: PANIC_DESCRIPTION,
+          gateId: gate?.id,
         })
       ),
     onSuccess: () => {
@@ -183,6 +184,7 @@ export default function GatemanIncidentsPage() {
                 category: category as 'SECURITY' | 'MAINTENANCE' | 'SAFETY' | 'OTHER',
                 priority: priority as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
                 photo: photo ?? undefined,
+                gateId: gate?.id,
               })
             }
           >
