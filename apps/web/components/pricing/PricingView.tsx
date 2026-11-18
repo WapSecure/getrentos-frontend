@@ -16,6 +16,7 @@ import { signedInPricingLinks } from '@/lib/pricingCta';
 import { useAuthStore } from '@/lib/store/authStore';
 import type { PlanPersona, PlanPricing } from '@/services/subscriptionService';
 import { Eyebrow } from '@/components/marketing/Eyebrow';
+import { EnterpriseSection } from '@/components/pricing/EnterpriseSection';
 
 const PERSONAS: Segment<PlanPersona>[] = [
   { value: 'landlord', label: 'Landlords' },
@@ -69,7 +70,8 @@ export function PricingView({ initialPricing }: { initialPricing?: PlanPricing }
             </h1>
             <p className="mt-6 max-w-[48ch] text-base leading-relaxed text-muted-foreground md:text-[1.0625rem]">
               Free covers the essentials. Pro adds unlimited scale, automation and analytics
-              {pricing ? `, with a ${pricing.trialDays}-day free trial` : ''}.
+              {pricing ? `, with a ${pricing.trialDays}-day free trial` : ''}. Enterprise is one
+              plan for a whole organisation and its team.
             </p>
             <ul className="mt-10 flex flex-col border-t border-border">
               {facts.map((fact) => (
@@ -121,6 +123,8 @@ export function PricingView({ initialPricing }: { initialPricing?: PlanPricing }
           )}
         </Container>
       </section>
+
+      <EnterpriseSection pricing={pricing} />
 
       {signedInLinks ? (
         <ClosingBand

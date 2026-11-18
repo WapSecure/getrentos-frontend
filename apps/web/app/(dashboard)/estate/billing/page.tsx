@@ -1,11 +1,10 @@
 'use client';
 
 import { Button, Card } from '@sureground/ui';
+import { ROUTES } from '@/lib/constants/auth';
 import { BillingPage } from '@/components/shared/subscription/BillingPage';
 import { useEstatePlan } from '@/hooks/useEstatePlan';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
-
-const SALES_EMAIL = 'hello@getsureground.io';
 
 export default function EstateBillingPage() {
   const { estate } = useSelectedEstate();
@@ -26,15 +25,8 @@ export default function EstateBillingPage() {
           visitor lists and visitor ID checks, for several estates if you run more than one. It is
           priced per estate after a short call.
         </p>
-        <p className="mt-3 text-sm text-foreground">
-          Email <span className="select-all font-medium">{SALES_EMAIL}</span> to arrange it.
-        </p>
-        <Button
-          variant="outline"
-          className="mt-4"
-          href={`mailto:${SALES_EMAIL}?subject=Enterprise%20for%20our%20estate`}
-        >
-          Email us about Enterprise
+        <Button variant="outline" className="mt-4" href={`${ROUTES.PRICING}#enterprise`}>
+          Talk to us about Enterprise
         </Button>
       </Card>
     </BillingPage>

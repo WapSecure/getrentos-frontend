@@ -56,7 +56,7 @@ const MORE_LINKS: NavLink[] = [
   { label: 'Let', href: '/landlords', hint: 'For landlords letting a home' },
   { label: 'Realtors and agencies', href: '/agents', hint: 'Listings, leads and commissions' },
   { label: 'Guides', href: '/resources', hint: 'How checks and payments work' },
-  { label: 'Pricing', href: ROUTES.PRICING, hint: 'Free and Pro plans' },
+  { label: 'Pricing', href: ROUTES.PRICING, hint: 'Free, Pro and Enterprise' },
   { label: 'About', href: '/about', hint: 'Who we are and how to reach us' },
 ];
 

@@ -7,6 +7,7 @@ import { Card, CardSkeleton, PageErrorState, PageHeader, StatGridSkeleton } from
 import { formatCurrency } from '@/lib/format';
 import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { agencyDashboardService, type AgencyDashboard } from '@/services/agencyDashboardService';
+import { AgencyPlanCard } from '@/components/agency/AgencyPlanCard';
 
 const rate = (value: number | null) => (value === null ? '—' : `${value}%`);
 
@@ -51,6 +52,8 @@ export function AgencyOverviewView() {
       />
 
       <AttentionFeed persona="manager" />
+
+      <AgencyPlanCard />
 
       {!d ? (
         <>

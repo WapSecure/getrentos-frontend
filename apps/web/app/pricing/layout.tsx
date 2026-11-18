@@ -4,9 +4,9 @@ import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 
 export const metadata: Metadata = {
-  title: 'Pricing: Free and Pro plans',
+  title: 'Pricing: Free, Pro and Enterprise plans',
   description:
-    'What Sureground costs for landlords, estate managers, property owners and realtors: what the Free plan includes and what Pro adds.',
+    'What Sureground costs for landlords, estate managers, property owners, realtors and agencies: what Free includes, what Pro adds, and Enterprise for whole organisations.',
   alternates: { canonical: '/pricing' },
 };
 
