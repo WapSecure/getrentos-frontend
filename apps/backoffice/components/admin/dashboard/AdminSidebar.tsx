@@ -59,6 +59,7 @@ import {
   MessageCircleQuestion,
   DisclosureCaret,
   Ruler,
+  Inbox,
 } from '@sureground/icons';
 import { ROUTES, unwrap } from '@sureground/shared';
 import { SidebarRailToggle, useSidebarRail } from '@sureground/ui';
@@ -371,6 +372,12 @@ const navItems: NavItem[] = [
     permission: 'subscriptions.view',
   },
   {
+    label: 'Enterprise enquiries',
+    href: ROUTES.ADMIN_ENTERPRISE_ENQUIRIES,
+    icon: Inbox,
+    permission: 'subscriptions.view',
+  },
+  {
     label: 'Disputes',
     href: ROUTES.ADMIN_DISPUTES,
     icon: Gavel,
@@ -547,6 +554,7 @@ const groupItems: [group: string, items: string[]][] = [
       'Chargebacks',
       'Credit refunds',
       'Subscriptions',
+      'Enterprise enquiries',
     ],
   ],
   [

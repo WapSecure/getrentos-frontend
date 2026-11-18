@@ -408,6 +408,7 @@ export const ROUTES = {
 
   ADMIN_USERS: '/admin/users',
   ADMIN_SUBSCRIPTIONS: '/admin/subscriptions',
+  ADMIN_ENTERPRISE_ENQUIRIES: '/admin/subscriptions/enquiries',
   ADMIN_VERIFICATIONS: '/admin/verifications',
   ADMIN_DISPUTES: '/admin/disputes',
   ADMIN_FRAUD: '/admin/fraud',

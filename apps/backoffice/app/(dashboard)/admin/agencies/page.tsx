@@ -23,6 +23,7 @@ import { formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { adminAgencyService, type AdminAgency } from '@/services/adminAgencyService';
+import { OrganisationPlanPanel } from '@/components/admin/subscriptions/OrganisationPlanPanel';
 
 type Filter = 'SUBMITTED' | 'PENDING' | 'ALL';
 
@@ -48,6 +49,15 @@ export default function AdminAgenciesPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();
   const canDecide = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canViewPlans = hasAdminPermission(user?.roles, 'subscriptions.view');
+  const [openPlans, setOpenPlans] = useState<Set<string>>(new Set());
+  const togglePlan = (id: string) =>
+    setOpenPlans((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   const [filter, setFilter] = useState<Filter>('SUBMITTED');
   const [notes, setNotes] = useState<Record<string, string>>({});
   const toast = useToast();
@@ -223,6 +233,22 @@ export default function AdminAgenciesPage() {
                     No registration details on file (created before verification existed).
                   </p>
                 )}
+
+                {canViewPlans ? (
+                  <div className="mt-4 space-y-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => togglePlan(a.organizationId)}
+                      aria-expanded={openPlans.has(a.organizationId)}
+                    >
+                      {openPlans.has(a.organizationId) ? 'Hide plan' : 'Show plan'}
+                    </Button>
+                    {openPlans.has(a.organizationId) ? (
+                      <OrganisationPlanPanel organizationId={a.organizationId} kind="agency" />
+                    ) : null}
+                  </div>
+                ) : null}
 
                 {canDecide && (reviewable || a.status === 'ACTIVE' || a.status === 'SUSPENDED') && (
                   <div className="mt-4 space-y-2 border-t border-border pt-4">

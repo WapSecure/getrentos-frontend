@@ -40,6 +40,9 @@ import { adminEstateService } from '@/services/adminEstateService';
 import { adminKeys } from '@/lib/queryKeys';
 import { useAdminSearchParam } from '@/lib/readAdminSearchParam';
 import { useEstateActions } from './queues';
+import { useAdminUser } from '@/app/(dashboard)/admin/layout';
+import { hasAdminPermission } from '@/lib/adminAccess';
+import { OrganisationPlanPanel } from '@/components/admin/subscriptions/OrganisationPlanPanel';
 import type { AdminEstate, AdminEstateDetail, HouseholdStatus, DueStatus } from '@/types/estate';
 
 const PAGE_SIZE = 10;
@@ -237,6 +240,8 @@ function EstateDetailDialog({ estateId, onClose }: { estateId: string; onClose: 
 
 function EstateCase360({ detail, onClose }: { detail: AdminEstateDetail; onClose: () => void }) {
   const actions = useEstateActions();
+  const adminUser = useAdminUser();
+  const canViewPlans = hasAdminPermission(adminUser?.roles, 'subscriptions.view');
   const stats = [
     {
       icon: Home,
@@ -369,6 +374,10 @@ function EstateCase360({ detail, onClose }: { detail: AdminEstateDetail; onClose
             </div>
           </div>
         )}
+
+        {detail.organization && canViewPlans ? (
+          <OrganisationPlanPanel organizationId={detail.organization.id} kind="estate" />
+        ) : null}
 
         {detail.households.length > 0 && (
           <div>

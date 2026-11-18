@@ -144,6 +144,9 @@ export interface PlatformUser {
   status: UserAccountStatus;
   trustScore: number;
   planTier: PlanTier;
+  planExpiresAt: string | null;
+  /** The customer pays by card; staff can't change this plan. */
+  planBilledByCard: boolean;
   joinedDate: string;
   lastActiveAt: string;
 }
