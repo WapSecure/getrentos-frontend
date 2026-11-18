@@ -20,6 +20,7 @@ import {
 } from '@sureground/ui';
 import { isNoAccountMessage, personContactLabel } from '@sureground/shared';
 import { formatDate } from '@/lib/format';
+import { AgencyPlanCard } from '@/components/agency/AgencyPlanCard';
 import { ContactField, contactIsReady } from '@/components/shared/contact/ContactField';
 import { InviteToSignUp } from '@/components/shared/representatives/InviteToSignUp';
 import { getStoredUser } from '@/lib/authStorage';
@@ -252,6 +253,8 @@ export function AgencyTeamView() {
         title="Team"
         description="Who works for the firm, in what role, and until when. Operating roles get your clients’ properties as soon as they join; suspending or removing someone takes that away at once."
       />
+
+      <AgencyPlanCard />
 
       {isPrincipal && (
         <Card className="mb-6 p-5">
