@@ -2,7 +2,16 @@ import { formatLocation, formatPhoneForDisplay } from '@sureground/shared';
 import { View } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { Footprints, KeyRound, LogOut, MapPin, ShieldCheck, Siren } from '@sureground/icons/native';
+import {
+  Footprints,
+  KeyRound,
+  LogOut,
+  MapPin,
+  ShieldCheck,
+  Siren,
+  CircleHelp,
+  LifeBuoy,
+} from '@sureground/icons/native';
 import {
   Avatar,
   Button,
@@ -127,6 +136,25 @@ export default function GatemanAccount() {
               onPress: () => router.push('/(app)/security-settings'),
             },
             deleteAccountItem,
+          ]}
+        />
+        <SettingsGroup
+          title="Help"
+          items={[
+            {
+              key: 'help',
+              label: 'Help centre',
+              description: 'Answers to common questions',
+              icon: CircleHelp,
+              onPress: () => router.push('/(app)/help'),
+            },
+            {
+              key: 'support',
+              label: 'Contact support',
+              description: 'Talk to our team',
+              icon: LifeBuoy,
+              onPress: () => router.push('/(app)/support'),
+            },
           ]}
         />
 

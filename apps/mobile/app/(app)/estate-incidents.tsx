@@ -119,6 +119,7 @@ export default function EstateIncidents() {
         renderItem={(i) => (
           <QueueCard
             title={`${categoryLabel(i.category)} incident`}
+            where={i.reportedByName ? `Reported by ${i.reportedByName}` : undefined}
             description={i.description}
             createdAt={i.createdAt}
             photoUrl={i.photoUrl}

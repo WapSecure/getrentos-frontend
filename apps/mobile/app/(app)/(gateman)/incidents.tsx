@@ -77,7 +77,7 @@ export default function GatemanIncidents() {
   const [panicSent, setPanicSent] = useState(false);
   const [panicHolding, setPanicHolding] = useState(false);
 
-  const { estate, isLoading: isPostLoading } = useGatemanPost();
+  const { estate, gate, isLoading: isPostLoading } = useGatemanPost();
 
   const openQuery = useQuery({
     queryKey: qk.gateman.incidents(estate?.id ?? ''),
@@ -97,6 +97,7 @@ export default function GatemanIncidents() {
         category: category.toUpperCase() as Uppercase<IncidentCategory>,
         priority: priority.toUpperCase() as Uppercase<IncidentPriority>,
         photo: photo ?? undefined,
+        gateId: gate?.id,
       }),
     onSuccess: () => {
       void haptics.success();
@@ -120,6 +121,7 @@ export default function GatemanIncidents() {
         description: PANIC_DESCRIPTION,
         category: 'SECURITY',
         priority: 'CRITICAL',
+        gateId: gate?.id,
       }),
     onSuccess: () => {
       void haptics.success();

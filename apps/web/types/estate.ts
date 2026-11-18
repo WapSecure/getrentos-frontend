@@ -698,6 +698,7 @@ export interface Incident {
   description: string;
   photoUrl?: string;
   resolutionNotes?: string;
+  reportedByName?: string;
   createdAt: string;
 }
 

@@ -71,7 +71,9 @@ export const IncidentCard = ({
             <Badge variant={statusVariant[incident.status]}>{statusLabels[incident.status]}</Badge>
           </div>
           <p className="text-xs text-muted-foreground mt-1.5">
-            {categoryLabels[incident.category]} · Reported {formatDateTime(incident.createdAt)}
+            {categoryLabels[incident.category]} · Reported{' '}
+            {incident.reportedByName ? `by ${incident.reportedByName} ` : ''}
+            {formatDateTime(incident.createdAt)}
           </p>
         </div>
         {isOpen && (onStart || onResolve || onDismiss) && (
