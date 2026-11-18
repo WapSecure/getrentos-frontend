@@ -4,7 +4,8 @@ import { useMutation } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Trash2 } from '@sureground/icons/native';
 import { Button, FormAlert, Text, TextField, useTheme } from '@sureground/ui-native';
-import { DELETE_PHRASE, deletePhraseOk, renterHomeApi } from '@/lib/api/renterHome';
+import { DELETE_PHRASE, deletePhraseOk } from '@/lib/api/renterHome';
+import { securityApi } from '@/lib/api/security';
 import { errorMessage } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
@@ -18,7 +19,7 @@ export default function DeleteAccount() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const remove = useMutation({
-    mutationFn: () => renterHomeApi.deleteAccount(password),
+    mutationFn: () => securityApi.deactivate(password),
     onSuccess: () => {
       Alert.alert('Account deleted', 'Your account has been deleted. We’re sorry to see you go.', [
         { text: 'OK', onPress: () => signOut() },
@@ -30,7 +31,7 @@ export default function DeleteAccount() {
   const confirm = () =>
     Alert.alert(
       'Delete your account for good?',
-      'This cannot be undone. Your applications, payments, messages and leases will be deleted.',
+      'This cannot be undone. You will be signed out and your account closed straight away.',
       [
         { text: 'Keep my account', style: 'cancel' },
         {
@@ -63,11 +64,11 @@ export default function DeleteAccount() {
         <FormAlert
           tone="error"
           title="This is permanent"
-          message="All your data, including applications, payments, messages and lease agreements, is deleted and cannot be recovered."
+          message="Your account is closed straight away and can't be reopened. Your personal data is then deleted, except records the law requires us to keep for a set time, such as payments and identity checks."
         />
         <Text variant="callout" color="mutedForeground">
-          If you only want a break, sign out instead. If you owe rent or have an active lease, talk
-          to your landlord first.
+          If you only want a break, sign out instead. If money is still owed to you or by you, or a
+          lease, sale or booking is in progress, settle it first.
         </Text>
         <TextField
           label={`Type “${DELETE_PHRASE}” to confirm`}

@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { Image, Pressable, View } from 'react-native';
-import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Camera, ChevronLeft, Images, Plus, Wrench, X } from '@sureground/icons/native';
+import { Camera, Images, Plus, Wrench, X } from '@sureground/icons/native';
 import {
   Badge,
   type BadgeTone,
@@ -31,6 +29,8 @@ import {
 import { qk } from '@/lib/query/keys';
 import { formatDate } from '@/lib/format';
 import { Image as ExpoImage } from 'expo-image';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const CATEGORY_LABEL: Record<MaintenanceTicketCategory, string> = {
   plumbing: 'Plumbing',
@@ -61,36 +61,6 @@ const STATUS_TONE: Record<MaintenanceTicketStatus, BadgeTone> = {
   dismissed: 'neutral',
 };
 
-function BackHeader({ title, action }: { title: string; action?: React.ReactNode }) {
-  const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        paddingHorizontal: spacing.xl,
-        paddingTop: insets.top + spacing.sm,
-        paddingBottom: spacing.md,
-      }}
-    >
-      <Pressable
-        onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        hitSlop={10}
-      >
-        <ChevronLeft size={24} color={colors.foreground} />
-      </Pressable>
-      <Text variant="title" style={{ flex: 1 }}>
-        {title}
-      </Text>
-      {action}
-    </View>
-  );
-}
-
 export default function ResidentMaintenance() {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
@@ -120,9 +90,12 @@ export default function ResidentMaintenance() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <BackHeader
+      <DetailScreenHeader
+        eyebrow="Your home"
         title="Maintenance"
-        action={
+        subtitle="Report an issue and follow it to the fix"
+        onBack={() => goBack()}
+        accessory={
           <IconButton
             onPress={() => setReportOpen(true)}
             accessibilityLabel="Report an issue"

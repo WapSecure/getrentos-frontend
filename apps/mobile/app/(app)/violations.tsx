@@ -1,7 +1,8 @@
+import { router } from 'expo-router';
 import { View } from 'react-native';
 
 import { useQuery } from '@tanstack/react-query';
-import { TriangleAlert } from '@sureground/icons/native';
+import { MessageCircle, TriangleAlert } from '@sureground/icons/native';
 import {
   Badge,
   type BadgeTone,
@@ -11,6 +12,7 @@ import {
   Skeleton,
   Text,
   useTheme,
+  IconButton,
 } from '@sureground/ui-native';
 import { residentApi, type ViolationStatus } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
@@ -54,6 +56,13 @@ export default function ResidentViolations() {
         title="Violations"
         subtitle="Household notices and resolutions"
         onBack={() => goBack()}
+        accessory={
+          <IconButton
+            onPress={() => router.push('/(app)/estate-office-messages')}
+            accessibilityLabel="Message the estate office"
+            icon={<MessageCircle size={20} color={colors.primary} />}
+          />
+        }
       />
       <Screen refreshing={query.isRefetching} onRefresh={() => void query.refetch()}>
         <QueryState

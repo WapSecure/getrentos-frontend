@@ -38,6 +38,7 @@ import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsL
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { RepresentingGroup } from '@/components/account/RepresentingGroup';
 import { managementItems } from '@/components/account/managementItems';
+import { deleteAccountItem } from '@/components/account/accountItems';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -248,6 +249,7 @@ export default function OwnerAccount() {
       icon: KeyRound,
       onPress: go('/(app)/security-settings'),
     },
+    deleteAccountItem,
     {
       key: 'help',
       label: 'Help centre',

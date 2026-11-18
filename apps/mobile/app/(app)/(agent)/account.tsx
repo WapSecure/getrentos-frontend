@@ -25,6 +25,7 @@ import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsL
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { RepresentingGroup } from '@/components/account/RepresentingGroup';
 import { AccountFooter, AppearanceFooter, ProfileCard } from '@/components/account/AccountParts';
+import { deleteAccountItem, editProfileItem } from '@/components/account/accountItems';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -137,6 +138,7 @@ export default function AgentAccount() {
       icon: MessageCircle,
       onPress: go('/(app)/whatsapp-settings'),
     },
+    editProfileItem,
     {
       key: 'security',
       label: 'Security',
@@ -144,6 +146,7 @@ export default function AgentAccount() {
       icon: KeyRound,
       onPress: go('/(app)/security-settings'),
     },
+    deleteAccountItem,
     {
       key: 'help',
       label: 'Help centre',

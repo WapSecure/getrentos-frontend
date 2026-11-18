@@ -8,8 +8,8 @@ import {
   Contact,
   DoorOpen,
   KeyRound,
-  Landmark,
   Megaphone,
+  MessageCircle,
   MessageCircleQuestion,
   Package,
   ReceiptText,
@@ -43,6 +43,7 @@ import { BalanceVisibilityButton } from '@/components/dashboard/BalanceVisibilit
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
 const QUICK_LINKS = [
+  { href: '/(app)/estate-office-messages', label: 'Estate office', icon: MessageCircle },
   { href: '/(app)/maintenance', label: 'Maintenance', icon: Wrench },
   { href: '/(app)/visitor-passes', label: 'Visitor passes', icon: KeyRound },
   { href: '/(app)/amenities', label: 'Amenities', icon: CalendarCheck },
@@ -50,7 +51,6 @@ const QUICK_LINKS = [
   { href: '/(app)/deliveries', label: 'Deliveries', icon: Package },
   { href: '/(app)/directory', label: 'Directory', icon: Contact },
   { href: '/(app)/polls', label: 'Polls', icon: Vote },
-  { href: '/(app)/committee', label: 'Committee', icon: Landmark },
 ] as const;
 
 export default function ResidentHome() {

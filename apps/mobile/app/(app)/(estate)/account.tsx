@@ -16,6 +16,7 @@ import {
   Globe,
   Store,
   Inbox,
+  MessageCircle,
   UsersRound,
   Sparkles,
   Vote,
@@ -38,6 +39,15 @@ import { EstateSwitcherSheet } from '@/components/estate/EstateUI';
 import { useEstate } from '@/hooks/useEstate';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useTrustItems } from '@/components/account/useTrustItems';
+import {
+  deleteAccountItem,
+  editProfileItem,
+  notificationSettingsItem,
+  textMessagesItem,
+} from '@/components/account/accountItems';
+import { useQuery } from '@tanstack/react-query';
+import { qk } from '@/lib/query/keys';
+import { estateOfficeApi } from '@/lib/api/estateOfficeMessages';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -45,6 +55,12 @@ export default function EstateAccount() {
   const { profile, signOut } = useAuth();
   const { colors, spacing } = useTheme();
   const { estate, estates, estateId, select } = useEstate();
+  const residentThreads = useQuery({
+    queryKey: qk.estateManager.residentThreads(estateId),
+    queryFn: () => estateOfficeApi.threads(estateId),
+    enabled: !!estateId,
+  });
+  const unreadThreads = residentThreads.data?.filter((t) => t.unread).length ?? 0;
   const [switching, setSwitching] = useState(false);
   const trustItems = useTrustItems('estate', {
     audience: 'residents',
@@ -73,6 +89,15 @@ export default function EstateAccount() {
       description: 'Market owners’ homes in the estate',
       icon: Store,
       onPress: go('/(app)/estate-marketplace'),
+    },
+    {
+      key: 'resident-messages',
+      label: 'Resident messages',
+      description: 'Households writing to the estate office',
+      icon: MessageCircle,
+      value: unreadThreads ? `${unreadThreads} new` : undefined,
+      tone: unreadThreads ? 'warning' : undefined,
+      onPress: go('/(app)/estate-resident-messages'),
     },
     {
       key: 'enquiries',
@@ -160,6 +185,9 @@ export default function EstateAccount() {
       icon: Sparkles,
       onPress: go('/(app)/billing'),
     },
+    editProfileItem,
+    notificationSettingsItem,
+    textMessagesItem,
     {
       key: 'security',
       label: 'Security',
@@ -167,6 +195,7 @@ export default function EstateAccount() {
       icon: KeyRound,
       onPress: go('/(app)/security-settings'),
     },
+    deleteAccountItem,
     {
       key: 'help',
       label: 'Help centre',

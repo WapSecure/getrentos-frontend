@@ -31,6 +31,7 @@ import { ProfileCard } from '@/components/account/AccountParts';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { RepresentingGroup } from '@/components/account/RepresentingGroup';
+import { deleteAccountItem } from '@/components/account/accountItems';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -185,6 +186,7 @@ export default function RealtorAccount() {
       icon: KeyRound,
       onPress: go('/(app)/security-settings'),
     },
+    deleteAccountItem,
     {
       key: 'help',
       label: 'Help centre',
