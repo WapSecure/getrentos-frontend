@@ -84,6 +84,7 @@ export const qk = {
     mandate: (id: string) => ['agency', 'mandate', id] as const,
     terminationRequests: (id: string) => ['agency', 'mandate', id, 'termination-requests'] as const,
     dashboard: ['agency', 'dashboard'] as const,
+    plan: ['agency', 'plan'] as const,
     attention: ['agency', 'attention'] as const,
     managedProperties: ['agency', 'managed-properties'] as const,
     ownerInvites: ['agency', 'owner-invites'] as const,

@@ -35,12 +35,14 @@ import { goBack } from '@/lib/goBack';
 import { isNoAccountMessage, personContactLabel } from '@sureground/shared';
 import { contactProblem, contactReady } from '@/lib/contact';
 import { InviteToSignUp } from '@/components/contact/InviteToSignUp';
+import { AgencyPlanCard } from '@/components/agency/AgencyPlanCard';
 
 export default function AgencyTeam() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const [editing, setEditing] = useState<TeamMember | null>(null);
+  const qc = useQueryClient();
   const members = useQuery({ queryKey: qk.agency.members, queryFn: agencyFirmApi.members });
   const principal = isPrincipal(members.data ?? [], profile?.id);
   const invitations = useQuery({
@@ -70,11 +72,13 @@ export default function AgencyTeam() {
             onRefresh={() => {
               members.refetch();
               invitations.refetch();
+              void qc.invalidateQueries({ queryKey: qk.agency.plan });
             }}
             tintColor={colors.mutedForeground}
           />
         }
       >
+        <AgencyPlanCard />
         <QueryState query={members} skeleton={<ListSkeleton rows={3} variant="card" height={80} />}>
           {(members.data ?? []).map((m) => (
             <MemberRow
