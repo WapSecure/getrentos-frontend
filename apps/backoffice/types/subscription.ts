@@ -69,6 +69,13 @@ export interface AdminOrganizationPlan {
   currentPeriodEnd: string | null;
   monthlyPriceKobo: number | null;
   notes: string | null;
+  // What staff stored; null allowances mean the tier default. Null when nothing was saved.
+  saved: {
+    tier: PlanTier;
+    seats: number | null;
+    unitAllowance: number | null;
+    estateAllowance: number | null;
+  } | null;
 }
 
 export interface SetOrganizationPlanInput {

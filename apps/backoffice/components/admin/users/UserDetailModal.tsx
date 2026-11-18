@@ -1,6 +1,6 @@
 'use client';
 
-import { Ban, CheckCircle2, ShieldAlert, BadgeCheck } from '@sureground/icons';
+import { Ban, CalendarDays, CheckCircle2, ShieldAlert, BadgeCheck } from '@sureground/icons';
 import { useState } from 'react';
 import {
   Badge,
@@ -16,7 +16,7 @@ import { FactGrid } from '@/components/admin/ops/OpsParts';
 import { getInitials, formatDate, formatRelativeTime } from '@sureground/shared';
 import type { PlanTier, PlatformUser, UserAccountStatus } from '@/types/admin';
 import { roleLabel } from '@/lib/roleLabels';
-import { planLabel, todayInLagos } from '@/lib/planDates';
+import { lagosDayOf, planLabel, todayInLagos } from '@/lib/planDates';
 import { UserSecurityActions } from './UserSecurityActions';
 
 interface UserDetailModalProps {
@@ -175,7 +175,8 @@ function PlanControl({
   isChanging: boolean;
   onChange: (userId: string, tier: PlanTier, endDate?: string) => void;
 }) {
-  const [endDate, setEndDate] = useState('');
+  const [endDate, setEndDate] = useState(user.planExpiresAt ? lagosDayOf(user.planExpiresAt) : '');
+  const paid = user.planTier !== 'FREE';
 
   return (
     <div className="space-y-3 rounded-lg border border-border px-3 py-2 text-sm">
@@ -185,7 +186,7 @@ function PlanControl({
           <Badge variant={user.planTier === 'FREE' ? 'neutral' : 'primary'}>
             {planLabel(user.planTier)}
           </Badge>
-          {user.planTier !== 'FREE' ? (
+          {paid ? (
             <span className="text-xs text-muted-foreground">
               {user.planExpiresAt ? `Ends ${formatDate(user.planExpiresAt)}` : 'No end date'}
             </span>
@@ -197,7 +198,11 @@ function PlanControl({
           <Field
             label="End date for Pro or Enterprise"
             optionalLabel="Optional"
-            hint="Leave empty to keep the plan until someone changes it."
+            hint={
+              paid
+                ? 'Leave empty for no end date. Use Change end date to update the current plan.'
+                : 'Leave empty to keep the plan until someone changes it.'
+            }
           >
             <DatePicker
               value={endDate}
@@ -208,6 +213,18 @@ function PlanControl({
             />
           </Field>
           <div className="flex flex-wrap gap-2">
+            {paid ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1"
+                isLoading={isChanging}
+                onClick={() => onChange(user.id, user.planTier, endDate || undefined)}
+              >
+                <CalendarDays className="h-3.5 w-3.5" />
+                Change end date
+              </Button>
+            ) : null}
             {PLAN_TIERS.filter((tier) => tier !== user.planTier).map((tier) => (
               <Button
                 key={tier}

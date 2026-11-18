@@ -88,11 +88,14 @@ export function OrganisationPlanPanel({
             <p className="mt-2 text-xs text-muted-foreground">
               {kind === 'agency' ? 'Agency limits' : 'Plan limits'} are not applied yet
               {plan.enforcedFrom ? `. They apply from ${formatDate(plan.enforcedFrom)}` : ''}. Until
-              then every organisation works as Enterprise, so the plan and limits shown here are
-              Enterprise.
+              then every organisation works as Enterprise, so the limits in use are Enterprise.
             </p>
           ) : null}
-          <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm md:grid-cols-3">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            In use now
+          </p>
+          <dl className="mt-1 grid grid-cols-2 gap-x-6 gap-y-2 text-sm md:grid-cols-3">
+            <PlanFact label="Plan" value={planLabel(plan.tier)} />
             <PlanFact label="Seats" value={`${plan.seatsUsed} of ${plan.seats} used`} />
             {kind === 'agency' ? (
               <PlanFact label="Managed units" value={`${plan.unitsUsed} of ${plan.units} used`} />
@@ -111,6 +114,23 @@ export function OrganisationPlanPanel({
               value={plan.currentPeriodEnd ? formatDate(plan.currentPeriodEnd) : 'No end date'}
             />
           </dl>
+          <p className="mt-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Saved plan
+          </p>
+          {plan.saved ? (
+            <dl className="mt-1 grid grid-cols-2 gap-x-6 gap-y-2 text-sm md:grid-cols-3">
+              <PlanFact label="Plan" value={planLabel(plan.saved.tier)} />
+              <PlanFact label="Seats" value={limitLabel(plan.saved.seats)} />
+              {kind === 'agency' ? (
+                <PlanFact label="Managed units" value={limitLabel(plan.saved.unitAllowance)} />
+              ) : null}
+              <PlanFact label="Estates" value={limitLabel(plan.saved.estateAllowance)} />
+            </dl>
+          ) : (
+            <p className="mt-1 text-sm text-muted-foreground">
+              Nothing saved. The organisation is on Free with default limits.
+            </p>
+          )}
           {plan.notes ? (
             <p className="mt-3 whitespace-pre-line text-sm text-muted-foreground">{plan.notes}</p>
           ) : null}
@@ -133,6 +153,10 @@ function PlanFact({ label, value }: { label: string; value: string }) {
   );
 }
 
+const limitLabel = (value: number | null) => (value == null ? 'Default' : `${value} (custom)`);
+
+const asField = (value: number | null | undefined) => (value == null ? '' : String(value));
+
 const toWhole = (value: string) => {
   const n = Number(value);
   return value.trim() && Number.isInteger(n) && n > 0 ? n : undefined;
@@ -149,12 +173,11 @@ function EditPlanDialog({
 }) {
   const client = useQueryClient();
   const toast = useToast();
-  const [tier, setTier] = useState<PlanTier>(plan.tier);
-  // Before limits apply the API reports Enterprise defaults, not the saved allowances.
-  const known = (n: number) => (plan.enforced ? String(n) : '');
-  const [seats, setSeats] = useState(known(plan.seats));
-  const [units, setUnits] = useState(known(plan.units));
-  const [estates, setEstates] = useState(known(plan.estates));
+  const savedTier: PlanTier = plan.saved?.tier ?? 'FREE';
+  const [tier, setTier] = useState<PlanTier>(savedTier);
+  const [seats, setSeats] = useState(asField(plan.saved?.seats));
+  const [units, setUnits] = useState(asField(plan.saved?.unitAllowance));
+  const [estates, setEstates] = useState(asField(plan.saved?.estateAllowance));
   const [priceNaira, setPriceNaira] = useState<number | ''>(
     plan.monthlyPriceKobo == null ? '' : Math.round(plan.monthlyPriceKobo / 100)
   );
@@ -167,15 +190,15 @@ function EditPlanDialog({
   const paid = tier !== 'FREE';
   const today = todayInLagos();
   const endDateInPast = paid && endDate !== '' && endDate < today;
-  const invalidCount = [seats, kind === 'agency' ? units : '1', estates].some(
-    (v) => v.trim() !== '' && toWhole(v) === undefined
-  );
+  const invalidCount =
+    paid && [seats, units, estates].some((v) => v.trim() !== '' && toWhole(v) === undefined);
 
+  // Free carries no limits; the server clears them.
   const input: SetOrganizationPlanInput = {
     tier,
-    seats: toWhole(seats),
-    unitAllowance: kind === 'agency' ? toWhole(units) : undefined,
-    estateAllowance: toWhole(estates),
+    seats: paid ? toWhole(seats) : undefined,
+    unitAllowance: paid ? toWhole(units) : undefined,
+    estateAllowance: paid ? toWhole(estates) : undefined,
     monthlyPriceKobo: priceNaira === '' ? undefined : priceNaira * 100,
     expiresAt: paid && endDate ? endOfLagosDay(endDate) : undefined,
     notes: notes.trim(),
@@ -198,13 +221,13 @@ function EditPlanDialog({
 
   const summary = [
     planLabel(tier),
-    input.seats ? `${input.seats} seats` : 'default seats',
-    kind === 'agency'
+    paid ? (input.seats ? `${input.seats} seats` : 'default seats') : null,
+    paid && kind === 'agency'
       ? input.unitAllowance
         ? `${input.unitAllowance} units`
         : 'default units'
       : null,
-    input.estateAllowance ? `${input.estateAllowance} estates` : 'default estates',
+    paid ? (input.estateAllowance ? `${input.estateAllowance} estates` : 'default estates') : null,
     input.monthlyPriceKobo != null
       ? `${formatCurrency(input.monthlyPriceKobo / 100)} a month`
       : null,
@@ -234,36 +257,39 @@ function EditPlanDialog({
                 options={TIER_OPTIONS}
               />
             </Field>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Field label="Seats">
-                <NumberInput value={seats} onValueChange={setSeats} integer placeholder="Default" />
-              </Field>
-              {kind === 'agency' ? (
-                <Field label="Managed units">
+            {paid ? (
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Field label="Seats">
                   <NumberInput
-                    value={units}
-                    onValueChange={setUnits}
+                    value={seats}
+                    onValueChange={setSeats}
                     integer
                     placeholder="Default"
                   />
                 </Field>
-              ) : null}
-              <Field label="Estates">
-                <NumberInput
-                  value={estates}
-                  onValueChange={setEstates}
-                  integer
-                  placeholder="Default"
-                />
-              </Field>
-            </div>
-            {!plan.enforced ? (
-              <Alert variant="info">
-                Limits are not applied yet, so this form cannot show the plan saved before. Saving
-                replaces it.
-              </Alert>
-            ) : null}
-            {tier !== plan.tier ? (
+                {kind === 'agency' ? (
+                  <Field label="Managed units">
+                    <NumberInput
+                      value={units}
+                      onValueChange={setUnits}
+                      integer
+                      placeholder="Default"
+                    />
+                  </Field>
+                ) : null}
+                <Field label="Estates">
+                  <NumberInput
+                    value={estates}
+                    onValueChange={setEstates}
+                    integer
+                    placeholder="Default"
+                  />
+                </Field>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">Free uses the default limits.</p>
+            )}
+            {paid && tier !== savedTier ? (
               <p className="text-xs text-muted-foreground">
                 Limits reset to the {planLabel(tier)} defaults. Enter numbers to agree different
                 ones.

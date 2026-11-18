@@ -381,25 +381,37 @@ export default function AdminUsersPage() {
         open={pendingSubscription !== null}
         onOpenChange={(open) => !open && setPendingSubscription(null)}
         title={
-          pendingSubscription?.tier === 'FREE'
-            ? 'Remove paid plan access?'
-            : 'Upgrade this account?'
+          !pendingSubscription
+            ? ''
+            : pendingSubscription.tier === pendingSubscription.user.planTier
+              ? 'Change the end date?'
+              : pendingSubscription.tier === 'FREE'
+                ? 'Remove paid plan access?'
+                : 'Upgrade this account?'
         }
         description={
-          pendingSubscription
-            ? `${pendingSubscription.user.fullName}'s plan will change from ${planLabel(pendingSubscription.user.planTier)} to ${planLabel(pendingSubscription.tier)}${
-                pendingSubscription.tier === 'FREE'
-                  ? ''
-                  : pendingSubscription.endDate
+          !pendingSubscription
+            ? ''
+            : pendingSubscription.tier === pendingSubscription.user.planTier
+              ? `${pendingSubscription.user.fullName} stays on ${planLabel(pendingSubscription.tier)}${
+                  pendingSubscription.endDate
                     ? ` until ${formatDate(pendingSubscription.endDate)}`
                     : ' with no end date'
-              }. This changes their product entitlements immediately.`
-            : ''
+                }.`
+              : `${pendingSubscription.user.fullName}'s plan will change from ${planLabel(pendingSubscription.user.planTier)} to ${planLabel(pendingSubscription.tier)}${
+                  pendingSubscription.tier === 'FREE'
+                    ? ''
+                    : pendingSubscription.endDate
+                      ? ` until ${formatDate(pendingSubscription.endDate)}`
+                      : ' with no end date'
+                }. This changes their product entitlements immediately.`
         }
         confirmLabel={
-          pendingSubscription?.tier === 'FREE'
-            ? 'Move to Free'
-            : `Upgrade to ${planLabel(pendingSubscription?.tier ?? 'PRO')}`
+          pendingSubscription?.tier === pendingSubscription?.user.planTier
+            ? 'Save end date'
+            : pendingSubscription?.tier === 'FREE'
+              ? 'Move to Free'
+              : `Upgrade to ${planLabel(pendingSubscription?.tier ?? 'PRO')}`
         }
         isLoading={changeSubscriptionMutation.isPending}
         onConfirm={() =>
