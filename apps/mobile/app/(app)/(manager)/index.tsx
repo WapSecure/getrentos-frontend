@@ -1,7 +1,7 @@
 import { formatLocation } from '@sureground/shared';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
   Banknote,
@@ -47,11 +47,13 @@ import { dashboardGreeting } from '@/components/dashboard/DashboardParts';
 import { CustodyBar } from '@/components/agency/CustodyBar';
 import { VerificationBanner } from '@/components/agency/VerificationBanner';
 import { landlordApi } from '@/lib/api/landlord';
+import { AgencyPlanCard } from '@/components/agency/AgencyPlanCard';
 
 export default function AgencyHome() {
   const { colors, spacing } = useTheme();
   const { profile } = useAuth();
   const custody = useCustody();
+  const queryClient = useQueryClient();
   const dashboard = useQuery({ queryKey: qk.agency.dashboard, queryFn: agencyApi.dashboard });
   const attention = useQuery({ queryKey: qk.agency.attention, queryFn: agencyApi.attention });
 
@@ -59,6 +61,7 @@ export default function AgencyHome() {
     custody.reload();
     dashboard.refetch();
     attention.refetch();
+    void queryClient.invalidateQueries({ queryKey: qk.agency.plan });
   };
 
   const notifications = useQuery({
@@ -103,6 +106,7 @@ export default function AgencyHome() {
         >
           <FirmFigures />
         </QueryState>
+        <AgencyPlanCard />
       </View>
     </Screen>
   );
