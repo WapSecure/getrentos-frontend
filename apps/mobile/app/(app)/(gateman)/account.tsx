@@ -1,5 +1,5 @@
 import { formatLocation, formatPhoneForDisplay } from '@sureground/shared';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
 import {
@@ -25,6 +25,7 @@ import {
 } from '@sureground/ui-native';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useGateQueue } from '@/lib/gateOfflineQueue';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
@@ -42,6 +43,22 @@ export default function GatemanAccount() {
   const { verified } = useIdentityVerification();
   const { colors, spacing } = useTheme();
   const [postSheetOpen, setPostSheetOpen] = useState(false);
+  const unsent = useGateQueue().length;
+
+  const confirmSignOut = () => {
+    if (unsent === 0) {
+      void signOut();
+      return;
+    }
+    Alert.alert(
+      'Sign out with unsent entries?',
+      `${unsent} saved entr${unsent === 1 ? 'y hasn’t' : 'ies haven’t'} reached the estate yet. Signing out removes ${unsent === 1 ? 'it' : 'them'} from this phone.`,
+      [
+        { text: 'Stay signed in', style: 'cancel' },
+        { text: 'Sign out', style: 'destructive', onPress: () => void signOut() },
+      ]
+    );
+  };
 
   const { estate, estates, gate, isLoading: isPostLoading } = useGatemanPost();
 
@@ -176,7 +193,7 @@ export default function GatemanAccount() {
           variant="outline"
           fullWidth
           icon={<LogOut size={16} color={colors.foreground} />}
-          onPress={signOut}
+          onPress={confirmSignOut}
         />
       </Screen>
 

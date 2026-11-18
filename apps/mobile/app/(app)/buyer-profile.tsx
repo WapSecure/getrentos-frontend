@@ -21,6 +21,7 @@ import { buyerApi, type BuyerProfile as BuyerProfileData } from '@/lib/api/buyer
 import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { useLegalNameLock } from '@/hooks/useLegalNameLock';
 
 export default function BuyerProfileScreen() {
   const { colors, spacing } = useTheme();
@@ -56,6 +57,7 @@ function ProfileForm({ data }: { data: BuyerProfileData }) {
   const toast = useToast();
 
   const [legalName, setLegalName] = useState(data.legalName ?? '');
+  const nameLock = useLegalNameLock();
   const [phone, setPhone] = useState(data.phone ?? '');
 
   const mutation = useMutation({
@@ -64,7 +66,10 @@ function ProfileForm({ data }: { data: BuyerProfileData }) {
     onSuccess: (updated) => {
       qc.setQueryData(qk.buyer.profile, updated);
     },
-    onError: (err) => toast.show(errorMessage(err, 'Could not save your profile.'), 'error'),
+    onError: (err) => {
+      if (nameLock.lockedBy(err)) setLegalName(data.legalName ?? '');
+      toast.show(errorMessage(err, 'Could not save your profile.'), 'error');
+    },
   });
 
   const status =
@@ -98,7 +103,13 @@ function ProfileForm({ data }: { data: BuyerProfileData }) {
       </View>
 
       <Card elevated style={{ gap: spacing.md }}>
-        <TextField label="Full name" value={legalName} onChangeText={setLegalName} required />
+        <TextField
+          label="Full name"
+          value={legalName}
+          onChangeText={setLegalName}
+          required
+          {...nameLock.fieldProps}
+        />
         <VerifiedPhoneField
           label="Phone"
           savedPhone={data.phone}

@@ -36,6 +36,7 @@ import {
   saveAccountLabel,
   type AccountLookup,
 } from '@sureground/shared';
+import { useSensitiveScreen } from '@/hooks/useSensitiveScreen';
 
 // An agent's own payouts arrive in lower case.
 function payoutKey(status: string): 'PENDING' | 'SUCCESS' | 'FAILED' {
@@ -155,6 +156,7 @@ export function MyPayout({
   history: PayoutRecord[];
   onChanged: () => void;
 }) {
+  useSensitiveScreen();
   const { spacing } = useTheme();
   const toast = useToast();
   const save = useMutation({

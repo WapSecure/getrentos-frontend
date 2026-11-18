@@ -4,6 +4,7 @@ import { darkColors, lightColors, radius } from '@sureground/tokens';
 import type { SmileLivenessSession } from '@/lib/api/trust';
 import { loadFaceAnalyzer } from '@/lib/smileid/faceAnalyzer';
 import { liveSelfieOutcome, loadSmileSdk, type LiveSelfieOutcome } from '@/lib/smileid/liveSelfie';
+import { useSensitiveScreen } from '@/hooks/useSensitiveScreen';
 
 // The verdict reaches our server by signed webhook, not through this screen. Only rendered where `liveSelfieSupported()` is true.
 export function LiveSelfieCheck({
@@ -17,6 +18,7 @@ export function LiveSelfieCheck({
 }) {
   const sdk = useMemo(() => loadSmileSdk(), []);
   const analyzer = useMemo(() => loadFaceAnalyzer(), []);
+  useSensitiveScreen();
   if (!sdk || !analyzer) return null;
   const { UseSmileIDBuilder, JobType, CaptureType, DocumentType } = sdk;
   const document = mode === 'document';

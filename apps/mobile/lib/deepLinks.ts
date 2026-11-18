@@ -29,6 +29,21 @@ function splitUrl(url: string): { path: string; query: string } {
   return { path, query };
 }
 
+export function magicLinkToken(url: string): string | null {
+  const { path, query } = splitUrl(url);
+  if (!startsWithSegment(path, '/magic-link')) return null;
+  for (const pair of query.split('&')) {
+    const [key, value = ''] = pair.split('=');
+    if (key !== 'token' || !value) continue;
+    try {
+      return decodeURIComponent(value.replace(/\+/g, ' '));
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 export function resolveIncomingLink(url: string, webUrl: string): LinkTarget | null {
   const { path, query } = splitUrl(url);
 

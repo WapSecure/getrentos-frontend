@@ -1,5 +1,8 @@
+import { useMemo } from 'react';
 import { View } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 import { WebView } from 'react-native-webview';
+import { embedFamily, embedNavigation } from '@/lib/embedNavigation';
 
 export function EmbedFrame({
   url,
@@ -10,6 +13,16 @@ export function EmbedFrame({
   title: string;
   fill?: boolean;
 }) {
+  const family = useMemo(() => embedFamily(url), [url]);
+  const onShouldStartLoadWithRequest = (request: { url: string; isTopFrame?: boolean }) => {
+    if (!family) return false;
+    const decision = embedNavigation(family, request.url, request.isTopFrame ?? true);
+    // Off-provider pages open in the browser, where the address bar shows whose page it is.
+    if (decision === 'external')
+      void WebBrowser.openBrowserAsync(request.url).catch(() => undefined);
+    return decision === 'allow';
+  };
+
   return (
     <View
       style={[
@@ -17,17 +30,20 @@ export function EmbedFrame({
         fill ? { flex: 1 } : { aspectRatio: 16 / 9 },
       ]}
     >
-      <WebView
-        source={{ uri: url }}
-        accessibilityLabel={title}
-        allowsFullscreenVideo
-        allowsInlineMediaPlayback
-        mediaPlaybackRequiresUserAction={false}
-        // Only the provider's own player may load; links inside it open nothing.
-        originWhitelist={['https://*']}
-        setSupportMultipleWindows={false}
-        style={{ flex: 1, backgroundColor: '#000' }}
-      />
+      {family ? (
+        <WebView
+          source={{ uri: url }}
+          accessibilityLabel={title}
+          allowsFullscreenVideo
+          allowsInlineMediaPlayback
+          mediaPlaybackRequiresUserAction={false}
+          // The library hands any URL outside the whitelist (any scheme, ours included) to the OS, so the callback is the only gate.
+          originWhitelist={['*']}
+          onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
+          setSupportMultipleWindows={false}
+          style={{ flex: 1, backgroundColor: '#000' }}
+        />
+      ) : null}
     </View>
   );
 }

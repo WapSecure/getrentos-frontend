@@ -21,7 +21,7 @@ export default function DeleteAccount() {
   const remove = useMutation({
     mutationFn: () => securityApi.deactivate(password),
     onSuccess: () => {
-      Alert.alert('Account deleted', 'Your account has been deleted. We’re sorry to see you go.', [
+      Alert.alert('Account closed', 'Your account has been closed. We’re sorry to see you go.', [
         { text: 'OK', onPress: () => signOut() },
       ]);
     },
@@ -30,8 +30,8 @@ export default function DeleteAccount() {
   const ready = deletePhraseOk(phrase) && password.length > 0;
   const confirm = () =>
     Alert.alert(
-      'Delete your account for good?',
-      'This cannot be undone. You will be signed out and your account closed straight away.',
+      'Close your account?',
+      'You will be signed out and your account closed straight away.',
       [
         { text: 'Keep my account', style: 'cancel' },
         {
@@ -50,7 +50,7 @@ export default function DeleteAccount() {
       <DetailScreenHeader
         eyebrow="Account"
         title="Delete account"
-        subtitle="Permanently remove your account and data"
+        subtitle="Close your Sureground account"
         onBack={() => goBack()}
       />
       <ScrollView
@@ -63,8 +63,8 @@ export default function DeleteAccount() {
       >
         <FormAlert
           tone="error"
-          title="This is permanent"
-          message="Your account is closed straight away and can't be reopened. Your personal data is then deleted, except records the law requires us to keep for a set time, such as payments and identity checks."
+          title="What happens"
+          message="We’ll close your account and remove your profile from Sureground. Some records are kept where the law requires, such as payments and identity checks."
         />
         <Text variant="callout" color="mutedForeground">
           If you only want a break, sign out instead. If money is still owed to you or by you, or a

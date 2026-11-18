@@ -35,6 +35,7 @@ import { purposeFor } from '@/lib/api/trust';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { VerificationChecklist } from '@/components/trust/VerificationChecklist';
 import { FilePickRow } from '@/components/forms/FilePickRow';
+import { useSensitiveScreen } from '@/hooks/useSensitiveScreen';
 
 type ColorKey = keyof ReturnType<typeof useTheme>['colors'];
 
@@ -59,6 +60,7 @@ const STATUS_META: Record<
 };
 
 export default function VerifyIdentity() {
+  useSensitiveScreen();
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const toast = useToast();

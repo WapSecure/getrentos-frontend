@@ -29,7 +29,7 @@ export const textMessagesItem: SettingsItem = {
 export const deleteAccountItem: SettingsItem = {
   key: 'delete-account',
   label: 'Delete account',
-  description: 'Permanently remove your account and data',
+  description: 'Close your Sureground account',
   icon: Trash2,
   onPress: () => router.push('/(app)/delete-account'),
 };

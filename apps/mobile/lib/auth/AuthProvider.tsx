@@ -32,6 +32,8 @@ import { identify, reset as resetAnalytics } from '../analytics';
 import { persister } from '../query/client';
 import { secureStorage } from '../storage';
 import { apiErrorCode } from './signupErrors';
+import { gateOfflineQueue } from '../gateOfflineQueue';
+import { clearSelectedEstate } from '../../hooks/useEstate';
 
 // Holds the user id while a new social account still has to pick its roles.
 const INITIAL_ROLES_KEY = 'sureground.initialRolesPending';
@@ -141,6 +143,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPreferredPortal(null);
     await writePreferredPortal(null);
     await writeSelectedClient(null);
+    await clearSelectedEstate();
+    await gateOfflineQueue.setOwner(null);
     queryClient.clear();
     await persister.removeClient();
   }, [queryClient]);
@@ -188,6 +192,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
   }, [refresh, teardown]);
+
+  useEffect(() => {
+    void gateOfflineQueue.setOwner(profile?.id ?? null);
+  }, [profile?.id]);
 
   useEffect(() => {
     if (profile?.id) identify(profile.id);
@@ -364,6 +372,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // best effort — clear locally regardless
       }
     }
+    // Only a deliberate sign-out drops unsent gate writes; an expired session keeps them for the same guard.
+    await gateOfflineQueue.clear();
     await teardown();
   }, [teardown]);
 

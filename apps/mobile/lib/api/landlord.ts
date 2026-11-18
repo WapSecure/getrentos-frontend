@@ -801,6 +801,20 @@ export const PROPERTY_TYPE_LABEL: Record<PropertyType, string> = {
   shared_apartment: 'Shared apartment',
 };
 
+export const PROPERTY_VERIFIED_FIELDS_LOCKED = 'PROPERTY_VERIFIED_FIELDS_LOCKED';
+
+export interface PropertyChangeRequest {
+  title?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  placeId?: string;
+  latitude?: number;
+  longitude?: number;
+  reason?: string;
+}
+
 export interface UpdatePropertyInput {
   videoTourOnSite?: VideoOnSiteReport;
   /** The pin the owner placed on the map; both or neither. */
@@ -1194,6 +1208,13 @@ export const landlordApi = {
 
   updateProperty: (id: string, patch: UpdatePropertyInput) =>
     apiFetch<LandlordProperty>(`/landlord/properties/${id}`, { method: 'PATCH', body: patch }),
+
+  /** Changes a verified property's name, address or pin; the property goes back for verification. */
+  requestPropertyChange: (id: string, change: PropertyChangeRequest) =>
+    apiFetch<LandlordProperty>(`/landlord/properties/${id}/change-requests`, {
+      method: 'POST',
+      body: change,
+    }),
 
   archiveProperty: (id: string) =>
     apiFetch<LandlordProperty>(`/landlord/properties/${id}/archive`, { method: 'PATCH' }),

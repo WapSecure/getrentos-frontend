@@ -7,6 +7,7 @@ import { SelectField } from '@/components/forms/SelectField';
 import { errorMessage } from '@/lib/api/client';
 import { COMMON_BANKS } from '@/lib/api/sellerPayout';
 import { accountNumberOk, useAccountName, useBanks } from '@/hooks/useBankAccountLookup';
+import { useSensitiveScreen } from '@/hooks/useSensitiveScreen';
 
 export { accountNumberOk };
 
@@ -29,6 +30,7 @@ export function BankAccountFields({
   /** Callers keep save disabled until `lookupAllowsSave`: the name is found, or honestly could not be checked. */
   onLookup?: (lookup: AccountLookup) => void;
 }) {
+  useSensitiveScreen();
   const { colors, spacing } = useTheme();
   const bankList = useBanks();
   const banks: readonly { code: string; name: string }[] = bankList.data?.banks ?? COMMON_BANKS;

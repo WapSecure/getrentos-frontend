@@ -1,25 +1,18 @@
-const SENSITIVE_CACHE_TERMS = [
-  'auth',
-  'profile',
-  'message',
-  'conversation',
-  'document',
-  'payment',
-  'receipt',
-  'lease',
-  'kyc',
-  'identity',
-  'security',
-  'visitor',
-] as const;
+// AsyncStorage is unencrypted, so only public data is written: an allow list, because a deny list misses new keys.
+const PUBLIC_ROOTS: ReadonlySet<string> = new Set(['market']);
+const PRIVATE_UNDER_PUBLIC_ROOT: ReadonlySet<string> = new Set(['saved']);
 
-// Only non-sensitive successful queries may be written to unencrypted AsyncStorage.
 export function shouldPersistQuery(query: {
   queryKey: readonly unknown[];
   state: { status: string };
   meta?: Record<string, unknown> | null;
 }) {
-  if (query.state.status !== 'success' || query.meta?.persist === false) return false;
-  const key = JSON.stringify(query.queryKey).toLowerCase();
-  return !SENSITIVE_CACHE_TERMS.some((term) => key.includes(term));
+  if (query.state.status !== 'success') return false;
+  if (query.meta?.persist !== undefined) return query.meta.persist === true;
+  const [root, section] = query.queryKey;
+  return (
+    typeof root === 'string' &&
+    PUBLIC_ROOTS.has(root) &&
+    !(typeof section === 'string' && PRIVATE_UNDER_PUBLIC_ROOT.has(section))
+  );
 }

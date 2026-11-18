@@ -5,15 +5,17 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@sureground/ui-native';
 import { gateOfflineQueue, replayGateQueue, type GateReplaySummary } from '@/lib/gateOfflineQueue';
 import { qk } from '@/lib/query/keys';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 // Replays on reconnect, on return to the foreground (a phone carried into signal never fires a connectivity change) and on mount: no single signal is reliable on a phone.
 export function GateQueueSync() {
   const toast = useToast();
   const qc = useQueryClient();
+  const userId = useAuth().profile?.id ?? null;
 
   useEffect(() => {
-    // Load what survived the restart before anything tries to send it.
-    void gateOfflineQueue.hydrate();
+    // Load this guard's writes that survived the restart before anything tries to send them.
+    void gateOfflineQueue.setOwner(userId);
 
     let cancelled = false;
 
@@ -61,7 +63,7 @@ export function GateQueueSync() {
       unsubscribeNet();
       appState.remove();
     };
-  }, [qc, toast]);
+  }, [qc, toast, userId]);
 
   return null;
 }

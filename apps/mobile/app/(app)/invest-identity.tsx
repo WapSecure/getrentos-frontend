@@ -43,6 +43,7 @@ import { FilePickList, FilePickRow } from '@/components/forms/FilePickRow';
 import { SelectField } from '@/components/forms/SelectField';
 import { ConsentGate } from '@/components/trust/ConsentGate';
 import { LiveSelfieCheck } from '@/components/trust/LiveSelfieCheck';
+import { useSensitiveScreen } from '@/hooks/useSensitiveScreen';
 
 const REVIEW_TIMESCALE = 'Our team reviews it within 2 working days.';
 const MAX_NOTE = 500;
@@ -50,6 +51,7 @@ const COUNTRY_OPTIONS = COUNTRIES.map((c) => ({ value: c.code, label: c.name }))
 const codeOf = (e: unknown) => (e instanceof ApiError ? e.code : undefined);
 
 export default function InvestIdentity() {
+  useSensitiveScreen();
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const status = useForeignIdentityStatus();

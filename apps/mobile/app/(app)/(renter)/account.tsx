@@ -235,7 +235,7 @@ export default function Account() {
     {
       key: 'delete-account',
       label: 'Delete account',
-      description: 'Permanently remove your account and data',
+      description: 'Close your Sureground account',
       icon: Trash2,
       onPress: go('/(app)/delete-account'),
     },

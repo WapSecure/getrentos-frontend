@@ -112,3 +112,15 @@ const OAUTH_COPY: Record<string, string> = {
 export function oauthErrorCopy(code: string | null | undefined): string {
   return (code && OAUTH_COPY[code]) || OAUTH_COPY.OAUTH_FAILED;
 }
+
+const SIGN_IN_UNAVAILABLE_CODES: ReadonlySet<string> = new Set([
+  'SIGN_IN_UNAVAILABLE',
+  'TWO_FACTOR_UNAVAILABLE',
+]);
+export const SIGN_IN_UNAVAILABLE_MESSAGE = 'Sign-in is temporarily unavailable. Try again shortly.';
+
+export function signInErrorMessage(err: unknown, fallback: string): string {
+  const code = apiErrorCode(err);
+  if (code && SIGN_IN_UNAVAILABLE_CODES.has(code)) return SIGN_IN_UNAVAILABLE_MESSAGE;
+  return err instanceof ApiError && err.message ? err.message : fallback;
+}

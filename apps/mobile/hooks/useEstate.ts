@@ -5,6 +5,8 @@ import { qk } from '@/lib/query/keys';
 
 const KEY = 'estate-manager.selected-estate';
 
+export const clearSelectedEstate = () => AsyncStorage.removeItem(KEY).catch(() => undefined);
+
 export function useEstate() {
   const qc = useQueryClient();
   const estates = useQuery({
