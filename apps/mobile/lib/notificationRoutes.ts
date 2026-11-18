@@ -17,6 +17,7 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/renter/reviews': '/(app)/reviews',
   '/renter/viewings': '/(app)/viewings',
   '/renter/roommates': '/(app)/roommates',
+  '/buyer/discover': '/(app)/(buyer)/discover',
   '/buyer/offers': '/(app)/(buyer)/offers',
   '/buyer/transactions': '/(app)/buyer-transactions',
   '/buyer/viewings': '/(app)/buyer-viewings',
