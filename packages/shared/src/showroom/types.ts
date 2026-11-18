@@ -136,6 +136,8 @@ export interface ShowroomListing {
 export interface PublicRentalDto {
   id: string;
   title: string;
+  /** Paid placement, labelled on the card. */
+  boosted?: boolean;
   location: string;
   address?: string;
   price: number | string;
@@ -179,6 +181,8 @@ export interface PublicRentalDto {
 export interface PublicSaleDto {
   id: string;
   title: string;
+  /** Paid placement, labelled on the card. */
+  boosted?: boolean;
   price: number | string;
   city?: string;
   state?: string;

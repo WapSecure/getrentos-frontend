@@ -26,6 +26,8 @@ export type BuyerListingTarget = Pick<BuyerListing, 'id' | 'title' | 'askingPric
 
 export interface BuyerListing {
   id: string;
+  /** Paid placement, labelled on the card. */
+  boosted?: boolean;
   title: string;
   propertyType: string;
   askingPrice: number;

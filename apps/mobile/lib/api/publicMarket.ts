@@ -211,6 +211,10 @@ const humanise = (value?: string) =>
 const labelFor = (chain?: TrustChainLike) =>
   chain?.steps.length ? trustChainLabel(chain) : undefined;
 
+/** Paid placement is always labelled, so it is never mistaken for an organic result. */
+export const BOOSTED = 'Boosted';
+export const boostedBadge = (boosted?: boolean) => (boosted ? [BOOSTED] : undefined);
+
 const rentToCard = (r: RentalDto): MarketCard => ({
   id: r.id,
   kind: 'rent',
@@ -224,6 +228,7 @@ const rentToCard = (r: RentalDto): MarketCard => ({
   image: r.image || undefined,
   verified: isListingVerified(r),
   trustLabel: labelFor(r.trustChain),
+  badges: boostedBadge(r.boosted),
 });
 
 const saleToCard = (s: SaleDto): MarketCard => ({
@@ -238,6 +243,7 @@ const saleToCard = (s: SaleDto): MarketCard => ({
   verified: isListingVerified(s),
   trustLabel: labelFor(s.trustChain),
   highlight: humanise(s.propertyType),
+  badges: boostedBadge(s.boosted),
 });
 
 /** With dates it is priced the way the booking will be, or says why those dates don't work. */
@@ -251,9 +257,11 @@ const shortletToCard = (s: ShortletListing): MarketCard => {
     location: place(s.city, s.state),
     image: s.coverImageUrl || s.images?.[0] || undefined,
     verified: !!s.isVerified,
-    badges: [s.inspection ? 'Inspected' : undefined, s.fairPrice ? 'Fair price' : undefined].filter(
-      (b): b is string => !!b
-    ),
+    badges: [
+      s.boosted ? BOOSTED : undefined,
+      s.inspection ? 'Inspected' : undefined,
+      s.fairPrice ? 'Fair price' : undefined,
+    ].filter((b): b is string => !!b),
   };
   if (q?.bookable) {
     return {

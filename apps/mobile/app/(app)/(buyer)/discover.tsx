@@ -24,6 +24,7 @@ import { buyerApi, type BuyerListing, type ListingFilters } from '@/lib/api/buye
 import { useBuyerSaved } from '@/hooks/useBuyerSaved';
 import { useCardAnalytics } from '@/hooks/useCardAnalytics';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { boostedBadge } from '@/lib/api/publicMarket';
 
 const PAGE_SIZE = 20;
 const SORTS: { value: ListingFilters['sort']; label: string }[] = [
@@ -53,6 +54,7 @@ function toCard(item: BuyerListing): PropertyCardData {
     size: item.propertySize,
     image: item.image ?? item.images?.[0] ?? null,
     trustLabel: item.ownerVerified ? { label: 'Owner verified', tone: 'verified' } : undefined,
+    badges: boostedBadge(item.boosted),
   };
 }
 

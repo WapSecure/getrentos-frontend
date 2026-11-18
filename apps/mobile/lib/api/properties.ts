@@ -6,6 +6,8 @@ import type { MediaItem } from '@sureground/shared/showroom';
 export interface RenterProperty {
   /** The id the save/apply endpoints use. */
   id: string;
+  /** Paid placement, labelled on the card. */
+  boosted?: boolean;
   propertyId: string;
   title: string;
   location: string;
