@@ -20,6 +20,10 @@ import { SaleListingCard } from '@/components/owner/listings/SaleListingCard';
 import { CreateSaleListingModal } from '@/components/owner/listings/CreateSaleListingModal';
 import { CommercialDetailsDialog } from '@/components/landlord/listings/EditCommercialDetailsDialog';
 import { ManageListingModal } from '@/components/owner/listings/ManageListingModal';
+import {
+  BoostListingDialog,
+  type BoostTarget,
+} from '@/components/shared/boosts/BoostListingDialog';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
@@ -45,6 +49,7 @@ export default function OwnerListingsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(Boolean(presetPropertyId));
   const [manageListing, setManageListing] = useState<SaleListing | null>(null);
   const [commercialListing, setCommercialListing] = useState<SaleListing | null>(null);
+  const [boostTarget, setBoostTarget] = useState<BoostTarget | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -272,7 +277,12 @@ export default function OwnerListingsPage() {
           setManageListing(null);
           setCommercialListing(listing);
         }}
+        onBoost={(listing) => {
+          setManageListing(null);
+          setBoostTarget({ id: listing.id, title: listing.listingTitle });
+        }}
       />
+      <BoostListingDialog target={boostTarget} onClose={() => setBoostTarget(null)} />
 
       <CommercialDetailsDialog
         target={

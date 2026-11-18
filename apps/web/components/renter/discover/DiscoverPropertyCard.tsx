@@ -6,6 +6,7 @@ import { Property, monthlyEquivalent } from '@/types/renter';
 import { VirtualTourBadge } from './features/VirtualTourBadge';
 import { PropertyScore } from './features/PropertyScore';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
+import { BoostedBadge } from '@/components/shared/boosts/BoostedBadge';
 import { LandlordMetrics } from './features/LandlordMetrics';
 
 interface DiscoverPropertyCardProps {
@@ -52,7 +53,12 @@ export const DiscoverPropertyCard = ({
       imageAlt={property.title}
       eager={eager}
       status={letOut ? 'Let' : 'For rent'}
-      badges={<TrustChainBadge chain={property.trustChain} fallbackVerified={property.verified} />}
+      badges={
+        <>
+          <TrustChainBadge chain={property.trustChain} fallbackVerified={property.verified} />
+          {property.boosted && <BoostedBadge />}
+        </>
+      }
       facts={{
         beds: property.bedrooms,
         baths: property.bathrooms,

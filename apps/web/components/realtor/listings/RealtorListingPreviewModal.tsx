@@ -12,6 +12,7 @@ import {
   ShieldAlert,
   Pause,
   XCircle,
+  Rocket,
 } from '@sureground/icons';
 import {
   Badge,
@@ -40,12 +41,14 @@ interface RealtorListingPreviewModalProps {
   listing: RealtorListing | null;
   onClose: () => void;
   onEditCommercial?: (listing: RealtorListing) => void;
+  onBoost?: (listing: RealtorListing) => void;
 }
 
 export const RealtorListingPreviewModal = ({
   listing,
   onClose,
   onEditCommercial,
+  onBoost,
 }: RealtorListingPreviewModalProps) => {
   return (
     <Dialog open={!!listing} onOpenChange={(open) => !open && onClose()}>
@@ -119,6 +122,17 @@ export const RealtorListingPreviewModal = ({
                   icon={<Building2 className="h-4 w-4" />}
                 >
                   {listing.commercial ? 'Edit commercial details' : 'Add commercial details'}
+                </Button>
+              )}
+              {onBoost && listing.status === 'published' && (
+                <Button
+                  variant="outline"
+                  fullWidth
+                  className="mt-2"
+                  onClick={() => onBoost(listing)}
+                  icon={<Rocket className="h-4 w-4" />}
+                >
+                  Boost in search
                 </Button>
               )}
             </div>

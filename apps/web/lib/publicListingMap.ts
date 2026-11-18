@@ -16,6 +16,8 @@ export const PUBLIC_MARKET_PAGE_SIZE = 12;
 export interface PublicListingCard {
   id: string;
   title: string;
+  /** Paid placement, labelled on the card. */
+  boosted?: boolean;
   price: number;
   priceUnit?: 'month' | 'year';
   trustChain?: PropertyTrustChain;
@@ -61,6 +63,7 @@ const onlyTrue = (value?: boolean) => (value ? true : undefined);
 export interface RentApiItem {
   id: string;
   title: string;
+  boosted?: boolean;
   price: number;
   period?: 'month' | 'year';
   trustChain?: PropertyTrustChain;
@@ -81,6 +84,7 @@ export interface RentApiItem {
 export interface SaleApiItem {
   id: string;
   title: string;
+  boosted?: boolean;
   price: number;
   city?: string;
   state?: string;
@@ -125,6 +129,7 @@ const pointOf = (item: {
 export const rentToCard = (item: RentApiItem): PublicListingCard => ({
   id: item.id,
   title: item.title,
+  boosted: item.boosted,
   price: money(item.price),
   priceUnit: item.period,
   location: formatLocation(item.location),
@@ -143,6 +148,7 @@ export const rentToCard = (item: RentApiItem): PublicListingCard => ({
 export const saleToCard = (item: SaleApiItem): PublicListingCard => ({
   id: item.id,
   title: item.title,
+  boosted: item.boosted,
   price: money(item.price),
   location: formatLocation(item.city, item.state),
   propertyType: item.propertyType,

@@ -10,6 +10,10 @@ import {
 } from '@/components/landlord/listings/CreateListingModal';
 import { ListingPreviewModal } from '@/components/landlord/listings/ListingPreviewModal';
 import { EditListingFeesDialog } from '@/components/landlord/listings/EditListingFeesDialog';
+import {
+  BoostListingDialog,
+  type BoostTarget,
+} from '@/components/shared/boosts/BoostListingDialog';
 import { EditCommercialDetailsDialog } from '@/components/landlord/listings/EditCommercialDetailsDialog';
 import {
   Button,
@@ -46,6 +50,7 @@ export default function LandlordListingsPage() {
   );
   const [previewListing, setPreviewListing] = useState<Listing | null>(null);
   const [feesListing, setFeesListing] = useState<Listing | null>(null);
+  const [boostTarget, setBoostTarget] = useState<BoostTarget | null>(null);
   const [commercialListing, setCommercialListing] = useState<Listing | null>(null);
   const toast = useToast();
 
@@ -240,6 +245,7 @@ export default function LandlordListingsPage() {
               onPreview={setPreviewListing}
               onEditFees={setFeesListing}
               onEditCommercial={setCommercialListing}
+              onBoost={(l) => setBoostTarget({ id: l.id, title: l.listingTitle })}
             />
           ))}
         </div>
@@ -256,6 +262,7 @@ export default function LandlordListingsPage() {
 
       <ListingPreviewModal listing={previewListing} onClose={() => setPreviewListing(null)} />
       <EditListingFeesDialog listing={feesListing} onClose={() => setFeesListing(null)} />
+      <BoostListingDialog target={boostTarget} onClose={() => setBoostTarget(null)} />
       <EditCommercialDetailsDialog
         listing={commercialListing}
         onClose={() => setCommercialListing(null)}

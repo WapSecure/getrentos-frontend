@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, Megaphone, Pause, Play, XCircle } from '@sureground/icons';
+import { Building2, Megaphone, Pause, Play, Rocket, XCircle } from '@sureground/icons';
 import {
   Button,
   DescriptionList,
@@ -18,6 +18,7 @@ interface ManageListingModalProps {
   onClose: () => void;
   onChangeStatus: (listingId: string, status: SaleListingStatus) => void;
   onEditCommercial?: (listing: SaleListing) => void;
+  onBoost?: (listing: SaleListing) => void;
 }
 
 export const ManageListingModal = ({
@@ -25,6 +26,7 @@ export const ManageListingModal = ({
   onClose,
   onChangeStatus,
   onEditCommercial,
+  onBoost,
 }: ManageListingModalProps) => {
   if (!listing) return null;
 
@@ -72,6 +74,16 @@ export const ManageListingModal = ({
                 icon={<Megaphone className="h-4 w-4" />}
               >
                 Publish listing
+              </Button>
+            )}
+            {onBoost && listing.status === 'published' && (
+              <Button
+                variant="outline"
+                fullWidth
+                onClick={() => onBoost(listing)}
+                icon={<Rocket className="h-4 w-4" />}
+              >
+                Boost in search
               </Button>
             )}
             {listing.status === 'published' && (

@@ -38,6 +38,8 @@ export interface PropertyTrustChain {
 export interface Property {
   id: string;
   propertyId: string;
+  /** Paid placement, labelled on the card. */
+  boosted?: boolean;
   title: string;
   location: string;
   address?: string;

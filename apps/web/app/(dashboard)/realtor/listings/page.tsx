@@ -7,6 +7,10 @@ import { Plus, Megaphone } from '@sureground/icons';
 import { RecordGridSkeleton, RecordToolbar } from '@/components/shared/records/RecordParts';
 import { RealtorListingCard } from '@/components/realtor/listings/RealtorListingCard';
 import { RealtorListingPreviewModal } from '@/components/realtor/listings/RealtorListingPreviewModal';
+import {
+  BoostListingDialog,
+  type BoostTarget,
+} from '@/components/shared/boosts/BoostListingDialog';
 import { CommercialDetailsDialog } from '@/components/landlord/listings/EditCommercialDetailsDialog';
 import {
   CreateListingModal,
@@ -47,6 +51,7 @@ export default function RealtorListingsPage() {
   );
   const [previewListing, setPreviewListing] = useState<RealtorListing | null>(null);
   const [commercialListing, setCommercialListing] = useState<RealtorListing | null>(null);
+  const [boostTarget, setBoostTarget] = useState<BoostTarget | null>(null);
   const queryClient = useQueryClient();
   const listingStatus =
     filter === 'all'
@@ -262,7 +267,12 @@ export default function RealtorListingsPage() {
           setPreviewListing(null);
           setCommercialListing(listing);
         }}
+        onBoost={(listing) => {
+          setPreviewListing(null);
+          setBoostTarget({ id: listing.id, title: listing.title });
+        }}
       />
+      <BoostListingDialog target={boostTarget} onClose={() => setBoostTarget(null)} />
 
       <CommercialDetailsDialog
         target={

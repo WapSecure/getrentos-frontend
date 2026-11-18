@@ -22,6 +22,7 @@ export type CardMarket = 'rent' | 'sale' | 'land' | 'shortlet';
 export interface MarketCard {
   id: string;
   title: string;
+  boosted?: boolean;
   location: string;
   price?: number;
   priceUnit?: ListingPriceUnit;
@@ -78,6 +79,7 @@ export interface ShortletCardApi {
 export const fromPublicCard = (c: PublicListingCard): MarketCard => ({
   id: c.id,
   title: c.title,
+  boosted: c.boosted,
   location: c.location,
   price: c.price,
   priceUnit: c.priceUnit,

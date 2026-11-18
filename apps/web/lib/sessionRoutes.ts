@@ -15,6 +15,7 @@ const SIGNED_IN_SECTIONS = [
   '/role-selection',
   '/agency-invite',
   '/billing',
+  '/boosts',
   '/payments',
   '/representing',
 ];
