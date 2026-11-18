@@ -6,6 +6,7 @@ import type {
   Announcement,
   DeliveryLog,
   DirectoryEntry,
+  EstateOfficeMessage,
   Due,
   ExpectedDelivery,
   IssuedExpectedDelivery,
@@ -19,6 +20,7 @@ import type {
   MusterSelfAnswer,
   ResidentEmergency,
   ResidentHousehold,
+  ResidentOfficeConversation,
   Violation,
   VisitorPass,
 } from '@/types/estate';
@@ -129,6 +131,19 @@ export const estateResidentService = {
 
   async listMyViolations(): Promise<ApiResponse<Violation[]>> {
     return safeCall(() => authFetch('/estate/resident/violations'));
+  },
+
+  async getOfficeMessages(): Promise<ApiResponse<ResidentOfficeConversation>> {
+    return safeCall(() => authFetch('/estate/resident/office-messages'));
+  },
+
+  async sendOfficeMessage(body: string): Promise<ApiResponse<EstateOfficeMessage>> {
+    return safeCall(() =>
+      authFetch('/estate/resident/office-messages', {
+        method: 'POST',
+        body: JSON.stringify({ body }),
+      })
+    );
   },
 
   async listMyDeliveries(

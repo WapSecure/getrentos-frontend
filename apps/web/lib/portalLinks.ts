@@ -5,6 +5,8 @@ const PORTAL_LINKS: Record<string, [from: string, to: string][]> = {
     ['/landlord/applications', '/owner/applications'],
     ['/landlord/leases', '/owner/leases'],
   ],
+  // Office replies link to the estate-side path; residents read them in their own portal.
+  resident: [['/estate/office-messages', '/resident/messages']],
 };
 
 export function portalLink(portal: string, url: string): string {

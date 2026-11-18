@@ -43,3 +43,8 @@ test('an owner opening an application or lease notice stays in the owner portal'
   assert.equal(portalLink('owner', '/landlord/leases?status=draft'), '/owner/leases?status=draft');
   assert.equal(portalLink('landlord', '/landlord/applications'), '/landlord/applications');
 });
+
+test('a resident opening an office reply lands on their messages', () => {
+  assert.equal(portalLink('resident', '/estate/office-messages'), '/resident/messages');
+  assert.equal(portalLink('estate', '/estate/resident-messages'), '/estate/resident-messages');
+});

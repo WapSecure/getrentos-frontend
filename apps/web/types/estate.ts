@@ -1029,3 +1029,34 @@ export interface GuestListImportResult {
   expiresAt: string;
   deadlineLabel: string;
 }
+
+export interface EstateOfficeMessage {
+  id: string;
+  body: string;
+  fromOffice: boolean;
+  senderName: string;
+  createdAt: string;
+}
+
+export interface ResidentOfficeConversation {
+  estateName: string;
+  messages: EstateOfficeMessage[];
+}
+
+export interface EstateResidentThreadSummary {
+  id: string;
+  householdId: string;
+  unitLabel: string;
+  residentName?: string;
+  lastMessagePreview?: string;
+  lastMessageAt: string;
+  lastFromOffice: boolean;
+  unread: boolean;
+}
+
+export interface EstateResidentThread {
+  id: string;
+  unitLabel: string;
+  residentName?: string;
+  messages: EstateOfficeMessage[];
+}
