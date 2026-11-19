@@ -5,11 +5,22 @@ import { ROUTES } from '@/lib/constants/auth';
 import { BillingPage } from '@/components/shared/subscription/BillingPage';
 import { useEstatePlan } from '@/hooks/useEstatePlan';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
-import { EstateProCard } from '@/components/estate/billing/EstateProCard';
+import { EstateProCard, estatePlanKey } from '@/components/estate/billing/EstateProCard';
+import { useQuery } from '@tanstack/react-query';
+import { unwrap } from '@/lib/apiHelpers';
+import { estatePlanService } from '@/services/estatePlanService';
 
 export default function EstateBillingPage() {
   const { estate } = useSelectedEstate();
   const { tier } = useEstatePlan();
+  // Once Estate Pro is on, a personal Pro no longer unlocks a new estate, so the page sells only Estate Pro.
+  const estatePro = useQuery({
+    queryKey: estatePlanKey(estate?.id ?? ''),
+    queryFn: () => unwrap(estatePlanService.get(estate!.id)),
+    enabled: Boolean(estate),
+    retry: false,
+  });
+  const estateProOn = Boolean(estatePro.data?.billing.available);
 
   return (
     <BillingPage
@@ -17,6 +28,7 @@ export default function EstateBillingPage() {
       description="See what's included on Free and what Pro unlocks for running your estate."
       planLabel={estate ? `${estate.name}'s plan` : "This estate's plan"}
       planTier={tier}
+      personalCheckout={!estateProOn}
       planNote="Estate features follow this estate's own Estate Pro, or the plan of the person who set it up."
     >
       {estate && <EstateProCard estateId={estate.id} />}

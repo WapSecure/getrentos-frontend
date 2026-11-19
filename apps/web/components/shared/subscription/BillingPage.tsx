@@ -25,6 +25,7 @@ export function BillingPage({
   planLabel = 'Your current plan',
   planTier,
   planNote,
+  personalCheckout = true,
   children,
 }: {
   persona: PlanPersona;
@@ -36,6 +37,8 @@ export function BillingPage({
   planLabel?: string;
   planTier?: PlanTier;
   planNote?: string;
+  /** False where the viewer's personal Pro would not unlock this page's features, such as an estate on Estate Pro. */
+  personalCheckout?: boolean;
   /** Extra offers shown after the comparison, such as the estate Enterprise card. */
   children?: ReactNode;
 }) {
@@ -69,7 +72,7 @@ export function BillingPage({
 
       {isPro && <ManageSubscriptionCard billing={billing} />}
 
-      {!isPro && (
+      {!isPro && personalCheckout && (
         <>
           <ProPriceCard
             pricing={pricing}
