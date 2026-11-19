@@ -124,6 +124,8 @@ export interface AdminStaffMember {
   regions?: string[];
   /** Personal permissions added or removed on top of the role. */
   adjusted?: boolean;
+  /** Offboarded: only a second super admin can bring them back. */
+  deactivated?: boolean;
   staffApproval?: {
     id: string;
     status: ApprovalStatus;
@@ -180,10 +182,57 @@ export interface MyStaffAccess {
   permissions: AdminPermission[];
   /** Empty means nationwide. */
   regions: string[];
+  emergency: EmergencyAccess | null;
+}
+
+export interface EmergencyAccess {
+  permissions: AdminPermission[];
+  expiresAt: string;
+}
+
+export interface StaffInviteLink {
+  id: string;
+  purpose: 'INVITE' | 'RESET';
+  expiresAt: string;
+  createdAt: string;
+  staff: { id: string; legalName: string; email: string | null } | null;
+  sentBy: { id: string; legalName: string; email: string | null } | null;
+}
+
+export type AccessReviewFlag =
+  | 'NOT_SIGNED_IN_30_DAYS'
+  | 'NO_TWO_FACTOR'
+  | 'EXTRA_PERMISSIONS'
+  | 'EMERGENCY_ACCESS_ACTIVE'
+  | 'MONEY_AND_EXPORT';
+
+export interface AccessReviewRow {
+  id: string;
+  legalName: string;
+  email: string | null;
+  status: string;
+  roles: string[];
+  permissionCount: number;
+  sensitivePermissions: AdminPermission[];
+  regions: string[];
+  extraPermissions: AdminPermission[];
+  extraUntil: string | null;
+  lastSignInAt: string | null;
+  daysSinceSignIn: number | null;
+  flags: AccessReviewFlag[];
+}
+
+export interface OffboardingSummary {
+  sessionsEnded: boolean;
+  casesReturned: number;
+  requestsWithdrawn: number;
+  invitesVoided: number;
 }
 
 export type ChangeRequestKind =
   | 'STAFF_ACCESS'
+  | 'STAFF_REACTIVATION'
+  | 'EMERGENCY_REVIEW'
   | 'PLATFORM_CONFIG'
   | 'SHORTLET_FEES'
   | 'SALE_COMMISSION';
@@ -192,6 +241,7 @@ export interface StaffAccessChange {
   grantedPermissions: AdminPermission[];
   revokedPermissions: AdminPermission[];
   regions: string[];
+  grantsExpireAt?: string | null;
   note?: string;
 }
 
@@ -224,6 +274,10 @@ export interface StaffAccess {
   grantedPermissions: AdminPermission[];
   revokedPermissions: AdminPermission[];
   regions: string[];
+  grantsExpireAt: string | null;
+  emergency: EmergencyAccess | null;
+  deactivatedAt: string | null;
+  deactivationReason: string | null;
   effectivePermissions: AdminPermission[];
   note: string | null;
   adjustable: boolean;

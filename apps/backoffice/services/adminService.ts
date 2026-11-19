@@ -48,6 +48,10 @@ import type {
   StaffDepartment,
   StaffRoleCatalogueEntry,
   StaffRoleHistoryEntry,
+  StaffInviteLink,
+  AdminPermission,
+  AccessReviewRow,
+  OffboardingSummary,
   AdminStaffStatus,
   StaffRoleUpdateResult,
 } from '@/types/admin';
@@ -933,6 +937,55 @@ export const adminService = {
     );
   },
 
+  async deactivateStaff(id: string, reason: string): Promise<ApiResponse<OffboardingSummary>> {
+    return safeCall(() =>
+      authFetch(`/admin/access/staff/${id}/deactivate`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+    );
+  },
+
+  async requestStaffReactivation(id: string, reason: string): Promise<ApiResponse<PendingChange>> {
+    return safeCall(() =>
+      authFetch(`/admin/access/staff/${id}/reactivate`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+    );
+  },
+
+  async resendStaffInvite(id: string): Promise<ApiResponse<{ message: string }>> {
+    return safeCall(() => authFetch(`/admin/access/staff/${id}/invite`, { method: 'POST' }));
+  },
+
+  async listStaffInvites(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<StaffInviteLink>>> {
+    const query = toQuery({ page: params.page?.toString(), pageSize: params.pageSize?.toString() });
+    return safeCall(() => authFetch(`/admin/access/invites${query}`));
+  },
+
+  async revokeStaffInvite(id: string): Promise<ApiResponse<{ message: string }>> {
+    return safeCall(() => authFetch(`/admin/access/invites/${id}/revoke`, { method: 'POST' }));
+  },
+
+  async getAccessReview(): Promise<ApiResponse<AccessReviewRow[]>> {
+    return safeCall(() => authFetch('/admin/access/review'));
+  },
+
+  async takeEmergencyAccess(
+    permissions: AdminPermission[],
+    reason: string
+  ): Promise<ApiResponse<{ expiresAt: string; permissions: AdminPermission[]; reviewId: string }>> {
+    return safeCall(() =>
+      authFetch('/admin/access/emergency', {
+        method: 'POST',
+        body: JSON.stringify({ permissions, reason }),
+      })
+    );
+  },
+
   async getRoleCatalogue(): Promise<ApiResponse<StaffRoleCatalogueEntry[]>> {
     return safeCall(() => authFetch('/admin/access/roles'));
   },
@@ -964,6 +1017,7 @@ export const adminService = {
           grantedPermissions: change.grantedPermissions,
           revokedPermissions: change.revokedPermissions,
           regions: change.regions,
+          ...(change.grantsExpireAt ? { grantsExpireAt: change.grantsExpireAt } : {}),
           reason: change.reason,
         }),
       })

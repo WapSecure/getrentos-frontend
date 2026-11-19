@@ -17,8 +17,15 @@ import {
   TabsTrigger,
   useToast,
 } from '@sureground/ui';
-import { ApiError, formatDate, formatRelativeTime, unwrap } from '@sureground/shared';
+import {
+  ApiError,
+  formatDate,
+  formatDateTime,
+  formatRelativeTime,
+  unwrap,
+} from '@sureground/shared';
 import { adminService } from '@/services/adminService';
+import { EmergencyAccess } from '@/components/admin/access/EmergencyAccess';
 import { adminKeys } from '@/lib/queryKeys';
 import { PERMISSION_LABELS } from '@/lib/adminAccess';
 import type {
@@ -33,6 +40,8 @@ const MIN_REASON_LENGTH = 10;
 
 const KIND_LABELS: Record<ChangeRequestKind, string> = {
   STAFF_ACCESS: 'Staff access',
+  STAFF_REACTIVATION: 'Reactivate staff',
+  EMERGENCY_REVIEW: 'Emergency access to review',
   PLATFORM_CONFIG: 'Platform configuration',
   SHORTLET_FEES: 'Shortlet fees and tax',
   SALE_COMMISSION: 'Sale commission split',
@@ -75,6 +84,16 @@ const permissionList = (values: unknown) =>
 function describeChange(request: AdminChangeRequest): string[] {
   const payload = request.payload ?? {};
   const baseline = request.baseline ?? {};
+  if (request.kind === 'STAFF_REACTIVATION') {
+    return ['Lets them sign in again with their current role. Extra access is not restored.'];
+  }
+  if (request.kind === 'EMERGENCY_REVIEW') {
+    const until = typeof payload.expiresAt === 'string' ? formatDateTime(payload.expiresAt) : '';
+    return [
+      `Took: ${permissionList(payload.permissions)}${until ? `, until ${until}` : ''}`,
+      'Approve if it was justified. Reject to end it now and keep the record.',
+    ];
+  }
   if (request.kind === 'STAFF_ACCESS') {
     const lines: string[] = [];
     const granted = payload.grantedPermissions as AdminPermission[] | undefined;
@@ -207,10 +226,12 @@ export default function ChangeRequestsPage() {
           <div className="flex flex-wrap items-center gap-2 sm:justify-end">
             {request.isMine && (
               <p className="mr-auto text-xs text-muted-foreground">
-                Another officer has to approve your request. You can withdraw it.
+                {request.kind === 'EMERGENCY_REVIEW'
+                  ? 'A super admin reviews your emergency access.'
+                  : 'Another officer has to approve your request. You can withdraw it.'}
               </p>
             )}
-            {(request.isMine || request.canDecide) && (
+            {((request.isMine && request.kind !== 'EMERGENCY_REVIEW') || request.canDecide) && (
               <Button
                 variant="outline"
                 size="sm"
@@ -247,6 +268,7 @@ export default function ChangeRequestsPage() {
       <PageHeader
         title="Approvals"
         description="Changes that need a second officer: wider staff access, and platform-wide settings such as fees, commission and trust thresholds. Nothing here takes effect until someone other than the requester approves it."
+        actions={<EmergencyAccess />}
       />
 
       <Tabs

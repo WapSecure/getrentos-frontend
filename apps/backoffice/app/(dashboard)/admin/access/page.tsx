@@ -11,6 +11,9 @@ import {
   UserRoundPlus,
   SlidersHorizontal,
   MapPin,
+  Mail,
+  UserCheck,
+  UserX,
 } from '@sureground/icons';
 import { useAdminUser } from '../layout';
 import { CreateStaffModal } from '@/components/admin/access/CreateStaffModal';
@@ -20,6 +23,8 @@ import { RoleGrantsPanel, roleGrantErrorMessage } from '@/components/admin/acces
 import { StaffStatusBadge } from '@/components/admin/access/StaffStatusBadge';
 import { StaffAccessModal } from '@/components/admin/access/StaffAccessModal';
 import { RoleCatalogue } from '@/components/admin/access/RoleCatalogue';
+import { StaffInvitesPanel } from '@/components/admin/access/StaffInvitesPanel';
+import { AccessReview } from '@/components/admin/access/AccessReview';
 import { Alert, Badge, PageHeader, SearchInput, Tabs, TabsList, TabsTrigger } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { ConfirmDialog } from '@sureground/ui';
@@ -37,6 +42,7 @@ import type {
   AdminStaffMember,
   AdminStaffRole,
   AdminStaffStatus,
+  OffboardingSummary,
   StaffDepartment,
 } from '@/types/admin';
 
@@ -65,6 +71,11 @@ export default function AdminAccessPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [resetTarget, setResetTarget] = useState<AdminStaffMember | null>(null);
   const [accessTarget, setAccessTarget] = useState<AdminStaffMember | null>(null);
+  const [lifecycleTarget, setLifecycleTarget] = useState<{
+    member: AdminStaffMember;
+    action: 'deactivate' | 'reactivate';
+  } | null>(null);
+  const [lifecycleReason, setLifecycleReason] = useState('');
   const [statusTarget, setStatusTarget] = useState<{
     member: AdminStaffMember;
     status: 'active' | 'suspended';
@@ -74,7 +85,7 @@ export default function AdminAccessPage() {
     role: AdminStaffRole;
   } | null>(null);
   const [staffPage, setStaffPage] = useState(1);
-  const [tab, setTab] = useState<'staff' | 'roles'>(canManage ? 'staff' : 'roles');
+  const [tab, setTab] = useState<'staff' | 'roles' | 'review'>(canManage ? 'staff' : 'roles');
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<AdminStaffRole | 'all'>('all');
   const [departmentFilter, setDepartmentFilter] = useState<StaffDepartment | 'all'>('all');
@@ -133,6 +144,52 @@ export default function AdminAccessPage() {
     },
   });
 
+  const lifecycle = useMutation({
+    mutationFn: async ({
+      member,
+      action,
+      reason,
+    }: {
+      member: AdminStaffMember;
+      action: 'deactivate' | 'reactivate';
+      reason: string;
+    }): Promise<{ action: 'deactivate' | 'reactivate'; summary: OffboardingSummary | null }> =>
+      action === 'deactivate'
+        ? { action, summary: await unwrap(adminService.deactivateStaff(member.id, reason)) }
+        : (await unwrap(adminService.requestStaffReactivation(member.id, reason)),
+          { action, summary: null }),
+    onSuccess: ({ action, summary }) => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.staff });
+      queryClient.invalidateQueries({ queryKey: adminKeys.changeRequests });
+      queryClient.invalidateQueries({ queryKey: adminKeys.staffInvites });
+      const name = lifecycleTarget?.member.legalName ?? 'They';
+      setLifecycleTarget(null);
+      if (action === 'deactivate' && summary) {
+        notify(
+          `${name} is deactivated: signed out everywhere, extra access removed, ${summary.casesReturned} open case${summary.casesReturned === 1 ? '' : 's'} returned to the queue.`,
+          'success'
+        );
+      } else {
+        notify(
+          `Sent for approval. ${name} can sign in again once another super admin approves it.`,
+          'info'
+        );
+      }
+    },
+    onError: (err) => notify(err instanceof Error ? err.message : 'That did not work.', 'error'),
+  });
+  const lifecycleBusy = lifecycle.isPending;
+
+  const resendInvite = useMutation({
+    mutationFn: (member: AdminStaffMember) => unwrap(adminService.resendStaffInvite(member.id)),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.staffInvites });
+      notify(result.message, 'success');
+    },
+    onError: (err) =>
+      notify(err instanceof Error ? err.message : 'The link could not be sent.', 'error'),
+  });
+
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'active' | 'suspended' }) =>
       unwrap(adminService.setStaffStatus(id, status)),
@@ -185,16 +242,18 @@ export default function AdminAccessPage() {
 
       <Tabs
         value={tab}
-        onValueChange={(value) => setTab(value as 'staff' | 'roles')}
+        onValueChange={(value) => setTab(value as 'staff' | 'roles' | 'review')}
         className="mb-5"
       >
         <TabsList aria-label="Access and roles view">
           <TabsTrigger value="staff">Staff</TabsTrigger>
           <TabsTrigger value="roles">Roles</TabsTrigger>
+          {canManage && <TabsTrigger value="review">Access review</TabsTrigger>}
         </TabsList>
       </Tabs>
 
       {tab === 'roles' && <RoleCatalogue canSeeHistory={canManage} />}
+      {tab === 'review' && canManage && <AccessReview />}
 
       {tab === 'staff' && canApprove && (
         <div className="mb-6">
@@ -205,6 +264,12 @@ export default function AdminAccessPage() {
       {tab === 'staff' && canManage && (
         <div className="mb-6">
           <RoleGrantsPanel currentUserId={user?.id} notify={notify} />
+        </div>
+      )}
+
+      {tab === 'staff' && canManage && (
+        <div className="mb-6">
+          <StaffInvitesPanel notify={notify} />
         </div>
       )}
 
@@ -334,6 +399,7 @@ export default function AdminAccessPage() {
                           </Badge>
                         )}
                         {member.adjusted && <Badge variant="warning">Personal access</Badge>}
+                        {member.deactivated && <Badge variant="danger">Deactivated</Badge>}
                       </div>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <StaffStatusBadge status={member.accountStatus} />
@@ -368,7 +434,22 @@ export default function AdminAccessPage() {
                       }))}
                       className="w-full sm:w-52"
                     />
-                    {member.accountStatus === 'suspended' || member.accountStatus === 'banned' ? (
+                    {member.deactivated ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5"
+                        disabled={isSelf(member) || lifecycleBusy}
+                        onClick={() => {
+                          setLifecycleReason('');
+                          setLifecycleTarget({ member, action: 'reactivate' });
+                        }}
+                      >
+                        <UserCheck className="h-3.5 w-3.5" />
+                        Reactivate
+                      </Button>
+                    ) : member.accountStatus === 'suspended' ||
+                      member.accountStatus === 'banned' ? (
                       <Button
                         variant="outline"
                         size="sm"
@@ -391,7 +472,21 @@ export default function AdminAccessPage() {
                         Suspend
                       </Button>
                     )}
-                    {staffRoleOf(member) !== 'super_admin' && (
+                    {!member.deactivated &&
+                      member.accountStatus === 'active' &&
+                      !member.lastLoginAt && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-1.5"
+                          disabled={resendInvite.isPending}
+                          onClick={() => resendInvite.mutate(member)}
+                        >
+                          <Mail className="h-3.5 w-3.5" />
+                          Resend set-up link
+                        </Button>
+                      )}
+                    {staffRoleOf(member) !== 'super_admin' && !member.deactivated && (
                       <Button
                         variant="outline"
                         size="sm"
@@ -413,6 +508,21 @@ export default function AdminAccessPage() {
                       <KeyRound className="h-3.5 w-3.5" />
                       Reset password
                     </Button>
+                    {!member.deactivated && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="gap-1.5 text-destructive"
+                        disabled={isSelf(member) || lifecycleBusy}
+                        onClick={() => {
+                          setLifecycleReason('');
+                          setLifecycleTarget({ member, action: 'deactivate' });
+                        }}
+                      >
+                        <UserX className="h-3.5 w-3.5" />
+                        Deactivate
+                      </Button>
+                    )}
                   </div>
                 </li>
               ))}
@@ -441,6 +551,46 @@ export default function AdminAccessPage() {
           onCreated={handleCreated}
         />
       )}
+
+      <ConfirmDialog
+        open={!!lifecycleTarget}
+        onOpenChange={(open) => {
+          if (open) return;
+          setLifecycleTarget(null);
+          setLifecycleReason('');
+        }}
+        title={
+          lifecycleTarget?.action === 'deactivate'
+            ? `Deactivate ${lifecycleTarget.member.legalName}?`
+            : `Ask to reactivate ${lifecycleTarget?.member.legalName ?? ''}?`
+        }
+        description={
+          lifecycleTarget?.action === 'deactivate'
+            ? 'For someone who has left or changed jobs. They are signed out everywhere and cannot sign in; extra and emergency access is removed; their open cases go back to the queue; their pending requests and links stop. Their history is kept. Bringing them back needs a second super admin.'
+            : 'Another super admin must approve this before they can sign in again.'
+        }
+        confirmLabel={lifecycleTarget?.action === 'deactivate' ? 'Deactivate' : 'Send for approval'}
+        tone={lifecycleTarget?.action === 'deactivate' ? 'danger' : 'primary'}
+        promptLabel="Reason"
+        promptPlaceholder={
+          lifecycleTarget?.action === 'deactivate'
+            ? 'e.g. Left the company on 30 November'
+            : 'Why they are coming back'
+        }
+        promptValue={lifecycleReason}
+        onPromptChange={setLifecycleReason}
+        promptRequired
+        promptMinLength={10}
+        isLoading={lifecycle.isPending}
+        onConfirm={() =>
+          lifecycleTarget &&
+          lifecycle.mutate({
+            member: lifecycleTarget.member,
+            action: lifecycleTarget.action,
+            reason: lifecycleReason.trim(),
+          })
+        }
+      />
 
       <StaffAccessModal
         member={accessTarget}
