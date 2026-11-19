@@ -89,7 +89,8 @@ export function scrubUrl(url: string): string {
 }
 
 const URL_OR_PATH = /(^|[\s"'(])((?:[a-z][a-z0-9+.-]*:\/\/|\/)[^\s"'<>)]+)/gi;
-const KEY_VALUE = /([A-Za-z][\w-]*)=([^&\s#"']+)/g;
+// The lookbehind and length cap keep a long run of word characters with no `=` linear (ReDoS).
+const KEY_VALUE = /(?<![\w-])([A-Za-z][\w-]{0,63})=([^&\s#"']+)/g;
 
 export function scrubText(text: string): string {
   return text
