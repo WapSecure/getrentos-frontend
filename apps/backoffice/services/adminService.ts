@@ -45,6 +45,10 @@ import type {
   StaffAccess,
   StaffAccessChange,
   StaffAccessUpdateResult,
+  StaffDepartment,
+  StaffRoleCatalogueEntry,
+  StaffRoleHistoryEntry,
+  AdminStaffStatus,
   StaffRoleUpdateResult,
 } from '@/types/admin';
 
@@ -92,6 +96,9 @@ interface RawStaffRow {
   accountStatus: string;
   lastLoginAt: string | null;
   roles: { role: string }[];
+  departments?: StaffDepartment[];
+  regions?: string[];
+  adjusted?: boolean;
   staffApproval?: {
     id: string;
     status: 'PENDING' | 'APPROVED' | 'REJECTED';
@@ -166,12 +173,23 @@ const postCaseEvidence = (
 
 export const adminService = {
   async listStaff(
-    params: { page?: number; pageSize?: number } = {}
+    params: {
+      page?: number;
+      pageSize?: number;
+      search?: string;
+      role?: AdminStaffRole;
+      department?: StaffDepartment;
+      status?: AdminStaffStatus;
+    } = {}
   ): Promise<ApiResponse<Paginated<AdminStaffMember>>> {
     return safeCall(async () => {
       const query = toQuery({
         page: params.page?.toString(),
         pageSize: params.pageSize?.toString(),
+        search: params.search?.trim() || undefined,
+        role: params.role?.toUpperCase(),
+        department: params.department,
+        status: params.status?.toUpperCase(),
       });
       const response = await authFetch<Paginated<RawStaffRow>>(`/admin/access/staff${query}`);
       return { ...response, items: response.items.map(normalizeStaffRow) };
@@ -913,6 +931,18 @@ export const adminService = {
         body: JSON.stringify({ ...config, reason }),
       })
     );
+  },
+
+  async getRoleCatalogue(): Promise<ApiResponse<StaffRoleCatalogueEntry[]>> {
+    return safeCall(() => authFetch('/admin/access/roles'));
+  },
+
+  async getRoleHistory(
+    role: string,
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<StaffRoleHistoryEntry>>> {
+    const query = toQuery({ page: params.page?.toString(), pageSize: params.pageSize?.toString() });
+    return safeCall(() => authFetch(`/admin/access/roles/${role}/history${query}`));
   },
 
   async getMyAccess(): Promise<ApiResponse<MyStaffAccess>> {
