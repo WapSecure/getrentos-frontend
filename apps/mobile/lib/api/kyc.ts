@@ -46,6 +46,8 @@ export interface KycStatusResponse {
   tier?: number;
   /** Gate on this: identity.status is only the older review flow and stays PENDING for someone verified by NIN. */
   identityVerified?: boolean;
+  /** True once the legal name can no longer be edited on profile forms. */
+  legalNameLocked?: boolean;
   /** ISO date the identity grace period ends; after it, listings, payout accounts and withdrawals stop working. */
   identityGraceEndsAt?: string;
   identity?: IdentityKyc;

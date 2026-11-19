@@ -37,6 +37,8 @@ export interface KycStatus {
    * verified by NIN.
    */
   identityVerified?: boolean;
+  /** True once the legal name can no longer be edited on profile forms. */
+  legalNameLocked?: boolean;
   /** ISO; verify identity before then or listings, payout accounts and withdrawals stop working. */
   identityGraceEndsAt?: string;
   identity?: IdentityKyc;

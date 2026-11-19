@@ -40,6 +40,7 @@ test('verified identity or an approved ID document locks the legal name', () => 
   assert.equal(isLegalNameLockedByKyc({ identity: { status: 'APPROVED' } }), true);
   assert.equal(isLegalNameLockedByKyc({ identity: { status: 'PENDING' } }), false);
   assert.equal(isLegalNameLockedByKyc(undefined), false);
+  assert.equal(isLegalNameLockedByKyc({ legalNameLocked: true, identityVerified: false }), true);
 });
 
 test('either spelling of a verified status counts', () => {

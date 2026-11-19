@@ -86,13 +86,13 @@ export const RoleGrantsPanel = ({ currentUserId, notify }: RoleGrantsPanelProps)
   });
 
   const rejectMutation = useMutation({
-    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+    mutationFn: ({ id, reason }: { id: string; reason: string; withdrawing: boolean }) =>
       unwrap(adminService.rejectRoleGrant(id, reason)),
-    onSuccess: () => {
+    onSuccess: (_data, { withdrawing }) => {
       refresh();
       setRejectTarget(null);
       setRejectReason('');
-      notify('Role change rejected.', 'success');
+      notify(withdrawing ? 'Role change withdrawn.' : 'Role change rejected.', 'success');
     },
     onError: (error) => {
       if (error instanceof ApiError && (error.status === 409 || error.status === 400)) refresh();
@@ -263,7 +263,11 @@ export const RoleGrantsPanel = ({ currentUserId, notify }: RoleGrantsPanelProps)
         isLoading={rejectMutation.isPending}
         onConfirm={() =>
           rejectTarget &&
-          rejectMutation.mutate({ id: rejectTarget.id, reason: rejectReason.trim() })
+          rejectMutation.mutate({
+            id: rejectTarget.id,
+            reason: rejectReason.trim(),
+            withdrawing: rejectTarget.requestedBy.id === currentUserId,
+          })
         }
       />
     </section>

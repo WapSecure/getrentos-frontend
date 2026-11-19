@@ -9,9 +9,9 @@ const LOCKED_HINT =
 
 // Bank and payout name checks rely on the verified name, so the API refuses edits; the form says so up front.
 export function useLegalNameLock() {
-  const { verified } = useIdentityVerification();
+  const { verified, legalNameLocked } = useIdentityVerification();
   const [refused, setRefused] = useState(false);
-  const locked = verified || refused;
+  const locked = verified || legalNameLocked || refused;
   return {
     locked,
     fieldProps: locked ? { editable: false, hint: LOCKED_HINT } : {},
