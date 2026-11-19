@@ -137,6 +137,8 @@ export default function AppLayout() {
         <Stack.Screen name="amenities" options={DETAIL_OPTIONS} />
         <Stack.Screen name="maintenance" options={DETAIL_OPTIONS} />
         <Stack.Screen name="dues" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="gate-incidents" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="gate-patrol" options={DETAIL_OPTIONS} />
         <Stack.Screen name="estate-office-messages" options={DETAIL_OPTIONS} />
         <Stack.Screen name="estate-resident-messages" options={DETAIL_OPTIONS} />
         <Stack.Screen name="estate-resident-thread/[id]" options={DETAIL_OPTIONS} />

@@ -92,14 +92,14 @@ export default function GatemanAccount() {
               label: 'Patrol',
               description: 'Checkpoints, schedules and patrol history',
               icon: Footprints,
-              onPress: () => router.push('/(app)/(gateman)/gate-patrol'),
+              onPress: () => router.push('/(app)/gate-patrol'),
             },
             {
               key: 'incidents',
               label: 'Incidents',
               description: 'Report and review gate incidents',
               icon: Siren,
-              onPress: () => router.push('/(app)/(gateman)/incidents'),
+              onPress: () => router.push('/(app)/gate-incidents'),
             },
           ]}
         />
