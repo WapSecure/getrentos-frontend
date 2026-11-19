@@ -27,6 +27,7 @@ import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import { SaveListingButton } from './SaveListingButton';
 import { ListingComparisonDialog } from './ListingComparisonDialog';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
+import { BoostedBadge } from '@/components/shared/boosts/BoostedBadge';
 import { track } from '@/lib/analytics';
 import {
   DiscoveryViewToggle,
@@ -113,7 +114,12 @@ const MarketListingCard = ({
       imageAlt={listing.title}
       eager={eager}
       status={market === 'rent' ? 'For rent' : 'For sale'}
-      badges={<TrustChainBadge chain={listing.trustChain} fallbackVerified={listing.verified} />}
+      badges={
+        <>
+          <TrustChainBadge chain={listing.trustChain} fallbackVerified={listing.verified} />
+          {listing.boosted && <BoostedBadge />}
+        </>
+      }
       facts={{
         beds: listing.bedrooms,
         baths: listing.bathrooms,

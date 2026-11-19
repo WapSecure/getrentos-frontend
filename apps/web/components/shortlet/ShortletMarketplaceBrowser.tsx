@@ -31,6 +31,7 @@ import { ALL_NIGERIAN_CITIES } from '@/lib/constants/locations';
 import { useShortletWishlist } from '@/hooks/useShortletWishlist';
 import { formatCurrency } from '@/lib/format';
 import type { ShortletListing } from '@/types/shortlet';
+import { BoostedBadge } from '@/components/shared/boosts/BoostedBadge';
 import {
   DiscoveryViewToggle,
   MapAreaNotice,
@@ -262,6 +263,7 @@ export const ShortletMarketplaceBrowser = ({
         status="Shortlet"
         badges={
           <>
+            {listing.boosted && <BoostedBadge />}
             {listing.instantBooking && (
               <Badge variant="primary" icon={<Zap className="h-3 w-3" />}>
                 Instant

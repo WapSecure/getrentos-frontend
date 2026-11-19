@@ -41,6 +41,8 @@ export type ShortletBookingStatus =
 export interface ShortletListing {
   id: string;
   listingId: string;
+  /** Paid placement, labelled on the card. */
+  boosted?: boolean;
   propertyId: string;
   title: string;
   description?: string;
