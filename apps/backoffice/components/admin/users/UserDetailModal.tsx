@@ -35,7 +35,9 @@ interface UserDetailModalProps {
   onChangeSubscription: (userId: string, tier: PlanTier, endDate?: string) => void;
   isChangingSubscription?: boolean;
   canManageSubscription?: boolean;
-  /** Holds users.manage and the user is not the signed-in staff member. */
+  canChangeStatus?: boolean;
+  canManageSecurity?: boolean;
+  /** Holds users.security and the user is not the signed-in staff member. */
   canCorrectLegalName?: boolean;
   onLegalNameChanged?: (userId: string, legalName: string) => void;
 }
@@ -59,6 +61,8 @@ export const UserDetailModal = ({
   onChangeSubscription,
   isChangingSubscription = false,
   canManageSubscription = false,
+  canChangeStatus = false,
+  canManageSecurity = false,
   canCorrectLegalName = false,
   onLegalNameChanged,
 }: UserDetailModalProps) => {
@@ -132,7 +136,7 @@ export const UserDetailModal = ({
             />
           </div>
 
-          <UserSecurityActions userId={user.id} />
+          {canManageSecurity && <UserSecurityActions userId={user.id} />}
 
           <div className="flex gap-2 border-t border-border bg-secondary/30 px-5 py-4">
             {/* Opening a profile lands on Close, not on a billing or account action. */}
@@ -145,7 +149,7 @@ export const UserDetailModal = ({
             >
               Close
             </Button>
-            {user.status !== 'suspended' ? (
+            {!canChangeStatus ? null : user.status !== 'suspended' ? (
               <Button
                 variant="outline"
                 className="flex-1 gap-1.5"
@@ -168,7 +172,7 @@ export const UserDetailModal = ({
                 Reactivate
               </Button>
             )}
-            {user.status !== 'banned' && (
+            {canChangeStatus && user.status !== 'banned' && (
               <Button
                 variant="ghost"
                 className="flex-1 gap-1.5 text-destructive"

@@ -66,7 +66,8 @@ export default function AdminUsersPage() {
   const toast = useToast();
   const adminUser = useAdminUser();
   const canManageSubscriptions = hasAdminPermission(adminUser?.roles, 'subscriptions.manage');
-  const canManageUsers = hasAdminPermission(adminUser?.roles, 'users.manage');
+  const canChangeStatus = hasAdminPermission(adminUser?.roles, 'users.suspend');
+  const canManageSecurity = hasAdminPermission(adminUser?.roles, 'users.security');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -352,8 +353,10 @@ export default function AdminUsersPage() {
         }}
         isChangingSubscription={changeSubscriptionMutation.isPending}
         canManageSubscription={canManageSubscriptions}
+        canChangeStatus={canChangeStatus}
+        canManageSecurity={canManageSecurity}
         canCorrectLegalName={
-          canManageUsers &&
+          canManageSecurity &&
           !!activeUser &&
           activeUser.id !== adminUser?.id &&
           activeUser.email !== adminUser?.email

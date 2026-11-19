@@ -45,8 +45,8 @@ const STATUS_FILTERS: { value: 'open' | LandInspectionStatus; label: string }[] 
 
 export default function AdminLandWatchPage() {
   const user = useAdminUser();
-  const canView = hasAdminPermission(user?.roles, 'verifications.review');
-  const canDecide = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canView = hasAdminPermission(user?.roles, 'land.review');
+  const canDecide = hasAdminPermission(user?.roles, 'land.approve');
   const [tab, setTab] = useState<Tab>('inspections');
 
   if (!canView) {

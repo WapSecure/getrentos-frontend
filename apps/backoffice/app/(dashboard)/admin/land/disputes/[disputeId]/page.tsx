@@ -48,8 +48,8 @@ export default function AdminLandDisputePage() {
   const disputeId = decodeURIComponent(params.disputeId);
   const queryClient = useQueryClient();
   const user = useAdminUser();
-  const canView = hasAdminPermission(user?.roles, 'verifications.review');
-  const canDecide = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canView = hasAdminPermission(user?.roles, 'disputes.review');
+  const canDecide = hasAdminPermission(user?.roles, 'disputes.resolve');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const [holdText, setHoldText] = useState('');
   const [outcome, setOutcome] = useState<LandDisputeOutcome | ''>('');

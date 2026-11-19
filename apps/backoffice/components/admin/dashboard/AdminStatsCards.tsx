@@ -3,7 +3,7 @@
 import { Gavel, Landmark, Lock, ShieldAlert, ShieldCheck, Users } from '@sureground/icons';
 import { StatGroup } from '@sureground/ui';
 import { formatCurrency, ROUTES } from '@sureground/shared';
-import { useAdminCan } from '@/hooks/useAdminCan';
+import { useAdminCan, useAdminCanAny } from '@/hooks/useAdminCan';
 
 interface AdminStatsCardsProps {
   totalUsers: number;
@@ -25,7 +25,7 @@ export const AdminStatsCards = ({
   // Every role sees the totals; a figure links only to a page the sidebar would show that role.
   const canViewUsers = useAdminCan('users.view');
   const canViewEscrow = useAdminCan('escrow.view');
-  const canReviewVerifications = useAdminCan('verifications.review');
+  const canReviewVerifications = useAdminCanAny('kyc.review', 'properties.review');
   const canReviewDisputes = useAdminCan('disputes.review');
   const canReviewFraud = useAdminCan('fraud.review');
 

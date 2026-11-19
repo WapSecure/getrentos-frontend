@@ -31,7 +31,7 @@ const ROLE_OPTIONS = [
 
 export default function AdminLandProfessionalsPage() {
   const user = useAdminUser();
-  const canView = hasAdminPermission(user?.roles, 'verifications.review');
+  const canView = hasAdminPermission(user?.roles, 'land.review');
   const [status, setStatus] = useState<string>('APPLIED');
   const [role, setRole] = useState<string>('all');
   const query = useQuery({

@@ -63,8 +63,8 @@ export default function AdminLandAuthorityPage() {
   const authorityId = decodeURIComponent(params.authorityId);
   const queryClient = useQueryClient();
   const user = useAdminUser();
-  const canView = hasAdminPermission(user?.roles, 'verifications.review');
-  const canDecide = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canView = hasAdminPermission(user?.roles, 'land.review');
+  const canDecide = hasAdminPermission(user?.roles, 'land.approve');
   const toast = useToast();
   const [blockers, setBlockers] = useState<string[]>([]);
 

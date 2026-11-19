@@ -37,7 +37,9 @@ export const ReviewVerificationModal = ({
   isRequestingClarification = false,
 }: ReviewVerificationModalProps) => {
   // Approve and reject need a separate permission; a reviewer without it can still ask for more information.
-  const canDecide = useAdminCan('verifications.approve');
+  const canDecideKyc = useAdminCan('kyc.approve');
+  const canDecideProperty = useAdminCan('properties.verify');
+  const canDecide = request?.type === 'property' ? canDecideProperty : canDecideKyc;
   const [mode, setMode] = useState<'view' | 'reject' | 'clarify'>('view');
   const [reason, setReason] = useState('');
   const [crossCheckIssues, setCrossCheckIssues] = useState<string[]>([]);

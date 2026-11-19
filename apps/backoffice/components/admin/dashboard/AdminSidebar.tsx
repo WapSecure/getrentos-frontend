@@ -71,7 +71,8 @@ interface NavItem {
   mobileLabel?: string;
   href: string;
   icon: React.ElementType;
-  permission: AdminPermission;
+  /** Several permissions: any one opens the page. */
+  permission: AdminPermission | AdminPermission[];
 }
 
 const navItems: NavItem[] = [
@@ -86,25 +87,25 @@ const navItems: NavItem[] = [
     label: 'Verifications',
     href: ROUTES.ADMIN_VERIFICATIONS,
     icon: ShieldCheck,
-    permission: 'verifications.review',
+    permission: ['kyc.review', 'properties.review'],
   },
   {
     label: 'Trust reviews',
     href: '/admin/trust/review-cases',
     icon: Fingerprint,
-    permission: 'verifications.review',
+    permission: 'kyc.review',
   },
   {
     label: 'Tier 3 grants',
     href: '/admin/trust/tier-grants',
     icon: KeyRound,
-    permission: 'verifications.approve',
+    permission: 'kyc.approve',
   },
   {
     label: 'Trust appeals',
     href: '/admin/trust/appeals',
     icon: Gavel,
-    permission: 'verifications.review',
+    permission: 'kyc.review',
   },
   {
     label: 'Diaspora operations',
@@ -116,13 +117,13 @@ const navItems: NavItem[] = [
     label: 'Property authorities',
     href: '/admin/property-authorities',
     icon: Building2,
-    permission: 'verifications.approve',
+    permission: 'properties.verify',
   },
   {
     label: 'Agencies',
     href: '/admin/agencies',
     icon: Briefcase,
-    permission: 'verifications.review',
+    permission: 'kyc.review',
   },
   {
     label: 'Sureground Managed',
@@ -249,7 +250,7 @@ const navItems: NavItem[] = [
     label: 'Land diligence',
     href: '/admin/land/diligence',
     icon: MapPinned,
-    permission: 'verifications.review',
+    permission: 'land.review',
   },
   {
     label: 'Land purchases',
@@ -273,37 +274,37 @@ const navItems: NavItem[] = [
     label: 'Inspection questions',
     href: '/admin/land/inspection-questions',
     icon: MessageCircleQuestion,
-    permission: 'verifications.review',
+    permission: 'land.review',
   },
   {
     label: 'Estate infrastructure',
     href: '/admin/land/infrastructure',
     icon: Construction,
-    permission: 'verifications.review',
+    permission: 'land.review',
   },
   {
     label: 'Land disputes',
     href: '/admin/land/disputes',
     icon: Gavel,
-    permission: 'verifications.review',
+    permission: 'disputes.review',
   },
   {
     label: 'Seller authority',
     href: '/admin/land/authority',
     icon: UserCheck,
-    permission: 'verifications.review',
+    permission: 'land.review',
   },
   {
     label: 'Land professionals',
     href: '/admin/land/professionals',
     icon: BadgeCheck,
-    permission: 'verifications.review',
+    permission: 'land.review',
   },
   {
     label: 'Land Watch',
     href: '/admin/land/watch',
     icon: Eye,
-    permission: 'verifications.review',
+    permission: 'land.review',
   },
   {
     label: 'Land fraud signals',
@@ -442,13 +443,13 @@ const navItems: NavItem[] = [
     label: 'Messages',
     href: ROUTES.ADMIN_MESSAGES,
     icon: MessageCircle,
-    permission: 'messages.manage',
+    permission: ['support.messages', 'conversations.read'],
   },
   {
     label: 'Text messaging',
     href: '/admin/text-messaging',
     icon: MessageSquare,
-    permission: 'messages.manage',
+    permission: 'support.messages',
   },
   {
     label: 'Reports',
@@ -472,19 +473,19 @@ const navItems: NavItem[] = [
     label: 'Floor plan checks',
     href: '/admin/floor-plans',
     icon: Ruler,
-    permission: 'verifications.review',
+    permission: 'properties.review',
   },
   {
     label: 'Development checks',
     href: '/admin/developments',
     icon: Building2,
-    permission: 'verifications.review',
+    permission: 'properties.review',
   },
   {
     label: 'Unanswered developer questions',
     href: '/admin/development-questions',
     icon: MessageCircleQuestion,
-    permission: 'verifications.review',
+    permission: 'properties.review',
   },
   {
     label: 'Automation usage',
@@ -643,7 +644,9 @@ const hasAccess = (roles: string[] | undefined, item: NavItem) =>
     ? hasStaffAccess(roles)
     : item.href === ROUTES.ADMIN_CHANGE_REQUESTS
       ? hasChangeRequestAccess(roles)
-      : hasAdminPermission(roles, item.permission);
+      : (Array.isArray(item.permission) ? item.permission : [item.permission]).some((permission) =>
+          hasAdminPermission(roles, permission)
+        );
 
 // The one link for this page: the most specific match, so a page nested under
 // another (/admin/rentals/units under /admin/rentals) does not light up both.

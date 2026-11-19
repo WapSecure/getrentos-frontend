@@ -21,6 +21,7 @@ import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
 import { RegionScopeNotice } from '@/components/admin/access/RegionScopeNotice';
 import { adminService } from '@/services/adminService';
+import { useAdminCan } from '@/hooks/useAdminCan';
 import { OpsToolbar } from '@/components/admin/ops/OpsParts';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -44,6 +45,8 @@ function approveDescription(request: VerificationRequest, crossCheckIssues: stri
 }
 
 export default function AdminVerificationsPage() {
+  const canReviewKyc = useAdminCan('kyc.review');
+  const canReviewProperties = useAdminCan('properties.review');
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -144,9 +147,9 @@ export default function AdminVerificationsPage() {
 
   const typeOptions: { value: TypeFilter; label: string }[] = [
     { value: 'all', label: 'All types' },
-    { value: 'identity', label: 'Identity' },
-    { value: 'property', label: 'Property' },
-    { value: 'license', label: 'License' },
+    ...(canReviewKyc ? [{ value: 'identity' as const, label: 'Identity' }] : []),
+    ...(canReviewProperties ? [{ value: 'property' as const, label: 'Property' }] : []),
+    ...(canReviewKyc ? [{ value: 'license' as const, label: 'License' }] : []),
   ];
 
   return (

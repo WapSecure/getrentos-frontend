@@ -41,7 +41,7 @@ export default function AdminLandPurchaseDetailPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();
   const canView = hasAdminPermission(user?.roles, 'sales.view');
-  const canWaiveMilestone = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canWaiveMilestone = hasAdminPermission(user?.roles, 'land.approve');
   const canWaiveLateFee = hasAdminPermission(user?.roles, 'escrow.approve');
   const toast = useToast();
 

@@ -48,7 +48,7 @@ const TYPE_LABEL = {
 export default function AdminAgenciesPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();
-  const canDecide = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canDecide = hasAdminPermission(user?.roles, 'kyc.approve');
   const canViewPlans = hasAdminPermission(user?.roles, 'subscriptions.view');
   const [openPlans, setOpenPlans] = useState<Set<string>>(new Set());
   const togglePlan = (id: string) =>

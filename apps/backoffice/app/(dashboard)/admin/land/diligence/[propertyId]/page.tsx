@@ -41,8 +41,8 @@ export default function AdminLandDiligenceCasePage() {
   const params = useParams<{ propertyId: string }>();
   const propertyId = decodeURIComponent(params.propertyId);
   const user = useAdminUser();
-  const canReview = hasAdminPermission(user?.roles, 'verifications.review');
-  const canApprove = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canReview = hasAdminPermission(user?.roles, 'land.review');
+  const canApprove = hasAdminPermission(user?.roles, 'land.approve');
   const canSearchUsers = hasAdminPermission(user?.roles, 'users.view');
   const toast = useToast();
   const [stale, setStale] = useState(false);

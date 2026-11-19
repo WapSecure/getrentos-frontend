@@ -60,7 +60,7 @@ const tabFilters: Record<QueueTab, Pick<ListLandDiligenceParams, 'assigned' | 'o
 export default function AdminLandDiligencePage() {
   const router = useRouter();
   const user = useAdminUser();
-  const canApprove = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canApprove = hasAdminPermission(user?.roles, 'land.approve');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');

@@ -162,7 +162,7 @@ const SaleConditions = ({
 export default function AdminLandResalesPage() {
   const user = useAdminUser();
   const canView = hasAdminPermission(user?.roles, 'sales.view');
-  const canDecide = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canDecide = hasAdminPermission(user?.roles, 'land.approve');
   const [open, setOpen] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const query = useQuery({

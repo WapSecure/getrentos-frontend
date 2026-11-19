@@ -68,8 +68,8 @@ const ACTION_COPY = {
 export default function AdminLandInfrastructurePage() {
   const user = useAdminUser();
   const queryClient = useQueryClient();
-  const canView = hasAdminPermission(user?.roles, 'verifications.review');
-  const canDecide = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canView = hasAdminPermission(user?.roles, 'land.review');
+  const canDecide = hasAdminPermission(user?.roles, 'land.approve');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const [action, setAction] = useState<Action>(null);
   const [note, setNote] = useState('');

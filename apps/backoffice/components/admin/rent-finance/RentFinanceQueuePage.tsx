@@ -22,6 +22,7 @@ import { adminKeys } from '@/lib/queryKeys';
 import { useAdminSearchParam } from '@/lib/readAdminSearchParam';
 import type { Paginated } from '@/services/adminService';
 import type { RentFinanceQuery } from '@/services/adminRentFinanceService';
+import { useAdminCan } from '@/hooks/useAdminCan';
 
 export interface RentFinanceQueueFilter {
   key: 'status' | 'escrowStatus' | 'category' | 'verified';
@@ -63,6 +64,7 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
   const [debounced, setDebounced] = useState('');
   const [page, setPage] = useState(1);
   const [exporting, setExporting] = useState(false);
+  const canExport = useAdminCan('data.export');
   const toast = useToast();
   const [filters, setFilters] = useState<Record<string, string>>(() =>
     Object.fromEntries((config.filters ?? []).map((filter) => [filter.key, 'all']))
@@ -111,7 +113,7 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
   }, [config]);
 
   const runExport = useCallback(async () => {
-    if (!config.exportFn) return;
+    if (!config.exportFn || !canExport) return;
     setExporting(true);
     try {
       const blob = await config.exportFn(queryParams);
@@ -122,7 +124,7 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
     } finally {
       setExporting(false);
     }
-  }, [config, queryParams, toast]);
+  }, [canExport, config, queryParams, toast]);
 
   if (isError && !data) {
     return (
@@ -145,7 +147,7 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
         actions={
           <>
             {config.headerActions}
-            {config.exportFn && (
+            {config.exportFn && canExport && (
               <Button
                 type="button"
                 variant="outline"
