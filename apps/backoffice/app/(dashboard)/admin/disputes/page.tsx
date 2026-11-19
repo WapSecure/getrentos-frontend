@@ -16,6 +16,7 @@ import {
 import { FilterChips, OpsToolbar } from '@/components/admin/ops/OpsParts';
 import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
+import { RegionScopeNotice } from '@/components/admin/access/RegionScopeNotice';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -269,6 +270,7 @@ export default function AdminDisputesPage() {
         ]}
       />
 
+      <RegionScopeNotice what="disputes" />
       <OpsToolbar>
         <SearchInput
           value={searchQuery}

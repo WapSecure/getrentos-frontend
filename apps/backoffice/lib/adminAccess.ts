@@ -1,6 +1,6 @@
 import type { AdminPermission, AdminStaffRole } from '@/types/admin';
 
-const ALL_PERMISSIONS: AdminPermission[] = [
+export const ALL_PERMISSIONS: AdminPermission[] = [
   'dashboard.view',
   'users.view',
   'users.manage',
@@ -158,7 +158,6 @@ export const ADMIN_ROLE_DETAILS: Record<
       'audit.view',
       'documents.manage',
       'reports.view',
-      'platform.configure',
       'shortlet.view',
       'rentals.view',
       'rentals.moderate',
@@ -207,8 +206,16 @@ export function getAdminStaffRole(roles: string[] = []): AdminStaffRole {
   return roles.map((role) => BACKEND_STAFF_ROLE_MAP[role]).find(Boolean) ?? 'backoffice_admin';
 }
 
-// Mirrors the backend: several roles grant the union of their permissions.
+// Personal adjustments live on the server, so once /admin/access/me has loaded it replaces the role table.
+let signedInPermissions: ReadonlySet<AdminPermission> | null = null;
+
+export function setSignedInPermissions(permissions: AdminPermission[] | null) {
+  signedInPermissions = permissions ? new Set(permissions) : null;
+}
+
+// Every caller passes the signed-in user's roles; several roles grant the union of their permissions.
 export function hasAdminPermission(roles: string[] | undefined, permission: AdminPermission) {
+  if (signedInPermissions) return signedInPermissions.has(permission);
   const staffRoles = (roles ?? [])
     .map((role) => BACKEND_STAFF_ROLE_MAP[role])
     .filter((role): role is AdminStaffRole => Boolean(role));
@@ -256,6 +263,12 @@ export function creatableStaffRoles(actorRoles: string[] = []): AdminStaffRole[]
   return staffRoles.filter((role) => isSubordinateRole(own, role));
 }
 
+export function hasChangeRequestAccess(roles: string[] | undefined): boolean {
+  return (
+    hasAdminPermission(roles, 'staff.manage') || hasAdminPermission(roles, 'platform.configure')
+  );
+}
+
 export function hasStaffAccess(roles: string[] | undefined): boolean {
   return (
     hasAdminPermission(roles, 'staff.manage') ||
@@ -263,3 +276,94 @@ export function hasStaffAccess(roles: string[] | undefined): boolean {
     hasAdminPermission(roles, 'staff.approve')
   );
 }
+
+// Staff administration comes only with a role (mirrors the backend ROLE_ONLY_PERMISSIONS).
+export const ROLE_ONLY_PERMISSIONS: AdminPermission[] = [
+  'staff.manage',
+  'staff.create',
+  'staff.approve',
+];
+
+export const PERMISSION_LABELS: Record<AdminPermission, string> = {
+  'dashboard.view': 'See the dashboard',
+  'users.view': 'Look up users',
+  'users.manage': 'Suspend users and change their plans',
+  'verifications.review': 'Review verification cases',
+  'verifications.approve': 'Approve verification cases',
+  'disputes.review': 'Read disputes',
+  'disputes.resolve': 'Resolve disputes',
+  'fraud.review': 'Review fraud alerts',
+  'fraud.freeze': 'Freeze accounts and funds for fraud',
+  'escrow.view': 'See held sale deposits',
+  'escrow.approve': 'Release or refund held deposits',
+  'audit.view': 'Read the audit log',
+  'documents.manage': 'Manage staff documents',
+  'messages.manage': 'Read and send support messages',
+  'reports.view': 'See reports',
+  'platform.configure': 'Ask for platform-wide setting changes',
+  'staff.manage': 'Manage staff accounts',
+  'staff.create': 'Add staff',
+  'staff.approve': 'Approve new staff',
+  'shortlet.view': 'See shortlets',
+  'shortlet.moderate': 'Moderate shortlets',
+  'shortlet.payout': 'Pay shortlet hosts',
+  'rentals.view': 'See rentals',
+  'rentals.moderate': 'Moderate rentals',
+  'rentfinance.view': 'See rent money',
+  'rentfinance.approve': 'Approve rent money movements',
+  'maintenance.view': 'See maintenance',
+  'maintenance.moderate': 'Act on maintenance',
+  'sales.view': 'See sales',
+  'sales.moderate': 'Moderate sales',
+  'professionals.moderate': 'Suspend or restore professionals',
+  'estate.view': 'See estates',
+  'estate.moderate': 'Act on estates',
+  'subscriptions.view': 'See subscriptions',
+  'subscriptions.manage': 'Change subscriptions',
+  'managed.view': 'See managed properties',
+  'managed.operate': 'Operate managed properties',
+  'ai.observe': 'See automation usage',
+  'collections.manage': 'Run collections',
+  'diaspora.ops': 'Handle diaspora requests',
+};
+
+// Mirrors the backend NIGERIAN_STATES; officers with none handle cases nationwide.
+export const NIGERIAN_STATES = [
+  'Abia',
+  'Adamawa',
+  'Akwa Ibom',
+  'Anambra',
+  'Bauchi',
+  'Bayelsa',
+  'Benue',
+  'Borno',
+  'Cross River',
+  'Delta',
+  'Ebonyi',
+  'Edo',
+  'Ekiti',
+  'Enugu',
+  'FCT',
+  'Gombe',
+  'Imo',
+  'Jigawa',
+  'Kaduna',
+  'Kano',
+  'Katsina',
+  'Kebbi',
+  'Kogi',
+  'Kwara',
+  'Lagos',
+  'Nasarawa',
+  'Niger',
+  'Ogun',
+  'Ondo',
+  'Osun',
+  'Oyo',
+  'Plateau',
+  'Rivers',
+  'Sokoto',
+  'Taraba',
+  'Yobe',
+  'Zamfara',
+] as const;

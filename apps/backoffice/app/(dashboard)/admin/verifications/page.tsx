@@ -19,6 +19,7 @@ import {
 } from '@sureground/ui';
 import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
+import { RegionScopeNotice } from '@/components/admin/access/RegionScopeNotice';
 import { adminService } from '@/services/adminService';
 import { OpsToolbar } from '@/components/admin/ops/OpsParts';
 import { unwrap } from '@sureground/shared';
@@ -160,6 +161,7 @@ export default function AdminVerificationsPage() {
         }
       />
 
+      <RegionScopeNotice what="property verifications" />
       <OpsToolbar>
         <SearchInput
           value={searchQuery}

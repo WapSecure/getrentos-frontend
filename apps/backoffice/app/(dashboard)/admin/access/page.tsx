@@ -9,6 +9,7 @@ import {
   ShieldAlert,
   CheckCircle2,
   UserRoundPlus,
+  SlidersHorizontal,
 } from '@sureground/icons';
 import { useAdminUser } from '../layout';
 import { CreateStaffModal } from '@/components/admin/access/CreateStaffModal';
@@ -16,6 +17,7 @@ import { ResetPasswordModal } from '@/components/admin/access/ResetPasswordModal
 import { StaffApprovalsPanel } from '@/components/admin/access/StaffApprovalsPanel';
 import { RoleGrantsPanel, roleGrantErrorMessage } from '@/components/admin/access/RoleGrantsPanel';
 import { StaffStatusBadge } from '@/components/admin/access/StaffStatusBadge';
+import { StaffAccessModal } from '@/components/admin/access/StaffAccessModal';
 import { Alert, Badge, PageHeader } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { ConfirmDialog } from '@sureground/ui';
@@ -55,6 +57,7 @@ export default function AdminAccessPage() {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [resetTarget, setResetTarget] = useState<AdminStaffMember | null>(null);
+  const [accessTarget, setAccessTarget] = useState<AdminStaffMember | null>(null);
   const [statusTarget, setStatusTarget] = useState<{
     member: AdminStaffMember;
     status: 'active' | 'suspended';
@@ -279,6 +282,18 @@ export default function AdminAccessPage() {
                         Suspend
                       </Button>
                     )}
+                    {staffRoleOf(member) !== 'super_admin' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5"
+                        disabled={isSelf(member)}
+                        onClick={() => setAccessTarget(member)}
+                      >
+                        <SlidersHorizontal className="h-3.5 w-3.5" />
+                        Access
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
@@ -318,6 +333,12 @@ export default function AdminAccessPage() {
         />
       )}
 
+      <StaffAccessModal
+        member={accessTarget}
+        onOpenChange={(open) => !open && setAccessTarget(null)}
+        notify={notify}
+      />
+
       <ResetPasswordModal
         key={resetTarget?.id ?? 'none'}
         open={!!resetTarget}
@@ -356,7 +377,7 @@ export default function AdminAccessPage() {
         title="Change staff role?"
         description={
           roleTarget
-            ? `${roleTarget.member.legalName} will become ${ADMIN_ROLE_DETAILS[roleTarget.role].label}. This grants: ${ADMIN_ROLE_DETAILS[roleTarget.role].permissions.join(', ')}.`
+            ? `${roleTarget.member.legalName} will become ${ADMIN_ROLE_DETAILS[roleTarget.role].label}. This grants: ${ADMIN_ROLE_DETAILS[roleTarget.role].permissions.join(', ')}. Any permissions you added or removed for them, and their regions, stay as they are.`
             : ''
         }
         confirmLabel="Change role"

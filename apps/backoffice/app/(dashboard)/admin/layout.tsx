@@ -13,7 +13,8 @@ import {
   getStoredUser,
   ensureValidSession,
 } from '@sureground/shared';
-import { hasStaffAccess } from '@/lib/adminAccess';
+import { hasChangeRequestAccess, hasStaffAccess, setSignedInPermissions } from '@/lib/adminAccess';
+import { adminService } from '@/services/adminService';
 import { StaffTwoFactorGate } from '@/components/security/StaffTwoFactorGate';
 import { usePathname } from 'next/navigation';
 
@@ -23,6 +24,8 @@ export type AdminUser = {
   email: string;
   role?: string;
   roles?: string[];
+  /** States whose cases this officer handles; empty means nationwide. */
+  regions?: string[];
 };
 
 const AdminUserContext = createContext<AdminUser | null>(null);
@@ -56,13 +59,22 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         return;
       }
 
+      // Without it the role table stands in; the API still enforces the personal limits.
+      const access = await adminService.getMyAccess();
+      if (cancelled) return;
+      setSignedInPermissions(access.success && access.data ? access.data.permissions : null);
+
       const needsStaffAccess = pathname === ROUTES.ADMIN_ACCESS;
       if (needsStaffAccess && !hasStaffAccess(parsedUser.roles)) {
         router.replace(ROUTES.ADMIN_DASHBOARD);
         return;
       }
+      if (pathname === ROUTES.ADMIN_CHANGE_REQUESTS && !hasChangeRequestAccess(parsedUser.roles)) {
+        router.replace(ROUTES.ADMIN_DASHBOARD);
+        return;
+      }
 
-      setUser(parsedUser);
+      setUser({ ...parsedUser, regions: access.success ? (access.data?.regions ?? []) : [] });
       setIsLoading(false);
     };
 

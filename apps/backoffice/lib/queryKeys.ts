@@ -143,6 +143,10 @@ export const adminKeys = {
   notificationPreferences: ['admin', 'notificationPreferences'] as const,
   platformConfig: ['admin', 'platformConfig'] as const,
   staff: ['admin', 'staff'] as const,
+  staffAccess: (id: string) => ['admin', 'staff', id, 'access'] as const,
+  changeRequests: ['admin', 'changeRequests'] as const,
+  changeRequestsList: (params: { status: string; page: number; pageSize: number }) =>
+    ['admin', 'changeRequests', params.status, params.page, params.pageSize] as const,
   staffApprovals: ['admin', 'staffApprovals'] as const,
   staffRoleGrants: ['admin', 'staffRoleGrants'] as const,
   staffRoleGrantsList: (params?: { page?: number; pageSize?: number }) =>

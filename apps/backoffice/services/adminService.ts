@@ -38,6 +38,13 @@ import type {
   AdminStaffApproval,
   AdminStaffRole,
   StaffRoleGrantRequest,
+  AdminChangeRequest,
+  ApprovalStatus,
+  MyStaffAccess,
+  PendingChange,
+  StaffAccess,
+  StaffAccessChange,
+  StaffAccessUpdateResult,
   StaffRoleUpdateResult,
 } from '@/types/admin';
 
@@ -896,9 +903,64 @@ export const adminService = {
     );
   },
 
-  async updatePlatformConfig(config: PlatformConfig): Promise<ApiResponse<PlatformConfig>> {
+  async updatePlatformConfig(
+    config: PlatformConfig,
+    reason: string
+  ): Promise<ApiResponse<PendingChange>> {
     return safeCall(() =>
-      authFetch('/admin/settings/platform-config', { method: 'PUT', body: JSON.stringify(config) })
+      authFetch('/admin/settings/platform-config', {
+        method: 'PUT',
+        body: JSON.stringify({ ...config, reason }),
+      })
+    );
+  },
+
+  async getMyAccess(): Promise<ApiResponse<MyStaffAccess>> {
+    return safeCall(() => authFetch('/admin/access/me'));
+  },
+
+  async getStaffAccess(id: string): Promise<ApiResponse<StaffAccess>> {
+    return safeCall(() => authFetch(`/admin/access/staff/${id}/access`));
+  },
+
+  async updateStaffAccess(
+    id: string,
+    change: StaffAccessChange & { reason: string }
+  ): Promise<ApiResponse<StaffAccessUpdateResult>> {
+    return safeCall(() =>
+      authFetch(`/admin/access/staff/${id}/access`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          grantedPermissions: change.grantedPermissions,
+          revokedPermissions: change.revokedPermissions,
+          regions: change.regions,
+          reason: change.reason,
+        }),
+      })
+    );
+  },
+
+  async listChangeRequests(
+    params: { status?: ApprovalStatus; page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<AdminChangeRequest>>> {
+    const query = toQuery({
+      status: params.status,
+      page: params.page?.toString(),
+      pageSize: params.pageSize?.toString(),
+    });
+    return safeCall(() => authFetch(`/admin/change-requests${query}`));
+  },
+
+  async approveChangeRequest(id: string): Promise<ApiResponse<AdminChangeRequest>> {
+    return safeCall(() => authFetch(`/admin/change-requests/${id}/approve`, { method: 'POST' }));
+  },
+
+  async rejectChangeRequest(id: string, reason: string): Promise<ApiResponse<{ message: string }>> {
+    return safeCall(() =>
+      authFetch(`/admin/change-requests/${id}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
     );
   },
 };
