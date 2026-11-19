@@ -126,6 +126,63 @@ export type StaffRoleUpdateResult =
   | { status: 'APPLIED'; member: AdminStaffMember }
   | { status: 'PENDING_APPROVAL'; request: StaffRoleGrantRequest };
 
+export interface MyStaffAccess {
+  roles: string[];
+  permissions: AdminPermission[];
+  /** Empty means nationwide. */
+  regions: string[];
+}
+
+export type ChangeRequestKind =
+  | 'STAFF_ACCESS'
+  | 'PLATFORM_CONFIG'
+  | 'SHORTLET_FEES'
+  | 'SALE_COMMISSION';
+
+export interface StaffAccessChange {
+  grantedPermissions: AdminPermission[];
+  revokedPermissions: AdminPermission[];
+  regions: string[];
+  note?: string;
+}
+
+export interface AdminChangeRequest {
+  id: string;
+  kind: ChangeRequestKind;
+  subjectId: string;
+  subjectName: string | null;
+  payload: Record<string, unknown>;
+  baseline: Record<string, unknown> | null;
+  reason: string;
+  status: ApprovalStatus;
+  expiresAt: string;
+  createdAt: string;
+  decidedAt: string | null;
+  rejectionReason: string | null;
+  requestedBy: StaffRoleGrantPerson;
+  decidedBy: StaffRoleGrantPerson | null;
+  canDecide: boolean;
+  isMine: boolean;
+}
+
+export type PendingChange = { status: 'PENDING_APPROVAL'; request: AdminChangeRequest };
+
+export interface StaffAccess {
+  staffId: string;
+  legalName: string;
+  roles: string[];
+  roleDefaults: AdminPermission[];
+  grantedPermissions: AdminPermission[];
+  revokedPermissions: AdminPermission[];
+  regions: string[];
+  effectivePermissions: AdminPermission[];
+  note: string | null;
+  adjustable: boolean;
+  pendingRequest: AdminChangeRequest | null;
+}
+
+export type StaffAccessUpdateResult = { status: 'APPLIED'; access: StaffAccess } | PendingChange;
+
 export type UserAccountStatus = 'active' | 'suspended' | 'pending' | 'banned';
 export type VerificationRequestType = 'identity' | 'property' | 'license';
 export type VerificationRequestStatus =

@@ -1,4 +1,5 @@
 import { authFetch, safeCall, toQuery } from '@sureground/shared';
+import type { PendingChange } from '@/types/admin';
 import type { ApiResponse } from '@sureground/shared';
 import type { Paginated } from '@/services/adminService';
 import type {
@@ -400,12 +401,13 @@ export const adminShortletService = {
   },
 
   updateFeeConfig(
-    input: AdminShortletFeeConfigInput
-  ): Promise<ApiResponse<AdminShortletFeeConfig>> {
+    input: AdminShortletFeeConfigInput,
+    reason: string
+  ): Promise<ApiResponse<PendingChange>> {
     return safeCall(() =>
-      authFetch<AdminShortletFeeConfig>('/admin/shortlets/fees', {
+      authFetch<PendingChange>('/admin/shortlets/fees', {
         method: 'PUT',
-        body: JSON.stringify(input),
+        body: JSON.stringify({ ...input, reason }),
       })
     );
   },

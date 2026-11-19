@@ -1,4 +1,5 @@
 import { authDownload, authFetch, safeCall, toQuery } from '@sureground/shared';
+import type { PendingChange } from '@/types/admin';
 import type { ApiResponse } from '@sureground/shared';
 import type { Paginated } from './adminService';
 import type {
@@ -204,12 +205,13 @@ export const adminMarketplaceService = {
 
   // Future sales only: commissions already earned keep their rate.
   setRealtorCommissionRates(
-    input: RealtorCommissionRates
-  ): Promise<ApiResponse<RealtorCommissionRates>> {
+    input: RealtorCommissionRates,
+    reason: string
+  ): Promise<ApiResponse<PendingChange>> {
     return safeCall(() =>
-      authFetch<RealtorCommissionRates>('/admin/realtors/commission-rates', {
+      authFetch<PendingChange>('/admin/realtors/commission-rates', {
         method: 'PUT',
-        body: JSON.stringify(input),
+        body: JSON.stringify({ ...input, reason }),
       })
     );
   },

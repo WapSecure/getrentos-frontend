@@ -7,6 +7,7 @@ import {
   Alert,
   Button,
   Card,
+  ConfirmDialog,
   Field,
   NumberInput,
   PageErrorState,
@@ -22,6 +23,8 @@ export const RealtorCommissionRates = () => {
   const client = useQueryClient();
   // A draft over the stored split rather than state synced in an effect, which would cascade renders; `null` means not edited yet.
   const [draft, setDraft] = useState<{ listing: string; buyer: string } | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [reason, setReason] = useState('');
   const toast = useToast();
 
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
@@ -35,14 +38,18 @@ export const RealtorCommissionRates = () => {
   const save = useMutation({
     mutationFn: () =>
       unwrap(
-        adminMarketplaceService.setRealtorCommissionRates({
-          listingSidePct: Number(listingSidePct),
-          buyerSidePct: Number(buyerSidePct),
-        })
+        adminMarketplaceService.setRealtorCommissionRates(
+          { listingSidePct: Number(listingSidePct), buyerSidePct: Number(buyerSidePct) },
+          reason.trim()
+        )
       ),
     onSuccess: async () => {
-      toast.success('Commission split updated and audited.');
+      toast.info(
+        'Sent for approval. The new split applies once another officer approves it under Approvals.'
+      );
       setDraft(null);
+      setReason('');
+      setConfirmOpen(false);
       await client.invalidateQueries({ queryKey: ['admin', 'realtor-commission-rates'] });
     },
     onError: (error: Error) => toast.error(error.message),
@@ -138,12 +145,12 @@ export const RealtorCommissionRates = () => {
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Button
-                onClick={() => save.mutate()}
-                disabled={tooMuch || !bothNumbers}
+                onClick={() => setConfirmOpen(true)}
+                disabled={tooMuch || !bothNumbers || draft === null}
                 isLoading={save.isPending}
-                loadingText="Saving…"
+                loadingText="Sending…"
               >
-                Save split
+                Ask for approval
               </Button>
               {data && (
                 <span className="text-xs text-muted-foreground">
@@ -154,6 +161,26 @@ export const RealtorCommissionRates = () => {
           </>
         )}
       </Card>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          setConfirmOpen(open);
+          if (!open) setReason('');
+        }}
+        title="Ask for this commission change?"
+        description={`Listing side ${listingSidePct}%, buyer side ${buyerSidePct}%. Another officer must approve it before it applies to sales that settle.`}
+        confirmLabel="Send for approval"
+        tone="primary"
+        promptLabel="Reason"
+        promptPlaceholder="Why the split should change"
+        promptValue={reason}
+        onPromptChange={setReason}
+        promptRequired
+        promptMinLength={10}
+        isLoading={save.isPending}
+        onConfirm={() => save.mutate()}
+      />
     </div>
   );
 };

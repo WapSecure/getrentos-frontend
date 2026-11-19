@@ -63,7 +63,7 @@ import {
 } from '@sureground/icons';
 import { ROUTES, unwrap } from '@sureground/shared';
 import { SidebarRailToggle, useSidebarRail } from '@sureground/ui';
-import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
+import { hasAdminPermission, hasChangeRequestAccess, hasStaffAccess } from '@/lib/adminAccess';
 import type { AdminPermission } from '@/types/admin';
 
 interface NavItem {
@@ -498,6 +498,12 @@ const navItems: NavItem[] = [
     icon: KeyRound,
     permission: 'staff.manage',
   },
+  {
+    label: 'Approvals',
+    href: ROUTES.ADMIN_CHANGE_REQUESTS,
+    icon: ClipboardCheck,
+    permission: 'platform.configure',
+  },
 ];
 
 // Groups list their pages by name; ranges let newly added pages drift into the wrong group.
@@ -588,7 +594,7 @@ const groupItems: [group: string, items: string[]][] = [
   ],
   ['Risk and disputes', ['Disputes', 'Caution deposits', 'Fraud & risk', 'Audit logs']],
   ['Communications', ['Messages', 'Text messaging', 'Documents']],
-  ['Platform', ['Settings', 'Access & roles']],
+  ['Platform', ['Settings', 'Access & roles', 'Approvals']],
 ];
 const baseNavGroups = groupItems.map(([label, labels]) => ({
   label,
@@ -603,7 +609,7 @@ const primaryLabels = [
   'Disputes',
   'Fraud & risk',
 ];
-const utilityLabels = ['Settings', 'Access & roles'];
+const utilityLabels = ['Settings', 'Access & roles', 'Approvals'];
 const promotedLabels = new Set([...primaryLabels, ...utilityLabels]);
 const itemsByLabel = (labels: string[]) =>
   labels.flatMap((label) => {
@@ -629,7 +635,9 @@ const navGroups = [
 const hasAccess = (roles: string[] | undefined, item: NavItem) =>
   item.href === ROUTES.ADMIN_ACCESS
     ? hasStaffAccess(roles)
-    : hasAdminPermission(roles, item.permission);
+    : item.href === ROUTES.ADMIN_CHANGE_REQUESTS
+      ? hasChangeRequestAccess(roles)
+      : hasAdminPermission(roles, item.permission);
 
 // The one link for this page: the most specific match, so a page nested under
 // another (/admin/rentals/units under /admin/rentals) does not light up both.

@@ -16,6 +16,7 @@ import { Badge, type BadgeVariant } from '@sureground/ui';
 import { EmptyState, PageErrorState } from '@sureground/ui';
 import { Pagination } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@sureground/shared';
+import { RegionScopeNotice } from '@/components/admin/access/RegionScopeNotice';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -303,6 +304,7 @@ export default function AdminEscrowPage() {
         ]}
       />
 
+      <RegionScopeNotice what="sale deposits" />
       <OpsToolbar className="mb-3">
         <SearchInput
           value={searchQuery}

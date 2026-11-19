@@ -423,6 +423,7 @@ export const ROUTES = {
   ADMIN_REPORTS: '/admin/reports',
   ADMIN_SETTINGS: '/admin/settings',
   ADMIN_ACCESS: '/admin/access',
+  ADMIN_CHANGE_REQUESTS: '/admin/change-requests',
   ADMIN_HELP: '/admin/help',
 } as const;
 

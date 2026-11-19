@@ -556,11 +556,12 @@ export const ShortletOversight = () => {
   });
 
   const saveFees = useMutation({
-    mutationFn: (input: AdminShortletFeeConfigInput) =>
-      unwrap(adminShortletService.updateFeeConfig(input)),
+    mutationFn: ({ input, reason }: { input: AdminShortletFeeConfigInput; reason: string }) =>
+      unwrap(adminShortletService.updateFeeConfig(input, reason)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'fees'] });
-      toast.success('Platform fees & taxes saved: new bookings will use them.');
+      toast.info(
+        'Sent for approval. New bookings use these fees once another officer approves them under Approvals.'
+      );
     },
     onError: (reason: Error) => toast.error(reason.message),
   });
@@ -1146,7 +1147,7 @@ export const ShortletOversight = () => {
           key={feeConfig.updatedAt}
           feeConfig={feeConfig}
           saving={saveFees.isPending}
-          onSave={(input) => saveFees.mutate(input)}
+          onSave={(input, reason) => saveFees.mutateAsync({ input, reason })}
         />
       ) : feesError ? (
         <Card>
@@ -2319,7 +2320,7 @@ function FeeConfigForm({
 }: {
   feeConfig: AdminShortletFeeConfig;
   saving: boolean;
-  onSave: (input: AdminShortletFeeConfigInput) => void;
+  onSave: (input: AdminShortletFeeConfigInput, reason: string) => Promise<unknown>;
 }) {
   const [commission, setCommission] = useState(String(feeConfig.commissionPct));
   const [introPct, setIntroPct] = useState(
@@ -2330,6 +2331,7 @@ function FeeConfigForm({
   const [taxPct, setTaxPct] = useState(String(feeConfig.taxPct));
   const [depositWindow, setDepositWindow] = useState(String(feeConfig.depositClaimWindowHours));
   const [pendingInput, setPendingInput] = useState<AdminShortletFeeConfigInput | null>(null);
+  const [reason, setReason] = useState('');
 
   const commissionPct = Math.min(100, Math.max(0, Number(commission) || 0));
   const hasIntro = introPct.trim() !== '';
@@ -2471,16 +2473,20 @@ function FeeConfigForm({
             onClick={submit}
             disabled={!isDirty || !!introError}
             isLoading={saving}
-            loadingText="Saving…"
+            loadingText="Sending…"
           >
-            Save fees & taxes
+            Ask for approval
           </Button>
         </div>
       </Card>
       <ConfirmDialog
         open={pendingInput !== null}
-        onOpenChange={(open) => !open && setPendingInput(null)}
-        title="Apply new shortlet fees?"
+        onOpenChange={(open) => {
+          if (open) return;
+          setPendingInput(null);
+          setReason('');
+        }}
+        title="Ask for new shortlet fees?"
         description={
           pendingInput
             ? `New bookings will use ${
@@ -2489,11 +2495,26 @@ function FeeConfigForm({
                   : `${pendingInput.commissionPct}% commission`
               } and ${pendingInput.taxPct}% ${pendingInput.taxName ?? 'tax'}. Hosts will have ${
                 pendingInput.depositClaimWindowHours
-              } hours after check-out to claim a held deposit, unless a listing overrides it. Existing bookings keep their original fee snapshot.`
+              } hours after check-out to claim a held deposit, unless a listing overrides it. Existing bookings keep their original fee snapshot. Another officer must approve this first.`
             : ''
         }
-        confirmLabel="Apply fee changes"
-        onConfirm={() => pendingInput && onSave(pendingInput)}
+        confirmLabel="Send for approval"
+        promptLabel="Reason"
+        promptPlaceholder="Why the fees should change"
+        promptValue={reason}
+        onPromptChange={setReason}
+        promptRequired
+        promptMinLength={10}
+        isLoading={saving}
+        onConfirm={() => {
+          if (!pendingInput) return;
+          onSave(pendingInput, reason.trim())
+            .then(() => {
+              setPendingInput(null);
+              setReason('');
+            })
+            .catch(() => undefined);
+        }}
       />
     </>
   );

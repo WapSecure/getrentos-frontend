@@ -70,7 +70,7 @@ const PlatformConfigSettingsForm = ({
   initial: PlatformConfig;
   onDirtyChange: (dirty: boolean) => void;
 }) => {
-  const [baseline, setBaseline] = useState(initial);
+  const baseline = initial;
   const [minTrustScore, setMinTrustScore] = useState(initial.minTrustScore);
   const [escrowHoldDays, setEscrowHoldDays] = useState(initial.escrowHoldDays);
   const [autoFlagFraud, setAutoFlagFraud] = useState(initial.autoFlagFraud);
@@ -78,6 +78,7 @@ const PlatformConfigSettingsForm = ({
     initial.roleRequirements
   );
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [reason, setReason] = useState('');
   const toast = useToast();
   const current = { minTrustScore, escrowHoldDays, autoFlagFraud, roleRequirements };
   const isDirty = JSON.stringify(current) !== JSON.stringify(baseline);
@@ -102,19 +103,28 @@ const PlatformConfigSettingsForm = ({
     );
   };
 
+  const resetToLive = () => {
+    setMinTrustScore(baseline.minTrustScore);
+    setEscrowHoldDays(baseline.escrowHoldDays);
+    setAutoFlagFraud(baseline.autoFlagFraud);
+    setRoleRequirements(baseline.roleRequirements);
+  };
+
   const saveMutation = useMutation({
     mutationFn: () =>
       unwrap(
-        adminService.updatePlatformConfig({
-          minTrustScore,
-          escrowHoldDays,
-          autoFlagFraud,
-          roleRequirements,
-        })
+        adminService.updatePlatformConfig(
+          { minTrustScore, escrowHoldDays, autoFlagFraud, roleRequirements },
+          reason.trim()
+        )
       ),
-    onSuccess: (savedConfig) => {
-      setBaseline(savedConfig);
-      toast.success('Platform configuration updated.');
+    onSuccess: () => {
+      resetToLive();
+      setReason('');
+      setConfirmOpen(false);
+      toast.info(
+        'Sent for approval. The new configuration applies once another officer approves it under Approvals.'
+      );
     },
     onError: (error: Error) =>
       toast.error(error.message || 'Platform configuration could not be saved.'),
@@ -202,14 +212,21 @@ const PlatformConfigSettingsForm = ({
         disabled={!isDirty || !isValid || saveMutation.isPending}
         isLoading={saveMutation.isPending}
       >
-        Save configuration
+        Ask for approval
       </Button>
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title="Apply platform-wide configuration?"
-        description="These thresholds and verification requirements affect platform decisions for all users. Review the values before continuing."
-        confirmLabel="Apply configuration"
+        title="Ask for this configuration change?"
+        description="These thresholds and verification requirements affect decisions for every user, so another officer must approve the change before it applies."
+        confirmLabel="Send for approval"
+        promptLabel="Reason"
+        promptPlaceholder="Why this change is needed"
+        promptValue={reason}
+        onPromptChange={setReason}
+        promptRequired
+        promptMinLength={10}
+        isLoading={saveMutation.isPending}
         onConfirm={handleSave}
       />
     </div>
