@@ -461,8 +461,13 @@ export function daySpan(from: string, until: string): number {
 }
 
 /** Mirrors the API's rules; null when the draft can be sent. */
-export function contractorDraftError(d: ContractorDraft): string | null {
-  if (!d.householdId) return 'Choose the household they’re working for.';
+/** A household's own grant has no unit to choose and a shorter limit than the office's. */
+export function contractorDraftError(
+  d: ContractorDraft,
+  opts: { forHousehold?: boolean; maxDays?: number } = {}
+): string | null {
+  const maxDays = opts.maxDays ?? MAX_AUTHORISATION_DAYS;
+  if (!opts.forHousehold && !d.householdId) return 'Choose the household they’re working for.';
   if (d.name.trim().length < 2) return 'Enter their name.';
   if (!hasFullName(d.name) && !d.phone.trim()) {
     return 'Add a surname or a phone number. With one name word there’s nothing to check them against.';
@@ -472,8 +477,10 @@ export function contractorDraftError(d: ContractorDraft): string | null {
   if (span < 0) return 'It has to end on or after the day it starts.';
   // Both days count: it runs from the start of the first to the end of the last.
   const days = span + 1;
-  if (days > MAX_AUTHORISATION_DAYS) {
-    return `That’s ${days} days. An authorisation can run for at most ${MAX_AUTHORISATION_DAYS}, so it’s looked at again every year.`;
+  if (days > maxDays) {
+    return opts.forHousehold
+      ? `That’s ${days} days. A regular visitor pass can run for at most ${maxDays}; add a new one when it ends.`
+      : `That’s ${days} days. An authorisation can run for at most ${maxDays}, so it’s looked at again every year.`;
   }
   if (d.restrictHours) {
     if (!d.dailyFrom || !d.dailyTo) return 'Choose both a start and an end time.';

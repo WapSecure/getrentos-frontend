@@ -20,8 +20,8 @@ import {
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 
-// Must match the API's cap.
-const MAX_VALIDITY_DAYS = 366;
+// Must match the API's caps.
+const OFFICE_MAX_VALIDITY_DAYS = 366;
 
 const DAYS = [
   { value: 1, short: 'Mon' },
@@ -34,7 +34,8 @@ const DAYS = [
 ];
 
 export interface AddContractorPassInput {
-  householdId: string;
+  /** Absent for a household's own regular visitor: the API uses the resident's household. */
+  householdId?: string;
   name: string;
   phone?: string;
   company?: string;
@@ -48,7 +49,11 @@ export interface AddContractorPassInput {
 
 interface AddContractorPassModalProps {
   isOpen: boolean;
-  estateId: string;
+  /** Office mode only; a household adds to its own unit. */
+  estateId?: string;
+  /** A resident adding their own regular visitor: no unit to choose, no firm, and a shorter limit. */
+  forHousehold?: boolean;
+  maxDays?: number;
   onClose: () => void;
   onSubmit: (data: AddContractorPassInput) => void;
   isSubmitting?: boolean;
@@ -67,6 +72,8 @@ const hasFullName = (value: string) => value.trim().split(/\s+/).filter(Boolean)
 export const AddContractorPassModal = ({
   isOpen,
   estateId,
+  forHousehold = false,
+  maxDays = OFFICE_MAX_VALIDITY_DAYS,
   onClose,
   onSubmit,
   isSubmitting,
@@ -78,7 +85,8 @@ export const AddContractorPassModal = ({
   const [company, setCompany] = useState('');
   const [trade, setTrade] = useState('');
   const [validFrom, setValidFrom] = useState(localDate(0));
-  const [validUntil, setValidUntil] = useState(localDate(182));
+  const defaultSpan = Math.min(182, maxDays);
+  const [validUntil, setValidUntil] = useState(localDate(defaultSpan));
   const [daysOfWeek, setDaysOfWeek] = useState<number[]>([]);
   const [restrictHours, setRestrictHours] = useState(false);
   const [dailyFrom, setDailyFrom] = useState('08:00');
@@ -87,8 +95,8 @@ export const AddContractorPassModal = ({
 
   const { data: households } = useQuery({
     queryKey: ['estate', estateId, 'households', 'for-contractor-pass'],
-    queryFn: () => unwrap(estateService.listHouseholds(estateId, { pageSize: 100 })),
-    enabled: isOpen && !!estateId,
+    queryFn: () => unwrap(estateService.listHouseholds(estateId as string, { pageSize: 100 })),
+    enabled: isOpen && !!estateId && !forHousehold,
   });
 
   const householdOptions = (households?.items ?? []).map((household) => ({
@@ -103,7 +111,7 @@ export const AddContractorPassModal = ({
     setCompany('');
     setTrade('');
     setValidFrom(localDate(0));
-    setValidUntil(localDate(182));
+    setValidUntil(localDate(defaultSpan));
     setDaysOfWeek([]);
     setRestrictHours(false);
     setDailyFrom('08:00');
@@ -117,7 +125,9 @@ export const AddContractorPassModal = ({
   };
 
   const submit = () => {
-    if (!householdId) return setLocalError('Choose the household they are working for.');
+    if (!forHousehold && !householdId) {
+      return setLocalError('Choose the household they are working for.');
+    }
     if (!name.trim()) return setLocalError('Enter their name.');
     if (!hasFullName(name) && !phone.trim()) {
       return setLocalError(
@@ -128,18 +138,20 @@ export const AddContractorPassModal = ({
       (new Date(`${validUntil}T00:00:00`).getTime() - new Date(`${validFrom}T00:00:00`).getTime()) /
       86_400_000;
     if (!(spanDays > 0)) return setLocalError('The authorisation has to end after it starts.');
-    if (spanDays > MAX_VALIDITY_DAYS) {
+    if (spanDays > maxDays) {
       return setLocalError(
-        `That is ${Math.round(spanDays)} days. An authorisation can run for at most ${MAX_VALIDITY_DAYS}, so it is looked at again at least once a year.`
+        forHousehold
+          ? `That is ${Math.round(spanDays)} days. A regular visitor pass can run for at most ${maxDays}; add a new one when it ends.`
+          : `That is ${Math.round(spanDays)} days. An authorisation can run for at most ${maxDays}, so it is looked at again at least once a year.`
       );
     }
 
     setLocalError(null);
     onSubmit({
-      householdId,
+      householdId: forHousehold ? undefined : householdId,
       name: name.trim(),
       phone: phone.trim() || undefined,
-      company: company.trim() || undefined,
+      company: forHousehold ? undefined : company.trim() || undefined,
       trade: trade.trim() || undefined,
       // The API wants an instant: run to the end of the last day so the permission doesn't lapse that morning.
       validFrom: new Date(`${validFrom}T00:00:00`).toISOString(),
@@ -154,26 +166,30 @@ export const AddContractorPassModal = ({
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="lg">
         <DialogTitle className="pr-8 text-lg font-semibold text-foreground">
-          Authorise a regular visitor
+          {forHousehold ? 'Add a regular visitor' : 'Authorise a regular visitor'}
         </DialogTitle>
         <DialogDescription className="mt-1 text-sm text-muted-foreground">
-          For somebody who comes back: a cleaner, a driver, a contractor on site.
+          {forHousehold
+            ? 'For someone who comes to your home often, like a cleaner or a driver. They use one code on the days you choose, and the estate office is told.'
+            : 'For somebody who comes back: a cleaner, a driver, a contractor on site.'}
         </DialogDescription>
 
         <div className="mt-5 space-y-4">
           {(localError || error) && <Alert variant="danger">{localError ?? error}</Alert>}
 
-          <Field
-            label="Who are they working for?"
-            hint="Every arrival is recorded against this unit, so it is also the one that is told when they turn up."
-          >
-            <Select
-              value={householdId}
-              onValueChange={setHouseholdId}
-              options={householdOptions}
-              searchable
-            />
-          </Field>
+          {!forHousehold && (
+            <Field
+              label="Who are they working for?"
+              hint="Every arrival is recorded against this unit, so it is also the one that is told when they turn up."
+            >
+              <Select
+                value={householdId}
+                onValueChange={setHouseholdId}
+                options={householdOptions}
+                searchable
+              />
+            </Field>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Name">
@@ -194,21 +210,23 @@ export const AddContractorPassModal = ({
             </Field>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Field label="Firm" optionalLabel="(optional)">
-              <Input
-                type="text"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                placeholder="e.g. Zenith Electrical"
-              />
-            </Field>
-            <Field label="Trade" optionalLabel="(optional)">
+          <div className={forHousehold ? '' : 'grid grid-cols-1 sm:grid-cols-2 gap-3'}>
+            {!forHousehold && (
+              <Field label="Firm" optionalLabel="(optional)">
+                <Input
+                  type="text"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  placeholder="e.g. Zenith Electrical"
+                />
+              </Field>
+            )}
+            <Field label={forHousehold ? 'What they do' : 'Trade'} optionalLabel="(optional)">
               <Input
                 type="text"
                 value={trade}
                 onChange={(e) => setTrade(e.target.value)}
-                placeholder="e.g. Electrician"
+                placeholder={forHousehold ? 'e.g. Cleaner' : 'e.g. Electrician'}
               />
             </Field>
           </div>
@@ -286,7 +304,7 @@ export const AddContractorPassModal = ({
               isLoading={isSubmitting}
               loadingText="Creating…"
             >
-              Authorise
+              {forHousehold ? 'Add' : 'Authorise'}
             </Button>
           </div>
         </div>

@@ -4,11 +4,13 @@ import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
 import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 import type {
   Announcement,
+  ContractorPass,
   DeliveryLog,
   DirectoryEntry,
   EstateOfficeMessage,
   Due,
   ExpectedDelivery,
+  IssuedContractorPass,
   IssuedExpectedDelivery,
   IssuedVisitorPass,
   MaintenanceTicket,
@@ -25,6 +27,7 @@ import type {
   VisitorPass,
 } from '@/types/estate';
 import { providerQuery } from '@/services/paymentStatusService';
+import type { AddContractorPassInput } from '@/components/estate/contractors/AddContractorPassModal';
 import type { PaymentProvider } from '@/types/payments';
 
 type PageQuery = { page?: number; pageSize?: number };
@@ -187,6 +190,32 @@ export const estateResidentService = {
       authFetch(`/estate/resident/deliveries/expected/${expectedDeliveryId}/cancel`, {
         method: 'PATCH',
         body: JSON.stringify(reason ? { reason } : {}),
+      })
+    );
+  },
+
+  async listMyRegularVisitors(
+    query: PageQuery & { status?: 'ACTIVE' | 'REVOKED' | 'EXPIRED' } = {}
+  ): Promise<ApiResponse<Paginated<ContractorPass> & { available: boolean; maxDays: number }>> {
+    return safeCall(() => authFetch(`/estate/resident/regular-visitors${toQuery(query)}`));
+  },
+
+  async addMyRegularVisitor(
+    data: AddContractorPassInput
+  ): Promise<ApiResponse<IssuedContractorPass>> {
+    return safeCall(() =>
+      authFetch('/estate/resident/regular-visitors', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  async withdrawMyRegularVisitor(passId: string): Promise<ApiResponse<ContractorPass>> {
+    return safeCall(() =>
+      authFetch(`/estate/resident/regular-visitors/${passId}/revoke`, {
+        method: 'PATCH',
+        body: JSON.stringify({}),
       })
     );
   },

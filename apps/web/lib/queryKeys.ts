@@ -504,6 +504,8 @@ export const estateResidentKeys = {
   violations: ['estate', 'resident', 'violations'] as const,
   officeMessages: ['estate', 'resident', 'office-messages'] as const,
   visitorPassesAll: ['estate', 'resident', 'visitorPasses'] as const,
+  regularVisitors: (page = 1) => ['estate', 'resident', 'regularVisitors', page] as const,
+  regularVisitorsAll: ['estate', 'resident', 'regularVisitors'] as const,
   visitorPasses: (group: 'waiting' | 'active' | 'past', page = 1) =>
     ['estate', 'resident', 'visitorPasses', group, page] as const,
   deliveriesAll: ['estate', 'resident', 'deliveries'] as const,

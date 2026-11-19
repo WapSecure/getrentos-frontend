@@ -1,5 +1,6 @@
 import { apiFetch, apiUpload } from './client';
 import { toQuery } from './query';
+import type { ContractorPass, IssuedContractorPass, NewContractorPass } from './estateGate';
 import { appendFile, type PickedFile } from './documents';
 import type { IssuedVisitorPass, VisitorPass } from './visitor-pass';
 import { providerQuery, type PaymentProvider } from './paymentStatus';
@@ -355,6 +356,23 @@ export const residentApi = {
 
   voteOnPoll: (pollId: string, optionId: string) =>
     apiFetch<Poll>(`/estate/resident/polls/${pollId}/vote`, { method: 'POST', body: { optionId } }),
+
+  listRegularVisitors: (page = 1, pageSize = 10) =>
+    apiFetch<Paginated<ContractorPass> & { available: boolean; maxDays: number }>(
+      `/estate/resident/regular-visitors${toQuery({ page, pageSize })}`
+    ),
+
+  addRegularVisitor: (body: Omit<NewContractorPass, 'householdId'>) =>
+    apiFetch<IssuedContractorPass>('/estate/resident/regular-visitors', {
+      method: 'POST',
+      body,
+    }),
+
+  withdrawRegularVisitor: (passId: string) =>
+    apiFetch<ContractorPass>(`/estate/resident/regular-visitors/${passId}/revoke`, {
+      method: 'PATCH',
+      body: {},
+    }),
 
   listVisitorPasses: (
     page = 1,
