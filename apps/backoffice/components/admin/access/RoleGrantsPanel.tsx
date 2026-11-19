@@ -187,8 +187,8 @@ export const RoleGrantsPanel = ({ currentUserId, notify }: RoleGrantsPanelProps)
         <div>
           <h2 className="type-heading">Role changes awaiting approval</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Granting Super Admin or Backoffice Admin, or staff access to a non-staff account, needs
-            a second super admin. Requests expire after 72 hours.
+            Granting Super admin or Head of operations, or staff access to a non-staff account,
+            needs a second super admin. Requests expire after 72 hours.
           </p>
         </div>
         {total > 0 && <Badge variant="warning">{total} pending</Badge>}

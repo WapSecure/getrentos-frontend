@@ -76,6 +76,43 @@ export type AdminStaffStatus = 'active' | 'pending' | 'suspended' | 'banned';
 
 export type ApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
+export type StaffDepartment =
+  | 'PLATFORM_GOVERNANCE'
+  | 'OPERATIONS'
+  | 'COMPLIANCE'
+  | 'VERIFICATION'
+  | 'TRUST_AND_SAFETY'
+  | 'DISPUTES'
+  | 'CUSTOMER_SUPPORT'
+  | 'FINANCE';
+
+export type PermissionSensitivity = 'READ' | 'DECIDE' | 'SENSITIVE_DATA' | 'MONEY' | 'GOVERNANCE';
+
+export interface StaffRoleCatalogueEntry {
+  role: string;
+  label: string;
+  department: StaffDepartment;
+  departmentLabel: string;
+  reportsTo: string | null;
+  level: number | null;
+  purpose: string;
+  holders: number;
+  permissions: {
+    permission: AdminPermission;
+    sensitivity: PermissionSensitivity;
+    roleOnly: boolean;
+  }[];
+}
+
+export interface StaffRoleHistoryEntry {
+  id: string;
+  action: string;
+  change: 'GRANTED' | 'REMOVED';
+  staff: { id: string; legalName: string } | null;
+  actor: { id: string; legalName: string } | null;
+  createdAt: string;
+}
+
 export interface AdminStaffMember {
   id: string;
   legalName: string;
@@ -83,6 +120,10 @@ export interface AdminStaffMember {
   accountStatus: AdminStaffStatus;
   lastLoginAt: string | null;
   roles: { role: AdminStaffRole }[];
+  departments?: StaffDepartment[];
+  regions?: string[];
+  /** Personal permissions added or removed on top of the role. */
+  adjusted?: boolean;
   staffApproval?: {
     id: string;
     status: ApprovalStatus;

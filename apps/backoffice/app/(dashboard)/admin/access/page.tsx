@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   UserRoundPlus,
   SlidersHorizontal,
+  MapPin,
 } from '@sureground/icons';
 import { useAdminUser } from '../layout';
 import { CreateStaffModal } from '@/components/admin/access/CreateStaffModal';
@@ -18,7 +19,8 @@ import { StaffApprovalsPanel } from '@/components/admin/access/StaffApprovalsPan
 import { RoleGrantsPanel, roleGrantErrorMessage } from '@/components/admin/access/RoleGrantsPanel';
 import { StaffStatusBadge } from '@/components/admin/access/StaffStatusBadge';
 import { StaffAccessModal } from '@/components/admin/access/StaffAccessModal';
-import { Alert, Badge, PageHeader } from '@sureground/ui';
+import { RoleCatalogue } from '@/components/admin/access/RoleCatalogue';
+import { Alert, Badge, PageHeader, SearchInput, Tabs, TabsList, TabsTrigger } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { ConfirmDialog } from '@sureground/ui';
 import { Select } from '@sureground/ui';
@@ -31,7 +33,12 @@ import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { ADMIN_ROLE_DETAILS, creatableStaffRoles, hasAdminPermission } from '@/lib/adminAccess';
 import { formatRelativeTime, getInitials } from '@sureground/shared';
-import type { AdminStaffMember, AdminStaffRole } from '@/types/admin';
+import type {
+  AdminStaffMember,
+  AdminStaffRole,
+  AdminStaffStatus,
+  StaffDepartment,
+} from '@/types/admin';
 
 const PAGE_SIZE = 10;
 
@@ -67,6 +74,27 @@ export default function AdminAccessPage() {
     role: AdminStaffRole;
   } | null>(null);
   const [staffPage, setStaffPage] = useState(1);
+  const [tab, setTab] = useState<'staff' | 'roles'>(canManage ? 'staff' : 'roles');
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState<AdminStaffRole | 'all'>('all');
+  const [departmentFilter, setDepartmentFilter] = useState<StaffDepartment | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<AdminStaffStatus | 'all'>('all');
+  const staffFilters = {
+    page: staffPage,
+    pageSize: PAGE_SIZE,
+    search: search.trim() || undefined,
+    role: roleFilter === 'all' ? undefined : roleFilter,
+    department: departmentFilter === 'all' ? undefined : departmentFilter,
+    status: statusFilter === 'all' ? undefined : statusFilter,
+  };
+  const { data: catalogue } = useQuery({
+    queryKey: adminKeys.staffRoleCatalogue,
+    queryFn: () => unwrap(adminService.getRoleCatalogue()),
+  });
+  const departmentLabels = useMemo(
+    () => new Map((catalogue ?? []).map((entry) => [entry.department, entry.departmentLabel])),
+    [catalogue]
+  );
 
   const {
     data: staffData,
@@ -75,8 +103,8 @@ export default function AdminAccessPage() {
     isFetching,
     refetch,
   } = useQuery({
-    queryKey: adminKeys.staffList({ page: staffPage, pageSize: PAGE_SIZE }),
-    queryFn: () => unwrap(adminService.listStaff({ page: staffPage, pageSize: PAGE_SIZE })),
+    queryKey: adminKeys.staffList(staffFilters),
+    queryFn: () => unwrap(adminService.listStaff(staffFilters)),
     enabled: canManage,
     placeholderData: keepPreviousData,
   });
@@ -155,19 +183,32 @@ export default function AdminAccessPage() {
         </p>
       </Alert>
 
-      {canApprove && (
+      <Tabs
+        value={tab}
+        onValueChange={(value) => setTab(value as 'staff' | 'roles')}
+        className="mb-5"
+      >
+        <TabsList aria-label="Access and roles view">
+          <TabsTrigger value="staff">Staff</TabsTrigger>
+          <TabsTrigger value="roles">Roles</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {tab === 'roles' && <RoleCatalogue canSeeHistory={canManage} />}
+
+      {tab === 'staff' && canApprove && (
         <div className="mb-6">
           <StaffApprovalsPanel notify={notify} />
         </div>
       )}
 
-      {canManage && (
+      {tab === 'staff' && canManage && (
         <div className="mb-6">
           <RoleGrantsPanel currentUserId={user?.id} notify={notify} />
         </div>
       )}
 
-      {canManage && (
+      {tab === 'staff' && canManage && (
         <section className="overflow-hidden rounded-2xl border border-border bg-card">
           <div className="border-b border-border p-5">
             <h2 className="type-heading">Internal staff</h2>
@@ -175,6 +216,62 @@ export default function AdminAccessPage() {
               Full control over staff accounts: change roles, suspend, or reset passwords. Each
               change is recorded in the audit log.
             </p>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <SearchInput
+                value={search}
+                onValueChange={(value) => {
+                  setSearch(value);
+                  setStaffPage(1);
+                }}
+                placeholder="Name or email"
+                label="Search staff"
+                className="w-full sm:w-56"
+              />
+              <Select
+                ariaLabel="Filter by department"
+                value={departmentFilter}
+                onValueChange={(value) => {
+                  setDepartmentFilter(value as StaffDepartment | 'all');
+                  setStaffPage(1);
+                }}
+                options={[
+                  { value: 'all', label: 'All departments' },
+                  ...Array.from(departmentLabels, ([value, label]) => ({ value, label })),
+                ]}
+                className="w-full sm:w-56"
+              />
+              <Select
+                ariaLabel="Filter by role"
+                value={roleFilter}
+                onValueChange={(value) => {
+                  setRoleFilter(value as AdminStaffRole | 'all');
+                  setStaffPage(1);
+                }}
+                options={[
+                  { value: 'all', label: 'All roles' },
+                  ...Object.entries(ADMIN_ROLE_DETAILS).map(([value, details]) => ({
+                    value,
+                    label: details.label,
+                  })),
+                ]}
+                className="w-full sm:w-52"
+              />
+              <Select
+                ariaLabel="Filter by status"
+                value={statusFilter}
+                onValueChange={(value) => {
+                  setStatusFilter(value as AdminStaffStatus | 'all');
+                  setStaffPage(1);
+                }}
+                options={[
+                  { value: 'all', label: 'Any status' },
+                  { value: 'active', label: 'Active' },
+                  { value: 'pending', label: 'Awaiting approval' },
+                  { value: 'suspended', label: 'Suspended' },
+                ]}
+                className="w-full sm:w-44"
+              />
+            </div>
           </div>
 
           {isLoading ? (
@@ -225,6 +322,18 @@ export default function AdminAccessPage() {
                             {ADMIN_ROLE_DETAILS[role]?.label ?? role}
                           </Badge>
                         ))}
+                        {member.departments?.map((department) => (
+                          <Badge key={department} variant="info">
+                            {departmentLabels.get(department) ?? department}
+                          </Badge>
+                        ))}
+                        {member.regions && member.regions.length > 0 && (
+                          <Badge variant="neutral" className="gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {member.regions.join(', ')}
+                          </Badge>
+                        )}
+                        {member.adjusted && <Badge variant="warning">Personal access</Badge>}
                       </div>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <StaffStatusBadge status={member.accountStatus} />

@@ -151,8 +151,11 @@ export const adminKeys = {
   staffRoleGrants: ['admin', 'staffRoleGrants'] as const,
   staffRoleGrantsList: (params?: { page?: number; pageSize?: number }) =>
     ['admin', 'staffRoleGrants', params?.page ?? 1, params?.pageSize ?? 20] as const,
-  staffList: (params?: { page?: number; pageSize?: number }) =>
-    ['admin', 'staff', params?.page ?? 1, params?.pageSize ?? 20] as const,
+  staffList: (params: Record<string, string | number | undefined> = {}) =>
+    ['admin', 'staff', params] as const,
+  staffRoleCatalogue: ['admin', 'staffRoles'] as const,
+  staffRoleHistory: (role: string, page: number) =>
+    ['admin', 'staffRoles', role, 'history', page] as const,
   staffApprovalsList: (params?: { page?: number; pageSize?: number }) =>
     ['admin', 'staffApprovals', params?.page ?? 1, params?.pageSize ?? 20] as const,
   rentalOverview: ['admin', 'rentals', 'overview'] as const,
