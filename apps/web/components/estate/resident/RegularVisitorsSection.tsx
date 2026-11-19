@@ -132,18 +132,20 @@ export const RegularVisitorsSection = () => {
         </div>
       )}
 
-      <AddContractorPassModal
-        isOpen={isAddOpen}
-        forHousehold
-        maxDays={data?.maxDays}
-        onClose={() => {
-          add.reset();
-          setIsAddOpen(false);
-        }}
-        onSubmit={(input) => add.mutate(input)}
-        isSubmitting={add.isPending}
-        error={add.error instanceof Error ? add.error.message : null}
-      />
+      {data && (
+        <AddContractorPassModal
+          isOpen={isAddOpen}
+          forHousehold
+          maxDays={data.maxDays}
+          onClose={() => {
+            add.reset();
+            setIsAddOpen(false);
+          }}
+          onSubmit={(input) => add.mutate(input)}
+          isSubmitting={add.isPending}
+          error={add.error instanceof Error ? add.error.message : null}
+        />
+      )}
 
       <ConfirmDialog
         open={withdrawing !== null}
