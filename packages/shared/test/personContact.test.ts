@@ -48,6 +48,16 @@ test('tells an email from a phone number and explains a bad one', () => {
   });
 });
 
+test('accepts the same email shapes as before and stays fast on a long run of dots', () => {
+  for (const ok of ['a@b.c', 'a@.b.c', 'a@b..c', 'first.last@sub.example.ng'])
+    assert.equal(readContactInput(ok).kind, 'email', ok);
+  for (const bad of ['a@b', 'a@b.', 'a@.b', '@b.c', 'a@b@c.d', 'a b@c.d'])
+    assert.equal(readContactInput(bad).kind, 'invalid', bad);
+  const started = performance.now();
+  assert.equal(readContactInput('!@!.' + '!.'.repeat(50_000) + '@').kind, 'invalid');
+  assert.ok(performance.now() - started < 200);
+});
+
 test('sends an email as `email` (older servers accept it) and a phone as `contact`', () => {
   assert.deepEqual(contactRequestBody('ada@example.com'), { email: 'ada@example.com' });
   assert.deepEqual(contactRequestBody('0803 123 4567'), { contact: '+2348031234567' });

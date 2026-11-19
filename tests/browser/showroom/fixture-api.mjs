@@ -183,14 +183,18 @@ const FIXTURES = {
   },
 };
 
+const LOCAL_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
 const server = http.createServer(async (req, res) => {
   const path = (req.url || '/').split('?')[0];
   const fixture = FIXTURES[path];
   if (fixture && req.method === 'GET') {
+    const origin = req.headers.origin;
     res.writeHead(200, {
       'content-type': 'application/json',
-      'access-control-allow-origin': req.headers.origin || '*',
-      'access-control-allow-credentials': 'true',
+      ...(origin && LOCAL_ORIGIN.test(origin)
+        ? { 'access-control-allow-origin': origin, 'access-control-allow-credentials': 'true' }
+        : {}),
     });
     res.end(JSON.stringify(fixture));
     return;

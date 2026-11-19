@@ -67,7 +67,7 @@ export const ExportSavedProperties = ({
     const rows = properties
       .map(
         (property) =>
-          `<tr><td>${escapeHtml(property.title)}</td><td>${escapeHtml(property.location)}</td><td>${escapeHtml(formatPrice(property.price, property.period))}</td><td>${property.bedrooms}</td><td>${property.bathrooms}</td><td>${property.size}</td><td>${property.verified ? 'Yes' : 'No'}</td></tr>`
+          `<tr><td>${escapeHtml(property.title)}</td><td>${escapeHtml(property.location)}</td><td>${escapeHtml(formatPrice(property.price, property.period))}</td><td>${escapeHtml(property.bedrooms)}</td><td>${escapeHtml(property.bathrooms)}</td><td>${escapeHtml(property.size)}</td><td>${property.verified ? 'Yes' : 'No'}</td></tr>`
       )
       .join('');
     printHtml(
