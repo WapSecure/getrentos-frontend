@@ -6,8 +6,15 @@ export type ContactInput =
   | { kind: 'phone'; e164: string }
   | { kind: 'invalid'; message: string };
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const NG_NATIONAL_RE = /^[789]\d{9}$/;
+
+// One `local@domain.tld` regex backtracks quadratically on a long run of dots, so check the parts.
+function isEmailShape(value: string): boolean {
+  if (!/^[^\s@]+@[^\s@]+$/.test(value)) return false;
+  const domain = value.slice(value.indexOf('@') + 1);
+  const dot = domain.indexOf('.', 1);
+  return dot > 0 && dot < domain.length - 1;
+}
 
 export const CONTACT_INVALID_PHONE = 'Enter a valid phone number, for example 0803 123 4567.';
 export const CONTACT_INVALID_EMAIL = 'Enter a valid email address.';
@@ -53,7 +60,7 @@ export function readContactInput(raw: string | null | undefined): ContactInput {
   const value = raw?.trim() ?? '';
   if (!value) return { kind: 'empty' };
   if (value.includes('@')) {
-    return EMAIL_RE.test(value)
+    return isEmailShape(value)
       ? { kind: 'email', email: value }
       : { kind: 'invalid', message: CONTACT_INVALID_EMAIL };
   }

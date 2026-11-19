@@ -58,9 +58,9 @@ export const ApplicationExport = ({ isOpen, onClose, applications }: Application
         (a) =>
           `<tr><td>${escapeHtml(a.title)}</td><td>${escapeHtml(a.address)}</td><td>${escapeHtml(
             a.status
-          )}</td><td>${escapeHtml(a.applicationDate)}</td><td>${a.price.toLocaleString()}</td><td>${
+          )}</td><td>${escapeHtml(a.applicationDate)}</td><td>${escapeHtml(a.price.toLocaleString())}</td><td>${escapeHtml(
             a.bedrooms
-          }</td><td>${a.bathrooms}</td><td>${a.size}</td></tr>`
+          )}</td><td>${escapeHtml(a.bathrooms)}</td><td>${escapeHtml(a.size)}</td></tr>`
       )
       .join('');
 
