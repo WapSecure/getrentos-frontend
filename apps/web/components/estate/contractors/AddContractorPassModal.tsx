@@ -85,7 +85,8 @@ export const AddContractorPassModal = ({
   const [company, setCompany] = useState('');
   const [trade, setTrade] = useState('');
   const [validFrom, setValidFrom] = useState(localDate(0));
-  const defaultSpan = Math.min(182, maxDays);
+  // Both the first and last day count, as the API does: it runs to the end of the last day.
+  const defaultSpan = Math.min(182, maxDays - 1);
   const [validUntil, setValidUntil] = useState(localDate(defaultSpan));
   const [daysOfWeek, setDaysOfWeek] = useState<number[]>([]);
   const [restrictHours, setRestrictHours] = useState(false);
@@ -138,11 +139,12 @@ export const AddContractorPassModal = ({
       (new Date(`${validUntil}T00:00:00`).getTime() - new Date(`${validFrom}T00:00:00`).getTime()) /
       86_400_000;
     if (!(spanDays > 0)) return setLocalError('The authorisation has to end after it starts.');
-    if (spanDays > maxDays) {
+    const days = Math.round(spanDays) + 1;
+    if (days > maxDays) {
       return setLocalError(
         forHousehold
-          ? `That is ${Math.round(spanDays)} days. A regular visitor pass can run for at most ${maxDays}; add a new one when it ends.`
-          : `That is ${Math.round(spanDays)} days. An authorisation can run for at most ${maxDays}, so it is looked at again at least once a year.`
+          ? `That is ${days} days. A regular visitor pass can run for at most ${maxDays}; add a new one when it ends.`
+          : `That is ${days} days. An authorisation can run for at most ${maxDays}, so it is looked at again at least once a year.`
       );
     }
 
