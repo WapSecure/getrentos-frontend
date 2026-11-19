@@ -804,7 +804,7 @@ export default function AdminManagedMandatesPage() {
       {!canOperate && (
         <div className="mb-4 rounded-xl border border-border bg-secondary/40 px-4 py-3 text-sm text-muted-foreground">
           You can view managed engagements. Activating, reassigning, suspending or ending them needs
-          the Managed operations permission (Super Admin or Backoffice Admin).
+          the Managed operations permission (Super admin or Head of operations).
         </div>
       )}
 
