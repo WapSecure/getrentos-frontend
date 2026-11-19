@@ -4,64 +4,63 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Fingerprint, ScanFace } from '@sureground/icons/native';
 import { BrandLogo, Button, LinkButton, Text, useTheme } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { biometricSupport, unlockWithBiometrics, useAppLockEnabled } from '@/lib/appLock';
+import {
+  biometricSupport,
+  isAppLockEnabled,
+  setAppForeground,
+  setAppLocked,
+  useAppLockEnabled,
+  useAppLocked,
+} from '@/lib/appLock';
 
 const RELOCK_AFTER_MS = 60_000;
 
 export function AppLockGate() {
-  const { status, signOut } = useAuth();
+  const { status, signOut, unlock } = useAuth();
   const { enabled } = useAppLockEnabled();
+  const locked = useAppLocked();
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
-  const [locked, setLocked] = useState(true);
   const [label, setLabel] = useState('Face ID');
   const [prompting, setPrompting] = useState(false);
+  const [failed, setFailed] = useState(false);
   const backgroundedAt = useRef<number | null>(null);
 
-  const active = enabled === true && status === 'authenticated';
+  // An unknown flag counts as on, so nothing shows before the lock does.
+  const active = enabled !== false && status === 'authenticated';
 
-  // Signing in with a password, or turning the lock on, is proof enough.
-  const prevStatus = useRef(status);
-  const prevEnabled = useRef(enabled);
-  // Set in the same commit as the unlock, so the prompt effect below skips it.
-  const provenThisCommit = useRef(false);
-  useEffect(() => {
-    const signedIn = prevStatus.current === 'unauthenticated' && status === 'authenticated';
-    const switchedOn = prevEnabled.current === false && enabled === true;
-    if (signedIn || switchedOn) {
-      provenThisCommit.current = true;
-      setLocked(false);
-    }
-    prevStatus.current = status;
-    prevEnabled.current = enabled;
-  }, [status, enabled]);
-
-  const unlock = useCallback(async () => {
+  const tryUnlock = useCallback(async () => {
     if (prompting) return;
     setPrompting(true);
-    const ok = await unlockWithBiometrics('Unlock Sureground');
+    setFailed(false);
+    const result = await unlock();
     setPrompting(false);
-    if (ok) setLocked(false);
-  }, [prompting]);
+    if (result === 'failed') setFailed(true);
+  }, [prompting, unlock]);
 
   useEffect(() => {
     if (!active || !locked) return;
-    if (provenThisCommit.current) {
-      provenThisCommit.current = false;
-      return;
-    }
-    biometricSupport().then((s) => setLabel(s.label));
-    unlock();
+    biometricSupport().then((s) => {
+      setLabel(s.label);
+      tryUnlock();
+    });
     // only when the lock (re)appears
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, locked]);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'background') backgroundedAt.current = Date.now();
-      if (state === 'active' && backgroundedAt.current) {
-        if (Date.now() - backgroundedAt.current >= RELOCK_AFTER_MS) setLocked(true);
+      if (state === 'background') {
+        backgroundedAt.current = Date.now();
+        setAppForeground(false);
+      }
+      if (state === 'active') {
+        const away = backgroundedAt.current;
         backgroundedAt.current = null;
+        if (away && Date.now() - away >= RELOCK_AFTER_MS && isAppLockEnabled()) {
+          setAppLocked(true);
+        }
+        setAppForeground(true);
       }
     });
     return () => sub.remove();
@@ -95,11 +94,13 @@ export function AppLockGate() {
           Sureground is locked
         </Text>
         <Text variant="callout" color="mutedForeground" center>
-          Unlock with {label} to continue.
+          {failed
+            ? `We couldn’t confirm it’s you. Try ${label} again, or sign in with your password.`
+            : `Unlock with ${label} to continue.`}
         </Text>
       </View>
       <View style={{ alignSelf: 'stretch', gap: spacing.xs }}>
-        <Button label={`Unlock with ${label}`} loading={prompting} onPress={unlock} />
+        <Button label={`Unlock with ${label}`} loading={prompting} onPress={tryUnlock} />
         <LinkButton
           label="Sign in with your password instead"
           tone="muted"

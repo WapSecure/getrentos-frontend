@@ -40,7 +40,12 @@
           "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
         }
       ],
-      "expo-secure-store",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Sureground uses Face ID to unlock the app when you turn on the app lock."
+        }
+      ],
       "expo-web-browser",
       "expo-document-picker",
       [
