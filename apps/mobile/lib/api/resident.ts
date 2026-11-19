@@ -325,8 +325,10 @@ export const residentApi = {
 
   listViolations: () => apiFetch<Violation[]>('/estate/resident/violations'),
 
-  listDeliveries: (page = 1, pageSize = 20) =>
-    apiFetch<Paginated<DeliveryLog>>(`/estate/resident/deliveries${toQuery({ page, pageSize })}`),
+  listDeliveries: (page = 1, pageSize = 20, status?: 'received' | 'collected') =>
+    apiFetch<Paginated<DeliveryLog>>(
+      `/estate/resident/deliveries${toQuery({ page, pageSize, status })}`
+    ),
 
   /** The reply is the only time the code exists, so the caller must show it before the response is dropped. */
   declareExpectedDelivery: (data: { courier: string; description?: string }) =>
@@ -354,9 +356,13 @@ export const residentApi = {
   voteOnPoll: (pollId: string, optionId: string) =>
     apiFetch<Poll>(`/estate/resident/polls/${pollId}/vote`, { method: 'POST', body: { optionId } }),
 
-  listVisitorPasses: (page = 1, pageSize = 50) =>
+  listVisitorPasses: (
+    page = 1,
+    pageSize = 50,
+    filter: { scope?: 'active' | 'past'; status?: 'awaiting_approval' } = {}
+  ) =>
     apiFetch<Paginated<VisitorPass>>(
-      `/estate/resident/visitor-passes${toQuery({ page, pageSize })}`
+      `/estate/resident/visitor-passes${toQuery({ page, pageSize, ...filter })}`
     ),
 
   issueVisitorPass: (data: {
@@ -416,8 +422,14 @@ export const residentApi = {
     return apiUpload<MaintenanceTicket>('/estate/resident/maintenance', form);
   },
 
-  listDues: (page = 1, pageSize = 50) =>
-    apiFetch<Paginated<Due>>(`/estate/resident/dues${toQuery({ page, pageSize })}`),
+  listDues: (page = 1, pageSize = 50, scope?: 'unpaid' | 'settled') =>
+    apiFetch<Paginated<Due>>(`/estate/resident/dues${toQuery({ page, pageSize, scope })}`),
+
+  /** Every unsettled due on the household, not one page of them. */
+  getDuesSummary: () =>
+    apiFetch<{ outstandingTotal: number; outstandingCount: number; overdueCount: number }>(
+      '/estate/resident/dues/summary'
+    ),
 
   payDue: (dueId: string, provider?: PaymentProvider) =>
     apiFetch<Due>(`/estate/resident/dues/${dueId}/pay${providerQuery(provider)}`, {

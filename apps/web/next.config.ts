@@ -46,6 +46,20 @@ const nextConfig: NextConfig = {
   async redirects() {
     // Old renter URLs redirect to the tab of the hub they were merged into.
     return [
+      // Portal roots have no page of their own; a typed or trimmed URL lands on the dashboard.
+      ...(
+        [
+          ['/renter', '/renter/dashboard'],
+          ['/landlord', '/landlord/dashboard'],
+          ['/owner', '/owner/dashboard'],
+          ['/buyer', '/buyer/dashboard'],
+          ['/realtor', '/realtor/dashboard'],
+          ['/agent', '/agent/dashboard'],
+          ['/estate', '/estate/dashboard'],
+          ['/resident', '/resident/dashboard'],
+          ['/gateman', '/gateman/verify'],
+        ] as const
+      ).map(([source, destination]) => ({ source, destination, permanent: false })),
       // Representatives cover every purchase, not only land, so they live outside /land (which LAND_MODE can switch off).
       {
         source: '/buyer/land/representatives',

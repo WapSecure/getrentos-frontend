@@ -18,6 +18,7 @@ import {
   Input,
   ListSkeleton,
   PageHeader,
+  Pagination,
 } from '@sureground/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -49,8 +50,22 @@ const statusLabels: Record<VisitorPass['status'], string> = {
   denied: 'Refused',
 };
 
+const PAGE_SIZE = 10;
+
+// Once a visitor has been and gone, or the pass was cancelled, its expiry no longer means anything.
+const SHOWS_EXPIRY = new Set<VisitorPass['status']>([
+  'pending',
+  'approved',
+  'checked_in',
+  'expired',
+]);
+
 const formatDate = (value: string) =>
   formatClock(new Date(value), { day: 'numeric', month: 'short', minute: '2-digit' });
+
+// Module scope keeps the clock read out of render.
+const expiryLabel = (iso: string) =>
+  `${new Date(iso).getTime() < Date.now() ? 'Expired' : 'Expires'} ${formatDate(iso)}`;
 
 export default function ResidentVisitorPassesPage() {
   const queryClient = useQueryClient();
@@ -60,14 +75,42 @@ export default function ResidentVisitorPassesPage() {
   const [denying, setDenying] = useState<VisitorPass | null>(null);
   const [denyReason, setDenyReason] = useState('');
 
-  const { data, isLoading } = useQuery({
-    queryKey: estateResidentKeys.visitorPasses(),
-    queryFn: () => unwrap(estateResidentService.listMyVisitorPasses({ pageSize: 50 })),
+  const [activePage, setActivePage] = useState(1);
+  const [pastPage, setPastPage] = useState(1);
+  // A walk-in waiting at the gate times out within minutes, so these are few and never paged.
+  const waiting = useQuery({
+    queryKey: estateResidentKeys.visitorPasses('waiting'),
+    queryFn: () =>
+      unwrap(
+        estateResidentService.listMyVisitorPasses({ status: 'awaiting_approval', pageSize: 50 })
+      ),
   });
-  const passes = data?.items ?? [];
+  const active = useQuery({
+    queryKey: estateResidentKeys.visitorPasses('active', activePage),
+    queryFn: () =>
+      unwrap(
+        estateResidentService.listMyVisitorPasses({
+          scope: 'active',
+          page: activePage,
+          pageSize: PAGE_SIZE,
+        })
+      ),
+  });
+  const past = useQuery({
+    queryKey: estateResidentKeys.visitorPasses('past', pastPage),
+    queryFn: () =>
+      unwrap(
+        estateResidentService.listMyVisitorPasses({
+          scope: 'past',
+          page: pastPage,
+          pageSize: PAGE_SIZE,
+        })
+      ),
+  });
+  const isLoading = waiting.isPending || active.isPending || past.isPending;
 
   const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: estateResidentKeys.visitorPasses() });
+    queryClient.invalidateQueries({ queryKey: estateResidentKeys.visitorPassesAll });
 
   const issueMutation = useMutation({
     mutationFn: (input: {
@@ -112,19 +155,47 @@ export default function ResidentVisitorPassesPage() {
       setNotice(error instanceof Error ? error.message : 'Could not refuse that visitor.'),
   });
 
-  const awaiting = passes.filter((pass) => pass.status === 'awaiting_approval');
-  const others = passes.filter((pass) => pass.status !== 'awaiting_approval');
+  const awaiting = waiting.data?.items ?? [];
+  const activePasses = active.data?.items ?? [];
+  const pastPasses = past.data?.items ?? [];
+  const activeTotal = active.data?.total ?? 0;
+  const pastTotal = past.data?.total ?? 0;
+
+  const renderPass = (pass: VisitorPass) => (
+    <div key={pass.id} className="p-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-foreground truncate">{pass.visitorName}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {[pass.purpose, SHOWS_EXPIRY.has(pass.status) ? expiryLabel(pass.expiresAt) : null]
+            .filter(Boolean)
+            .join(' · ')}
+        </p>
+      </div>
+      <div className="flex items-center gap-3 shrink-0">
+        <Badge variant={statusVariant[pass.status]}>{statusLabels[pass.status]}</Badge>
+        {pass.status === 'pending' && (
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={revokeMutation.isPending && revokeMutation.variables !== pass.id}
+            isLoading={revokeMutation.isPending && revokeMutation.variables === pass.id}
+            onClick={() => setRevoking({ id: pass.id, visitorName: pass.visitorName })}
+          >
+            Revoke
+          </Button>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <>
       <PageHeader
         title="Visitor passes"
         description={
-          <>
-            {data
-              ? `${data.total} pass${data.total === 1 ? '' : 'es'} for your household`
-              : 'Loading…'}
-          </>
+          isLoading
+            ? 'Loading…'
+            : `${activeTotal} active pass${activeTotal === 1 ? '' : 'es'} for your household`
         }
         actions={
           <Button
@@ -193,41 +264,51 @@ export default function ResidentVisitorPassesPage() {
 
       {isLoading ? (
         <ListSkeleton rows={3} />
-      ) : others.length === 0 && awaiting.length === 0 ? (
+      ) : activeTotal + pastTotal === 0 && awaiting.length === 0 ? (
         <EmptyState
           icon={KeyRound}
           title="No visitor passes yet"
           description="Issue a pass so your visitor can check in at the gate."
         />
       ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {others.map((pass) => (
-            <div
-              key={pass.id}
-              className="p-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2"
-            >
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{pass.visitorName}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {pass.purpose ? `${pass.purpose} · ` : ''}Expires {formatDate(pass.expiresAt)}
-                </p>
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <Badge variant={statusVariant[pass.status]}>{statusLabels[pass.status]}</Badge>
-                {pass.status === 'pending' && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={revokeMutation.isPending && revokeMutation.variables !== pass.id}
-                    isLoading={revokeMutation.isPending && revokeMutation.variables === pass.id}
-                    onClick={() => setRevoking({ id: pass.id, visitorName: pass.visitorName })}
-                  >
-                    Revoke
-                  </Button>
+        <div className="space-y-8">
+          <section>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">Active</h2>
+            {activePasses.length === 0 ? (
+              <p className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
+                No passes waiting to be used. Issue one before a visitor arrives.
+              </p>
+            ) : (
+              <div className="bg-card rounded-2xl border border-border overflow-hidden">
+                <div className="divide-y divide-border">{activePasses.map(renderPass)}</div>
+                {activeTotal > PAGE_SIZE && (
+                  <Pagination
+                    page={activePage}
+                    pageSize={PAGE_SIZE}
+                    total={activeTotal}
+                    onPageChange={setActivePage}
+                  />
                 )}
               </div>
-            </div>
-          ))}
+            )}
+          </section>
+
+          {pastPasses.length > 0 && (
+            <section>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">Past</h2>
+              <div className="bg-card rounded-2xl border border-border overflow-hidden">
+                <div className="divide-y divide-border">{pastPasses.map(renderPass)}</div>
+                {pastTotal > PAGE_SIZE && (
+                  <Pagination
+                    page={pastPage}
+                    pageSize={PAGE_SIZE}
+                    total={pastTotal}
+                    onPageChange={setPastPage}
+                  />
+                )}
+              </div>
+            </section>
+          )}
         </div>
       )}
 

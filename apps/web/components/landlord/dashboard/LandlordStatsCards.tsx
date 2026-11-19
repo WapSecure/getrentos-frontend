@@ -3,6 +3,7 @@
 import { Banknote, Building2, Clock, DoorOpen, KeyRound, Wallet, Wrench } from '@sureground/icons';
 import { SegmentedBar, StatGroup } from '@sureground/ui';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
+import { usePlanTier } from '@/hooks/usePlanTier';
 import { formatCurrency } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
 
@@ -30,6 +31,7 @@ export const LandlordStatsCards = ({
   activeMaintenanceRequests,
 }: LandlordStatsCardsProps) => {
   const { visible: moneyVisible } = useMonetaryVisibility();
+  const { isPro } = usePlanTier();
   const totalUnits = occupiedUnits + reservedUnits + vacantUnits;
 
   return (
@@ -43,7 +45,8 @@ export const LandlordStatsCards = ({
             // Rent is contracted and paid yearly, so this is an annual figure, not monthly revenue.
             value: moneyVisible ? formatCurrency(annualRentRoll, { compact: true }) : HIDDEN,
             subtitle: 'Contracted across let units, per year',
-            href: ROUTES.LANDLORD_FINANCIALS,
+            // Financials is a Pro page; on Free the tile opens the rent itself, not an upgrade wall.
+            href: isPro ? ROUTES.LANDLORD_FINANCIALS : ROUTES.LANDLORD_PAYMENTS,
           },
           {
             label: 'Outstanding',

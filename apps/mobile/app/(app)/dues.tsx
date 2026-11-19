@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { usePagedList } from '@/lib/query/usePagedList';
 import { MessageCircle, ReceiptText, Repeat } from '@sureground/icons/native';
 import {
   Badge,
@@ -13,6 +14,7 @@ import {
   ListSkeleton,
   QueryState,
   Screen,
+  SectionHeader,
   Text,
   useTheme,
   useToast,
@@ -28,6 +30,8 @@ import { PaySheet } from '@/components/payments/PaySheet';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 import { errorMessage } from '@/lib/api/client';
+
+const PAGE_SIZE = 10;
 
 const STATUS_LABEL: Record<DueStatus, string> = {
   pending: 'Pending',
@@ -66,10 +70,22 @@ export default function ResidentDues() {
     setProviderError(null);
   };
 
-  const query = useQuery({
-    queryKey: qk.resident.dues,
-    queryFn: () => residentApi.listDues(1, 50),
+  const summary = useQuery({
+    queryKey: qk.resident.duesSummary,
+    queryFn: () => residentApi.getDuesSummary(),
   });
+  // Unpaid comes oldest first, so an overdue charge is never behind "Show more".
+  const unpaid = usePagedList([...qk.resident.dues, 'unpaid'], (page) =>
+    residentApi.listDues(page, PAGE_SIZE, 'unpaid')
+  );
+  const settled = usePagedList([...qk.resident.dues, 'settled'], (page) =>
+    residentApi.listDues(page, PAGE_SIZE, 'settled')
+  );
+  const refetchAll = () => {
+    void summary.refetch();
+    void unpaid.query.refetch();
+    void settled.query.refetch();
+  };
 
   const pay = useMutation({
     mutationFn: ({ dueId, provider }: { dueId: string; provider?: PaymentProvider }) =>
@@ -96,7 +112,20 @@ export default function ResidentDues() {
     },
   });
 
-  const dues = query.data?.items ?? [];
+  const startPay = (due: Due) => {
+    setPayDue(due);
+    setProviderError(null);
+    setSheetOpen(true);
+  };
+  const renderDue = (due: Due) => (
+    <DueCard
+      key={due.id}
+      due={due}
+      onPay={() => startPay(due)}
+      paying={pay.isPending && pay.variables?.dueId === due.id}
+    />
+  );
+  const owed = summary.data;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -116,29 +145,53 @@ export default function ResidentDues() {
       <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
         <ServiceChargesEntry kind="resident" />
       </View>
-      <Screen refreshing={query.isRefetching} onRefresh={() => void query.refetch()}>
+      <Screen
+        refreshing={unpaid.query.isRefetching || settled.query.isRefetching}
+        onRefresh={refetchAll}
+      >
         <QueryState
-          query={query}
+          query={unpaid.query}
           skeleton={<ListSkeleton variant="card" rows={2} height={90} />}
-          isEmpty={dues.length === 0}
+          isEmpty={unpaid.total === 0 && settled.total === 0 && !settled.query.isPending}
           empty={{
             icon: <ReceiptText size={34} color={colors.mutedForeground} />,
             title: 'No dues yet',
             description: "Your estate manager hasn't charged any dues to your household.",
           }}
         >
-          {dues.map((due) => (
-            <DueCard
-              key={due.id}
-              due={due}
-              onPay={() => {
-                setPayDue(due);
-                setProviderError(null);
-                setSheetOpen(true);
-              }}
-              paying={pay.isPending && pay.variables?.dueId === due.id}
+          <SectionHeader
+            title="To pay"
+            description={
+              owed
+                ? owed.outstandingCount === 0
+                  ? "You're up to date."
+                  : `${formatNaira(owed.outstandingTotal)} across ${owed.outstandingCount} ${owed.outstandingCount === 1 ? 'due' : 'dues'}${owed.overdueCount > 0 ? `, ${owed.overdueCount} overdue` : ''}`
+                : undefined
+            }
+          />
+          {unpaid.items.map(renderDue)}
+          {unpaid.hasMore ? (
+            <Button
+              label="Show more"
+              variant="ghost"
+              loading={unpaid.isLoadingMore}
+              onPress={unpaid.loadMore}
             />
-          ))}
+          ) : null}
+          {settled.items.length > 0 ? (
+            <>
+              <SectionHeader title="History" />
+              {settled.items.map(renderDue)}
+              {settled.hasMore ? (
+                <Button
+                  label="Show more"
+                  variant="ghost"
+                  loading={settled.isLoadingMore}
+                  onPress={settled.loadMore}
+                />
+              ) : null}
+            </>
+          ) : null}
         </QueryState>
       </Screen>
       <PaySheet

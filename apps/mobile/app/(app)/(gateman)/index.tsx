@@ -43,6 +43,7 @@ import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { gatemanApi, type VisitorPass } from '@/lib/api/gateman';
 import { gateOfflineQueue, replayGateQueue, useGateQueue } from '@/lib/gateOfflineQueue';
 import { qk } from '@/lib/query/keys';
+import { usePagedList } from '@/lib/query/usePagedList';
 import { formatTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
@@ -99,11 +100,12 @@ export default function GatemanCheckIn() {
   } = useGatemanPost();
   const [postSheetOpen, setPostSheetOpen] = useState(false);
 
-  const checkInsQuery = useQuery({
-    queryKey: qk.gateman.visitorsInside(estate?.id ?? ''),
-    queryFn: () => gatemanApi.listVisitorPasses(estate!.id, 'checked_in', 1, 100),
-    enabled: !!estate,
-  });
+  const insideList = usePagedList(
+    [...qk.gateman.visitorsInside(estate?.id ?? ''), 'paged'],
+    (page) => gatemanApi.listVisitorPasses(estate!.id, 'checked_in', page, 50),
+    { enabled: !!estate }
+  );
+  const checkInsQuery = insideList.query;
 
   // Polled: the household answers on their own phone. Not filtered, so a refused or lapsed request doesn't vanish from the guard's screen.
   const walkInsQuery = useQuery({
@@ -265,7 +267,8 @@ export default function GatemanCheckIn() {
       )
       .map((write) => write.payload.passId)
   );
-  const inside = (checkInsQuery.data?.items ?? []).filter((pass) => !leaving.has(pass.id));
+  const inside = insideList.items.filter((pass) => !leaving.has(pass.id));
+  const insideCount = Math.max(0, insideList.total - leaving.size);
 
   // Queued admits are hidden so a guard offline can't admit the same visitor twice and replay into a conflict.
   const admitting = new Set(
@@ -731,7 +734,7 @@ export default function GatemanCheckIn() {
 
         <View style={{ gap: spacing.md }}>
           <SectionHeader
-            title={`Inside now${inside.length > 0 ? ` (${inside.length})` : ''}`}
+            title={`Inside now${insideCount > 0 ? ` (${insideCount})` : ''}`}
             description="Visitors currently recorded on the estate"
           />
           {checkInsQuery.isLoading ? (
@@ -774,6 +777,14 @@ export default function GatemanCheckIn() {
               </Card>
             ))
           )}
+          {insideList.hasMore ? (
+            <Button
+              label="Show more"
+              variant="ghost"
+              loading={insideList.isLoadingMore}
+              onPress={insideList.loadMore}
+            />
+          ) : null}
         </View>
       </Screen>
 

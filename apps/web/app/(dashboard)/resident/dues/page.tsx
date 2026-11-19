@@ -6,7 +6,7 @@ import type { PaymentProvider } from '@/types/payments';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReceiptText, Repeat } from '@sureground/icons';
-import { Badge, Button, EmptyState, ListSkeleton, PageHeader } from '@sureground/ui';
+import { Badge, Button, EmptyState, ListSkeleton, PageHeader, Pagination } from '@sureground/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { residentServiceChargesService } from '@/services/residentServiceChargesService';
 import { ServiceChargesTab } from '@/components/renter/payments/ServiceChargesTab';
@@ -36,6 +36,8 @@ const formatCurrency = (amount: number) =>
     maximumFractionDigits: 0,
   }).format(amount);
 
+const PAGE_SIZE = 10;
+
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }).format(
     new Date(value)
@@ -52,11 +54,34 @@ export default function ResidentDuesPage() {
   const [payingDueId, setPayingDueId] = useState<string | null>(null);
   const [providerError, setProviderError] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery({
-    queryKey: estateResidentKeys.dues(),
-    queryFn: () => unwrap(estateResidentService.listMyDues({ pageSize: 50 })),
+  const [unpaidPage, setUnpaidPage] = useState(1);
+  const [settledPage, setSettledPage] = useState(1);
+  const summary = useQuery({
+    queryKey: estateResidentKeys.duesSummary,
+    queryFn: () => unwrap(estateResidentService.getMyDuesSummary()),
   });
-  const dues = data?.items ?? [];
+  const unpaid = useQuery({
+    queryKey: [...estateResidentKeys.dues(unpaidPage), 'unpaid'],
+    queryFn: () =>
+      unwrap(
+        estateResidentService.listMyDues({ scope: 'unpaid', page: unpaidPage, pageSize: PAGE_SIZE })
+      ),
+  });
+  const settled = useQuery({
+    queryKey: [...estateResidentKeys.dues(settledPage), 'settled'],
+    queryFn: () =>
+      unwrap(
+        estateResidentService.listMyDues({
+          scope: 'settled',
+          page: settledPage,
+          pageSize: PAGE_SIZE,
+        })
+      ),
+  });
+  const dues = unpaid.data?.items ?? [];
+  const history = settled.data?.items ?? [];
+  const isLoading = unpaid.isPending || settled.isPending;
+  const nothingAtAll = !isLoading && (unpaid.data?.total ?? 0) + (settled.data?.total ?? 0) === 0;
 
   const payMutation = useMutation({
     mutationFn: ({ dueId, provider }: { dueId: string; provider?: PaymentProvider }) =>
@@ -69,7 +94,7 @@ export default function ResidentDuesPage() {
         return;
       }
       setPayingDueId(null);
-      queryClient.invalidateQueries({ queryKey: estateResidentKeys.dues() });
+      queryClient.invalidateQueries({ queryKey: estateResidentKeys.duesAll });
     },
     onError: (err, { dueId, provider }) => {
       const unavailable = providers.recover(err, provider);
@@ -84,6 +109,60 @@ export default function ResidentDuesPage() {
       });
     },
   });
+  const renderDue = (due: Due) => {
+    const isPaying = payMutation.isPending && payMutation.variables?.dueId === due.id;
+    const canPay =
+      due.status === 'pending' || due.status === 'overdue' || due.status === 'processing';
+    return (
+      <div key={due.id} className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
+              {categoryLabels[due.category]}
+              {due.isRecurring && (
+                <span title="Repeats automatically">
+                  <Repeat
+                    className="w-3 h-3 text-muted-foreground shrink-0"
+                    aria-label="Repeats automatically"
+                  />
+                </span>
+              )}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Due {formatDate(due.dueDate)}
+              {due.description ? ` · ${due.description}` : ''}
+            </p>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-sm font-semibold text-foreground">
+              {formatCurrency(due.amount)}
+            </span>
+            <Badge variant={statusVariant[due.status]}>
+              {due.status.charAt(0).toUpperCase() + due.status.slice(1)}
+            </Badge>
+            {canPay && (
+              <Button
+                variant="primary"
+                size="sm"
+                isLoading={isPaying}
+                loadingText="Processing…"
+                onClick={() => {
+                  setPayError(null);
+                  setPayingDueId(due.id);
+                }}
+              >
+                {due.status === 'processing' ? 'Finish paying' : 'Pay now'}
+              </Button>
+            )}
+          </div>
+        </div>
+        {payError?.dueId === due.id && (
+          <p className="text-xs text-destructive mt-2">{payError.message}</p>
+        )}
+      </div>
+    );
+  };
+
   const payingDue = dues.find((due) => due.id === payingDueId) ?? null;
   const closePayDialog = () => {
     setPayingDueId(null);
@@ -95,9 +174,11 @@ export default function ResidentDuesPage() {
       <PageHeader
         title="Dues"
         description={
-          <>
-            {data?.total ?? 0} {(data?.total ?? 0) === 1 ? 'due' : 'dues'} on your household
-          </>
+          summary.data
+            ? summary.data.outstandingCount === 0
+              ? 'Nothing to pay right now'
+              : `${formatCurrency(summary.data.outstandingTotal)} to pay across ${summary.data.outstandingCount} ${summary.data.outstandingCount === 1 ? 'due' : 'dues'}${summary.data.overdueCount > 0 ? `, ${summary.data.overdueCount} overdue` : ''}`
+            : 'Loading…'
         }
       />
 
@@ -113,70 +194,52 @@ export default function ResidentDuesPage() {
 
       {isLoading ? (
         <ListSkeleton rows={3} />
-      ) : dues.length === 0 ? (
+      ) : nothingAtAll ? (
         <EmptyState
           icon={ReceiptText}
           title="No dues yet"
           description="Your estate manager hasn't charged any dues to your household."
         />
       ) : (
-        <>
-          <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-            {dues.map((due) => {
-              const isPaying = payMutation.isPending && payMutation.variables?.dueId === due.id;
-              const canPay =
-                due.status === 'pending' || due.status === 'overdue' || due.status === 'processing';
-              return (
-                <div key={due.id} className="p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
-                        {categoryLabels[due.category]}
-                        {due.isRecurring && (
-                          <span title="Repeats automatically">
-                            <Repeat
-                              className="w-3 h-3 text-muted-foreground shrink-0"
-                              aria-label="Repeats automatically"
-                            />
-                          </span>
-                        )}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Due {formatDate(due.dueDate)}
-                        {due.description ? ` · ${due.description}` : ''}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-sm font-semibold text-foreground">
-                        {formatCurrency(due.amount)}
-                      </span>
-                      <Badge variant={statusVariant[due.status]}>
-                        {due.status.charAt(0).toUpperCase() + due.status.slice(1)}
-                      </Badge>
-                      {canPay && (
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          isLoading={isPaying}
-                          loadingText="Processing…"
-                          onClick={() => {
-                            setPayError(null);
-                            setPayingDueId(due.id);
-                          }}
-                        >
-                          {due.status === 'processing' ? 'Finish paying' : 'Pay now'}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                  {payError?.dueId === due.id && (
-                    <p className="text-xs text-destructive mt-2">{payError.message}</p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </>
+        <div className="space-y-8">
+          <section>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">To pay</h2>
+            {dues.length === 0 ? (
+              <p className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
+                You&apos;re up to date. New charges appear here.
+              </p>
+            ) : (
+              <div className="bg-card rounded-2xl border border-border overflow-hidden">
+                <div className="divide-y divide-border">{dues.map(renderDue)}</div>
+                {(unpaid.data?.total ?? 0) > PAGE_SIZE && (
+                  <Pagination
+                    page={unpaidPage}
+                    pageSize={PAGE_SIZE}
+                    total={unpaid.data?.total ?? 0}
+                    onPageChange={setUnpaidPage}
+                  />
+                )}
+              </div>
+            )}
+          </section>
+
+          {history.length > 0 && (
+            <section>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">History</h2>
+              <div className="bg-card rounded-2xl border border-border overflow-hidden">
+                <div className="divide-y divide-border">{history.map(renderDue)}</div>
+                {(settled.data?.total ?? 0) > PAGE_SIZE && (
+                  <Pagination
+                    page={settledPage}
+                    pageSize={PAGE_SIZE}
+                    total={settled.data?.total ?? 0}
+                    onPageChange={setSettledPage}
+                  />
+                )}
+              </div>
+            </section>
+          )}
+        </div>
       )}
 
       <PayDialog

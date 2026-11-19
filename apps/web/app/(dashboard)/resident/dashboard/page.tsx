@@ -57,20 +57,17 @@ export default function ResidentDashboardPage() {
     queryFn: () => unwrap(estateResidentService.getMyHousehold()),
   });
 
-  // A past-due due is `overdue`, not `pending`, so filtering to `pending` under-reports what is owed.
-  const { data: duesData } = useQuery({
-    queryKey: estateResidentKeys.dues(),
-    queryFn: () => unwrap(estateResidentService.listMyDues({ pageSize: 50 })),
+  const { data: duesSummary } = useQuery({
+    queryKey: estateResidentKeys.duesSummary,
+    queryFn: () => unwrap(estateResidentService.getMyDuesSummary()),
   });
 
   const { data: announcementsData } = useQuery({
-    queryKey: estateResidentKeys.announcements,
+    queryKey: estateResidentKeys.announcements(1, 3),
     queryFn: () => unwrap(estateResidentService.listMyAnnouncements({ pageSize: 3 })),
   });
 
-  const pendingTotal = (duesData?.items ?? [])
-    .filter((due) => due.status !== 'paid')
-    .reduce((sum, due) => sum + due.amount, 0);
+  const pendingTotal = duesSummary?.outstandingTotal ?? 0;
   const announcements = announcementsData?.items ?? [];
 
   if (isHouseholdLoading) {

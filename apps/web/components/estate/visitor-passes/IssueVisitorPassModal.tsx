@@ -135,7 +135,11 @@ export const IssueVisitorPassModal = ({
             />
           </Field>
 
-          <Field label="Expires" optionalLabel="(optional: defaults to 24 hours)">
+          <Field
+            label="Last day to arrive"
+            optionalLabel="(optional: defaults to 24 hours)"
+            hint="A pass lets the visitor in once. For their next visit, issue a new pass."
+          >
             <DatePicker value={expiresAt} onChange={setExpiresAt} clearable />
           </Field>
         </div>

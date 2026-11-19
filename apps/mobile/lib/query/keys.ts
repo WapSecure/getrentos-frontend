@@ -567,6 +567,7 @@ export const qk = {
     directory: ['resident', 'directory'] as const,
     announcements: (page = 1, pageSize = 20) =>
       ['resident', 'announcements', { page, pageSize }] as const,
+    announcementsPaged: ['resident', 'announcements', 'paged'] as const,
     violations: ['resident', 'violations'] as const,
     deliveries: (page = 1, pageSize = 20) =>
       ['resident', 'deliveries', { page, pageSize }] as const,
@@ -579,6 +580,7 @@ export const qk = {
     amenityBusy: (amenityId: string) => ['resident', 'amenity-busy', amenityId] as const,
     maintenance: ['resident', 'maintenance'] as const,
     dues: ['resident', 'dues'] as const,
+    duesSummary: ['resident', 'dues', 'summary'] as const,
     governance: ['resident', 'governance'] as const,
     /** Shared by the home banner and the answer screen, so answering on one can't leave the other stale. */
     emergency: ['resident', 'emergency'] as const,

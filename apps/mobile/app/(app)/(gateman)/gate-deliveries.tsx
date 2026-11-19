@@ -27,6 +27,7 @@ import {
 } from '@/lib/api/gateman';
 import type { PickedFile } from '@/lib/api/documents';
 import { qk } from '@/lib/query/keys';
+import { usePagedList } from '@/lib/query/usePagedList';
 import { formatTime } from '@/lib/format';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { collectionSummary } from '@sureground/shared';
@@ -52,12 +53,13 @@ export default function GatemanDeliveries() {
   });
   const gates = gatesQuery.data ?? [];
 
-  const awaitingQuery = useQuery({
-    queryKey: qk.gateman.deliveries(estate?.id ?? ''),
-    queryFn: () => gatemanApi.listDeliveries(estate!.id, 'received', 1, 100),
-    enabled: !!estate,
-  });
-  const awaiting = awaitingQuery.data?.items ?? [];
+  const awaitingList = usePagedList(
+    [...qk.gateman.deliveries(estate?.id ?? ''), 'received'],
+    (page) => gatemanApi.listDeliveries(estate!.id, 'received', page, 50),
+    { enabled: !!estate }
+  );
+  const awaitingQuery = awaitingList.query;
+  const awaiting = awaitingList.items;
 
   const collectedQuery = useQuery({
     queryKey: [...qk.gateman.deliveries(estate?.id ?? ''), 'collected'],
@@ -145,7 +147,7 @@ export default function GatemanDeliveries() {
 
       <View style={{ gap: spacing.md }}>
         <SectionHeader
-          title={`Awaiting pickup (${awaiting.length})`}
+          title={`Awaiting pickup (${awaitingList.total})`}
           description="Parcels still held at the gate"
         />
         {awaitingQuery.isLoading ? (
@@ -190,6 +192,14 @@ export default function GatemanDeliveries() {
             </Card>
           ))
         )}
+        {awaitingList.hasMore ? (
+          <Button
+            label="Show more"
+            variant="ghost"
+            loading={awaitingList.isLoadingMore}
+            onPress={awaitingList.loadMore}
+          />
+        ) : null}
       </View>
 
       {recentlyCollected.length > 0 ? (
