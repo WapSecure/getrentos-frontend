@@ -171,6 +171,8 @@ function EstateProBody({ estateId, plan }: { estateId: string; plan: EstatePlan 
         </Alert>
       )}
 
+      {b.status !== 'NONE' && <EstateProReceipts estateId={estateId} />}
+
       <ConfirmDialog
         open={confirmCancel}
         onOpenChange={setConfirmCancel}
@@ -186,5 +188,40 @@ function EstateProBody({ estateId, plan }: { estateId: string; plan: EstatePlan 
         onConfirm={() => cancel.mutate()}
       />
     </Card>
+  );
+}
+
+function EstateProReceipts({ estateId }: { estateId: string }) {
+  const receipts = useQuery({
+    queryKey: [...estatePlanKey(estateId), 'receipts'],
+    queryFn: () => unwrap(estatePlanService.receipts(estateId)),
+    retry: false,
+  });
+  const items = receipts.data?.items ?? [];
+  if (items.length === 0) return null;
+  return (
+    <div className="mt-6 border-t border-border pt-4">
+      <h3 className="text-sm font-semibold text-foreground">Payments</h3>
+      <ul className="mt-2 divide-y divide-border text-sm">
+        {items.map((receipt) => (
+          <li key={receipt.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+            <div className="min-w-0">
+              <p className="text-foreground">{receipt.description}</p>
+              <p className="text-xs text-muted-foreground">
+                {formatDate(receipt.paidAt ?? receipt.createdAt)} · {receipt.number}
+              </p>
+            </div>
+            <p className="tabular-nums text-foreground">
+              {naira(receipt.amountKobo)}
+              {receipt.status !== 'PAID' && (
+                <span className="ml-2 text-xs text-muted-foreground">
+                  {receipt.status === 'REFUNDED' ? 'Refunded' : 'Failed'}
+                </span>
+              )}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

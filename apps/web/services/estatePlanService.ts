@@ -33,6 +33,16 @@ export interface EstatePlan {
   billing: EstateProBilling;
 }
 
+export interface EstateProReceipt {
+  id: string;
+  number: string;
+  status: 'PAID' | 'REFUNDED' | 'FAILED';
+  description: string;
+  amountKobo: number;
+  paidAt: string | null;
+  createdAt: string;
+}
+
 const base = (estateId: string) => `/estate/${encodeURIComponent(estateId)}/plan`;
 
 export const estatePlanService = {
@@ -53,6 +63,11 @@ export const estatePlanService = {
         method: 'POST',
         body: JSON.stringify({ reference }),
       })
+    );
+  },
+  async receipts(estateId: string): Promise<ApiResponse<{ items: EstateProReceipt[] }>> {
+    return safeCall(() =>
+      authFetch<{ items: EstateProReceipt[] }>(`${base(estateId)}/invoices?pageSize=12`)
     );
   },
   async cancel(estateId: string): Promise<ApiResponse<EstateProBilling>> {
