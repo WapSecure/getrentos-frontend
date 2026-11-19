@@ -24,6 +24,7 @@
       "env": {
         "EXPO_PUBLIC_API_URL": "http://172.20.10.6:4000",
         "ALLOW_CLEARTEXT": "1",
+        "EXPO_PUBLIC_ALLOW_INSECURE_API": "1",
         "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     },
