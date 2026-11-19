@@ -11,18 +11,25 @@ export interface SessionTokens {
   refreshToken: string;
 }
 
-export async function readTokens(): Promise<SessionTokens | null> {
+export interface StoredTokens {
+  accessToken: string | null;
+  refreshToken: string;
+}
+
+export async function readTokens(): Promise<StoredTokens | null> {
   const [accessToken, refreshToken] = await Promise.all([
     secureStorage.get(ACCESS_KEY),
     secureStorage.get(REFRESH_KEY),
   ]);
-  if (!accessToken || !refreshToken) return null;
+  if (!refreshToken) return null;
   return { accessToken, refreshToken };
 }
 
-export async function writeTokens(tokens: SessionTokens): Promise<void> {
+export async function writeTokens(tokens: StoredTokens): Promise<void> {
   await Promise.all([
-    secureStorage.set(ACCESS_KEY, tokens.accessToken),
+    tokens.accessToken
+      ? secureStorage.set(ACCESS_KEY, tokens.accessToken)
+      : secureStorage.remove(ACCESS_KEY),
     secureStorage.set(REFRESH_KEY, tokens.refreshToken),
   ]);
 }

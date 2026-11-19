@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useToast } from '@sureground/ui-native';
-import { biometricSupport, unlockWithBiometrics, useAppLockEnabled } from '@/lib/appLock';
+import { appLockChangeMessage, biometricSupport, useAppLockEnabled } from '@/lib/appLock';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 const OFFERED_KEY = 'sureground.appLockOffered';
 // Lets the home screen settle before asking.
@@ -10,7 +11,8 @@ const OFFER_DELAY_MS = 1500;
 
 /** Asks once, on the first portal home after sign-in, whether to lock the app with biometrics. */
 export function useAppLockOffer(active: boolean) {
-  const { enabled, setEnabled } = useAppLockEnabled();
+  const { enabled } = useAppLockEnabled();
+  const { setAppLock } = useAuth();
   const toast = useToast();
 
   useEffect(() => {
@@ -20,7 +22,7 @@ export function useAppLockOffer(active: boolean) {
       const offered = await AsyncStorage.getItem(OFFERED_KEY).catch(() => '1');
       if (cancelled || offered) return;
       const support = await biometricSupport();
-      if (cancelled || !support.available) return;
+      if (cancelled || !support.canLock) return;
       await AsyncStorage.setItem(OFFERED_KEY, '1').catch(() => undefined);
       Alert.alert(
         `Lock Sureground with ${support.label}?`,
@@ -30,10 +32,8 @@ export function useAppLockOffer(active: boolean) {
           {
             text: 'Turn on',
             onPress: async () => {
-              const ok = await unlockWithBiometrics(`Turn on ${support.label} for Sureground`);
-              if (!ok) return;
-              setEnabled(true);
-              toast.show(`${support.label} lock is on.`, 'success');
+              const notice = appLockChangeMessage(await setAppLock(true), true, support.label);
+              if (notice) toast.show(notice.message, notice.tone);
             },
           },
         ]
@@ -43,5 +43,5 @@ export function useAppLockOffer(active: boolean) {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [active, enabled, setEnabled, toast]);
+  }, [active, enabled, setAppLock, toast]);
 }

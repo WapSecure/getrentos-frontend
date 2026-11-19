@@ -26,6 +26,28 @@ import { unregisterPush } from '../push';
 import { requestAppleCredential } from './apple';
 import { TOKEN_KEYS, accessTokenExpiry, clearTokens, readTokens, writeTokens } from './tokenStore';
 import { clearSecureLeftoversOnFreshInstall } from './freshInstall';
+import {
+  LOCKED_SESSION_KEY,
+  UNLOCK_PROMPT,
+  canLockWithBiometrics,
+  clearLockedSession,
+  hasLockedSession,
+  lockFailure,
+  readLockedRefreshToken,
+  storeLockedSession,
+  storeUnlockedSession,
+} from './lockedSession';
+import {
+  APP_LOCK_KEY,
+  type AppLockChange,
+  isAppLockEnabled,
+  isAppLocked,
+  loadAppLockFlag,
+  saveAppLockFlag,
+  setAppLocked,
+  unlockWithBiometrics,
+  waitUntilUnlocked,
+} from '../appLock';
 import { clearCachedProfile, readCachedProfile, writeCachedProfile } from './profileCache';
 import { markSessionExpired } from './sessionExpiry';
 import { startOAuth } from './oauth';
@@ -44,6 +66,11 @@ export interface SignInOutcome {
   /** The provider sign-in just created this account. */
   isNewUser?: boolean;
 }
+
+export type UnlockResult = 'unlocked' | 'cancelled' | 'failed' | 'signedOut';
+
+const BIOMETRICS_CHANGED =
+  'The fingerprints or face on this phone changed, so sign in again to unlock Sureground.';
 
 // The API sends no profile before the second factor.
 interface PendingTwoFactor {
@@ -73,6 +100,9 @@ interface AuthContextValue {
   skipInitialRoles: () => void;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
+  /** Reads the biometric-bound session, so the OS asks for the fingerprint or face. */
+  unlock: () => Promise<UnlockResult>;
+  setAppLock: (on: boolean) => Promise<AppLockChange>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -96,20 +126,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const accessTokenRef = useRef<string | null>(null);
   const refreshTokenRef = useRef<string | null>(null);
   const refreshInFlight = useRef<Promise<string | null> | null>(null);
+  // A locked launch shows the cached profile until the unlock can fetch a fresh one.
+  const profilePending = useRef(false);
+  const signingOutLocked = useRef(false);
+
+  // With the lock on, the access token stays in memory and only the refresh token is saved, behind biometrics.
+  // A biometric save that fails drops the saved copy: the rotated-away token left behind would read as reuse and end every session.
+  const persistTokens = useCallback(
+    async (tokens: { accessToken: string; refreshToken: string }): Promise<boolean> => {
+      if (isAppLockEnabled()) {
+        try {
+          await storeLockedSession(tokens.refreshToken);
+          return true;
+        } catch {
+          await clearLockedSession();
+          return false;
+        }
+      }
+      try {
+        await writeTokens(tokens);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    []
+  );
 
   // The session still works in memory if the keychain refuses it; say so rather than sign them out silently next launch.
   const saveTokens = useCallback(
     async (tokens: { accessToken: string; refreshToken: string }) => {
-      try {
-        await writeTokens(tokens);
-      } catch {
+      setAppLocked(false);
+      if (isAppLockEnabled() && !canLockWithBiometrics()) {
+        await saveAppLockFlag(false).catch(() => undefined);
+        toast.show(
+          'App lock is off because this phone has no fingerprint or face set up.',
+          'warning'
+        );
+      }
+      if (!(await persistTokens(tokens))) {
         toast.show(
           'You’re signed in, but this phone couldn’t save your session. You may need to sign in again next time.',
           'error'
         );
       }
     },
-    [toast]
+    [toast, persistTokens]
   );
 
   const markInitialRoles = useCallback(async (userId: string | null) => {
@@ -138,7 +200,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPendingTwoFactor(null);
     setInitialRolesPending(false);
     setStatus('unauthenticated');
+    profilePending.current = false;
+    setAppLocked(false);
     await clearTokens();
+    await clearLockedSession();
     await secureStorage.remove(INITIAL_ROLES_KEY).catch(() => undefined);
     await clearCachedProfile();
     setPreferredPortal(null);
@@ -151,16 +216,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [queryClient]);
 
   const refresh = useCallback(async (): Promise<string | null> => {
+    if (signingOutLocked.current) return null;
     if (refreshInFlight.current) return refreshInFlight.current;
-    const rt = refreshTokenRef.current;
-    if (!rt) return null;
+    if (!refreshTokenRef.current && !isAppLockEnabled()) return null;
 
     refreshInFlight.current = (async () => {
       try {
+        await waitUntilUnlocked();
+        const rt = refreshTokenRef.current;
+        if (!rt) return null;
         const res = await authApi.refresh(rt);
         accessTokenRef.current = res.accessToken;
         if (res.refreshToken) refreshTokenRef.current = res.refreshToken;
-        await writeTokens({
+        await persistTokens({
           accessToken: res.accessToken,
           refreshToken: refreshTokenRef.current!,
         });
@@ -179,7 +247,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
 
     return refreshInFlight.current;
-  }, [teardown]);
+  }, [teardown, persistTokens]);
 
   useEffect(() => {
     configureApi({
@@ -211,7 +279,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      await clearSecureLeftoversOnFreshInstall([...TOKEN_KEYS, INITIAL_ROLES_KEY]);
+      await clearSecureLeftoversOnFreshInstall([
+        ...TOKEN_KEYS,
+        LOCKED_SESSION_KEY,
+        INITIAL_ROLES_KEY,
+        APP_LOCK_KEY,
+      ]);
+      const lockOn = await loadAppLockFlag();
+      const lockedSession = await hasLockedSession();
+      if (lockedSession && !lockOn) await clearLockedSession();
+
+      // Nothing is refreshed or fetched before the unlock, so a locked launch never prompts on its own.
+      if (lockOn) {
+        // A session an older build saved in plain storage is moved behind biometrics at the unlock.
+        const legacy = lockedSession ? null : await readTokens();
+        if (!lockedSession && !legacy) {
+          setAppLocked(false);
+          if (!cancelled) setStatus('unauthenticated');
+          return;
+        }
+        refreshTokenRef.current = legacy?.refreshToken ?? null;
+        profilePending.current = true;
+        const cached = await readCachedProfile();
+        if (!cancelled) {
+          setProfile(cached);
+          setStatus('authenticated');
+        }
+        return;
+      }
+
+      setAppLocked(false);
       const stored = await readTokens();
       if (!stored) {
         if (!cancelled) setStatus('unauthenticated');
@@ -220,7 +317,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       accessTokenRef.current = stored.accessToken;
       refreshTokenRef.current = stored.refreshToken;
 
-      const exp = accessTokenExpiry(stored.accessToken);
+      const exp = stored.accessToken ? accessTokenExpiry(stored.accessToken) : null;
       if (exp === null || exp < Date.now() + 60_000) {
         const fresh = await refresh();
         if (!fresh) return; // teardown already ran
@@ -362,21 +459,116 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(await authApi.me());
   }, []);
 
-  const signOut = useCallback(async () => {
-    // Before the session is cleared: the API only lets a user remove their own device.
-    await unregisterPush();
-    await forgetPurchaser();
-    const rt = refreshTokenRef.current;
-    if (rt) {
+  const loadLockedProfile = useCallback(async () => {
+    try {
+      const prof = await authApi.me();
+      const rolesPendingFor = await secureStorage.get(INITIAL_ROLES_KEY).catch(() => null);
+      setInitialRolesPending(rolesPendingFor === prof.id);
+      setProfile(prof);
+    } catch (err) {
+      if (err instanceof ApiError && err.isAuth) await teardown();
+    }
+  }, [teardown]);
+
+  const sessionInvalidated = useCallback(async (): Promise<'signedOut'> => {
+    markSessionExpired({ message: BIOMETRICS_CHANGED, tone: 'info' });
+    await teardown();
+    return 'signedOut';
+  }, [teardown]);
+
+  const unlock = useCallback(async (): Promise<UnlockResult> => {
+    if (await hasLockedSession()) {
+      const read = await readLockedRefreshToken();
+      if (read.status === 'gone') return sessionInvalidated();
+      if (read.status !== 'ok') return read.status;
+      refreshTokenRef.current ??= read.refreshToken;
+    } else {
+      // Saved by an older build, or a biometric save failed earlier: lock the in-memory session now.
+      const rt = refreshTokenRef.current;
+      if (!rt) {
+        markSessionExpired();
+        await teardown();
+        return 'signedOut';
+      }
       try {
-        await authApi.logout(rt);
-      } catch {
-        // best effort — clear locally regardless
+        await storeLockedSession(rt, { prove: true });
+      } catch (err) {
+        return lockFailure(err);
       }
     }
-    // Only a deliberate sign-out drops unsent gate writes; an expired session keeps them for the same guard.
-    await gateOfflineQueue.clear();
-    await teardown();
+    setAppLocked(false);
+    if (profilePending.current) {
+      profilePending.current = false;
+      void loadLockedProfile();
+    }
+    return 'unlocked';
+  }, [teardown, sessionInvalidated, loadLockedProfile]);
+
+  const setAppLock = useCallback(
+    async (on: boolean): Promise<AppLockChange> => {
+      // A rotation still saving under the old setting would leave the token in the wrong place.
+      await refreshInFlight.current;
+      const accessToken = accessTokenRef.current;
+      let refreshToken = refreshTokenRef.current;
+      if (on) {
+        if (!canLockWithBiometrics()) return 'unavailable';
+        if (!refreshToken) return 'failed';
+        try {
+          await storeLockedSession(refreshToken, { prove: true });
+        } catch (err) {
+          return lockFailure(err);
+        }
+        try {
+          await saveAppLockFlag(true);
+        } catch {
+          await storeUnlockedSession({ accessToken, refreshToken }).catch(() => undefined);
+          return 'failed';
+        }
+        setAppLocked(false);
+        return 'done';
+      }
+
+      if (await hasLockedSession()) {
+        const read = await readLockedRefreshToken();
+        if (read.status === 'gone') return sessionInvalidated();
+        if (read.status !== 'ok') return read.status;
+        refreshToken ??= read.refreshToken;
+      } else if (!(await unlockWithBiometrics(UNLOCK_PROMPT))) {
+        return 'cancelled';
+      }
+      if (!refreshToken) return 'failed';
+      try {
+        await storeUnlockedSession({ accessToken, refreshToken });
+        await saveAppLockFlag(false);
+      } catch {
+        return 'failed';
+      }
+      return 'done';
+    },
+    [sessionInvalidated]
+  );
+
+  const signOut = useCallback(async () => {
+    // Behind the lock, a call that needed a refresh would wait for an unlock that never comes.
+    signingOutLocked.current = isAppLockEnabled() && isAppLocked();
+    try {
+      // Before the session is cleared: the API only lets a user remove their own device.
+      await unregisterPush();
+      await forgetPurchaser();
+      const rt = refreshTokenRef.current;
+      if (rt) {
+        try {
+          await authApi.logout(rt);
+        } catch {
+          // best effort — clear locally regardless
+        }
+      }
+      // Only a deliberate sign-out drops unsent gate writes; an expired session keeps them for the same guard.
+      await gateOfflineQueue.clear();
+      await teardown();
+    } finally {
+      signingOutLocked.current = false;
+    }
   }, [teardown]);
 
   const value = useMemo<AuthContextValue>(
@@ -400,6 +592,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       skipInitialRoles,
       refreshProfile,
       signOut,
+      unlock,
+      setAppLock,
     }),
     [
       status,
@@ -418,6 +612,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       skipInitialRoles,
       refreshProfile,
       signOut,
+      unlock,
+      setAppLock,
     ]
   );
 

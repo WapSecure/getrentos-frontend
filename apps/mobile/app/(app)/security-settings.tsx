@@ -55,8 +55,8 @@ import {
   transactionPinBody,
 } from '@/lib/stepUpSetup';
 import {
+  appLockChangeMessage,
   biometricSupport,
-  unlockWithBiometrics,
   useAppLockEnabled,
   type BiometricSupport,
 } from '@/lib/appLock';
@@ -121,8 +121,10 @@ export default function SecuritySettings() {
 function AppLockSection() {
   const { colors } = useTheme();
   const toast = useToast();
-  const { enabled, setEnabled } = useAppLockEnabled();
+  const { setAppLock } = useAuth();
+  const { enabled } = useAppLockEnabled();
   const [support, setSupport] = useState<BiometricSupport | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     biometricSupport().then(setSupport);
@@ -131,27 +133,29 @@ function AppLockSection() {
   if (!support) return null;
 
   const toggle = async (next: boolean) => {
-    if (next) {
-      // Prove it works before relying on it, so nobody locks themselves out.
-      const ok = await unlockWithBiometrics(`Turn on ${support.label} for Sureground`);
-      if (!ok) return;
-      toast.show(`${support.label} lock is on.`, 'success');
-    }
-    setEnabled(next);
+    setBusy(true);
+    const change = await setAppLock(next);
+    setBusy(false);
+    const notice = appLockChangeMessage(change, next, support.label);
+    if (notice) toast.show(notice.message, notice.tone);
   };
+
+  const label = `${support.label.charAt(0).toUpperCase()}${support.label.slice(1)}`;
 
   return (
     <Card elevated>
       <SwitchRow
         icon={<ScanFace size={16} color={colors.primary} />}
-        label={`${support.label.charAt(0).toUpperCase()}${support.label.slice(1)} lock`}
+        label={`${label} lock`}
         description={
-          support.available
-            ? `Ask for ${support.label} when Sureground opens, or after a minute away.`
-            : `Set up ${support.label} or a screen lock in your phone's settings to use this.`
+          support.canLock
+            ? `Ask for ${support.label} when Sureground opens, or after a minute away. Your sign-in on this phone can only be used after ${support.label}.`
+            : support.available
+              ? `This phone’s ${support.label} can’t protect the lock. Set up a fingerprint in your phone’s settings to use this.`
+              : `Set up ${support.label} in your phone’s settings to use this.`
         }
         value={!!enabled}
-        disabled={!support.available}
+        disabled={busy || (!support.canLock && !enabled)}
         onValueChange={toggle}
       />
     </Card>
