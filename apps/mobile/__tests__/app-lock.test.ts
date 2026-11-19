@@ -40,14 +40,19 @@ type SecureStoreMock = typeof import('expo-secure-store') & {
   deleteItemAsync: jest.Mock;
 };
 
+type AsyncStorageStatic = typeof import('@react-native-async-storage/async-storage').default;
+
+// The setup file's mock is CommonJS, so there is no `default` export to read.
+const asyncStorage = (mod: AsyncStorageStatic | { default: AsyncStorageStatic }) =>
+  'default' in mod ? mod.default : mod;
+
 /* eslint-disable @typescript-eslint/no-require-imports */
 function load(os: 'ios' | 'android' | 'web' = 'ios') {
   mockPlatform.OS = os;
   jest.resetModules();
   return {
     SecureStore: require('expo-secure-store') as SecureStoreMock,
-    AsyncStorage: require('@react-native-async-storage/async-storage')
-      .default as typeof import('@react-native-async-storage/async-storage').default,
+    AsyncStorage: asyncStorage(require('@react-native-async-storage/async-storage')),
     LocalAuthentication: require('expo-local-authentication') as {
       isEnrolledAsync: jest.Mock;
     },
