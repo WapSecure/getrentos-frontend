@@ -347,7 +347,7 @@ const INVOICE_LABEL: Record<AdminSubscriptionInvoice['status'], string> = {
   FAILED: 'Failed',
 };
 
-const INVOICE_COLUMNS: Column<AdminSubscriptionInvoice>[] = [
+export const INVOICE_COLUMNS: Column<AdminSubscriptionInvoice>[] = [
   {
     key: 'date',
     header: 'Date',

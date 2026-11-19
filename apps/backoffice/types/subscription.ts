@@ -108,3 +108,32 @@ export interface EnterpriseLead {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface AdminEstateSubscription {
+  estateId: string;
+  estateName: string;
+  organizationName: string;
+  payerEmail: string | null;
+  payerName: string | null;
+  status: SubscriptionStatus;
+  isActive: boolean;
+  cycle: 'MONTHLY' | 'ANNUAL' | null;
+  priceKobo: number | null;
+  trialEndsAt: string | null;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  households: number;
+  updatedAt: string;
+}
+
+export interface AdminEstateSubscriptionOverview {
+  inForce: number;
+  trialing: number;
+  active: number;
+  pastDue: number;
+  cancelled: number;
+  mrrKobo: number;
+  currency: string;
+  /** Null while Estate Pro is switched off. */
+  estateProFrom: string | null;
+}

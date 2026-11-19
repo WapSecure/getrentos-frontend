@@ -5,6 +5,8 @@ import type {
   AdminSubscription,
   AdminSubscriptionInvoice,
   AdminSubscriptionOverview,
+  AdminEstateSubscription,
+  AdminEstateSubscriptionOverview,
   AdminOrganizationPlan,
   EnterpriseLead,
   EnterpriseLeadStatus,
@@ -41,6 +43,38 @@ export const adminSubscriptionService = {
     safeCall(() =>
       authFetch<Paginated<AdminSubscriptionInvoice>>(
         `/admin/subscriptions/${userId}/invoices${toQuery({
+          page: params.page,
+          pageSize: params.pageSize,
+        })}`
+      )
+    ),
+
+  getEstateOverview: (): Promise<ApiResponse<AdminEstateSubscriptionOverview>> =>
+    safeCall(() =>
+      authFetch<AdminEstateSubscriptionOverview>('/admin/estate-subscriptions/overview')
+    ),
+
+  listEstates: (
+    params: SubscriptionQuery = {}
+  ): Promise<ApiResponse<Paginated<AdminEstateSubscription>>> =>
+    safeCall(() =>
+      authFetch<Paginated<AdminEstateSubscription>>(
+        `/admin/estate-subscriptions${toQuery({
+          search: params.search,
+          status: params.status,
+          page: params.page,
+          pageSize: params.pageSize,
+        })}`
+      )
+    ),
+
+  listEstateInvoices: (
+    estateId: string,
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<AdminSubscriptionInvoice>>> =>
+    safeCall(() =>
+      authFetch<Paginated<AdminSubscriptionInvoice>>(
+        `/admin/estate-subscriptions/${estateId}/invoices${toQuery({
           page: params.page,
           pageSize: params.pageSize,
         })}`

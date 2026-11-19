@@ -372,6 +372,12 @@ const navItems: NavItem[] = [
     permission: 'subscriptions.view',
   },
   {
+    label: 'Estate Pro',
+    href: ROUTES.ADMIN_ESTATE_SUBSCRIPTIONS,
+    icon: CreditCard,
+    permission: 'subscriptions.view',
+  },
+  {
     label: 'Enterprise enquiries',
     href: ROUTES.ADMIN_ENTERPRISE_ENQUIRIES,
     icon: Inbox,
