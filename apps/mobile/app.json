@@ -17,6 +17,7 @@
     },
     "android": {
       "package": "io.getsureground.app",
+      "allowBackup": false,
       "adaptiveIcon": {
         "backgroundColor": "#0057D9",
         "foregroundImage": "./assets/android-icon-foreground.png",

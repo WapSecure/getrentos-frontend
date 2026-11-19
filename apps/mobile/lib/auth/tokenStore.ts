@@ -4,6 +4,8 @@ import { secureStorage } from '../storage';
 const ACCESS_KEY = 'sureground.accessToken';
 const REFRESH_KEY = 'sureground.refreshToken';
 
+export const TOKEN_KEYS = [ACCESS_KEY, REFRESH_KEY];
+
 export interface SessionTokens {
   accessToken: string;
   refreshToken: string;

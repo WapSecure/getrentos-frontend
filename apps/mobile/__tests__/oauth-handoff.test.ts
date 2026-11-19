@@ -92,6 +92,18 @@ describe('native Google sign-in handoff (AU-17)', () => {
     await expect(startOAuth('google')).rejects.toThrow('Could not sign you in. Try again.');
   });
 
+  it('refuses tokens or a challenge placed directly in the redirect URL', async () => {
+    for (const url of [
+      'sureground://oauth#access_token=at&refresh_token=rt',
+      'sureground://oauth?access_token=at&refresh_token=rt',
+      'sureground://oauth#challenge_token=ch',
+    ]) {
+      mockOpenAuthSessionAsync.mockResolvedValue({ type: 'success', url });
+      await expect(startOAuth('google')).rejects.toThrow('Sign-in response was incomplete');
+    }
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
   it('treats OAUTH_CANCELLED like closing the browser', async () => {
     mockOpenAuthSessionAsync.mockResolvedValue({
       type: 'success',

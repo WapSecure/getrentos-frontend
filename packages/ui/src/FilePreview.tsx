@@ -105,13 +105,28 @@ export function FilePreview({ url, name, mimeType, className }: FilePreviewProps
             className="max-h-[55vh] w-full rounded-lg bg-card"
           />
         ) : csv ? (
-          <iframe src={url} title={name} className="h-[55vh] w-full rounded-lg bg-card" />
-        ) : (
           <iframe
-            src={`${url}#view=FitH`}
+            src={url}
             title={name}
+            sandbox=""
+            referrerPolicy="no-referrer"
             className="h-[55vh] w-full rounded-lg bg-card"
           />
+        ) : (
+          // Browsers won't show a PDF in a sandboxed iframe; an <object> typed as PDF hands it to the built-in viewer.
+          <object
+            data={`${url}#view=FitH`}
+            type="application/pdf"
+            aria-label={name}
+            className="h-[55vh] w-full rounded-lg bg-card"
+          >
+            <p className="p-4 text-center text-sm text-muted-foreground">
+              This PDF can&apos;t be shown here.{' '}
+              <a href={url} target="_blank" rel="noreferrer" className="text-primary underline">
+                Open it in a new tab
+              </a>
+            </p>
+          </object>
         )}
       </div>
     </div>

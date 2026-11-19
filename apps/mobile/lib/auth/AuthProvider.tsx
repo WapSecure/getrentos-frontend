@@ -24,7 +24,8 @@ import { writeSelectedClient } from '../agency/selectedClient';
 import { forgetPurchaser, identifyPurchaser } from '../purchases';
 import { unregisterPush } from '../push';
 import { requestAppleCredential } from './apple';
-import { accessTokenExpiry, clearTokens, readTokens, writeTokens } from './tokenStore';
+import { TOKEN_KEYS, accessTokenExpiry, clearTokens, readTokens, writeTokens } from './tokenStore';
+import { clearSecureLeftoversOnFreshInstall } from './freshInstall';
 import { clearCachedProfile, readCachedProfile, writeCachedProfile } from './profileCache';
 import { markSessionExpired } from './sessionExpiry';
 import { startOAuth } from './oauth';
@@ -210,6 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      await clearSecureLeftoversOnFreshInstall([...TOKEN_KEYS, INITIAL_ROLES_KEY]);
       const stored = await readTokens();
       if (!stored) {
         if (!cancelled) setStatus('unauthenticated');

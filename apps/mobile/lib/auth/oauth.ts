@@ -53,7 +53,7 @@ export async function startOAuth(provider: 'google'): Promise<OAuthResult> {
     throw new Error('Sign-in did not complete. Please try again.');
   }
 
-  // Tokens come back in either the URL fragment or the query.
+  // The code comes back in either the URL fragment or the query.
   const { url } = result;
   const afterHash = url.includes('#') ? url.slice(url.indexOf('#') + 1) : '';
   const afterQuery = url.includes('?') ? url.slice(url.indexOf('?') + 1).split('#')[0] : '';
@@ -64,40 +64,29 @@ export async function startOAuth(provider: 'google'): Promise<OAuthResult> {
   if (refusal) throw new Error(oauthErrorCopy(refusal));
   const flaggedNew = truthy(params.get('new_user')) || truthy(params.get('isNewUser'));
 
-  // The redirect carries a one-time code; the tokens come back only to the holder of the secret.
+  // Only a one-time code is trusted from the redirect; tokens placed in the URL could come from an app that claimed the scheme.
   const code = params.get('code');
-  if (code) {
-    const result = await apiFetch<Record<string, string | boolean>>('/auth/oauth/native/exchange', {
+  if (!code) throw new Error('Sign-in response was incomplete. Please try again.');
+  const exchanged = await apiFetch<Record<string, string | boolean>>(
+    '/auth/oauth/native/exchange',
+    {
       method: 'POST',
       anonymous: true,
       body: { code, verifier },
-    });
-    if (typeof result.challenge_token === 'string' && result.challenge_token)
-      return { kind: 'challenge', challengeToken: result.challenge_token };
-    const { access_token: accessToken, refresh_token: refreshToken } = result;
-    if (typeof accessToken !== 'string' || typeof refreshToken !== 'string') {
-      throw new Error('Sign-in response was incomplete. Please try again.');
     }
-    const isNewUser =
-      flaggedNew ||
-      truthy(result.isNewUser) ||
-      truthy(result.is_new_user) ||
-      truthy(result.new_user);
-    return isNewUser
-      ? { kind: 'session', accessToken, refreshToken, isNewUser }
-      : { kind: 'session', accessToken, refreshToken };
-  }
-
-  const challengeToken = params.get('challenge_token');
-  if (challengeToken) return { kind: 'challenge', challengeToken };
-
-  const accessToken = params.get('access_token');
-  const refreshToken = params.get('refresh_token');
-
-  if (!accessToken || !refreshToken) {
+  );
+  if (typeof exchanged.challenge_token === 'string' && exchanged.challenge_token)
+    return { kind: 'challenge', challengeToken: exchanged.challenge_token };
+  const { access_token: accessToken, refresh_token: refreshToken } = exchanged;
+  if (typeof accessToken !== 'string' || typeof refreshToken !== 'string') {
     throw new Error('Sign-in response was incomplete. Please try again.');
   }
-  return flaggedNew
-    ? { kind: 'session', accessToken, refreshToken, isNewUser: true }
+  const isNewUser =
+    flaggedNew ||
+    truthy(exchanged.isNewUser) ||
+    truthy(exchanged.is_new_user) ||
+    truthy(exchanged.new_user);
+  return isNewUser
+    ? { kind: 'session', accessToken, refreshToken, isNewUser }
     : { kind: 'session', accessToken, refreshToken };
 }
