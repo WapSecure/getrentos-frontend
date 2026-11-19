@@ -9,6 +9,7 @@ import {
   isLocalHost,
   mapTiles,
   parseOriginList,
+  sentryConnectSources,
   websocketOrigin,
 } from '@sureground/shared';
 
@@ -189,5 +190,19 @@ describe('cspReportUri (security gap CI-02)', () => {
   it('sends nowhere without a usable API URL', () => {
     expect(cspReportUri(undefined, undefined)).toBeNull();
     expect(cspReportUri(undefined, 'not a url')).toBeNull();
+  });
+});
+
+describe('sentryConnectSources', () => {
+  it('allows only the ingest origin of a configured DSN, never its key', () => {
+    expect(sentryConnectSources('https://abc123@o42.ingest.de.sentry.io/7')).toEqual([
+      'https://o42.ingest.de.sentry.io',
+    ]);
+  });
+
+  it('adds nothing without a usable DSN', () => {
+    expect(sentryConnectSources(undefined)).toEqual([]);
+    expect(sentryConnectSources('')).toEqual([]);
+    expect(sentryConnectSources('not a dsn')).toEqual([]);
   });
 });

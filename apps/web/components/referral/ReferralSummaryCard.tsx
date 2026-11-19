@@ -85,7 +85,7 @@ export const ReferralSummaryCard = () => {
           <h2 className="text-lg font-semibold text-foreground">Your referral code</h2>
         </div>
         <p className="text-sm text-muted-foreground mb-4">
-          Invite people you know. A referral counts once they verify their identity.
+          Share your code, or copy the link and send it.
         </p>
 
         <div className="flex items-center gap-2 mb-5">

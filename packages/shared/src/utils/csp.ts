@@ -69,6 +69,12 @@ export function parseOriginList(raw: string | null | undefined): string[] {
     .filter((origin): origin is string => origin !== null);
 }
 
+// The DSN's host is the ingest endpoint; with no DSN nothing is added, so the policy stays as tight as before.
+export function sentryConnectSources(dsn: string | null | undefined): string[] {
+  const origin = httpOrigin(dsn);
+  return origin ? [origin] : [];
+}
+
 // Null/empty counts as local, so HTTPS-only headers fail closed.
 export function isLocalHost(hostHeader: string | null | undefined): boolean {
   const first = hostHeader?.split(',')[0]?.trim().toLowerCase();

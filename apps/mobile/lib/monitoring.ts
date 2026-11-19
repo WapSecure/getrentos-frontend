@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native';
-import { scrubBreadcrumb, scrubEvent } from './sentryScrub';
+import { scrubBreadcrumb, scrubEvent } from '@sureground/shared/sentryScrub';
 
 const dsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
 

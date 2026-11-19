@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.2",
+    "@sentry/nextjs": "~10.75.3",
     "@simplewebauthn/browser": "14.0.0",
     "@sureground/icons": "workspace:*",
     "@sureground/shared": "workspace:*",

@@ -1,4 +1,18 @@
-import type { Breadcrumb, ErrorEvent, TransactionEvent } from '@sentry/react-native';
+// Structural so it serves every Sentry SDK (web, back office, mobile) without depending on one.
+interface ScrubbableBreadcrumb {
+  message?: string;
+  data?: Record<string, unknown>;
+}
+
+interface ScrubbableEvent {
+  request?: { url?: string; method?: string };
+  user?: { ip_address?: string | null };
+  message?: string;
+  transaction?: string;
+  breadcrumbs?: ScrubbableBreadcrumb[];
+  exception?: { values?: Array<{ value?: string }> };
+  spans?: Array<{ description?: string; data?: Record<string, unknown> }>;
+}
 
 export const FILTERED = '[Filtered]';
 
@@ -102,7 +116,7 @@ function scrubRecord(record: Record<string, unknown>, depth = 0): Record<string,
   return out;
 }
 
-export function scrubBreadcrumb(breadcrumb: Breadcrumb): Breadcrumb {
+export function scrubBreadcrumb<T extends ScrubbableBreadcrumb>(breadcrumb: T): T {
   return {
     ...breadcrumb,
     message: breadcrumb.message ? scrubText(breadcrumb.message) : breadcrumb.message,
@@ -110,11 +124,17 @@ export function scrubBreadcrumb(breadcrumb: Breadcrumb): Breadcrumb {
   };
 }
 
-export function scrubEvent<T extends ErrorEvent | TransactionEvent>(event: T): T {
-  const scrubbed: T = { ...event };
+export function scrubEvent<T extends ScrubbableEvent>(event: T): T {
+  const scrubbed: ScrubbableEvent = { ...event };
+  // An allowlist, so bodies, query strings, cookies and headers (Authorization) never leave.
   if (event.request) {
-    const { data: _data, query_string: _query, cookies: _cookies, ...request } = event.request;
-    scrubbed.request = { ...request, url: request.url ? scrubUrl(request.url) : request.url };
+    const { url, method } = event.request;
+    scrubbed.request = { url: url ? scrubUrl(url) : url, method };
+  }
+  if (event.user) {
+    const user = { ...event.user };
+    delete user.ip_address;
+    scrubbed.user = user;
   }
   if (event.message) scrubbed.message = scrubText(event.message);
   if (event.transaction) scrubbed.transaction = scrubText(event.transaction);
@@ -132,8 +152,18 @@ export function scrubEvent<T extends ErrorEvent | TransactionEvent>(event: T): T
     scrubbed.spans = event.spans.map((span) => ({
       ...span,
       description: span.description ? scrubText(span.description) : span.description,
-      data: span.data ? (scrubRecord(span.data) as typeof span.data) : span.data,
+      data: span.data ? scrubRecord(span.data) : span.data,
     }));
   }
-  return scrubbed;
+  return scrubbed as T;
+}
+
+export function scrubbedSentryOptions(dsn: string) {
+  return {
+    dsn,
+    sendDefaultPii: false,
+    beforeBreadcrumb: scrubBreadcrumb,
+    beforeSend: scrubEvent,
+    beforeSendTransaction: scrubEvent,
+  };
 }

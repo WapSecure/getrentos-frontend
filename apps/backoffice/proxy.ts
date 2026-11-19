@@ -4,13 +4,14 @@ import {
   buildContentSecurityPolicy,
   parseOriginList,
   cspReportUri,
+  sentryConnectSources,
 } from '@sureground/shared/csp';
 
 const DEV = process.env.NODE_ENV !== 'production';
 // Server-only, read at runtime: lets a production build run over plain http on a developer machine.
 const LOCAL_HTTP = process.env.LOCAL_HTTP === 'true';
 
-// Security headers plus a per-request nonce CSP, enforced from the start (staff-only, nothing third-party).
+// Security headers plus a per-request nonce CSP, enforced from the start (staff-only; the only third party is Sentry, when a DSN is set).
 // The nonce also goes on the forwarded request because Next stamps rendered scripts from it, so pages must render dynamically.
 // Not an auth gate: the access token lives in page memory and the httpOnly gr_refresh cookie belongs to the API origin with Path=/auth, so no page request carries a session.
 export default function proxy(request: NextRequest) {
@@ -22,6 +23,7 @@ export default function proxy(request: NextRequest) {
     dev: DEV,
     apiUrl: process.env.NEXT_PUBLIC_API_URL,
     mediaOrigins: parseOriginList(process.env.CSP_MEDIA_ORIGINS),
+    connectSrc: sentryConnectSources(process.env.NEXT_PUBLIC_SENTRY_DSN),
     upgradeInsecureRequests: secure,
     reportUri: cspReportUri(process.env.CSP_REPORT_URI, process.env.NEXT_PUBLIC_API_URL),
   });

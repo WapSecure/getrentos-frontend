@@ -1,5 +1,11 @@
 import type { ErrorEvent } from '@sentry/react-native';
-import { FILTERED, scrubBreadcrumb, scrubEvent, scrubText, scrubUrl } from '@/lib/sentryScrub';
+import {
+  FILTERED,
+  scrubBreadcrumb,
+  scrubEvent,
+  scrubText,
+  scrubUrl,
+} from '@sureground/shared/sentryScrub';
 
 describe('scrubUrl', () => {
   it('strips the query string and fragment', () => {
