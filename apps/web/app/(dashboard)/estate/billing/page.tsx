@@ -5,6 +5,7 @@ import { ROUTES } from '@/lib/constants/auth';
 import { BillingPage } from '@/components/shared/subscription/BillingPage';
 import { useEstatePlan } from '@/hooks/useEstatePlan';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
+import { EstateProCard } from '@/components/estate/billing/EstateProCard';
 
 export default function EstateBillingPage() {
   const { estate } = useSelectedEstate();
@@ -16,8 +17,9 @@ export default function EstateBillingPage() {
       description="See what's included on Free and what Pro unlocks for running your estate."
       planLabel={estate ? `${estate.name}'s plan` : "This estate's plan"}
       planTier={tier}
-      planNote="Estate features follow the plan of the person who set up the estate."
+      planNote="Estate features follow this estate's own Estate Pro, or the plan of the person who set it up."
     >
+      {estate && <EstateProCard estateId={estate.id} />}
       <Card className="p-6">
         <h2 className="text-base font-semibold text-foreground">Enterprise for estates</h2>
         <p className="mt-2 text-sm text-muted-foreground">
