@@ -218,6 +218,7 @@ export const qk = {
   },
   estateManager: {
     notifications: ['estate-manager', 'notifications'] as const,
+    plan: (estateId: string) => ['estate-manager', estateId, 'plan'] as const,
     reportDigest: (estateId: string) => ['estate-manager', estateId, 'report-digest'] as const,
     collectionPlan: (estateId: string, language: string) =>
       ['estate-manager', estateId, 'collection-plan', language] as const,

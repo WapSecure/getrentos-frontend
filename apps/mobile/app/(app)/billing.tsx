@@ -43,6 +43,8 @@ import {
 } from '@/lib/purchases';
 import { openLegal } from '@/lib/links';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { EstateProCard } from '@/components/estate/EstateProCard';
+import { useEstate } from '@/hooks/useEstate';
 import { goBack } from '@/lib/goBack';
 
 const PERSONA: Partial<Record<string, PlanPersona>> = {
@@ -111,6 +113,8 @@ export default function Billing() {
           </>
         ) : null}
       </QueryState>
+
+      {persona === 'estate' ? <SelectedEstatePro /> : null}
 
       {pricing.data?.entitlements[persona]?.length ? (
         <Comparison rows={pricing.data.entitlements[persona]} />
@@ -244,6 +248,11 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
 }
 
 // The stores require the auto-renewal terms next to the button.
+function SelectedEstatePro() {
+  const { estate } = useEstate();
+  return estate ? <EstateProCard estateId={estate.id} estateName={estate.name} /> : null;
+}
+
 function BuyPro() {
   const { spacing, radius } = useTheme();
   const qc = useQueryClient();

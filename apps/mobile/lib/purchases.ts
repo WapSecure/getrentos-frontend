@@ -63,6 +63,21 @@ export async function loadProOffers(): Promise<ProOffer[]> {
     .sort((a, b) => (a.cycle === b.cycle ? 0 : a.cycle === 'MONTHLY' ? -1 : 1));
 }
 
+/** Estate Pro has its own offering, so it never mixes with personal Pro. */
+export async function loadEstateProOffers(): Promise<ProOffer[]> {
+  if (!configuredFor) return [];
+  const offerings = await Purchases.getOfferings();
+  const packages = offerings.all['estate_pro']?.availablePackages ?? [];
+  return packages
+    .map((pkg) => ({
+      id: pkg.identifier,
+      price: pkg.product.priceString,
+      cycle: (pkg.packageType === 'ANNUAL' ? 'ANNUAL' : 'MONTHLY') as ProOffer['cycle'],
+      pkg,
+    }))
+    .sort((a, b) => (a.cycle === b.cycle ? 0 : a.cycle === 'MONTHLY' ? -1 : 1));
+}
+
 export async function buyOffer(offer: ProOffer): Promise<boolean> {
   try {
     await Purchases.purchasePackage(offer.pkg);
