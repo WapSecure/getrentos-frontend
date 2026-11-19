@@ -9,6 +9,7 @@ import {
   MessageCircle,
   Package,
   ReceiptText,
+  Settings,
   Siren,
   TriangleAlert,
   Vote,
@@ -65,6 +66,7 @@ export const residentNavigation = defineRoleNavigation({
     { id: 'committee', label: 'Committee', href: ROUTES.RESIDENT_COMMITTEE, icon: Landmark },
     { id: 'governance', label: 'Governance', href: ROUTES.RESIDENT_GOVERNANCE, icon: BookOpen },
     { id: 'emergency', label: 'Emergency', href: ROUTES.RESIDENT_EMERGENCY, icon: Siren },
+    { id: 'settings', label: 'Settings', href: ROUTES.RESIDENT_SETTINGS, icon: Settings },
   ],
   groups: [
     { label: 'Overview', items: ['dashboard', 'announcements', 'messages'] },
@@ -74,6 +76,7 @@ export const residentNavigation = defineRoleNavigation({
     },
     { label: 'Community', items: ['polls', 'amenities', 'committee', 'governance'] },
     { label: 'Emergency', items: ['emergency'] },
+    { label: 'Account', items: ['settings'] },
   ],
   primary: ['dashboard', 'announcements', 'dues', 'visitorPasses', 'maintenance', 'amenities'],
 });

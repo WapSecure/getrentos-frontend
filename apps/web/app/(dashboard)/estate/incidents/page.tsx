@@ -1,7 +1,7 @@
 'use client';
 
 import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Siren, Plus } from '@sureground/icons';
 import {
@@ -57,6 +57,18 @@ export default function EstateIncidentsPage() {
     enabled: !!estate,
     placeholderData: keepPreviousData,
   });
+
+  // Newest-first put a dismissed demo report above open critical alerts; open work comes first, most urgent first.
+  const orderedIncidents = useMemo(() => {
+    const closed = (status: string) => (status === 'resolved' || status === 'dismissed' ? 1 : 0);
+    const urgency: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+    return [...incidents].sort(
+      (a, b) =>
+        closed(a.status) - closed(b.status) ||
+        (urgency[a.priority] ?? 4) - (urgency[b.priority] ?? 4) ||
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [incidents]);
 
   const invalidate = () => {
     if (!estate) return;
@@ -175,7 +187,7 @@ export default function EstateIncidentsPage() {
         </div>
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {incidents.map((incident) => (
+          {orderedIncidents.map((incident) => (
             <IncidentCard
               key={incident.id}
               incident={incident}

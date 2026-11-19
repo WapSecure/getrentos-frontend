@@ -7,7 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Camera, User, Mail, Phone, ShieldCheck, CheckCircle2 } from '@sureground/icons';
 import { Badge, Button, Field, IconButton, Input, SaveButton, Textarea } from '@sureground/ui';
 import { OTPModal } from '@/components/auth/OTPModal';
-import { renterService } from '@/services/renterService';
+import { accountService } from '@/services/accountService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { nameOnly } from '@/lib/validations/input';
@@ -23,7 +23,7 @@ interface ProfileSettingsProps {
 export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
   const { data: profile } = useQuery({
     queryKey: renterKeys.profile,
-    queryFn: () => unwrap(renterService.getProfile()),
+    queryFn: () => unwrap(accountService.getProfile()),
   });
 
   const initial = {
@@ -66,7 +66,7 @@ const ProfileSettingsForm = ({
   const updateMutation = useMutation({
     mutationFn: () =>
       unwrap(
-        renterService.updateProfile({
+        accountService.updateProfile({
           fullName: formData.fullName,
           phone: formData.phone,
           location: formData.location,
@@ -82,7 +82,7 @@ const ProfileSettingsForm = ({
   });
 
   const avatarMutation = useMutation({
-    mutationFn: (file: File) => unwrap(renterService.updateAvatar(file)),
+    mutationFn: (file: File) => unwrap(accountService.updateAvatar(file)),
     onSuccess: (profile) => {
       setAvatarUrl(profile?.avatarUrl);
       queryClient.invalidateQueries({ queryKey: renterKeys.profile });
@@ -106,7 +106,7 @@ const ProfileSettingsForm = ({
     }
     setOtpError('');
     setIsSendingOtp(true);
-    const response = await renterService.sendPhoneVerification();
+    const response = await accountService.sendPhoneVerification();
     setIsSendingOtp(false);
     if (response.success && response.data) {
       setOtpReference(response.data.reference);
@@ -118,7 +118,7 @@ const ProfileSettingsForm = ({
 
   const handleOtpVerify = async (otp: string) => {
     if (!otpReference) return;
-    const response = await renterService.confirmPhoneVerification(otpReference, otp);
+    const response = await accountService.confirmPhoneVerification(otpReference, otp);
     if (response.success && response.data) {
       setIsOtpOpen(false);
       setOtpReference('');
@@ -129,7 +129,7 @@ const ProfileSettingsForm = ({
   };
 
   const handleOtpResend = async () => {
-    const response = await renterService.sendPhoneVerification();
+    const response = await accountService.sendPhoneVerification();
     if (response.success && response.data) {
       setOtpReference(response.data.reference);
     } else {

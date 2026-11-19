@@ -159,6 +159,8 @@ export interface EscrowSaleTransaction {
   propertyType?: string;
   buyerName: string;
   salePrice: number;
+  /** What went through Sureground (the deposit); the balance is settled between buyer and seller. */
+  heldAmount?: number;
   /** Sureground holds the deposit, and pays nothing out, until this is true. */
   ownershipVerified?: boolean;
   escrowStatus: SaleEscrowStatus;

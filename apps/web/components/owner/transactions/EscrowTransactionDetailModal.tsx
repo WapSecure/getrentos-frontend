@@ -86,9 +86,9 @@ const escrowSteps: {
   {
     key: 'released',
     label: 'Released',
-    description: 'Funds released to you after all conditions were met.',
+    description: 'Released from Payment Protection once all conditions are met.',
     doneLabel: 'Released',
-    doneDescription: 'Funds released to you after all conditions were met.',
+    doneDescription: 'Released from Payment Protection. The payout to you is shown below.',
   },
 ];
 
@@ -181,6 +181,13 @@ export const EscrowTransactionDetailModal = ({
               {formatCurrency(transaction.salePrice)}
             </span>
           </div>
+          {transaction.heldAmount !== undefined &&
+            transaction.heldAmount < transaction.salePrice && (
+              <p className="-mt-3 text-xs text-muted-foreground">
+                Deposit through Sureground: {formatCurrency(transaction.heldAmount)}. The buyer pays
+                you the balance directly, as you agreed.
+              </p>
+            )}
 
           {isFrozen ? (
             <Alert variant="danger" icon={ShieldAlert} title="Payment on hold: dispute open">

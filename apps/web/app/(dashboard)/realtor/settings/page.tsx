@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Lock,
   Download,
+  Trash2,
 } from '@sureground/icons';
 import { ProfileSettings } from '@/components/realtor/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/realtor/settings/NotificationSettings';
@@ -19,6 +20,7 @@ import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSe
 import { BusinessPreferencesSettings } from '@/components/realtor/settings/BusinessPreferencesSettings';
 import { LicenseVerificationSettings } from '@/components/shared/verification/LicenseVerificationSettings';
 import { DataExport } from '@/components/shared/settings/DataExport';
+import { AccountDeletion } from '@/components/shared/settings/AccountDeletion';
 import { SecuritySettings } from '@/components/shared/security/SecuritySettings';
 
 type SettingsTab =
@@ -28,7 +30,8 @@ type SettingsTab =
   | 'payouts'
   | 'preferences'
   | 'security'
-  | 'data';
+  | 'data'
+  | 'delete';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -38,6 +41,7 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'preferences', label: 'Business preferences', icon: SlidersHorizontal },
   { id: 'security', label: 'Security', icon: Lock },
   { id: 'data', label: 'Your data', icon: Download },
+  { id: 'delete', label: 'Delete account', icon: Trash2 },
 ];
 
 export default function RealtorSettingsPage() {
@@ -64,6 +68,8 @@ export default function RealtorSettingsPage() {
         return <SecuritySettings />;
       case 'data':
         return <DataExport />;
+      case 'delete':
+        return <AccountDeletion />;
       default:
         return null;
     }

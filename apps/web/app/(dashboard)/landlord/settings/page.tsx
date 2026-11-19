@@ -3,16 +3,24 @@
 import { useLandlordUser } from '../layout';
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { User, Bell, Landmark, Zap, Lock, Download } from '@sureground/icons';
+import { User, Bell, Landmark, Zap, Lock, Download, Trash2 } from '@sureground/icons';
 import { Card, PageHeader } from '@sureground/ui';
 import { ProfileSettings } from '@/components/landlord/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/landlord/settings/NotificationSettings';
 import { PayoutSettings } from '@/components/landlord/settings/PayoutSettings';
 import { AutomationSettings } from '@/components/landlord/settings/AutomationSettings';
 import { DataExport } from '@/components/shared/settings/DataExport';
+import { AccountDeletion } from '@/components/shared/settings/AccountDeletion';
 import { SecuritySettings } from '@/components/shared/security/SecuritySettings';
 
-type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'automation' | 'security' | 'data';
+type SettingsTab =
+  | 'profile'
+  | 'notifications'
+  | 'payouts'
+  | 'automation'
+  | 'security'
+  | 'data'
+  | 'delete';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -21,6 +29,7 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'automation', label: 'Automation', icon: Zap },
   { id: 'security', label: 'Security', icon: Lock },
   { id: 'data', label: 'Your data', icon: Download },
+  { id: 'delete', label: 'Delete account', icon: Trash2 },
 ];
 
 const isSettingsTab = (value: string | null): value is SettingsTab =>
@@ -47,6 +56,8 @@ function LandlordSettingsPageContent() {
         return <SecuritySettings />;
       case 'data':
         return <DataExport />;
+      case 'delete':
+        return <AccountDeletion />;
       default:
         return null;
     }

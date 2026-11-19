@@ -51,7 +51,6 @@ export const realtorNavigation = defineRoleNavigation({
       labelKey: 'sidebar.commissions',
       href: ROUTES.REALTOR_COMMISSIONS,
       icon: Wallet,
-      plan: 'PRO',
     },
     {
       id: 'documents',

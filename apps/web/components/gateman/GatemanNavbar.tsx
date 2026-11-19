@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { KeyRound, Car, Package, Siren } from '@sureground/icons';
+import { KeyRound, Car, Package, Siren, Settings } from '@sureground/icons';
 import { Logo } from '@/components/ui/Logo';
 import { PostSwitcher } from '@/components/gateman/PostSwitcher';
 import { ThemeToggle } from '@sureground/ui';
@@ -70,7 +70,12 @@ export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
             <ThemeToggle />
             <TopBarDivider className="mx-1 hidden sm:block" />
             <TopBarAccount>
-              <AccountMenu user={user} roleId="gateman" roleLabel="Gate" />
+              <AccountMenu
+                user={user}
+                roleId="gateman"
+                roleLabel="Gate"
+                links={[{ href: ROUTES.GATEMAN_SETTINGS, label: 'Settings', icon: Settings }]}
+              />
             </TopBarAccount>
           </div>
         </div>

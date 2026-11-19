@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { Trash2, Check } from '@sureground/icons';
 import { Alert, Button, Field, Input } from '@sureground/ui';
-import { renterService } from '@/services/renterService';
+import { accountService } from '@/services/accountService';
 import { ROUTES } from '@/lib/constants/auth';
 import { logoutSession } from '@/lib/apiClient';
 
@@ -17,7 +17,7 @@ export const AccountDeletion = () => {
   const [error, setError] = useState<string | null>(null);
 
   const deleteMutation = useMutation({
-    mutationFn: () => renterService.deleteAccount(password),
+    mutationFn: () => accountService.deleteAccount(password),
     onSuccess: (res) => {
       if (res.success) {
         setStep('complete');
@@ -41,9 +41,9 @@ export const AccountDeletion = () => {
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive-subtle flex items-center justify-center">
           <Check className="w-8 h-8 text-destructive" aria-hidden="true" />
         </div>
-        <h3 className="text-xl font-semibold text-foreground">Account deleted</h3>
+        <h3 className="text-xl font-semibold text-foreground">Account closed</h3>
         <p className="text-sm text-muted-foreground mt-2">
-          Your account has been successfully deleted. We&apos;re sorry to see you go.
+          Your account has been closed. We&apos;re sorry to see you go.
         </p>
       </div>
     );
@@ -53,12 +53,14 @@ export const AccountDeletion = () => {
     <div>
       <h2 className="text-xl font-semibold text-destructive mb-4">Delete account</h2>
       <p className="text-sm text-muted-foreground mb-6">
-        Permanently delete your account and all associated data
+        Close your Sureground account. You will be signed out straight away.
       </p>
 
       <Alert variant="danger" title="Warning">
-        This action is permanent and cannot be undone. All your data, including applications,
-        payments, messages, and lease agreements will be permanently deleted.
+        Your account is closed straight away and can&apos;t be reopened. Your personal data is then
+        deleted, except records the law requires us to keep for a set time, such as payments and
+        identity checks. If money is still owed to you or by you, or a lease, sale or booking is in
+        progress, settle it first.
       </Alert>
 
       <Field

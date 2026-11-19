@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-17T17:14:57.866Z",
+  "generatedAt": "2026-11-19T10:53:50.626Z",
   "policy": "Existing entries are debt or reviewed platform exceptions. Counts may decrease; additions require review.",
   "entries": [
     {
@@ -197,21 +197,21 @@
       "path": "apps/web/components/landlord/properties/EditPropertyModal.tsx",
       "tag": "input",
       "fingerprint": "815576d230c6b6a2",
-      "line": 293,
+      "line": 369,
       "classification": "platform-bridge",
       "rationale": "Native file/hidden input used as a browser integration point; the visible control must remain shared.",
       "count": 1,
-      "lines": [293]
+      "lines": [369]
     },
     {
       "path": "apps/web/components/landlord/settings/ProfileSettings.tsx",
       "tag": "input",
       "fingerprint": "b50a8bad6fc9ce3a",
-      "line": 81,
+      "line": 94,
       "classification": "platform-bridge",
       "rationale": "Native file/hidden input used as a browser integration point; the visible control must remain shared.",
       "count": 1,
-      "lines": [81]
+      "lines": [94]
     },
     {
       "path": "apps/web/components/owner/listings/CreateSaleListingModal.tsx",
@@ -237,11 +237,11 @@
       "path": "apps/web/components/owner/properties/EditOwnerPropertyModal.tsx",
       "tag": "input",
       "fingerprint": "c4ead4513ac87fc5",
-      "line": 316,
+      "line": 391,
       "classification": "platform-bridge",
       "rationale": "Native file/hidden input used as a browser integration point; the visible control must remain shared.",
       "count": 1,
-      "lines": [316]
+      "lines": [391]
     },
     {
       "path": "apps/web/components/realtor/messages/MessageThread.tsx",
@@ -257,11 +257,11 @@
       "path": "apps/web/components/realtor/settings/ProfileSettings.tsx",
       "tag": "input",
       "fingerprint": "99b22784d95028ae",
-      "line": 98,
+      "line": 103,
       "classification": "platform-bridge",
       "rationale": "Native file/hidden input used as a browser integration point; the visible control must remain shared.",
       "count": 1,
-      "lines": [98]
+      "lines": [103]
     },
     {
       "path": "apps/web/components/renter/discover/features/DocumentChecklist.tsx",
@@ -314,16 +314,6 @@
       "lines": [753]
     },
     {
-      "path": "apps/web/components/renter/settings/ProfileSettings.tsx",
-      "tag": "input",
-      "fingerprint": "ab47b8101b3b7de1",
-      "line": 174,
-      "classification": "platform-bridge",
-      "rationale": "Native file/hidden input used as a browser integration point; the visible control must remain shared.",
-      "count": 1,
-      "lines": [174]
-    },
-    {
       "path": "apps/web/components/shared/media/PropertyPhotoEditor.tsx",
       "tag": "input",
       "fingerprint": "d4acb890cc006bd2",
@@ -332,6 +322,16 @@
       "rationale": "Native file/hidden input used as a browser integration point; the visible control must remain shared.",
       "count": 1,
       "lines": [235]
+    },
+    {
+      "path": "apps/web/components/shared/settings/ProfileSettings.tsx",
+      "tag": "input",
+      "fingerprint": "2c3e54288e7b438c",
+      "line": 181,
+      "classification": "platform-bridge",
+      "rationale": "Native file/hidden input used as a browser integration point; the visible control must remain shared.",
+      "count": 1,
+      "lines": [181]
     },
     {
       "path": "apps/web/components/shortlet/ShortletMediaManager.tsx",
