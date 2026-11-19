@@ -113,9 +113,15 @@ export const estateResidentService = {
   },
 
   async listMyDues(
-    query: PageQuery & { status?: string } = {}
+    query: PageQuery & { status?: string; scope?: 'unpaid' | 'settled' } = {}
   ): Promise<ApiResponse<Paginated<Due>>> {
     return safeCall(() => authFetch(`/estate/resident/dues${toQuery(query)}`));
+  },
+
+  async getMyDuesSummary(): Promise<
+    ApiResponse<{ outstandingTotal: number; outstandingCount: number; overdueCount: number }>
+  > {
+    return safeCall(() => authFetch('/estate/resident/dues/summary'));
   },
 
   /** `provider` names the company that takes it (Paystack or Monnify); omitted, the default one. */
@@ -186,7 +192,7 @@ export const estateResidentService = {
   },
 
   async listMyVisitorPasses(
-    query: PageQuery & { status?: string } = {}
+    query: PageQuery & { status?: string; scope?: 'active' | 'past' } = {}
   ): Promise<ApiResponse<Paginated<VisitorPass>>> {
     return safeCall(() => authFetch(`/estate/resident/visitor-passes${toQuery(query)}`));
   },

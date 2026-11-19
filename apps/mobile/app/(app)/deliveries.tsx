@@ -21,10 +21,12 @@ import {
 import { Sheet } from '@/components/Sheet';
 import {
   residentApi,
+  type DeliveryLog,
   type ExpectedDelivery,
   type IssuedExpectedDelivery,
 } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
+import { usePagedList } from '@/lib/query/usePagedList';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
@@ -32,6 +34,8 @@ import { goBack } from '@/lib/goBack';
 import { Image as ExpoImage } from 'expo-image';
 
 // Labels are written server-side (`delivery.util.ts`) and rendered as-is, so this screen can't contradict the guard's refusal.
+const PAGE_SIZE = 10;
+
 export default function ResidentDeliveries() {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
@@ -39,10 +43,14 @@ export default function ResidentDeliveries() {
 
   const [declareOpen, setDeclareOpen] = useState(false);
 
+  // Parcels still at the gate are few and always shown; only the collected history is paged.
   const query = useQuery({
-    queryKey: qk.resident.deliveries(1, 50),
-    queryFn: () => residentApi.listDeliveries(1, 50),
+    queryKey: [...qk.resident.deliveries(1, 50), 'received'],
+    queryFn: () => residentApi.listDeliveries(1, 50, 'received'),
   });
+  const collected = usePagedList([...qk.resident.deliveries(), 'collected'], (page) =>
+    residentApi.listDeliveries(page, PAGE_SIZE, 'collected')
+  );
 
   const expectedQuery = useQuery({
     queryKey: qk.resident.expectedDeliveries,
@@ -64,6 +72,63 @@ export default function ResidentDeliveries() {
       ),
   });
 
+  const renderDelivery = (d: DeliveryLog) => (
+    <Card key={d.id} elevated>
+      <View style={{ flexDirection: 'row', gap: spacing.md }}>
+        {d.photoUrl ? (
+          <ExpoImage
+            source={{ uri: d.photoUrl }}
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: radius.md,
+              backgroundColor: colors.secondary,
+            }}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+          />
+        ) : (
+          <View
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: radius.md,
+              backgroundColor: colors.accent,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Package size={22} color={colors.primary} />
+          </View>
+        )}
+        <View style={{ flex: 1, gap: 2 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Text variant="bodyStrong">{d.courier ?? 'Package'}</Text>
+            <Badge
+              label={d.status === 'collected' ? 'Collected' : 'Received'}
+              tone={d.status === 'collected' ? 'success' : 'info'}
+            />
+          </View>
+          {d.recipientName ? (
+            <Text variant="caption" color="mutedForeground">
+              For {d.recipientName}
+            </Text>
+          ) : null}
+          <Text variant="caption" color="mutedForeground">
+            Received {formatDate(d.receivedAt, 'short')}
+            {collectionSummary(d) ? ` · ${collectionSummary(d)}` : ''}
+          </Text>
+        </View>
+      </View>
+    </Card>
+  );
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <DetailScreenHeader
@@ -73,10 +138,13 @@ export default function ResidentDeliveries() {
         onBack={() => goBack()}
       />
       <Screen
-        refreshing={query.isRefetching || expectedQuery.isRefetching}
+        refreshing={
+          query.isRefetching || expectedQuery.isRefetching || collected.query.isRefetching
+        }
         onRefresh={() => {
           void query.refetch();
           void expectedQuery.refetch();
+          void collected.query.refetch();
         }}
       >
         <Card>
@@ -148,74 +216,43 @@ export default function ResidentDeliveries() {
         )}
 
         <SectionHeader title="At the gate" />
-        {query.isLoading ? (
+        {query.isLoading || collected.query.isLoading ? (
           <View style={{ gap: spacing.md }}>
             <Skeleton height={76} radius={16} />
             <Skeleton height={76} radius={16} />
           </View>
-        ) : query.data && query.data.items.length > 0 ? (
-          query.data.items.map((d) => (
-            <Card key={d.id} elevated>
-              <View style={{ flexDirection: 'row', gap: spacing.md }}>
-                {d.photoUrl ? (
-                  <ExpoImage
-                    source={{ uri: d.photoUrl }}
-                    style={{
-                      width: 52,
-                      height: 52,
-                      borderRadius: radius.md,
-                      backgroundColor: colors.secondary,
-                    }}
-                    contentFit="cover"
-                    cachePolicy="memory-disk"
-                  />
-                ) : (
-                  <View
-                    style={{
-                      width: 52,
-                      height: 52,
-                      borderRadius: radius.md,
-                      backgroundColor: colors.accent,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Package size={22} color={colors.primary} />
-                  </View>
-                )}
-                <View style={{ flex: 1, gap: 2 }}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <Text variant="bodyStrong">{d.courier ?? 'Package'}</Text>
-                    <Badge
-                      label={d.status === 'collected' ? 'Collected' : 'Received'}
-                      tone={d.status === 'collected' ? 'success' : 'info'}
-                    />
-                  </View>
-                  {d.recipientName ? (
-                    <Text variant="caption" color="mutedForeground">
-                      For {d.recipientName}
-                    </Text>
-                  ) : null}
-                  <Text variant="caption" color="mutedForeground">
-                    Received {formatDate(d.receivedAt, 'short')}
-                    {collectionSummary(d) ? ` · ${collectionSummary(d)}` : ''}
-                  </Text>
-                </View>
-              </View>
-            </Card>
-          ))
-        ) : (
+        ) : (query.data?.items.length ?? 0) === 0 && collected.total === 0 ? (
           <EmptyState
             icon={<Package size={34} color={colors.mutedForeground} />}
             title="No deliveries yet"
             description="Packages logged at the gate for your household will show up here."
           />
+        ) : (
+          <>
+            {(query.data?.items.length ?? 0) > 0 ? (
+              query.data?.items.map(renderDelivery)
+            ) : (
+              <Card>
+                <Text variant="caption" color="mutedForeground">
+                  Nothing is waiting for you at the gate.
+                </Text>
+              </Card>
+            )}
+            {collected.items.length > 0 ? (
+              <>
+                <SectionHeader title="Collected" />
+                {collected.items.map(renderDelivery)}
+                {collected.hasMore ? (
+                  <Button
+                    label="Show more"
+                    variant="ghost"
+                    loading={collected.isLoadingMore}
+                    onPress={collected.loadMore}
+                  />
+                ) : null}
+              </>
+            ) : null}
+          </>
         )}
       </Screen>
 

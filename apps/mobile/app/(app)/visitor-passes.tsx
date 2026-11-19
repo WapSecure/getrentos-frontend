@@ -25,6 +25,7 @@ import {
   type VisitorPassStatus,
 } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
+import { usePagedList } from '@/lib/query/usePagedList';
 import { formatDateTime, formatTime } from '@/lib/format';
 import { passTimeline } from '@sureground/shared';
 import { haptics } from '@/lib/haptics';
@@ -67,6 +68,8 @@ const EXPIRY_PRESETS = [
 ] as const;
 const DEFAULT_EXPIRY_HOURS = 24;
 
+const PAGE_SIZE = 10;
+
 const ACTIVE_STATUSES = new Set<VisitorPassStatus>(['pending', 'approved', 'checked_in']);
 
 export default function ResidentVisitorPasses() {
@@ -81,12 +84,17 @@ export default function ResidentVisitorPasses() {
   // A walk-in lapses ten minutes after it is raised; keep refreshing so a dead request stops offering buttons.
   const [now, setNow] = useState(() => Date.now());
   const query = useQuery({
-    queryKey: qk.resident.visitorPasses,
-    queryFn: () => residentApi.listVisitorPasses(1, 50),
-    refetchInterval: (q) =>
-      q.state.data?.items.some((pass) => pass.status === 'awaiting_approval') ? 15_000 : false,
+    queryKey: [...qk.resident.visitorPasses, 'waiting'],
+    queryFn: () => residentApi.listVisitorPasses(1, 50, { status: 'awaiting_approval' }),
+    refetchInterval: (q) => ((q.state.data?.items.length ?? 0) > 0 ? 15_000 : false),
   });
-  const hasAwaiting = (query.data?.items ?? []).some((pass) => pass.status === 'awaiting_approval');
+  const activeList = usePagedList([...qk.resident.visitorPasses, 'active'], (page) =>
+    residentApi.listVisitorPasses(page, PAGE_SIZE, { scope: 'active' })
+  );
+  const pastList = usePagedList([...qk.resident.visitorPasses, 'past'], (page) =>
+    residentApi.listVisitorPasses(page, PAGE_SIZE, { scope: 'past' })
+  );
+  const hasAwaiting = (query.data?.items.length ?? 0) > 0;
   useEffect(() => {
     if (!hasAwaiting) return;
     const timer = setInterval(() => setNow(Date.now()), 5_000);
@@ -158,9 +166,16 @@ export default function ResidentVisitorPasses() {
 
   // Walk-ins get their own section at the top: a real person is waiting at the barrier.
   const awaiting = passes.filter((pass) => pass.status === 'awaiting_approval');
-  const others = passes.filter((pass) => pass.status !== 'awaiting_approval');
-  const active = others.filter((pass) => ACTIVE_STATUSES.has(pass.status));
-  const finished = others.filter((pass) => !ACTIVE_STATUSES.has(pass.status));
+  const active = activeList.items;
+  const finished = pastList.items;
+  const isLoading = query.isLoading || activeList.query.isLoading || pastList.query.isLoading;
+  const loadFailed =
+    (query.isError && !query.data) || (activeList.query.isError && !activeList.query.data);
+  const refetchAll = () => {
+    void query.refetch();
+    void activeList.query.refetch();
+    void pastList.query.refetch();
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -177,7 +192,12 @@ export default function ResidentVisitorPasses() {
           />
         }
       />
-      <Screen refreshing={query.isRefetching} onRefresh={() => void query.refetch()}>
+      <Screen
+        refreshing={
+          query.isRefetching || activeList.query.isRefetching || pastList.query.isRefetching
+        }
+        onRefresh={refetchAll}
+      >
         {awaiting.length > 0 ? (
           <View style={{ gap: spacing.md }}>
             <GroupLabel
@@ -199,23 +219,23 @@ export default function ResidentVisitorPasses() {
           </View>
         ) : null}
 
-        {query.isLoading ? (
+        {isLoading ? (
           <View style={{ gap: spacing.md }}>
             <Skeleton height={12} width="35%" />
             <Skeleton height={112} radius={radius.lg} />
             <Skeleton height={112} radius={radius.lg} />
           </View>
-        ) : query.isError && !query.data ? (
+        ) : loadFailed ? (
           <ErrorState
             title="We couldn't load your passes"
             description="Check your connection, then try again."
-            onRetry={() => void query.refetch()}
+            onRetry={refetchAll}
           />
-        ) : others.length > 0 ? (
+        ) : active.length + finished.length > 0 ? (
           <>
             {active.length > 0 ? (
               <View style={{ gap: spacing.md }}>
-                <GroupLabel label="Active passes" count={active.length} />
+                <GroupLabel label="Active passes" count={activeList.total} />
                 {active.map((pass) => (
                   <PassCard
                     key={pass.id}
@@ -224,14 +244,30 @@ export default function ResidentVisitorPasses() {
                     onRevoke={() => revoke.mutate(pass.id)}
                   />
                 ))}
+                {activeList.hasMore ? (
+                  <Button
+                    label="Show more"
+                    variant="ghost"
+                    loading={activeList.isLoadingMore}
+                    onPress={activeList.loadMore}
+                  />
+                ) : null}
               </View>
             ) : null}
             {finished.length > 0 ? (
               <View style={{ gap: spacing.sm }}>
-                <GroupLabel label="Past visitors" count={finished.length} />
+                <GroupLabel label="Past visitors" count={pastList.total} />
                 {finished.map((pass) => (
                   <PassCard key={pass.id} pass={pass} />
                 ))}
+                {pastList.hasMore ? (
+                  <Button
+                    label="Show more"
+                    variant="ghost"
+                    loading={pastList.isLoadingMore}
+                    onPress={pastList.loadMore}
+                  />
+                ) : null}
               </View>
             ) : null}
           </>
@@ -621,15 +657,18 @@ function IssuePassForm({
           onChangeText={setPurpose}
           editable={!submitting}
         />
-        <Field label="Pass lasts for">
+        <Field label="Time to arrive">
           <DurationChoice
-            label="Pass lasts for"
+            label="Time to arrive"
             options={EXPIRY_PRESETS}
             // Nothing chosen means the server's 24-hour default, so that option shows as selected.
             value={expiryHours ?? DEFAULT_EXPIRY_HOURS}
             onChange={setExpiryHours}
             disabled={submitting}
           />
+          <Text variant="caption" color="mutedForeground">
+            A pass lets the visitor in once. For their next visit, issue a new pass.
+          </Text>
         </Field>
       </FormGroup>
       <Button

@@ -67,8 +67,8 @@ export default function ResidentHome() {
     queryFn: () => residentApi.listAnnouncements(1, 3),
   });
   const dues = useQuery({
-    queryKey: qk.resident.dues,
-    queryFn: () => residentApi.listDues(1, 50),
+    queryKey: qk.resident.duesSummary,
+    queryFn: () => residentApi.getDuesSummary(),
   });
 
   const notifications = useQuery({
@@ -78,9 +78,13 @@ export default function ResidentHome() {
   const unreadCount = (notifications.data?.items ?? []).filter((n) => !n.read).length;
   // A walk-in has a ten-minute window, so keep polling while one is open.
   const passes = useQuery({
-    queryKey: qk.resident.visitorPasses,
-    queryFn: () => residentApi.listVisitorPasses(1, 50),
+    queryKey: [...qk.resident.visitorPasses, 'waiting'],
+    queryFn: () => residentApi.listVisitorPasses(1, 50, { status: 'awaiting_approval' }),
     refetchInterval: 30_000,
+  });
+  const active = useQuery({
+    queryKey: [...qk.resident.visitorPasses, 'active', 1],
+    queryFn: () => residentApi.listVisitorPasses(1, 50, { scope: 'active' }),
   });
   const waitingAtGate = (passes.data?.items ?? []).filter(
     (pass) =>
@@ -93,26 +97,24 @@ export default function ResidentHome() {
     announcements.isRefetching ||
     dues.isRefetching ||
     passes.isRefetching ||
+    active.isRefetching ||
     notifications.isRefetching;
   const onRefresh = () => {
     household.refetch();
     announcements.refetch();
     dues.refetch();
     passes.refetch();
+    active.refetch();
     notifications.refetch();
   };
 
   const recent = announcements.data?.items ?? [];
-  const activePasses = (passes.data?.items ?? []).filter(
-    (pass) =>
-      pass.status === 'pending' || pass.status === 'approved' || pass.status === 'checked_in'
-  );
-  const insideNow = activePasses.filter((pass) => pass.status === 'checked_in').length;
+  const activeCount = active.data?.total ?? 0;
+  const insideNow = (active.data?.items ?? []).filter(
+    (pass) => pass.status === 'checked_in'
+  ).length;
 
-  const outstanding = (dues.data?.items ?? [])
-    .filter((d) => d.status === 'pending' || d.status === 'overdue' || d.status === 'processing')
-    // `amount` already includes any late fee.
-    .reduce((sum, d) => sum + d.amount, 0);
+  const outstanding = dues.data?.outstandingTotal ?? 0;
 
   return (
     <Screen refreshing={isRefreshing} onRefresh={onRefresh}>
@@ -225,7 +227,7 @@ export default function ResidentHome() {
         accessibilityRole="button"
         accessibilityLabel={
           passes.data
-            ? `Visitor passes, ${activePasses.length} active, ${insideNow} inside now`
+            ? `Visitor passes, ${activeCount} active, ${insideNow} inside now`
             : 'Visitor passes'
         }
       >
@@ -250,9 +252,9 @@ export default function ResidentHome() {
               ) : (
                 <Text variant="caption" color="mutedForeground">
                   {passes.data
-                    ? activePasses.length === 0
+                    ? activeCount === 0
                       ? 'No active passes. Issue one before a guest arrives.'
-                      : `${activePasses.length} active${insideNow > 0 ? ` · ${insideNow} inside now` : ''}`
+                      : `${activeCount} active${insideNow > 0 ? ` · ${insideNow} inside now` : ''}`
                     : 'Invite guests and answer the gate'}
                 </Text>
               )}
