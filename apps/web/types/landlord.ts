@@ -426,6 +426,8 @@ export interface Tenant {
   trustScore: number;
   verified: boolean;
   rentStatus: RentPaymentStatus;
+  hasCharges?: boolean;
+  nextDueDate?: string | null;
 }
 
 export type LeadStage =

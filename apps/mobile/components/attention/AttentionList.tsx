@@ -10,7 +10,7 @@ export interface AttentionListItem extends AttentionItem {
   due?: string;
 }
 
-const SEVERITY_LABEL = { urgent: 'Urgent', soon: 'Due soon', info: 'For information' } as const;
+const SEVERITY_LABEL = { urgent: 'Urgent', soon: 'Act soon', info: 'For information' } as const;
 
 export function AttentionList({
   items,
