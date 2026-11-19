@@ -14,6 +14,8 @@ import { GetStartedCard } from '@/components/shared/dashboard/GetStartedCard';
 import { ClipboardList, ShieldCheck } from '@sureground/icons';
 import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 import { unwrap } from '@/lib/apiHelpers';
+import { kycService } from '@/services/kycService';
+import { identityGate } from '@/lib/identityGate';
 import { ROUTES } from '@/lib/constants/auth';
 import { PageErrorState, StatGroupSkeleton } from '@sureground/ui';
 
@@ -35,6 +37,19 @@ export default function AgentDashboardPage() {
   if (currentHour >= 12 && currentHour < 18) greeting = 'Good afternoon';
   if (currentHour >= 18) greeting = 'Good evening';
 
+  const kyc = useQuery({
+    queryKey: ['kyc-status'],
+    queryFn: () => unwrap(kycService.getStatus()),
+    staleTime: 60_000,
+  });
+  const hasTasks = dashboard
+    ? dashboard.assignedTasks +
+        dashboard.inProgressTasks +
+        dashboard.completedTasks +
+        dashboard.overdueTasks >
+      0
+    : false;
+
   return (
     <div className="space-y-6">
       <AgentDashboardHeader greeting={greeting} firstName={firstName} />
@@ -43,24 +58,28 @@ export default function AgentDashboardPage() {
         unlocks="run verification visits and receive payouts"
         className="mb-6"
       />
-      <GetStartedCard
-        id="agent"
-        description="How work reaches you as an agent."
-        steps={[
-          {
-            title: 'Tasks come from owners',
-            body: 'A landlord or owner adds you as their agent and assigns visits, inspections or repairs. Each one appears in Tasks with the property and what to do.',
-            icon: ClipboardList,
-            href: ROUTES.AGENT_TASKS,
-          },
-          {
-            title: 'Verify your ID',
-            body: 'You need a checked ID to run verification visits and receive payouts.',
-            icon: ShieldCheck,
-            href: ROUTES.AGENT_VERIFICATION,
-          },
-        ]}
-      />
+      {dashboard && kyc.data ? (
+        <GetStartedCard
+          id="agent"
+          description="How work reaches you as an agent."
+          steps={[
+            {
+              title: 'Tasks come from owners',
+              body: 'A landlord or owner adds you as their agent and assigns visits, inspections or repairs. Each one appears in Tasks with the property and what to do.',
+              icon: ClipboardList,
+              href: ROUTES.AGENT_TASKS,
+              done: hasTasks,
+            },
+            {
+              title: 'Verify your ID',
+              body: 'You need a checked ID to run verification visits and receive payouts.',
+              icon: ShieldCheck,
+              href: ROUTES.AGENT_VERIFICATION,
+              done: kyc.data ? identityGate(kyc.data) === 'verified' : false,
+            },
+          ]}
+        />
+      ) : null}
       <AttentionFeed persona="agent" />
 
       {dashboardLoading ? (
