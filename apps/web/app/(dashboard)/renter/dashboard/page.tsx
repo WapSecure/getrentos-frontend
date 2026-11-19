@@ -11,9 +11,7 @@ import { RenterLeaseRenewal } from '@/components/renter/dashboard/RenterLeaseRen
 import { RenterRoommates } from '@/components/renter/dashboard/RenterRoommates';
 import { RenterReviews } from '@/components/renter/dashboard/RenterReviews';
 import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
-import { GetStartedCard } from '@/components/shared/dashboard/GetStartedCard';
-import { Search, ShieldCheck } from '@sureground/icons';
-import { ROUTES } from '@/lib/constants/auth';
+import { RenterGetStarted } from '@/components/renter/dashboard/RenterGetStarted';
 import { useRenterUser } from '../layout';
 
 export default function RenterDashboardPage() {
@@ -27,24 +25,7 @@ export default function RenterDashboardPage() {
   return (
     <div className="space-y-7">
       <RenterDashboardHeader greeting={greeting} firstName={firstName} />
-      <GetStartedCard
-        id="renter"
-        description="Two things that make renting through Sureground quicker."
-        steps={[
-          {
-            title: 'Find a home',
-            body: 'Search verified homes and book a viewing with the landlord.',
-            icon: Search,
-            href: ROUTES.RENTER_DISCOVER,
-          },
-          {
-            title: 'Verify your ID',
-            body: 'Your ID is checked before you pay or sign. Doing it now saves time later.',
-            icon: ShieldCheck,
-            href: ROUTES.RENTER_VERIFICATION,
-          },
-        ]}
-      />
+      <RenterGetStarted />
       <AttentionFeed persona="renter" />
 
       <RenterStatsCards />
