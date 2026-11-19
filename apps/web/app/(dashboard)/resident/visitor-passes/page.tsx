@@ -25,6 +25,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
 import { IssueResidentVisitorPassModal } from '@/components/estate/resident/IssueResidentVisitorPassModal';
 import { VisitorPinDialog } from '@/components/estate/visitor-passes/VisitorPinDialog';
+import { RegularVisitorsSection } from '@/components/estate/resident/RegularVisitorsSection';
 import type { IssuedVisitorPass, VisitorPass } from '@/types/estate';
 import { formatClock } from '@sureground/shared';
 
@@ -292,6 +293,8 @@ export default function ResidentVisitorPassesPage() {
               </div>
             )}
           </section>
+
+          <RegularVisitorsSection />
 
           {pastPasses.length > 0 && (
             <section>

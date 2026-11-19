@@ -97,6 +97,21 @@ describe('regular visitors', () => {
     expect(contractorDraftError(draft({ name: 'Chinedu', phone: '0803' }))).toBeNull();
   });
 
+  it('a household’s own grant needs no unit but has the shorter limit', () => {
+    const own = draft({
+      householdId: undefined,
+      validFrom: '2026-01-01',
+      validUntil: '2026-03-31',
+    });
+    expect(contractorDraftError(own, { forHousehold: true, maxDays: 90 })).toBeNull();
+    expect(
+      contractorDraftError(
+        { ...own, validUntil: '2026-04-30' },
+        { forHousehold: true, maxDays: 90 }
+      )
+    ).toMatch(/at most 90/);
+  });
+
   it('needs a household and a name', () => {
     expect(contractorDraftError(draft({ householdId: undefined }))).toMatch(/household/);
     expect(contractorDraftError(draft({ name: ' ' }))).toMatch(/name/);

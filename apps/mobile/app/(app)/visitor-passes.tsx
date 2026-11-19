@@ -18,6 +18,7 @@ import {
   useToast,
 } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
+import { RegularVisitorsSection } from '@/components/resident/RegularVisitorsSection';
 import {
   residentApi,
   type IssuedVisitorPass,
@@ -274,6 +275,8 @@ export default function ResidentVisitorPasses() {
         ) : awaiting.length === 0 ? (
           <PassesEmptyState onIssue={() => setIssueOpen(true)} />
         ) : null}
+
+        <RegularVisitorsSection />
       </Screen>
 
       <IssuePassSheet

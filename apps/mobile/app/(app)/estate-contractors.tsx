@@ -13,44 +13,31 @@ import { Plus, UserCheck } from '@sureground/icons/native';
 import {
   Button,
   Card,
-  Checkbox,
   Chip,
-  DateField,
   EmptyState,
-  FormAlert,
   IconButton,
   QueryState,
   Skeleton,
   Text,
-  TextField,
-  TimeField,
-  toISODate,
   useTheme,
   useToast,
 } from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { EnterpriseUpsell, OneTimeCode } from '@/components/estate/gate/GateUI';
-import { HouseholdPicker } from '@/components/estate/HouseholdPicker';
+import { EnterpriseUpsell } from '@/components/estate/gate/GateUI';
 import { ReasonSheet } from '@/components/homecare/ReasonSheet';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
+import { AuthoriseRegularVisitorForm } from '@/components/estate/gate/AuthoriseRegularVisitorForm';
 import { useEstate } from '@/hooks/useEstate';
 import {
   CONTRACTOR_STATUS_TONE,
-  WEEK_DAYS,
   WITHDRAW_REASON_MIN,
-  contractorDraftError,
-  contractorPassBody,
   estateGateApi,
   gateKeys,
   lacksTier,
-  planRefusal,
-  toggleDay,
   type ContractorPass,
   type ContractorPassStatus,
-  type IssuedContractorPass,
 } from '@/lib/api/estateGate';
-import type { Household } from '@/lib/api/estateManager';
 import { haptics } from '@/lib/haptics';
 import { goBack } from '@/lib/goBack';
 import { errorMessage } from '@/lib/api/client';
@@ -271,9 +258,15 @@ export default function EstateContractors() {
 
       <Sheet open={adding} onClose={() => setAdding(false)} title="Authorise a regular visitor">
         {adding ? (
-          <AuthoriseForm
+          <AuthoriseRegularVisitorForm
             estateId={estateId}
             estateName={estate?.name}
+            createPass={(body) => estateGateApi.createContractorPass(estateId, body)}
+            onCreated={() =>
+              qc.invalidateQueries({
+                queryKey: ['estate-manager', estateId, 'gate', 'contractors'],
+              })
+            }
             onDone={() => setAdding(false)}
           />
         ) : null}
@@ -288,200 +281,6 @@ export default function EstateContractors() {
         onClose={() => setWithdrawing(null)}
         onConfirm={(reason) => withdrawing && withdraw.mutate({ pass: withdrawing, reason })}
       />
-    </View>
-  );
-}
-
-const addDays = (days: number) => {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return toISODate(d);
-};
-
-function AuthoriseForm({
-  estateId,
-  estateName,
-  onDone,
-}: {
-  estateId: string;
-  estateName?: string;
-  onDone: () => void;
-}) {
-  const { spacing } = useTheme();
-  const qc = useQueryClient();
-  const [household, setHousehold] = useState<Household | null>(null);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [company, setCompany] = useState('');
-  const [trade, setTrade] = useState('');
-  const [validFrom, setValidFrom] = useState(() => addDays(0));
-  const [validUntil, setValidUntil] = useState(() => addDays(182));
-  const [daysOfWeek, setDaysOfWeek] = useState<number[]>([]);
-  const [restrictHours, setRestrictHours] = useState(false);
-  const [dailyFrom, setDailyFrom] = useState('08:00');
-  const [dailyTo, setDailyTo] = useState('17:00');
-  const [issued, setIssued] = useState<IssuedContractorPass | null>(null);
-
-  const draft = {
-    householdId: household?.id,
-    name,
-    phone,
-    company,
-    trade,
-    validFrom,
-    validUntil,
-    daysOfWeek,
-    restrictHours,
-    dailyFrom,
-    dailyTo,
-  };
-  const problem = contractorDraftError(draft);
-
-  const create = useMutation({
-    mutationFn: () => estateGateApi.createContractorPass(estateId, contractorPassBody(draft)),
-    onSuccess: (pass) => {
-      void haptics.success();
-      qc.invalidateQueries({ queryKey: ['estate-manager', estateId, 'gate', 'contractors'] });
-      setIssued(pass);
-    },
-  });
-  const refusal = planRefusal(create.error);
-
-  if (issued) {
-    return (
-      <OneTimeCode
-        title={`Code for ${issued.name}`}
-        code={issued.pin}
-        qrDataUrl={issued.qrDataUrl}
-        notes={[
-          issued.scheduleLabel,
-          'Shown only now. Send it to them before you close this; it can’t be read back.',
-        ]}
-        shareMessage={`Your gate code${estateName ? ` for ${estateName}` : ''} is ${issued.pin}. ${issued.scheduleLabel}. Show it at the gate each time you arrive.`}
-        onDone={onDone}
-      />
-    );
-  }
-
-  if (refusal) {
-    return (
-      <EnterpriseUpsell
-        feature="Regular visitors"
-        points={UPSELL_POINTS}
-        current={refusal.current}
-        estateName={estateName}
-      />
-    );
-  }
-
-  return (
-    <View style={{ gap: spacing.md }}>
-      <HouseholdPicker
-        estateId={estateId}
-        value={household}
-        onChange={setHousehold}
-        label="Who are they working for"
-      />
-      <TextField
-        label="Full name"
-        required
-        value={name}
-        onChangeText={setName}
-        maxLength={120}
-        placeholder="e.g. Chinedu Okafor"
-      />
-      <TextField
-        label="Phone (optional)"
-        value={phone}
-        onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
-        keyboardType="phone-pad"
-        maxLength={30}
-        hint="With only a first name, a phone is needed to check them against the watch list"
-      />
-      <TextField
-        label="Firm (optional)"
-        value={company}
-        onChangeText={setCompany}
-        maxLength={120}
-      />
-      <TextField
-        label="Trade (optional)"
-        value={trade}
-        onChangeText={setTrade}
-        maxLength={80}
-        placeholder="e.g. Electrician"
-      />
-      <DateField label="From" value={validFrom} onChange={setValidFrom} min={addDays(0)} />
-      <DateField
-        label="Until"
-        value={validUntil}
-        onChange={setValidUntil}
-        min={validFrom}
-        hint="At most a year, so it gets looked at again"
-      />
-      <View style={{ gap: spacing.xs }}>
-        <Text variant="bodyStrong">Which days</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          {WEEK_DAYS.map((d) => (
-            <Chip
-              key={d.value}
-              label={d.short}
-              selected={daysOfWeek.includes(d.value)}
-              onPress={() => setDaysOfWeek((cur) => toggleDay(cur, d.value))}
-            />
-          ))}
-        </View>
-        <Text variant="caption" color="mutedForeground">
-          {daysOfWeek.length
-            ? 'They can only be let in on the days chosen.'
-            : 'Any day. Choose days to limit them, e.g. Tuesdays only.'}
-        </Text>
-      </View>
-      <Checkbox
-        checked={restrictHours}
-        onChange={setRestrictHours}
-        label="Only during certain hours"
-      />
-      {restrictHours ? (
-        <View style={{ gap: spacing.sm }}>
-          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <TimeField
-              label="From"
-              value={dailyFrom}
-              onChange={setDailyFrom}
-              startHour={0}
-              endHour={24}
-              containerStyle={{ flex: 1 }}
-            />
-            <TimeField
-              label="To"
-              value={dailyTo}
-              onChange={setDailyTo}
-              startHour={0}
-              endHour={24}
-              containerStyle={{ flex: 1 }}
-            />
-          </View>
-          <Text variant="caption" color="mutedForeground">
-            On the estate’s clock. An end earlier than the start runs past midnight, for a night
-            shift.
-          </Text>
-        </View>
-      ) : null}
-      {create.error ? (
-        <FormAlert message={errorMessage(create.error, 'Could not create the authorisation.')} />
-      ) : problem && name.trim() && household ? (
-        <FormAlert tone="warning" message={problem} />
-      ) : null}
-      <Button
-        label="Authorise"
-        disabled={!!problem}
-        loading={create.isPending}
-        onPress={() => create.mutate()}
-      />
-      <Text variant="caption" color="mutedForeground" center>
-        Their gate code is shown once, after you authorise.
-      </Text>
     </View>
   );
 }

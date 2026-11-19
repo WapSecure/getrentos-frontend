@@ -575,6 +575,7 @@ export const qk = {
     committee: ['resident', 'committee'] as const,
     polls: ['resident', 'polls'] as const,
     visitorPasses: ['resident', 'visitor-passes'] as const,
+    regularVisitors: ['resident', 'regular-visitors'] as const,
     amenities: ['resident', 'amenities'] as const,
     amenityBookings: ['resident', 'amenity-bookings'] as const,
     amenityBusy: (amenityId: string) => ['resident', 'amenity-busy', amenityId] as const,

@@ -9,9 +9,9 @@ interface Page<T> {
 }
 
 /** A list that loads page by page behind a "Show more" button, so nothing past the first page is out of reach. */
-export function usePagedList<T>(
+export function usePagedList<P extends Page<unknown>>(
   queryKey: QueryKey,
-  fetchPage: (page: number) => Promise<Page<T>>,
+  fetchPage: (page: number) => Promise<P>,
   options: { enabled?: boolean } = {}
 ) {
   const query = useInfiniteQuery({
@@ -21,7 +21,10 @@ export function usePagedList<T>(
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
     enabled: options.enabled,
   });
-  const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
+  const items = useMemo(
+    () => (query.data?.pages.flatMap((p) => p.items) ?? []) as P['items'],
+    [query.data]
+  );
   return {
     query,
     items,
