@@ -34,6 +34,10 @@
       "import": "./src/utils/csp.ts",
       "types": "./src/utils/csp.ts"
     },
+    "./sentryScrub": {
+      "import": "./src/sentryScrub/index.ts",
+      "types": "./src/sentryScrub/index.ts"
+    },
     "./auth": {
       "import": "./src/auth/index.ts",
       "types": "./src/auth/index.ts"

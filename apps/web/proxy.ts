@@ -7,6 +7,7 @@ import {
   cspHeaderName,
   parseOriginList,
   cspReportUri,
+  sentryConnectSources,
 } from '@sureground/shared/csp';
 
 // Report-Only by default (violations logged, nothing blocked); build with NEXT_PUBLIC_CSP_ENFORCE=true to enforce. Inlined at build time.
@@ -34,7 +35,7 @@ export default function proxy(request: NextRequest) {
     mediaOrigins: parseOriginList(process.env.CSP_MEDIA_ORIGINS),
     imgSrc: [...MAP_TILE_ORIGINS, 'https://image.mux.com'],
     // Listing video tours stream from Mux: playlists and segments over fetch, played from a blob: source.
-    connectSrc: ['https://*.mux.com'],
+    connectSrc: ['https://*.mux.com', ...sentryConnectSources(process.env.NEXT_PUBLIC_SENTRY_DSN)],
     mediaSrc: ['https://*.mux.com'],
     frameSrc: EMBED_FRAME_ORIGINS,
     // Browsers ignore it in a Report-Only policy (and warn), so only when enforcing.

@@ -84,7 +84,7 @@ export default function Referrals() {
                 <Text variant="heading">Invite people you know</Text>
               </View>
               <Text variant="callout" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-                Invite people you know. A referral counts once they verify their identity.
+                A referral counts once they verify their identity.
               </Text>
 
               <View
