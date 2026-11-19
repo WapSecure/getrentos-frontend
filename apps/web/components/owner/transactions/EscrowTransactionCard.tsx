@@ -97,6 +97,22 @@ export const EscrowTransactionCard = ({
         {neverPaid && (
           <p className="text-xs text-muted-foreground">Cancelled before a deposit was paid</p>
         )}
+        {!neverPaid &&
+          transaction.heldAmount !== undefined &&
+          transaction.heldAmount < transaction.salePrice && (
+            <p className="text-xs text-muted-foreground">
+              Deposit through Sureground:{' '}
+              {formatCurrency(transaction.heldAmount, { compact: true })}
+            </p>
+          )}
+        {transaction.ownershipVerified === false &&
+          transaction.escrowStatus !== 'refunded' &&
+          transaction.sellerPayoutStatus !== 'PAID' &&
+          transaction.sellerPayoutStatus !== 'PROCESSING' && (
+            <p className="mt-1 text-xs font-medium text-warning">
+              Verify your ownership to be paid
+            </p>
+          )}
 
         <div className="mt-4 rounded-xl bg-secondary/60 px-3.5 py-3">
           <Timeline
