@@ -230,7 +230,7 @@ export default function LandlordAccount() {
     {
       key: 'referrals',
       label: 'Referrals',
-      description: 'Invite others, earn rewards',
+      description: 'Invite people you know',
       icon: Gift,
       onPress: go('/(app)/referrals'),
     },

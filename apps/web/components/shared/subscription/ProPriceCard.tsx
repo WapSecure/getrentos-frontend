@@ -114,7 +114,7 @@ export function ProPriceCard({
             <Check className="mt-0.5 h-3 w-3 shrink-0" />
             <span>
               {!trialAvailable
-                ? `You have already used your free trial. You are charged ${naira(
+                ? `A free trial has already been used with this account, card or identity. You are charged ${naira(
                     amount
                   )} today and Pro renews ${per}ly until you cancel.`
                 : capture

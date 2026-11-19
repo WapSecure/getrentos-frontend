@@ -3,8 +3,13 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle2, Loader2, XCircle } from '@sureground/icons';
-import { billingService, type MyBilling } from '@/services/billingService';
-import { unwrap } from '@/lib/apiHelpers';
+import {
+  billingService,
+  TRIAL_ALREADY_USED,
+  TRIAL_ALREADY_USED_COPY,
+  type MyBilling,
+} from '@/services/billingService';
+import { ApiError, unwrap } from '@/lib/apiHelpers';
 import { useProCheckout } from '@/hooks/useProCheckout';
 import { Button, Skeleton } from '@sureground/ui';
 
@@ -13,10 +18,10 @@ function BillingReturnContent() {
   const searchParams = useSearchParams();
   // Paystack appends both; older integrations only send trxref.
   const reference = searchParams.get('reference') ?? searchParams.get('trxref');
-  const { refresh } = useProCheckout();
+  const { refresh, startCheckout, upgrading, error: checkoutError } = useProCheckout();
 
   const [state, setState] = useState<{
-    status: 'pending' | 'ok' | 'error';
+    status: 'pending' | 'ok' | 'error' | 'trial_used';
     detail?: MyBilling;
     message?: string;
   }>({ status: 'pending' });
@@ -35,12 +40,17 @@ function BillingReturnContent() {
         await refresh();
         if (!cancelled) setState({ status: 'ok', detail: billing });
       } catch (err) {
-        if (!cancelled) {
-          setState({
-            status: 'error',
-            message: err instanceof Error ? err.message : 'We could not confirm your payment.',
-          });
+        if (cancelled) return;
+        if (err instanceof ApiError && err.code === TRIAL_ALREADY_USED) {
+          // The card is only known after the gateway step, so a reused card is refused here; the backend refunds the card check.
+          const billing = await unwrap(billingService.getMine()).catch(() => undefined);
+          if (!cancelled) setState({ status: 'trial_used', detail: billing });
+          return;
         }
+        setState({
+          status: 'error',
+          message: err instanceof Error ? err.message : 'We could not confirm your payment.',
+        });
       }
     })();
 
@@ -71,6 +81,30 @@ function BillingReturnContent() {
               : 'Your Pro plan is active.'}
           </p>
           <Button href="/" className="mt-6">
+            Back to Sureground
+          </Button>
+        </>
+      )}
+
+      {view.status === 'trial_used' && (
+        <>
+          <XCircle className="h-12 w-12 text-warning" />
+          <h1 className="mt-4 text-xl font-semibold text-foreground">No free trial this time</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {TRIAL_ALREADY_USED_COPY} You can still subscribe without a trial.
+          </p>
+          {checkoutError && <p className="mt-2 text-sm text-destructive">{checkoutError}</p>}
+          <Button
+            className="mt-6"
+            isLoading={upgrading}
+            loadingText="Opening secure checkout…"
+            onClick={() =>
+              void startCheckout(state.detail?.cycle ?? 'MONTHLY', { withoutTrial: true })
+            }
+          >
+            Subscribe without a trial
+          </Button>
+          <Button href="/" variant="outline" className="mt-3">
             Back to Sureground
           </Button>
         </>

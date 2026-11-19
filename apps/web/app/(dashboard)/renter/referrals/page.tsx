@@ -6,10 +6,10 @@ export default function RenterReferralsPage() {
   return (
     <div>
       <RenterPageHeader
-        eyebrow="Rewards"
+        eyebrow="Referrals"
         icon={Gift}
-        title="Refer & earn"
-        description="Invite friends to Sureground and track the rewards earned from successful referrals."
+        title="Invite people"
+        description="Invite people you know. A referral counts once they verify their identity."
       />
       <div className="max-w-2xl">
         <ReferralSummaryCard />

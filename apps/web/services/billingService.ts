@@ -3,6 +3,10 @@ import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
 import type { BillingCycle, PlanTier } from './subscriptionService';
 import { trackOnSuccess } from '@/lib/analytics';
 
+export const TRIAL_ALREADY_USED = 'TRIAL_ALREADY_USED';
+export const TRIAL_ALREADY_USED_COPY =
+  'A free trial has already been used with this card or identity.';
+
 export type BillingStatus = 'NONE' | 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'CANCELLED';
 
 export interface CheckoutSession {
@@ -65,11 +69,14 @@ export interface SubscriptionInvoice {
 }
 
 export const billingService = {
-  async startCheckout(cycle: BillingCycle): Promise<ApiResponse<CheckoutSession>> {
+  async startCheckout(
+    cycle: BillingCycle,
+    options: { withoutTrial?: boolean } = {}
+  ): Promise<ApiResponse<CheckoutSession>> {
     return safeCall(() =>
       authFetch<CheckoutSession>('/billing/checkout', {
         method: 'POST',
-        body: JSON.stringify({ cycle }),
+        body: JSON.stringify(options.withoutTrial ? { cycle, withoutTrial: true } : { cycle }),
       })
     ).then((res) =>
       trackOnSuccess(res, {

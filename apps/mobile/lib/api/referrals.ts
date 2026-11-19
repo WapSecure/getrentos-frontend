@@ -1,18 +1,19 @@
 import { apiFetch } from './client';
 
+export type ReferralStatus = 'PENDING' | 'QUALIFIED';
+
 export interface ReferredUser {
   name: string;
-  rewardAmount: number;
+  status: ReferralStatus;
   date: string;
 }
 
 export interface ReferralSummary {
   code: string;
   totalReferred: number;
-  totalEarned: number;
+  totalQualified: number;
   referrals: ReferredUser[];
   referredByName?: string;
-  refereeRewardAmount?: number;
 }
 
 export const referralsApi = {
