@@ -32,6 +32,31 @@ jest.mock('expo-local-authentication', () => ({
   authenticateAsync: jest.fn(async () => ({ success: true })),
 }));
 
+// A stand-in for native AES-GCM: decrypting with any other key fails, like a real auth tag check.
+jest.mock('expo-crypto', () => {
+  let next = 0;
+  const makeKey = (id: string) => ({ id, encoded: async () => id });
+  const sealedFrom = (combined: string) => {
+    const parsed = JSON.parse(atob(combined)) as { k: string; p: string };
+    return { ...parsed, combined: async () => combined };
+  };
+  return {
+    AESKeySize: { AES128: 128, AES192: 192, AES256: 256 },
+    AESEncryptionKey: {
+      generate: jest.fn(async () => makeKey(`key-${++next}`)),
+      import: jest.fn(async (encoded: string) => makeKey(encoded)),
+    },
+    AESSealedData: { fromCombined: (combined: string) => sealedFrom(combined) },
+    aesEncryptAsync: jest.fn(async (plain: string, key: { id: string }) =>
+      sealedFrom(btoa(JSON.stringify({ k: key.id, p: plain })))
+    ),
+    aesDecryptAsync: jest.fn(async (sealed: { k: string; p: string }, key: { id: string }) => {
+      if (sealed.k !== key.id) throw new Error('authentication tag mismatch');
+      return sealed.p;
+    }),
+  };
+});
+
 type SecureStoreMock = typeof import('expo-secure-store') & {
   __entries: Map<string, string>;
   canUseBiometricAuthentication: jest.Mock;
@@ -63,11 +88,34 @@ function load(os: 'ios' | 'android' | 'web' = 'ios') {
 }
 /* eslint-enable @typescript-eslint/no-require-imports */
 
-const LOCKED = 'sureground.locked:sureground.lockedRefreshToken';
+const LOCK_KEY = 'sureground.locked:sureground.lockKey';
+const SEALED = 'default:sureground.sealedRefreshToken';
+const PER_TOKEN = 'sureground.locked:sureground.lockedRefreshToken';
+const PER_TOKEN_MARKER = 'default:sureground.lockedSession';
 const PLAIN_REFRESH = 'default:sureground.refreshToken';
 const PLAIN_ACCESS = 'default:sureground.accessToken';
-const MARKER = 'default:sureground.lockedSession';
 const FLAG = 'default:sureground.appLock';
+
+type AuthOptions = { requireAuthentication?: boolean } | undefined;
+
+/** Fails only the biometric read of the key, as the OS prompt does. */
+function rejectKeyRead(SecureStore: SecureStoreMock, error: Error) {
+  const read = SecureStore.getItemAsync.getMockImplementation()!;
+  SecureStore.getItemAsync.mockImplementation(async (key: string, options?: unknown) => {
+    if (key === 'sureground.lockKey') throw error;
+    return read(key, options);
+  });
+}
+
+/** Calls that show the OS prompt: any auth-bound read, and on Android any auth-bound write. */
+function promptCount(SecureStore: SecureStoreMock, os: 'ios' | 'android') {
+  const auth = (calls: unknown[][], optionsAt: number) =>
+    calls.filter((call) => (call[optionsAt] as AuthOptions)?.requireAuthentication).length;
+  return (
+    auth(SecureStore.getItemAsync.mock.calls, 1) +
+    (os === 'android' ? auth(SecureStore.setItemAsync.mock.calls, 2) : 0)
+  );
+}
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -116,124 +164,196 @@ describe('app lock flag', () => {
   });
 });
 
-describe('locked session storage', () => {
-  it('saves the refresh token behind biometrics and drops the plain copies', async () => {
-    const { SecureStore, tokenStore, lockedSession } = load('ios');
+describe.each(['ios', 'android'] as const)('locked session on %s', (os) => {
+  it('puts only the key behind biometrics and seals the token in a plain entry', async () => {
+    const { SecureStore, tokenStore, lockedSession } = load(os);
     await tokenStore.writeTokens({ accessToken: 'access', refreshToken: 'refresh-1' });
 
-    await lockedSession.storeLockedSession('refresh-2');
+    await lockedSession.lockSession('refresh-1');
 
-    expect(SecureStore.__entries.get(LOCKED)).toBe('refresh-2');
-    expect(SecureStore.__entries.get(MARKER)).toBe('1');
-    expect(SecureStore.__entries.has(PLAIN_REFRESH)).toBe(false);
-    expect(SecureStore.__entries.has(PLAIN_ACCESS)).toBe(false);
     expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
-      'sureground.lockedRefreshToken',
-      'refresh-2',
+      'sureground.lockKey',
+      expect.any(String),
       expect.objectContaining({
         requireAuthentication: true,
         keychainService: 'sureground.locked',
         authenticationPrompt: expect.any(String),
       })
     );
+    const sealedWrite = SecureStore.setItemAsync.mock.calls.find(
+      ([key]) => key === 'sureground.sealedRefreshToken'
+    );
+    expect(sealedWrite?.[2]).not.toHaveProperty('requireAuthentication');
+    expect(SecureStore.__entries.get(SEALED)).not.toContain('refresh-1');
+    expect(SecureStore.__entries.has(PLAIN_REFRESH)).toBe(false);
+    expect(SecureStore.__entries.has(PLAIN_ACCESS)).toBe(false);
+    await expect(lockedSession.lockedSessionFormat()).resolves.toBe('sealed');
   });
 
-  it('recreates the iOS entry rather than updating it, so a rotation does not prompt', async () => {
-    const { SecureStore, lockedSession } = load('ios');
-    await lockedSession.storeLockedSession('refresh-1');
-    SecureStore.deleteItemAsync.mockClear();
-    SecureStore.getItemAsync.mockClear();
-
-    await lockedSession.storeLockedSession('refresh-2');
-
-    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(
-      'sureground.lockedRefreshToken',
-      expect.objectContaining({ keychainService: 'sureground.locked' })
-    );
-    const lockedReads = SecureStore.getItemAsync.mock.calls.filter(
-      ([key]) => key === 'sureground.lockedRefreshToken'
-    );
-    expect(lockedReads).toHaveLength(0);
+  it('asks for the biometric exactly once when the lock is turned on', async () => {
+    const { SecureStore, lockedSession } = load(os);
+    await lockedSession.lockSession('refresh-1', { prove: true });
+    expect(promptCount(SecureStore, os)).toBe(1);
   });
 
-  it('reads the entry back on iOS when turning the lock on, so the biometric is proven once', async () => {
-    const { SecureStore, lockedSession } = load('ios');
-    await lockedSession.storeLockedSession('refresh-1', { prove: true });
-    expect(SecureStore.getItemAsync).toHaveBeenCalledWith(
-      'sureground.lockedRefreshToken',
-      expect.objectContaining({
-        requireAuthentication: true,
-        authenticationPrompt: 'Unlock Sureground',
-      })
-    );
+  it('unlocks with one prompt and returns the token', async () => {
+    const { SecureStore, lockedSession } = load(os);
+    await lockedSession.lockSession('refresh-1');
+    lockedSession.forgetLockKey();
+    jest.clearAllMocks();
+
+    await expect(lockedSession.unlockLockedSession()).resolves.toEqual({
+      status: 'ok',
+      refreshToken: 'refresh-1',
+    });
+    expect(promptCount(SecureStore, os)).toBe(1);
   });
 
-  it('does not read back on Android, where saving already asks for the biometric', async () => {
-    const { SecureStore, lockedSession } = load('android');
-    await lockedSession.storeLockedSession('refresh-1', { prove: true });
-    const lockedReads = SecureStore.getItemAsync.mock.calls.filter(
-      ([key]) => key === 'sureground.lockedRefreshToken'
+  it('re-seals a rotated token with the in-memory key, without a prompt', async () => {
+    const { SecureStore, lockedSession } = load(os);
+    await lockedSession.lockSession('refresh-1');
+    lockedSession.forgetLockKey();
+    await lockedSession.unlockLockedSession();
+    jest.clearAllMocks();
+
+    await expect(lockedSession.resealRefreshToken('refresh-2')).resolves.toBe(true);
+    await expect(lockedSession.resealRefreshToken('refresh-3')).resolves.toBe(true);
+    expect(promptCount(SecureStore, os)).toBe(0);
+    expect(SecureStore.setItemAsync).not.toHaveBeenCalledWith(
+      'sureground.lockKey',
+      expect.anything(),
+      expect.anything()
     );
-    expect(lockedReads).toHaveLength(0);
-    expect(SecureStore.__entries.get(LOCKED)).toBe('refresh-1');
+
+    lockedSession.forgetLockKey();
+    await expect(lockedSession.unlockLockedSession()).resolves.toEqual({
+      status: 'ok',
+      refreshToken: 'refresh-3',
+    });
   });
 
-  it('leaves no marker and keeps the plain session when the biometric save is cancelled', async () => {
-    const { SecureStore, tokenStore, lockedSession } = load('android');
+  it('cannot re-seal once the app locks, because the key is dropped', async () => {
+    const { SecureStore, lockedSession, appLock } = load(os);
+    await lockedSession.lockSession('refresh-1');
+    appLock.setAppLocked(true);
+    jest.clearAllMocks();
+
+    await expect(lockedSession.resealRefreshToken('refresh-2')).resolves.toBe(false);
+    expect(promptCount(SecureStore, os)).toBe(0);
+  });
+
+  it('treats an invalidated key (biometrics changed) as gone, so the person signs in again', async () => {
+    const { SecureStore, lockedSession } = load(os);
+    await lockedSession.lockSession('refresh-1');
+    lockedSession.forgetLockKey();
+    SecureStore.getItemAsync.mockImplementation(async (key: string) =>
+      key === 'sureground.lockKey' ? null : (SecureStore.__entries.get(`default:${key}`) ?? null)
+    );
+
+    await expect(lockedSession.unlockLockedSession()).resolves.toEqual({ status: 'gone' });
+    SecureStore.getItemAsync.mockReset();
+  });
+
+  it('treats a token sealed under another key as gone', async () => {
+    const { SecureStore, lockedSession } = load(os);
+    await lockedSession.lockSession('refresh-1');
+    const sealed = SecureStore.__entries.get(SEALED)!;
+    await lockedSession.lockSession('refresh-other');
+    SecureStore.__entries.set(SEALED, sealed);
+    SecureStore.__entries.set(LOCK_KEY, 'key-unknown');
+    lockedSession.forgetLockKey();
+
+    await expect(lockedSession.unlockLockedSession()).resolves.toEqual({ status: 'gone' });
+  });
+
+  it('reports a dismissed prompt as cancelled and keeps the session', async () => {
+    const { SecureStore, lockedSession } = load(os);
+    await lockedSession.lockSession('refresh-1');
+    rejectKeyRead(SecureStore, new Error('User canceled the authentication'));
+
+    await expect(lockedSession.unlockLockedSession()).resolves.toEqual({ status: 'cancelled' });
+    await expect(lockedSession.lockedSessionFormat()).resolves.toBe('sealed');
+  });
+
+  it('reports any other prompt failure without throwing', async () => {
+    const { SecureStore, lockedSession } = load(os);
+    await lockedSession.lockSession('refresh-1');
+    rejectKeyRead(SecureStore, new Error('Biometry is locked out.'));
+    await expect(lockedSession.unlockLockedSession()).resolves.toEqual({ status: 'failed' });
+  });
+
+  it('keeps the plain session when the biometric save is cancelled', async () => {
+    const { SecureStore, tokenStore, lockedSession } = load(os);
     await tokenStore.writeTokens({ accessToken: 'access', refreshToken: 'refresh-1' });
-    SecureStore.setItemAsync.mockRejectedValueOnce(new Error('User canceled the authentication'));
+    SecureStore.setItemAsync.mockImplementationOnce(async () => {
+      throw new Error('User canceled the authentication');
+    });
 
-    await expect(lockedSession.storeLockedSession('refresh-1')).rejects.toThrow();
+    await expect(lockedSession.lockSession('refresh-1')).rejects.toThrow();
 
-    expect(SecureStore.__entries.has(MARKER)).toBe(false);
     expect(SecureStore.__entries.get(PLAIN_REFRESH)).toBe('refresh-1');
-    await expect(lockedSession.hasLockedSession()).resolves.toBe(false);
+    await expect(lockedSession.lockedSessionFormat()).resolves.toBeNull();
   });
 
-  it('moves the session back to plain storage when the lock is turned off', async () => {
-    const { SecureStore, lockedSession } = load('ios');
-    await lockedSession.storeLockedSession('refresh-1');
+  it('moves the session back to plain storage and deletes the key when the lock is turned off', async () => {
+    const { SecureStore, lockedSession } = load(os);
+    await lockedSession.lockSession('refresh-1');
 
     await lockedSession.storeUnlockedSession({ accessToken: null, refreshToken: 'refresh-1' });
 
     expect(SecureStore.__entries.get(PLAIN_REFRESH)).toBe('refresh-1');
     expect(SecureStore.__entries.has(PLAIN_ACCESS)).toBe(false);
-    expect(SecureStore.__entries.has(LOCKED)).toBe(false);
-    expect(SecureStore.__entries.has(MARKER)).toBe(false);
+    expect(SecureStore.__entries.has(LOCK_KEY)).toBe(false);
+    expect(SecureStore.__entries.has(SEALED)).toBe(false);
     const plainWrite = SecureStore.setItemAsync.mock.calls.find(
       ([key]) => key === 'sureground.refreshToken'
     );
     expect(plainWrite?.[2]).not.toHaveProperty('requireAuthentication');
+    await expect(lockedSession.lockedSessionFormat()).resolves.toBeNull();
   });
-});
 
-describe('reading the locked session', () => {
-  it('returns the token after the biometric prompt', async () => {
-    const { lockedSession } = load('ios');
-    await lockedSession.storeLockedSession('refresh-1');
-    await expect(lockedSession.readLockedRefreshToken()).resolves.toEqual({
+  it('migrates a session saved in plain storage by locking it with one prompt', async () => {
+    const { SecureStore, tokenStore, lockedSession } = load(os);
+    await tokenStore.writeTokens({ accessToken: 'access', refreshToken: 'refresh-1' });
+    await expect(lockedSession.lockedSessionFormat()).resolves.toBeNull();
+    jest.clearAllMocks();
+
+    await lockedSession.lockSession('refresh-1', { prove: true });
+
+    expect(promptCount(SecureStore, os)).toBe(1);
+    expect(SecureStore.__entries.has(PLAIN_REFRESH)).toBe(false);
+    lockedSession.forgetLockKey();
+    await expect(lockedSession.unlockLockedSession()).resolves.toEqual({
       status: 'ok',
       refreshToken: 'refresh-1',
     });
   });
 
-  it('treats an invalidated key (biometrics changed) as gone, so the person signs in again', async () => {
-    const { SecureStore, lockedSession } = load('android');
-    SecureStore.getItemAsync.mockResolvedValueOnce(null);
-    await expect(lockedSession.readLockedRefreshToken()).resolves.toEqual({ status: 'gone' });
-  });
+  it('migrates a session whose token itself was behind biometrics', async () => {
+    const { SecureStore, lockedSession } = load(os);
+    SecureStore.__entries.set(PER_TOKEN, 'refresh-1');
+    SecureStore.__entries.set(PER_TOKEN_MARKER, '1');
+    await expect(lockedSession.lockedSessionFormat()).resolves.toBe('perToken');
 
-  it('reports a dismissed prompt as cancelled', async () => {
-    const { SecureStore, lockedSession } = load('android');
-    SecureStore.getItemAsync.mockRejectedValueOnce(new Error('User canceled the authentication'));
-    await expect(lockedSession.readLockedRefreshToken()).resolves.toEqual({ status: 'cancelled' });
-  });
+    await expect(lockedSession.unlockLockedSession()).resolves.toEqual({
+      status: 'ok',
+      refreshToken: 'refresh-1',
+    });
 
-  it('reports any other prompt failure without throwing', async () => {
-    const { SecureStore, lockedSession } = load('ios');
-    SecureStore.getItemAsync.mockRejectedValueOnce(new Error('Biometry is locked out.'));
-    await expect(lockedSession.readLockedRefreshToken()).resolves.toEqual({ status: 'failed' });
+    expect(SecureStore.__entries.has(PER_TOKEN)).toBe(false);
+    expect(SecureStore.__entries.has(PER_TOKEN_MARKER)).toBe(false);
+    await expect(lockedSession.lockedSessionFormat()).resolves.toBe('sealed');
+    await expect(lockedSession.resealRefreshToken('refresh-2')).resolves.toBe(true);
   });
+});
+
+it('recreates the iOS key entry rather than updating it, so creating it never prompts', async () => {
+  const { SecureStore, lockedSession } = load('ios');
+  await lockedSession.lockSession('refresh-1');
+  expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(
+    'sureground.lockKey',
+    expect.objectContaining({ keychainService: 'sureground.locked' })
+  );
 });
 
 describe('biometric capability', () => {

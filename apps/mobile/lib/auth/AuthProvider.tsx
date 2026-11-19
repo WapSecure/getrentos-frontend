@@ -27,15 +27,18 @@ import { requestAppleCredential } from './apple';
 import { TOKEN_KEYS, accessTokenExpiry, clearTokens, readTokens, writeTokens } from './tokenStore';
 import { clearSecureLeftoversOnFreshInstall } from './freshInstall';
 import {
-  LOCKED_SESSION_KEY,
+  PER_TOKEN_MARKER_KEY,
+  SEALED_REFRESH_KEY,
   UNLOCK_PROMPT,
   canLockWithBiometrics,
   clearLockedSession,
-  hasLockedSession,
+  clearSealedToken,
   lockFailure,
-  readLockedRefreshToken,
-  storeLockedSession,
+  lockSession,
+  lockedSessionFormat,
+  resealRefreshToken,
   storeUnlockedSession,
+  unlockLockedSession,
 } from './lockedSession';
 import {
   APP_LOCK_KEY,
@@ -130,18 +133,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const profilePending = useRef(false);
   const signingOutLocked = useRef(false);
 
-  // With the lock on, the access token stays in memory and only the refresh token is saved, behind biometrics.
-  // A biometric save that fails drops the saved copy: the rotated-away token left behind would read as reuse and end every session.
+  // With the lock on, the access token stays in memory and only the sealed refresh token is saved.
+  // A save that fails drops the saved copy: the rotated-away token left behind would read as reuse and end every session.
   const persistTokens = useCallback(
     async (tokens: { accessToken: string; refreshToken: string }): Promise<boolean> => {
       if (isAppLockEnabled()) {
-        try {
-          await storeLockedSession(tokens.refreshToken);
-          return true;
-        } catch {
-          await clearLockedSession();
-          return false;
-        }
+        if (await resealRefreshToken(tokens.refreshToken)) return true;
+        await clearSealedToken();
+        return false;
       }
       try {
         await writeTokens(tokens);
@@ -164,7 +163,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           'warning'
         );
       }
-      if (!(await persistTokens(tokens))) {
+      let saved: boolean;
+      if (isAppLockEnabled()) {
+        saved = await lockSession(tokens.refreshToken)
+          .then(() => true)
+          .catch(async () => {
+            await clearLockedSession();
+            return false;
+          });
+      } else {
+        saved = await persistTokens(tokens);
+      }
+      if (!saved) {
         toast.show(
           'You’re signed in, but this phone couldn’t save your session. You may need to sign in again next time.',
           'error'
@@ -281,12 +291,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (async () => {
       await clearSecureLeftoversOnFreshInstall([
         ...TOKEN_KEYS,
-        LOCKED_SESSION_KEY,
+        SEALED_REFRESH_KEY,
+        PER_TOKEN_MARKER_KEY,
         INITIAL_ROLES_KEY,
         APP_LOCK_KEY,
       ]);
       const lockOn = await loadAppLockFlag();
-      const lockedSession = await hasLockedSession();
+      const lockedSession = (await lockedSessionFormat()) !== null;
       if (lockedSession && !lockOn) await clearLockedSession();
 
       // Nothing is refreshed or fetched before the unlock, so a locked launch never prompts on its own.
@@ -477,13 +488,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [teardown]);
 
   const unlock = useCallback(async (): Promise<UnlockResult> => {
-    if (await hasLockedSession()) {
-      const read = await readLockedRefreshToken();
+    if (await lockedSessionFormat()) {
+      const read = await unlockLockedSession();
       if (read.status === 'gone') return sessionInvalidated();
       if (read.status !== 'ok') return read.status;
       refreshTokenRef.current ??= read.refreshToken;
     } else {
-      // Saved by an older build, or a biometric save failed earlier: lock the in-memory session now.
+      // Saved in plain storage by an older build, or a save failed earlier: lock the in-memory session now.
       const rt = refreshTokenRef.current;
       if (!rt) {
         markSessionExpired();
@@ -491,7 +502,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return 'signedOut';
       }
       try {
-        await storeLockedSession(rt, { prove: true });
+        await lockSession(rt, { prove: true });
       } catch (err) {
         return lockFailure(err);
       }
@@ -514,7 +525,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!canLockWithBiometrics()) return 'unavailable';
         if (!refreshToken) return 'failed';
         try {
-          await storeLockedSession(refreshToken, { prove: true });
+          await lockSession(refreshToken, { prove: true });
         } catch (err) {
           return lockFailure(err);
         }
@@ -528,8 +539,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return 'done';
       }
 
-      if (await hasLockedSession()) {
-        const read = await readLockedRefreshToken();
+      if (await lockedSessionFormat()) {
+        const read = await unlockLockedSession();
         if (read.status === 'gone') return sessionInvalidated();
         if (read.status !== 'ok') return read.status;
         refreshToken ??= read.refreshToken;

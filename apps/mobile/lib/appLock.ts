@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { canLockWithBiometrics } from './auth/lockedSession';
+import { canLockWithBiometrics, forgetLockKey } from './auth/lockedSession';
 import { secureStorage } from './storage';
 
 export const APP_LOCK_KEY = 'sureground.appLock';
@@ -67,6 +67,7 @@ export function isAppLocked(): boolean {
 }
 
 export function setAppLocked(locked: boolean) {
+  if (locked) forgetLockKey();
   if (state.locked !== locked) update({ locked });
 }
 
@@ -78,7 +79,7 @@ function sessionUsable() {
   return state.enabled !== true || (!state.locked && state.foreground);
 }
 
-// A refresh rotates the refresh token, and saving a biometric-bound one prompts on Android, so it waits for an unlocked app on screen.
+// A rotated refresh token is sealed with the key held only while unlocked, so a refresh waits for an unlocked app on screen.
 export function waitUntilUnlocked(): Promise<void> {
   if (sessionUsable()) return Promise.resolve();
   return new Promise((resolve) => {
