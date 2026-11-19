@@ -6,10 +6,10 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Bell, MessageCircle, FileText, CreditCard, Wrench, Home } from '@sureground/icons';
 import { CheckboxGroup, SaveButton, Switch, useToast } from '@sureground/ui';
-import { renterService } from '@/services/renterService';
+import { accountService } from '@/services/accountService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import type { NotificationPreference as FetchedPreference } from '@/services/renterService';
+import type { AccountNotificationPreference as FetchedPreference } from '@/services/accountService';
 import { categorySendsEmail } from '@sureground/shared';
 
 type Channel = 'email' | 'push' | 'inApp';
@@ -65,7 +65,7 @@ const buildPreferences = (fetched?: FetchedPreference[]): NotificationPreference
 export const NotificationSettings = () => {
   const { data: fetched } = useQuery({
     queryKey: renterKeys.notificationPreferences,
-    queryFn: () => unwrap(renterService.listNotificationPreferences()),
+    queryFn: () => unwrap(accountService.listNotificationPreferences()),
   });
 
   return (
@@ -91,7 +91,7 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
   const togglePreferenceMutation = useMutation({
     mutationFn: ({ category, enabled }: { prefId: string; category: string; enabled: boolean }) =>
       unwrap(
-        renterService.updateNotificationPreference(category, {
+        accountService.updateNotificationPreference(category, {
           email: enabled,
           push: enabled,
           inApp: enabled,
@@ -145,7 +145,7 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
       category: string;
       channel: 'email' | 'push' | 'inApp';
       value: boolean;
-    }) => unwrap(renterService.updateNotificationPreference(category, { [channel]: value })),
+    }) => unwrap(accountService.updateNotificationPreference(category, { [channel]: value })),
     onMutate: ({ prefId, channel, value }) => {
       const previous = preferences.find((p) => p.id === prefId);
       patchPreference(prefId, (p) => ({ ...p, channels: { ...p.channels, [channel]: value } }));

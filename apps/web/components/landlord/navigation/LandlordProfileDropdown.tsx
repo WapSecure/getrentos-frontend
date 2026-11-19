@@ -14,6 +14,12 @@ const LINKS = [
   { href: ROUTES.LANDLORD_HELP, label: 'Help centre', icon: HelpCircle },
 ];
 
+// The landlord settings page would switch a manager into the landlord workspace.
+const MANAGER_LINKS = [
+  { href: ROUTES.AGENCY_SETTINGS, label: 'Settings', icon: Settings },
+  { href: ROUTES.LANDLORD_HELP, label: 'Help centre', icon: HelpCircle },
+];
+
 export const LandlordProfileDropdown = ({
   user,
   asManager = false,
@@ -22,6 +28,6 @@ export const LandlordProfileDropdown = ({
     user={user}
     roleId={asManager ? 'manager' : 'landlord'}
     roleLabel={asManager ? 'Property manager' : 'Landlord'}
-    links={LINKS}
+    links={asManager ? MANAGER_LINKS : LINKS}
   />
 );

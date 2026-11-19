@@ -3,7 +3,7 @@
 import { useOwnerUser } from '../layout';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { User, Bell, Landmark, SlidersHorizontal, Lock, Download } from '@sureground/icons';
+import { User, Bell, Landmark, SlidersHorizontal, Lock, Download, Trash2 } from '@sureground/icons';
 import { ProfileSettings } from '@/components/owner/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/owner/settings/NotificationSettings';
 import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';
@@ -11,10 +11,18 @@ import { PayoutSettings } from '@/components/landlord/settings/PayoutSettings';
 import { ROUTES } from '@/lib/constants/auth';
 import { PreferencesSettings } from '@/components/owner/settings/PreferencesSettings';
 import { DataExport } from '@/components/shared/settings/DataExport';
+import { AccountDeletion } from '@/components/shared/settings/AccountDeletion';
 import { SecuritySettings } from '@/components/shared/security/SecuritySettings';
 import { PageHeader } from '@sureground/ui';
 
-type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'preferences' | 'security' | 'data';
+type SettingsTab =
+  | 'profile'
+  | 'notifications'
+  | 'payouts'
+  | 'preferences'
+  | 'security'
+  | 'data'
+  | 'delete';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -23,6 +31,7 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'preferences', label: 'Preferences', icon: SlidersHorizontal },
   { id: 'security', label: 'Security', icon: Lock },
   { id: 'data', label: 'Your data', icon: Download },
+  { id: 'delete', label: 'Delete account', icon: Trash2 },
 ];
 
 export default function OwnerSettingsPage() {
@@ -58,6 +67,8 @@ export default function OwnerSettingsPage() {
         return <SecuritySettings />;
       case 'data':
         return <DataExport />;
+      case 'delete':
+        return <AccountDeletion />;
       default:
         return null;
     }

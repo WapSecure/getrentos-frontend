@@ -4,9 +4,9 @@ import { ROUTES } from '@/lib/constants/auth';
 import { useRenterUser } from '../layout';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { ProfileSettings } from '@/components/renter/settings/ProfileSettings';
+import { ProfileSettings } from '@/components/shared/settings/ProfileSettings';
 import { AccountSettings } from '@/components/renter/settings/AccountSettings';
-import { NotificationSettings } from '@/components/renter/settings/NotificationSettings';
+import { NotificationSettings } from '@/components/shared/settings/NotificationSettings';
 import { PrivacySettings } from '@/components/renter/settings/PrivacySettings';
 import { SecuritySettings } from '@/components/shared/security/SecuritySettings';
 import { PaymentSettings } from '@/components/renter/settings/PaymentSettings';
@@ -14,7 +14,7 @@ import { ThemeSettings } from '@/components/renter/settings/ThemeSettings';
 import { LanguageSettings } from '@/components/renter/settings/LanguageSettings';
 import { LANGUAGE_CHOICE_ENABLED } from '@/lib/i18n/LanguageContext';
 import { DataExport } from '@/components/shared/settings/DataExport';
-import { AccountDeletion } from '@/components/renter/settings/AccountDeletion';
+import { AccountDeletion } from '@/components/shared/settings/AccountDeletion';
 import { IdentityVerificationSettings } from '@/components/shared/verification/IdentityVerificationSettings';
 import {
   Settings,

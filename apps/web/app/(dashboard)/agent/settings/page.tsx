@@ -4,7 +4,16 @@ import { useState } from 'react';
 import { Card, PageHeader } from '@sureground/ui';
 import { useSearchParams } from 'next/navigation';
 import { useAgentUser } from '../layout';
-import { User, Bell, Landmark, MapPin, ShieldCheck, Lock, Download } from '@sureground/icons';
+import {
+  User,
+  Bell,
+  Landmark,
+  MapPin,
+  ShieldCheck,
+  Lock,
+  Download,
+  Trash2,
+} from '@sureground/icons';
 import { ProfileSettings } from '@/components/agent/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/agent/settings/NotificationSettings';
 import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';
@@ -12,6 +21,7 @@ import { AgencyAgentSelfPayout } from '@/components/agency/AgencyAgentSelfPayout
 import { FieldPreferencesSettings } from '@/components/agent/settings/FieldPreferencesSettings';
 import { LicenseVerificationSettings } from '@/components/shared/verification/LicenseVerificationSettings';
 import { DataExport } from '@/components/shared/settings/DataExport';
+import { AccountDeletion } from '@/components/shared/settings/AccountDeletion';
 import { SecuritySettings } from '@/components/shared/security/SecuritySettings';
 
 type SettingsTab =
@@ -21,7 +31,8 @@ type SettingsTab =
   | 'payouts'
   | 'preferences'
   | 'security'
-  | 'data';
+  | 'data'
+  | 'delete';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -31,6 +42,7 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'preferences', label: 'Field preferences', icon: MapPin },
   { id: 'security', label: 'Security', icon: Lock },
   { id: 'data', label: 'Your data', icon: Download },
+  { id: 'delete', label: 'Delete account', icon: Trash2 },
 ];
 
 export default function AgentSettingsPage() {
@@ -60,6 +72,8 @@ export default function AgentSettingsPage() {
         return <SecuritySettings />;
       case 'data':
         return <DataExport />;
+      case 'delete':
+        return <AccountDeletion />;
       default:
         return null;
     }

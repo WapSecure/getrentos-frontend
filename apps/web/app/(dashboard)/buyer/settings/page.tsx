@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Lock,
   Download,
+  Trash2,
 } from '@sureground/icons';
 import { ProfileSettings } from '@/components/buyer/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/buyer/settings/NotificationSettings';
@@ -20,6 +21,7 @@ import { PaymentMethodSettings } from '@/components/buyer/settings/PaymentMethod
 import { SearchPreferencesSettings } from '@/components/buyer/settings/SearchPreferencesSettings';
 import { IdentityVerificationSettings } from '@/components/shared/verification/IdentityVerificationSettings';
 import { DataExport } from '@/components/shared/settings/DataExport';
+import { AccountDeletion } from '@/components/shared/settings/AccountDeletion';
 import { SecuritySettings } from '@/components/shared/security/SecuritySettings';
 
 type SettingsTab =
@@ -29,7 +31,8 @@ type SettingsTab =
   | 'payment'
   | 'preferences'
   | 'security'
-  | 'data';
+  | 'data'
+  | 'delete';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -39,6 +42,7 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'preferences', label: 'Search preferences', icon: SlidersHorizontal },
   { id: 'security', label: 'Security', icon: Lock },
   { id: 'data', label: 'Your data', icon: Download },
+  { id: 'delete', label: 'Delete account', icon: Trash2 },
 ];
 
 export default function BuyerSettingsPage() {
@@ -68,6 +72,8 @@ export default function BuyerSettingsPage() {
         return <SecuritySettings />;
       case 'data':
         return <DataExport />;
+      case 'delete':
+        return <AccountDeletion />;
       default:
         return null;
     }
