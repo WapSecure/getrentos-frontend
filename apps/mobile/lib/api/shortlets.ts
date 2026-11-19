@@ -18,11 +18,7 @@ export type { DisputeMessage, ShortletDispute, ShortletSeason };
 export type GuestDepositClaim = DepositClaim & { evidenceUrls?: string[] };
 
 export type ShortletBookingStatus =
-  | 'REQUESTED'
-  | 'CONFIRMED'
-  | 'DECLINED'
-  | 'CANCELLED'
-  | 'COMPLETED';
+  'REQUESTED' | 'CONFIRMED' | 'DECLINED' | 'CANCELLED' | 'COMPLETED';
 
 export const SHORTLET_BOOKING_STATUS_LABEL: Record<ShortletBookingStatus, string> = {
   REQUESTED: 'Requested',
@@ -70,8 +66,7 @@ export interface StayQuote {
 }
 
 export type StayQuoteResult =
-  | { bookable: true; quote: StayQuote }
-  | { bookable: false; reason: string };
+  { bookable: true; quote: StayQuote } | { bookable: false; reason: string };
 
 /** The nightly rate is at or below the typical rate of 5+ comparable stays. */
 export interface FairPrice {
@@ -97,6 +92,8 @@ export interface ShortletInspection {
 export interface ShortletListing {
   id: string;
   listingId: string;
+  /** Paid placement, labelled on the card. */
+  boosted?: boolean;
   propertyId: string;
   title: string;
   description: string;
@@ -171,10 +168,7 @@ export interface ShortletListing {
 }
 
 export type GuestPromiseProblem =
-  | 'NOT_AS_DESCRIBED'
-  | 'NO_ACCESS'
-  | 'UNSAFE_OR_UNCLEAN'
-  | 'MISSING_ESSENTIALS';
+  'NOT_AS_DESCRIBED' | 'NO_ACCESS' | 'UNSAFE_OR_UNCLEAN' | 'MISSING_ESSENTIALS';
 
 export type GuestPromiseOutcome = 'FULL_REFUND' | 'PARTIAL_REFUND' | 'NOT_UPHELD';
 

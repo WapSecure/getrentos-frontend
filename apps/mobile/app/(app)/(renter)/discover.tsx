@@ -47,6 +47,7 @@ import {
 import { formatNaira } from '@/lib/format';
 import { track } from '@/lib/analytics';
 import { withTrustLabel } from '@/lib/trustLabel';
+import { boostedBadge } from '@/lib/api/publicMarket';
 
 const MAP_PAGE_SIZE = 100;
 
@@ -135,7 +136,7 @@ export default function Discover() {
     ({ item, index }: { item: RenterProperty; index: number }) => (
       <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
         <PropertyCard
-          property={withTrustLabel(item)}
+          property={{ ...withTrustLabel(item), badges: boostedBadge(item.boosted) }}
           saved={savedIds.has(item.id)}
           onToggleSave={toggle}
           onPress={(id) => {

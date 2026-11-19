@@ -65,6 +65,7 @@ export interface LandCardApi {
 export interface ShortletCardApi {
   id: string;
   title: string;
+  boosted?: boolean;
   city: string;
   state: string;
   nightlyRate?: number;
@@ -113,6 +114,7 @@ export const fromLandCard = (l: LandCardApi): MarketCard => ({
 export const fromShortletCard = (s: ShortletCardApi): MarketCard => ({
   id: s.id,
   title: s.title,
+  boosted: s.boosted,
   location: formatLocation(s.city, s.state),
   price: s.nightlyRate,
   priceUnit: s.pricingMode === 'PER_NIGHT' ? 'night' : undefined,
