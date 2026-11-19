@@ -48,18 +48,6 @@ export default function GatemanTabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="gate-patrol"
-          options={{
-            href: null,
-          }}
-        />
-        <Tabs.Screen
-          name="incidents"
-          options={{
-            href: null,
-          }}
-        />
-        <Tabs.Screen
           name="account"
           options={{
             title: 'More',

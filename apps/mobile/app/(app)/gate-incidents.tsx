@@ -17,7 +17,7 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
-import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
+import { GatemanPostProvider, useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import {
   gatemanApi,
   PANIC_DESCRIPTION,
@@ -29,7 +29,8 @@ import { qk } from '@/lib/query/keys';
 import { relativeTime } from '@/lib/format';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { haptics } from '@/lib/haptics';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 // `Record` so a new backend enum member fails the build instead of showing a raw token.
 const CATEGORY_LABEL: Record<IncidentCategory, string> = {
@@ -65,7 +66,7 @@ const PRIORITY_TONE: Record<IncidentPriority, BadgeTone> = {
 
 const PANIC_HOLD_MS = 1000;
 
-export default function GatemanIncidents() {
+function GatemanIncidentsScreen() {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -158,7 +159,8 @@ export default function GatemanIncidents() {
 
   return (
     <Screen refreshing={openQuery.isRefetching} onRefresh={() => void openQuery.refetch()}>
-      <DashboardHeader
+      <DetailHeader
+        onBack={() => goBack()}
         eyebrow="Gate operations"
         title="Incidents"
         subtitle={`${estate.name} · Report, escalate and track safety events`}
@@ -360,5 +362,14 @@ export default function GatemanIncidents() {
         )}
       </View>
     </Screen>
+  );
+}
+
+// Pushed above the gate tabs rather than a hidden tab: Expo Router sends a focused hidden tab back to the first one.
+export default function GatemanIncidents() {
+  return (
+    <GatemanPostProvider>
+      <GatemanIncidentsScreen />
+    </GatemanPostProvider>
   );
 }

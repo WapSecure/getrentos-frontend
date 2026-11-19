@@ -12,14 +12,15 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
-import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
+import { GatemanPostProvider, useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { gatemanApi, type PatrolScanResult } from '@/lib/api/gateman';
 import { gateOfflineQueue, useGateQueue } from '@/lib/gateOfflineQueue';
 import { haptics } from '@/lib/haptics';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 // A scan queued offline carries when it happened, not when it was sent, or a walked patrol reads as missed. Prefixed `gate-` to avoid a bare-path route clash.
-export default function GatemanPatrol() {
+function GatemanPatrolScreen() {
   const { colors, spacing } = useTheme();
   const toast = useToast();
   const { estate, isLoading } = useGatemanPost();
@@ -59,7 +60,7 @@ export default function GatemanPatrol() {
 
   return (
     <Screen>
-      <DashboardHeader eyebrow="Gate operations" title="Patrol checkpoint" />
+      <DetailHeader onBack={() => goBack()} eyebrow="Gate operations" title="Patrol checkpoint" />
       <View style={{ padding: spacing.lg, gap: spacing.lg }}>
         <SectionHeader
           title="Scan the code at the checkpoint"
@@ -157,5 +158,14 @@ export default function GatemanPatrol() {
         </Text>
       </View>
     </Screen>
+  );
+}
+
+// Pushed above the gate tabs rather than a hidden tab: Expo Router sends a focused hidden tab back to the first one.
+export default function GatemanPatrol() {
+  return (
+    <GatemanPostProvider>
+      <GatemanPatrolScreen />
+    </GatemanPostProvider>
   );
 }
