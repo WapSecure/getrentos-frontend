@@ -8,6 +8,7 @@ import {
   Badge,
   Button,
   Checkbox,
+  DatePicker,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -19,7 +20,7 @@ import {
   ToggleChip,
   type ToastVariant,
 } from '@sureground/ui';
-import { ApiError, formatRelativeTime, unwrap } from '@sureground/shared';
+import { ApiError, formatDateTime, formatRelativeTime, unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 import { adminKeys } from '@/lib/queryKeys';
 import {
@@ -144,6 +145,11 @@ const StaffAccessForm = ({
   );
   const [regions, setRegions] = useState<string[]>(access.regions);
   const [reason, setReason] = useState('');
+  const [until, setUntil] = useState(access.grantsExpireAt ? lagosDay(access.grantsExpireAt) : '');
+  const [untilBounds] = useState(() => ({
+    min: lagosDay(new Date(Date.now() + 86_400_000).toISOString()),
+    max: lagosDay(new Date(Date.now() + 90 * 86_400_000).toISOString()),
+  }));
   const [error, setError] = useState<string | null>(null);
 
   const roleDefaults = useMemo(() => new Set(access.roleDefaults), [access.roleDefaults]);
@@ -158,8 +164,13 @@ const StaffAccessForm = ({
   const widensRegions =
     access.regions.length > 0 &&
     (regions.length === 0 || regions.some((state) => !access.regions.includes(state)));
-  const widens = widensPermissions || widensRegions;
+  const savedUntil = access.grantsExpireAt ? lagosDay(access.grantsExpireAt) : '';
+  // Keeping extra permissions for longer is more access, as the server judges it too.
+  const extendsGrants =
+    granted.length > 0 && savedUntil !== '' && (until === '' || until > savedUntil);
+  const widens = widensPermissions || widensRegions || extendsGrants;
   const changed =
+    (granted.length > 0 && until !== savedUntil) ||
     ALL_PERMISSIONS.some((p) => selected.has(p) !== current.has(p)) ||
     regions.length !== access.regions.length ||
     regions.some((state) => !access.regions.includes(state));
@@ -172,6 +183,7 @@ const StaffAccessForm = ({
           grantedPermissions: granted,
           revokedPermissions: revoked,
           regions,
+          grantsExpireAt: granted.length && until ? `${until}T23:59:59+01:00` : null,
           reason: reason.trim(),
         })
       ),
@@ -227,6 +239,19 @@ const StaffAccessForm = ({
         save.mutate();
       }}
     >
+      {access.deactivatedAt && (
+        <Alert variant="danger">
+          Deactivated {formatRelativeTime(access.deactivatedAt)}
+          {access.deactivationReason ? `: ${access.deactivationReason}` : ''}. They cannot sign in
+          until a second super admin approves their reactivation.
+        </Alert>
+      )}
+      {access.emergency && (
+        <Alert variant="warning">
+          Emergency access active until {formatDateTime(access.emergency.expiresAt)}:{' '}
+          {access.emergency.permissions.map((p) => PERMISSION_LABELS[p] ?? p).join(', ')}.
+        </Alert>
+      )}
       {pending && (
         <Alert variant="warning">
           {pending.requestedBy.legalName} asked {formatRelativeTime(pending.createdAt)} to change
@@ -304,6 +329,25 @@ const StaffAccessForm = ({
         </div>
       </section>
 
+      {granted.length > 0 && (
+        <Field
+          label="Extra permissions end on"
+          htmlFor="staff-access-until"
+          hint="Leave empty to keep them until removed. At most 90 days ahead."
+        >
+          <DatePicker
+            id="staff-access-until"
+            value={until}
+            onChange={setUntil}
+            min={untilBounds.min}
+            max={untilBounds.max}
+            clearable
+            disabled={Boolean(pending)}
+            ariaLabel="Extra permissions end on"
+          />
+        </Field>
+      )}
+
       <Field
         label="Reason"
         htmlFor="staff-access-reason"
@@ -344,3 +388,7 @@ const StaffAccessForm = ({
     </form>
   );
 };
+
+function lagosDay(iso: string): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Lagos' }).format(new Date(iso));
+}

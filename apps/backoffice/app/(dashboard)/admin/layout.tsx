@@ -15,6 +15,7 @@ import {
 } from '@sureground/shared';
 import { hasChangeRequestAccess, hasStaffAccess, setSignedInPermissions } from '@/lib/adminAccess';
 import { adminService } from '@/services/adminService';
+import type { EmergencyAccess } from '@/types/admin';
 import { StaffTwoFactorGate } from '@/components/security/StaffTwoFactorGate';
 import { usePathname } from 'next/navigation';
 
@@ -26,6 +27,7 @@ export type AdminUser = {
   roles?: string[];
   /** States whose cases this officer handles; empty means nationwide. */
   regions?: string[];
+  emergency?: EmergencyAccess | null;
 };
 
 const AdminUserContext = createContext<AdminUser | null>(null);
@@ -74,7 +76,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         return;
       }
 
-      setUser({ ...parsedUser, regions: access.success ? (access.data?.regions ?? []) : [] });
+      setUser({
+        ...parsedUser,
+        regions: access.success ? (access.data?.regions ?? []) : [],
+        emergency: access.success ? (access.data?.emergency ?? null) : null,
+      });
       setIsLoading(false);
     };
 
