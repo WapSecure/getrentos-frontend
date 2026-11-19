@@ -88,7 +88,7 @@ function EstateProBody({ estateId, plan }: { estateId: string; plan: EstatePlan 
 
       <p className="mt-3 text-sm text-foreground">
         {plan.householdCap === null
-          ? `${plan.households} households`
+          ? `${plan.households} household${plan.households === 1 ? '' : 's'}`
           : `${plan.households} of ${plan.householdCap} households`}
       </p>
 

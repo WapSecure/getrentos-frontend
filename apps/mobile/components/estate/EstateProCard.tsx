@@ -51,7 +51,7 @@ function Body({
   const b = plan.billing;
   const households =
     plan.householdCap === null
-      ? `${plan.households} households`
+      ? `${plan.households} household${plan.households === 1 ? '' : 's'}`
       : `${plan.households} of ${plan.householdCap} households`;
 
   return (
