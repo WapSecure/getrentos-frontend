@@ -8,5 +8,7 @@ export function useIdentityVerification() {
   const verified = !!data && (data.identityVerified ?? data.identity?.status === 'APPROVED');
   const inReview = !verified && data?.identity?.status === 'PENDING_REVIEW';
   const label = !data ? undefined : verified ? 'Verified' : inReview ? 'In review' : 'Not verified';
-  return { verified, inReview, known: !!data, label };
+  // A NIN match locks the legal name before the identity counts as verified.
+  const legalNameLocked = !!data?.legalNameLocked;
+  return { verified, inReview, known: !!data, label, legalNameLocked };
 }

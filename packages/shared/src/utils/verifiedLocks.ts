@@ -99,13 +99,15 @@ export function isVerifiedPropertyStatus(
 }
 
 export interface LegalNameLockSource {
+  legalNameLocked?: boolean;
   identityVerified?: boolean;
   identity?: { status?: string } | null;
 }
 
-/** From GET /users/me/kyc. A passed NIN/BVN match also locks it but isn't exposed, so a 409 still has to be handled. */
+/** From GET /users/me/kyc. Older APIs lack legalNameLocked, so the 409 still has to be handled. */
 export function isLegalNameLockedByKyc(kyc: LegalNameLockSource | null | undefined): boolean {
   if (!kyc) return false;
+  if (kyc.legalNameLocked) return true;
   return Boolean(kyc.identityVerified) || kyc.identity?.status?.toUpperCase() === 'APPROVED';
 }
 
