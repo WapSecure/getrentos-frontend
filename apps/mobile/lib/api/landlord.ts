@@ -102,11 +102,13 @@ export interface LandlordTenant {
   trustScore: number;
   verified: boolean;
   rentStatus: RentStatus;
+  hasCharges?: boolean;
+  nextDueDate?: string | null;
 }
 
 export const RENT_STATUS_LABEL: Record<RentStatus, string> = {
-  paid: 'Paid',
-  pending: 'Up to date',
+  paid: 'Paid up',
+  pending: 'Rent due',
   due: 'Due',
   overdue: 'Overdue',
   partial: 'Part paid',
@@ -114,7 +116,7 @@ export const RENT_STATUS_LABEL: Record<RentStatus, string> = {
 
 export const RENT_STATUS_TONE: Record<RentStatus, 'success' | 'warning' | 'danger' | 'info'> = {
   paid: 'success',
-  pending: 'info',
+  pending: 'warning',
   due: 'warning',
   overdue: 'danger',
   partial: 'info',

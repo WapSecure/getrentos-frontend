@@ -95,6 +95,13 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
           <Badge variant={payout.variant} icon={payout.icon && <payout.icon className="h-3 w-3" />}>
             {payout.label}
           </Badge>
+        ) : payment.escrowStatus === 'released' ? (
+          <span
+            className="text-muted-foreground"
+            title="Released from Payment Protection; it is paid out with your next owner statement."
+          >
+            With next statement
+          </span>
         ) : (
           <span className="text-muted-foreground">Not yet</span>
         );

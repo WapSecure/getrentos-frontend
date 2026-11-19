@@ -23,7 +23,7 @@ const TONE = {
   info: { icon: Bell, cls: 'text-primary', tile: 'bg-primary/10' },
 } as const;
 
-const SEVERITY_LABEL = { urgent: 'Urgent', soon: 'Due soon', info: 'For information' } as const;
+const SEVERITY_LABEL = { urgent: 'Urgent', soon: 'Act soon', info: 'For information' } as const;
 
 interface AttentionListProps {
   items: readonly AttentionListItem[];

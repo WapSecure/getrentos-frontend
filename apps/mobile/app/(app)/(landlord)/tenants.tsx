@@ -104,7 +104,10 @@ function TenantRow({ tenant: t }: { tenant: LandlordTenant }) {
   const message = useMutation({
     mutationFn: () => landlordApi.startConversation(t.tenantUserId as string, t.propertyId),
     onSuccess: (conversation) =>
-      router.push({ pathname: '/(app)/landlord-conversation/[id]', params: { id: conversation.id } }),
+      router.push({
+        pathname: '/(app)/landlord-conversation/[id]',
+        params: { id: conversation.id },
+      }),
     onError: (e) => toast.show(errorMessage(e, 'Could not open the chat.'), 'error'),
   });
   return (
@@ -118,7 +121,14 @@ function TenantRow({ tenant: t }: { tenant: LandlordTenant }) {
             </Text>
             {t.verified ? <ShieldCheck size={13} color={colors.success} /> : null}
             <View style={{ flex: 1 }} />
-            <Badge label={RENT_STATUS_LABEL[t.rentStatus]} tone={RENT_STATUS_TONE[t.rentStatus]} />
+            {t.hasCharges === false ? (
+              <Badge label="No charges yet" tone="info" />
+            ) : (
+              <Badge
+                label={RENT_STATUS_LABEL[t.rentStatus]}
+                tone={RENT_STATUS_TONE[t.rentStatus]}
+              />
+            )}
           </View>
 
           <Text variant="caption" color="mutedForeground" numberOfLines={1}>
@@ -130,6 +140,11 @@ function TenantRow({ tenant: t }: { tenant: LandlordTenant }) {
             Moved in {formatDate(t.moveInDate, 'short')} ·{' '}
             {t.trustScore > 0 ? `trust ${t.trustScore}` : 'new to Sureground'}
           </Text>
+          {t.nextDueDate ? (
+            <Text variant="caption" color="mutedForeground">
+              Next rent due {formatDate(t.nextDueDate, 'short')}
+            </Text>
+          ) : null}
         </View>
       </View>
       {t.tenantUserId ? (

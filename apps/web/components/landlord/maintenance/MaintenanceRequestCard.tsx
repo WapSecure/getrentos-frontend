@@ -24,6 +24,10 @@ interface MaintenanceRequestCardProps {
   isTriaging?: boolean;
 }
 
+// Module scope keeps the clock read out of render.
+const visitHasPassed = (iso?: string | null): boolean =>
+  Boolean(iso) && new Date(iso as string).getTime() < Date.now();
+
 export const MaintenanceRequestCard = ({
   request,
   onAssignVendor,
@@ -43,6 +47,8 @@ export const MaintenanceRequestCard = ({
   const isResolved = request.status === 'resolved';
   const isClosed = isResolved || request.status === 'cancelled';
   const isBusy = isMarkingResolved || isEscalating;
+  const visitMissed =
+    !isClosed && request.status !== 'in_progress' && visitHasPassed(request.scheduledFor);
 
   return (
     <article className={recordCardClass()}>
@@ -88,10 +94,19 @@ export const MaintenanceRequestCard = ({
         )}
       </div>
 
-      {request.scheduledFor && !isClosed && (
+      {request.scheduledFor && !isClosed && !visitMissed && (
         <p className="mt-2 flex items-center gap-1.5 text-xs text-foreground">
           <CalendarClock className="w-3.5 h-3.5 text-primary" />
           Visit {formatVisit(request.scheduledFor)}
+        </p>
+      )}
+      {visitMissed && (
+        <p className="mt-2 flex items-start gap-1.5 rounded-xl bg-warning/10 px-3 py-2 text-xs text-foreground">
+          <CalendarClock className="mt-px w-3.5 h-3.5 shrink-0 text-warning" />
+          <span>
+            The visit was booked for {formatVisit(request.scheduledFor as string)}. If the work is
+            done, mark it resolved; if the vendor didn&apos;t come, move the visit.
+          </span>
         </p>
       )}
 

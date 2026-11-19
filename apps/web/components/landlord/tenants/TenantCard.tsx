@@ -23,7 +23,7 @@ const rentStatusConfig = paymentStatusBadges;
 
 // A bare "Pending" beside a name reads as the person's status, so the wording is scoped to rent.
 const RENT_LABEL: Record<RentPaymentStatus, string> = {
-  paid: 'Rent paid',
+  paid: 'Paid up',
   pending: 'Rent due',
   overdue: 'Rent overdue',
   processing: 'Processing',
@@ -42,6 +42,7 @@ const moveInTense = (dateString?: string | null): string => {
 };
 
 export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
+  const noCharges = tenant.hasCharges === false;
   const rentStatus = rentStatusConfig[tenant.rentStatus];
   const moveInLabel = moveInTense(tenant.moveInDate);
   const router = useRouter();
@@ -50,7 +51,9 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
     mutationFn: () =>
       unwrap(landlordService.startConversation(tenant.tenantUserId as string, tenant.propertyId)),
     onSuccess: (conversation) =>
-      router.push(`${ROUTES.LANDLORD_MESSAGES}?conversation=${encodeURIComponent(conversation.id)}`),
+      router.push(
+        `${ROUTES.LANDLORD_MESSAGES}?conversation=${encodeURIComponent(conversation.id)}`
+      ),
     onError: (err: Error) => toast.error(err.message || 'We could not open that conversation.'),
   });
   const leaseHref = tenant.leaseId
@@ -77,12 +80,16 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
             <p className="truncate text-xs text-muted-foreground">{tenant.email}</p>
           </div>
         </div>
-        <Badge
-          variant={rentStatus.variant}
-          icon={rentStatus.icon ? <rentStatus.icon className="w-3 h-3" /> : undefined}
-        >
-          {RENT_LABEL[tenant.rentStatus]}
-        </Badge>
+        {noCharges ? (
+          <Badge variant="neutral">No charges yet</Badge>
+        ) : (
+          <Badge
+            variant={rentStatus.variant}
+            icon={rentStatus.icon ? <rentStatus.icon className="w-3 h-3" /> : undefined}
+          >
+            {RENT_LABEL[tenant.rentStatus]}
+          </Badge>
+        )}
       </div>
 
       <div className="mt-3 flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
@@ -93,8 +100,12 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
       </div>
 
       <RecordFacts
+        columns={tenant.nextDueDate ? 3 : 2}
         facts={[
           { label: moveInLabel, value: formatDate(tenant.moveInDate) },
+          ...(tenant.nextDueDate
+            ? [{ label: 'Next rent due', value: formatDate(tenant.nextDueDate) }]
+            : []),
           { label: 'Trust score', value: trustScoreDisplay(tenant.trustScore), tone: 'brand' },
         ]}
       />
@@ -127,13 +138,7 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
             Call
           </Button>
         ) : null}
-        <Button
-          href={leaseHref}
-          variant="outline"
-          size="sm"
-          fullWidth
-          className="gap-1.5"
-        >
+        <Button href={leaseHref} variant="outline" size="sm" fullWidth className="gap-1.5">
           <FileCheck className="w-3.5 h-3.5" />
           View lease
         </Button>
