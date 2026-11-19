@@ -36,7 +36,7 @@ const statusOptions = [
 
 export default function AdminLandDisputesPage() {
   const user = useAdminUser();
-  const canView = hasAdminPermission(user?.roles, 'verifications.review');
+  const canView = hasAdminPermission(user?.roles, 'disputes.review');
   const [status, setStatus] = useState<'all' | LandDisputeStatus>('all');
   const [heldOnly, setHeldOnly] = useState(false);
   const [page, setPage] = useState(1);

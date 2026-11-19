@@ -42,7 +42,7 @@ const DOC_KIND_LABEL: Record<string, string> = {
 export default function DevelopmentCheckPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const user = useAdminUser();
-  const canAct = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canAct = hasAdminPermission(user?.roles, 'properties.verify');
   const queryClient = useQueryClient();
   const toast = useToast();
   const [busy, setBusy] = useState<string | null>(null);

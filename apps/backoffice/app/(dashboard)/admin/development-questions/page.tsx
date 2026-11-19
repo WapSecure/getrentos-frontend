@@ -30,7 +30,7 @@ const days = (n: number) => `${n} day${n === 1 ? '' : 's'}`;
 
 export default function UnansweredDeveloperQuestionsPage() {
   const user = useAdminUser();
-  const canRemind = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canRemind = hasAdminPermission(user?.roles, 'properties.verify');
   const queryClient = useQueryClient();
   const toast = useToast();
   const [target, setTarget] = useState<UnansweredDevelopmentGroup | null>(null);

@@ -90,7 +90,7 @@ const QuestionItem = ({
 export default function AdminLandInspectionQuestionsPage() {
   const user = useAdminUser();
   const queryClient = useQueryClient();
-  const canView = hasAdminPermission(user?.roles, 'verifications.review');
+  const canView = hasAdminPermission(user?.roles, 'land.review');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const query = useQuery({
     queryKey: landInspectionQuestionKeys.open,

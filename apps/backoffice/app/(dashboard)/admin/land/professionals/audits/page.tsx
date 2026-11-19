@@ -102,8 +102,8 @@ const AuditItem = ({
 export default function AdminLandReviewAuditsPage() {
   const user = useAdminUser();
   const queryClient = useQueryClient();
-  const canView = hasAdminPermission(user?.roles, 'verifications.review');
-  const canDecide = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canView = hasAdminPermission(user?.roles, 'land.review');
+  const canDecide = hasAdminPermission(user?.roles, 'land.approve');
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const query = useQuery({
     queryKey: landProfessionalKeys.audits,

@@ -69,6 +69,7 @@ export const AgentRegister = () => {
   });
   const items = data?.items ?? [];
 
+  const canExport = useAdminCan('data.export');
   const handleExport = async () => {
     setExporting(true);
     try {
@@ -87,14 +88,16 @@ export const AgentRegister = () => {
         title="Agents"
         description="Field-agent register: clients, assigned properties, tasks, inspections and reviews."
         actions={
-          <Button
-            variant="outline"
-            onClick={handleExport}
-            isLoading={exporting}
-            loadingText="Exporting…"
-          >
-            Export CSV
-          </Button>
+          canExport ? (
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              isLoading={exporting}
+              loadingText="Exporting…"
+            >
+              Export CSV
+            </Button>
+          ) : null
         }
       />
 

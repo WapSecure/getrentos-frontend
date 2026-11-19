@@ -11,32 +11,34 @@ const actions: {
   label: string;
   href: string;
   icon: React.ElementType;
-  permission: AdminPermission;
+  permissions: AdminPermission[];
 }[] = [
   {
     label: 'Review verifications',
     href: ROUTES.ADMIN_VERIFICATIONS,
     icon: ShieldCheck,
-    permission: 'verifications.review',
+    permissions: ['kyc.review', 'properties.review'],
   },
   {
     label: 'View disputes',
     href: ROUTES.ADMIN_DISPUTES,
     icon: Gavel,
-    permission: 'disputes.review',
+    permissions: ['disputes.review'],
   },
   {
     label: 'Fraud alerts',
     href: ROUTES.ADMIN_FRAUD,
     icon: AlertTriangle,
-    permission: 'fraud.review',
+    permissions: ['fraud.review'],
   },
-  { label: 'Manage users', href: ROUTES.ADMIN_USERS, icon: Users, permission: 'users.view' },
+  { label: 'Manage users', href: ROUTES.ADMIN_USERS, icon: Users, permissions: ['users.view'] },
 ];
 
 export const AdminQuickActions = () => {
   const user = useAdminUser();
-  const available = actions.filter((action) => hasAdminPermission(user?.roles, action.permission));
+  const available = actions.filter((action) =>
+    action.permissions.some((permission) => hasAdminPermission(user?.roles, permission))
+  );
   if (available.length === 0) return null;
   return (
     <Card>

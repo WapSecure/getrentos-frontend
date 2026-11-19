@@ -21,6 +21,7 @@ import { formatCurrency } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
+import { useAdminCan } from '@/hooks/useAdminCan';
 
 // recharts is heavy: load it only when the reports page mounts.
 const PlatformRevenueChart = dynamic(
@@ -98,6 +99,7 @@ export default function AdminReportsPage() {
     },
   });
 
+  const canExport = useAdminCan('data.export');
   const handleExport = () => exportMutation.mutate();
 
   return (
@@ -106,20 +108,22 @@ export default function AdminReportsPage() {
         title="Reports and analytics"
         description="Platform performance, transaction volume, and category-level reporting."
         actions={
-          <Button
-            variant="outline"
-            onClick={handleExport}
-            isLoading={exportMutation.isPending}
-            icon={
-              exported ? (
-                <Check className="h-4 w-4 text-success" />
-              ) : (
-                <FileSpreadsheet className="h-4 w-4" />
-              )
-            }
-          >
-            {exported ? 'Exported' : 'Export CSV'}
-          </Button>
+          canExport && (
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              isLoading={exportMutation.isPending}
+              icon={
+                exported ? (
+                  <Check className="h-4 w-4 text-success" />
+                ) : (
+                  <FileSpreadsheet className="h-4 w-4" />
+                )
+              }
+            >
+              {exported ? 'Exported' : 'Export CSV'}
+            </Button>
+          )
         }
       />
 

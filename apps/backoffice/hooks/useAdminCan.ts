@@ -9,3 +9,8 @@ export function useAdminCan(permission: AdminPermission): boolean {
   const user = useAdminUser();
   return hasAdminPermission(user?.roles, permission);
 }
+
+export function useAdminCanAny(...permissions: AdminPermission[]): boolean {
+  const user = useAdminUser();
+  return permissions.some((permission) => hasAdminPermission(user?.roles, permission));
+}

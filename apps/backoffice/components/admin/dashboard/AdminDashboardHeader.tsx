@@ -3,7 +3,7 @@
 import { ShieldCheck } from '@sureground/icons';
 import { Button, PageHeader } from '@sureground/ui';
 import { ROUTES } from '@sureground/shared';
-import { useAdminCan } from '@/hooks/useAdminCan';
+import { useAdminCanAny } from '@/hooks/useAdminCan';
 
 interface AdminDashboardHeaderProps {
   greeting: string;
@@ -11,7 +11,7 @@ interface AdminDashboardHeaderProps {
 }
 
 export const AdminDashboardHeader = ({ greeting, firstName }: AdminDashboardHeaderProps) => {
-  const canReviewVerifications = useAdminCan('verifications.review');
+  const canReviewVerifications = useAdminCanAny('kyc.review', 'properties.review');
   return (
     <PageHeader
       eyebrow="Operations console"

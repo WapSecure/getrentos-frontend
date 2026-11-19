@@ -28,7 +28,7 @@ const FILTERS: { value: 'open' | LandAuthorityStatus; label: string }[] = [
 
 export default function AdminLandAuthorityQueuePage() {
   const user = useAdminUser();
-  const canView = hasAdminPermission(user?.roles, 'verifications.review');
+  const canView = hasAdminPermission(user?.roles, 'land.review');
   const [filter, setFilter] = useState<'open' | LandAuthorityStatus>('open');
   const status = filter === 'open' ? undefined : filter;
   const query = useQuery({

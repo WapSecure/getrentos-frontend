@@ -34,7 +34,7 @@ const size = (r: AdminFloorPlan['rooms'][number]) =>
 export default function FloorPlanChecksPage() {
   const [view, setView] = useState<FloorPlanMeasurementStatus>('ESTIMATED');
   const user = useAdminUser();
-  const canAct = hasAdminPermission(user?.roles, 'verifications.approve');
+  const canAct = hasAdminPermission(user?.roles, 'properties.verify');
   const queryClient = useQueryClient();
   const toast = useToast();
   const [notes, setNotes] = useState<Record<string, string>>({});
