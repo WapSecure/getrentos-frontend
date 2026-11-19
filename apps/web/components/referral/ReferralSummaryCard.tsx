@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Copy, Check, Gift, Users, Wallet, Mail, MessageCircle } from '@sureground/icons';
+import { Copy, Check, Gift, Users, UserCheck, Mail, MessageCircle } from '@sureground/icons';
 import { Alert, Button, Card, CardSkeleton } from '@sureground/ui';
+import { Badge } from '@sureground/ui/Badge';
 import { referralService } from '@/services/referralService';
-import { formatCurrency, formatDate } from '@/lib/format';
+import { formatDate } from '@/lib/format';
 import type { ReferralSummary } from '@/types/referral';
 
 export const ReferralSummaryCard = () => {
@@ -72,12 +73,8 @@ export const ReferralSummaryCard = () => {
         <div className="bg-accent rounded-2xl border border-primary/20 p-4 flex items-center gap-3">
           <Gift className="w-5 h-5 text-primary shrink-0" />
           <p className="text-sm text-foreground">
-            You joined via <span className="font-semibold">{summary.referredByName}</span>&apos;s
-            referral and earned{' '}
-            <span className="font-semibold text-primary">
-              {formatCurrency(summary.refereeRewardAmount ?? 0)}
-            </span>
-            .
+            You joined with an invite from{' '}
+            <span className="font-semibold">{summary.referredByName}</span>.
           </p>
         </div>
       )}
@@ -87,6 +84,9 @@ export const ReferralSummaryCard = () => {
           <Gift className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground">Your referral code</h2>
         </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          Invite people you know. A referral counts once they verify their identity.
+        </p>
 
         <div className="flex items-center gap-2 mb-5">
           <div className="flex-1 min-w-0 p-3 rounded-xl bg-secondary text-center">
@@ -123,19 +123,17 @@ export const ReferralSummaryCard = () => {
             <Users className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">People referred</p>
+            <p className="text-xs text-muted-foreground">People invited</p>
             <p className="text-xl font-bold text-foreground">{summary.totalReferred}</p>
           </div>
         </Card>
         <Card className="rounded-2xl p-5 flex items-center gap-4">
           <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center shrink-0">
-            <Wallet className="w-5 h-5 text-primary" />
+            <UserCheck className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Total earned</p>
-            <p className="text-xl font-bold text-foreground">
-              {formatCurrency(summary.totalEarned)}
-            </p>
+            <p className="text-xs text-muted-foreground">Counted</p>
+            <p className="text-xl font-bold text-foreground">{summary.totalQualified}</p>
           </div>
         </Card>
       </div>
@@ -144,7 +142,7 @@ export const ReferralSummaryCard = () => {
         <h3 className="text-sm font-semibold text-foreground mb-4">Recent referrals</h3>
         {summary.referrals.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No referrals yet: share your code above to start earning.
+            No referrals yet. Share your code above with people you know.
           </p>
         ) : (
           <div className="space-y-3">
@@ -157,9 +155,11 @@ export const ReferralSummaryCard = () => {
                   <p className="font-medium text-foreground">{referral.name}</p>
                   <p className="text-xs text-muted-foreground">{formatDate(referral.date)}</p>
                 </div>
-                <span className="font-semibold text-primary">
-                  +{formatCurrency(referral.rewardAmount)}
-                </span>
+                {referral.status === 'QUALIFIED' ? (
+                  <Badge variant="success">Counted</Badge>
+                ) : (
+                  <Badge variant="neutral">Waiting for identity check</Badge>
+                )}
               </div>
             ))}
           </div>

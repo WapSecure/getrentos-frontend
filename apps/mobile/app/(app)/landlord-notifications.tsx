@@ -4,6 +4,7 @@ import {
   Banknote,
   Bell,
   FileText,
+  Gift,
   MessageCircle,
   Star,
   UserPlus,
@@ -24,6 +25,7 @@ function iconFor(type: string) {
   if (type.startsWith('application') || type.startsWith('lease')) return FileText;
   if (type.startsWith('message')) return MessageCircle;
   if (type.startsWith('review')) return Star;
+  if (type.toLowerCase().startsWith('referral')) return Gift;
   return Bell;
 }
 

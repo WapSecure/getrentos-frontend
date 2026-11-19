@@ -6,8 +6,8 @@ export default function LandlordReferralsPage() {
     <div className="max-w-2xl">
       <PageHeader
         eyebrow="Account"
-        title="Refer & earn"
-        description="Share your code with other landlords: you both earn a reward when they sign up."
+        title="Invite people"
+        description="Invite people you know. A referral counts once they verify their identity."
       />
       <ReferralSummaryCard />
     </div>

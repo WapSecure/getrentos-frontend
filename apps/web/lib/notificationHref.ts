@@ -22,6 +22,8 @@ const MESSAGES: Partial<Record<NotificationPortal, string>> = {
 
 // Longest prefix wins. Mirrors ESTATE_FALLBACK and TYPE_FALLBACK in the mobile app.
 const BY_TYPE: Partial<Record<NotificationPortal, [prefix: string, route: string][]>> = {
+  renter: [['referral_', ROUTES.RENTER_REFERRALS]],
+  landlord: [['referral_', ROUTES.LANDLORD_REFERRALS]],
   estate: [
     ['estate_due_', ROUTES.ESTATE_DUES],
     ['estate_announcement_', ROUTES.ESTATE_ANNOUNCEMENTS],

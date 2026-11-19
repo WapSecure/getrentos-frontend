@@ -30,3 +30,11 @@ test('estate office messages open the right side of the conversation', () => {
   assert.equal(notificationHref('resident', resident), '/resident/messages');
   assert.equal(notificationHref('estate', office), '/estate/resident-messages');
 });
+
+test('referral notifications, current and older, open the referrals page', () => {
+  assert.equal(notificationHref('renter', { type: 'REFERRAL_QUALIFIED' }), '/renter/referrals');
+  assert.equal(
+    notificationHref('landlord', { type: 'REFERRAL_REWARD_EARNED' }),
+    '/landlord/referrals'
+  );
+});

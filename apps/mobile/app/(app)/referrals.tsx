@@ -2,12 +2,12 @@ import { Pressable, Share, View } from 'react-native';
 
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Gift, Share2, Users } from '@sureground/icons/native';
+import { Gift, Share2, UserCheck, Users } from '@sureground/icons/native';
 import {
+  Badge,
   Card,
   Divider,
   EmptyState,
-  Price,
   QueryState,
   Screen,
   Skeleton,
@@ -48,9 +48,9 @@ export default function Referrals() {
         }}
       >
         <DetailHeader
-          eyebrow="Rewards"
+          eyebrow="Account"
           title="Referrals"
-          subtitle="Invite trusted people and track earnings"
+          subtitle="Invite people you know and see who has joined"
           onBack={() => goBack()}
           style={{ flex: 1 }}
         />
@@ -69,14 +69,10 @@ export default function Referrals() {
             {d.referredByName ? (
               <Card elevated style={{ backgroundColor: colors.accent }}>
                 <Text variant="callout" style={{ color: colors.accentForeground }}>
-                  You joined via{' '}
+                  You joined with an invite from{' '}
                   <Text style={{ fontWeight: '700', color: colors.accentForeground }}>
                     {d.referredByName}
                   </Text>
-                  &apos;s referral
-                  {d.refereeRewardAmount
-                    ? `: you earned ₦${d.refereeRewardAmount.toLocaleString()}`
-                    : ''}
                   .
                 </Text>
               </Card>
@@ -85,11 +81,10 @@ export default function Referrals() {
             <Card elevated>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
                 <Gift size={20} color={colors.primary} />
-                <Text variant="heading">Invite friends, earn rewards</Text>
+                <Text variant="heading">Invite people you know</Text>
               </View>
               <Text variant="callout" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-                Share your code: when a friend signs up and completes their first move, you both
-                earn a reward.
+                Invite people you know. A referral counts once they verify their identity.
               </Text>
 
               <View
@@ -126,13 +121,13 @@ export default function Referrals() {
             <View style={{ flexDirection: 'row', gap: spacing.md }}>
               <StatCard
                 icon={<Users size={16} color={colors.primary} />}
-                label="People referred"
+                label="People invited"
                 value={String(d.totalReferred)}
               />
               <StatCard
-                icon={<Gift size={16} color={colors.primary} />}
-                label="Total earned"
-                value={`₦${d.totalEarned.toLocaleString()}`}
+                icon={<UserCheck size={16} color={colors.primary} />}
+                label="Counted"
+                value={String(d.totalQualified)}
               />
             </View>
 
@@ -142,7 +137,7 @@ export default function Referrals() {
                 <EmptyState
                   icon={<Users size={34} color={colors.mutedForeground} />}
                   title="No referrals yet"
-                  description="Share your code to start earning rewards."
+                  description="Share your code with people you know."
                 />
               ) : (
                 <Card elevated padding="none">
@@ -157,13 +152,17 @@ export default function Referrals() {
                           padding: spacing.lg,
                         }}
                       >
-                        <View>
+                        <View style={{ flex: 1, marginRight: spacing.md }}>
                           <Text variant="callout">{r.name}</Text>
                           <Text variant="caption" color="mutedForeground">
                             {formatDate(r.date, 'short')}
                           </Text>
                         </View>
-                        <Price amount={r.rewardAmount} variant="callout" />
+                        {r.status === 'QUALIFIED' ? (
+                          <Badge label="Counted" tone="success" />
+                        ) : (
+                          <Badge label="Waiting for identity check" tone="neutral" />
+                        )}
                       </View>
                     </View>
                   ))}

@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { BadgeCheck } from '@sureground/icons';
 import type { PlanTier } from '@sureground/shared';
-import { Alert, Card, TableSkeleton, PageHeader } from '@sureground/ui';
+import { Alert, Button, Card, TableSkeleton, PageHeader } from '@sureground/ui';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
 import { useProCheckout } from '@/hooks/useProCheckout';
@@ -14,6 +14,7 @@ import { ProPriceCard } from '@/components/shared/subscription/ProPriceCard';
 import { ManageSubscriptionCard } from '@/components/shared/subscription/ManageSubscriptionCard';
 import { BillingHistoryCard } from '@/components/shared/subscription/BillingHistoryCard';
 import type { BillingCycle, PlanPersona } from '@/services/subscriptionService';
+import { TRIAL_ALREADY_USED_COPY } from '@/services/billingService';
 
 // Price and the Free-vs-Pro matrix come from the backend pricing catalog, so the offer always matches what is charged.
 export function BillingPage({
@@ -79,7 +80,27 @@ export function BillingPage({
             onUpgrade={upgrade}
             upgrading={isUpgrading}
           />
-          {checkout.error && !onUpgrade && <Alert variant="danger">{checkout.error}</Alert>}
+          {checkout.error && !onUpgrade && !checkout.trialRefusedCycle && (
+            <Alert variant="danger">{checkout.error}</Alert>
+          )}
+          {checkout.trialRefusedCycle && !onUpgrade && (
+            <Alert
+              variant="warning"
+              action={
+                <Button
+                  variant="primary"
+                  size="sm"
+                  isLoading={checkout.upgrading}
+                  loadingText="Opening secure checkout…"
+                  onClick={checkout.subscribeWithoutTrial}
+                >
+                  Subscribe without a trial
+                </Button>
+              }
+            >
+              {TRIAL_ALREADY_USED_COPY}
+            </Alert>
+          )}
         </>
       )}
 

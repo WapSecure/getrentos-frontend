@@ -31,6 +31,13 @@ describe('notification routes', () => {
     );
   });
 
+  it('opens referrals for both the current and the older referral notification', () => {
+    expect(routeForNotification({ type: 'REFERRAL_QUALIFIED' }, 'renter')).toBe('/(app)/referrals');
+    expect(routeForNotification({ type: 'REFERRAL_REWARD_EARNED' }, 'landlord')).toBe(
+      '/(app)/referrals'
+    );
+  });
+
   it('opens the inbox for a message only in portals that have one', () => {
     expect(routeForNotification({ type: 'NEW_MESSAGE' }, 'landlord')).toBe(
       '/(app)/(landlord)/messages'

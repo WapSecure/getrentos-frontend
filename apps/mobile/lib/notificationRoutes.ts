@@ -69,6 +69,8 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/agent/trust-profile': '/(app)/agent-trust-profile',
   '/agent/verification': '/(app)/verify-identity',
   '/landlord/billing': '/(app)/billing',
+  '/landlord/referrals': '/(app)/referrals',
+  '/renter/referrals': '/(app)/referrals',
   '/landlord/realtors': '/(app)/representatives',
   '/estate/dashboard': '/(app)/(estate)',
   '/estate/households': '/(app)/(estate)/households',
@@ -135,6 +137,7 @@ const TYPE_FALLBACK: [prefix: string, route: string][] = [
   ['ESTATE_DELIVERY_', '/(app)/deliveries'],
   ['ESTATE_DUE_', '/(app)/dues'],
   ['ESTATE_ANNOUNCEMENT_', '/(app)/(resident)/announcements'],
+  ['REFERRAL_', '/(app)/referrals'],
 ];
 
 const OWNER_FALLBACK: [prefix: string, route: string][] = [

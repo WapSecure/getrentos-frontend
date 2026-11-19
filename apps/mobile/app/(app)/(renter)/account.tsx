@@ -190,7 +190,7 @@ export default function Account() {
     {
       key: 'referrals',
       label: 'Referrals',
-      description: 'Invite friends, earn rewards',
+      description: 'Invite people you know',
       icon: Gift,
       onPress: go('/(app)/referrals'),
     },
